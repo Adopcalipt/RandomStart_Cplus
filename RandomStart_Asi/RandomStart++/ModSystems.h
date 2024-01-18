@@ -726,7 +726,6 @@ namespace Mod_Data
     inline bool BackStagePass = false;
     inline bool GotPlayZero = false;
     inline bool CanSnow = false;
-    inline bool SnowOnGround = false;
 
     inline std::string Ahhhh;
 
