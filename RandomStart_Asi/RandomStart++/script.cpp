@@ -1805,6 +1805,7 @@ void WeaponCapture()
 
 void SetWeatherDate()
 {
+    CanSnow = false;
     std::string Today = TimeDate();
     if (StringContains("Jan", Today) && Mod_Settings.SnowMonths.Jan)
         CanSnow = true;
@@ -1828,7 +1829,7 @@ void SetWeatherDate()
         CanSnow = true;
     else if (StringContains("Nov", Today) && Mod_Settings.SnowMonths.Nov)
         CanSnow = true;
-    else if (Mod_Settings.SnowMonths.Dec)
+    else if (StringContains("Dec", Today) && Mod_Settings.SnowMonths.Dec)
         CanSnow = true;
 }
 void LoadinData()
@@ -1878,7 +1879,7 @@ void LoadinData()
     Ahhhh = GetDir() + "/RandomStart/heavenly_choir.wav";
     std::string BannerLoc = GetDir() + "/RandomStart/RandomStartBanner@256x64.png";
     MyBannerPng = createTexture(BannerLoc.c_str());
-	BottomLeft("" + MultC[LessRandomInt("LoadinData01", 0, 5)] + "Random Start " + MultC[LessRandomInt("LoadinData01", 0, 5)] + "1.61" + MultC[LessRandomInt("LoadinData01", 0, 5)] + " by" + MultC[LessRandomInt("LoadinData01", 0, 5)] + " Adopcalipt " + MultC[LessRandomInt("LoadinData01", 0, 5)] + "Loaded" + MultC[LessRandomInt("LoadinData01", 0, 5)] + ".");
+	BottomLeft("" + MultC[LessRandomInt("LoadinData01", 0, 5)] + "Random Start " + MultC[LessRandomInt("LoadinData01", 0, 5)] + "1.21" + MultC[LessRandomInt("LoadinData01", 0, 5)] + " by" + MultC[LessRandomInt("LoadinData01", 0, 5)] + " Adopcalipt " + MultC[LessRandomInt("LoadinData01", 0, 5)] + "Loaded" + MultC[LessRandomInt("LoadinData01", 0, 5)] + ".");
     
     if (FileExists(GetDir() + "/PlayerZero++.asi"))
         GotPlayZero = true;
@@ -4694,18 +4695,18 @@ void RsMenu_Winter(int iScale, float screenHeightScaleFactor)
     LoggerLight("RsMenu_Winter");
     MenuOpen = true;
     std::vector<Mod_Class::MeunFields> M_List = {
-        Mod_Class::MeunFields(RSLangMenu[211], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Jan),
-        Mod_Class::MeunFields(RSLangMenu[212], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Feb),
-        Mod_Class::MeunFields(RSLangMenu[213], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Mar),
-        Mod_Class::MeunFields(RSLangMenu[214], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Apr),
-        Mod_Class::MeunFields(RSLangMenu[215], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.May),
-        Mod_Class::MeunFields(RSLangMenu[216], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Jun),
-        Mod_Class::MeunFields(RSLangMenu[217], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Jul),
-        Mod_Class::MeunFields(RSLangMenu[218], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Aug),
-        Mod_Class::MeunFields(RSLangMenu[219], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Sep),
-        Mod_Class::MeunFields(RSLangMenu[220], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Oct),
-        Mod_Class::MeunFields(RSLangMenu[221], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Nov),
-        Mod_Class::MeunFields(RSLangMenu[222], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Dec),
+        Mod_Class::MeunFields(RSLangMenu[214], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Jan),
+        Mod_Class::MeunFields(RSLangMenu[215], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Feb),
+        Mod_Class::MeunFields(RSLangMenu[216], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Mar),
+        Mod_Class::MeunFields(RSLangMenu[217], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Apr),
+        Mod_Class::MeunFields(RSLangMenu[218], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.May),
+        Mod_Class::MeunFields(RSLangMenu[219], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Jun),
+        Mod_Class::MeunFields(RSLangMenu[220], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Jul),
+        Mod_Class::MeunFields(RSLangMenu[221], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Aug),
+        Mod_Class::MeunFields(RSLangMenu[222], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Sep),
+        Mod_Class::MeunFields(RSLangMenu[223], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Oct),
+        Mod_Class::MeunFields(RSLangMenu[224], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Nov),
+        Mod_Class::MeunFields(RSLangMenu[225], "", true, false, 0, 1, (int)Mod_Settings.SnowMonths.Dec),
     };
 
     Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 7, true, M_List);
@@ -4862,7 +4863,7 @@ void RsMenu_Main(int iScale, float screenHeightScaleFactor)
         Mod_Class::MeunFields(RSLangMenu[22], RSLangMenu[23], true, false, 0, 1, (int)Mod_Settings.Random_Weapons),
         Mod_Class::MeunFields(RSLangMenu[24], RSLangMenu[25], false, false, 0, 0, 0),
         Mod_Class::MeunFields(RSLangMenu[26], RSLangMenu[27], false, false, 0, 0, 0),
-        Mod_Class::MeunFields(RSLangMenu[210],RSLangMenu[223], false, false, 0, 0, 0),         //Ext
+        Mod_Class::MeunFields(RSLangMenu[213],RSLangMenu[226], false, false, 0, 0, 0),         //Ext
         Mod_Class::MeunFields(TranlatesTo[Mod_Settings.Lang_Set], "", false, false, 0, 0, 0)
     };
     
