@@ -1,0 +1,9 @@
+﻿  ModSystems.cpp
+E:\Ado\source\repos\RandomStart_Asi\RandomStart++\ModSystems.cpp(65,20): warning C4996: 'ctime': This function or variable may be unsafe. Consider using ctime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+E:\Ado\source\repos\RandomStart_Asi\RandomStart++\ModSystems.cpp(96,51): warning C4101: 'err': unreferenced local variable
+  script.cpp
+  Generating code
+  Previous IPDB and IOBJ mismatch, fall back to full compilation.
+  All 2891 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  RandomStart++.vcxproj -> E:\Ado\source\repos\RandomStart_Asi\RandomStart++\bin\Release\RandomStart++.asi
