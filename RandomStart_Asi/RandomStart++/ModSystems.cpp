@@ -1803,48 +1803,50 @@ namespace Mod_Systems
 		return LOY;
 	}
 
+	bool SnowOnGround = false;
+
 	void WeatherReport(int iWet)
 	{
-		bool MayOff = false;
-
 		if (iWet == -1)
 		{
 			if (CanSnow)
 				iWet = LessRandomInt("RanWeather", 10, 13);
 			else
 				iWet = LessRandomInt("RanWeather", 1, 9);
+		}
 
+		if (iWet == 1)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("EXTRASUNNY");
+		else if (iWet == 2)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("CLEAR");
+		else if (iWet == 3)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("CLOUDS");
+		else if (iWet == 4)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("SMOG");
+		else if (iWet == 4)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("FOGGY");
+		else if (iWet == 5)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("OVERCAST");
+		else if (iWet == 6)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("RAIN");
+		else if (iWet == 7)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("THUNDER");
+		else if (iWet == 8)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("CLEARING");
+		else if (iWet == 9)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("NEUTRAL");
+		else if (iWet == 10)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("SNOW");
+		else if (iWet == 11)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("BLIZZARD");
+		else if (iWet == 12)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("SNOWLIGHT");
+		else if (iWet == 13)
+			GAMEPLAY::SET_WEATHER_TYPE_NOW("XMAS");
 
-			if (iWet == 1)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("EXTRASUNNY");
-			else if (iWet == 2)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("CLEAR");
-			else if (iWet == 3)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("CLOUDS");
-			else if (iWet == 4)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("SMOG");
-			else if (iWet == 4)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("FOGGY");
-			else if (iWet == 5)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("OVERCAST");
-			else if (iWet == 6)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("RAIN");
-			else if (iWet == 7)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("THUNDER");
-			else if (iWet == 8)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("CLEARING");
-			else if (iWet == 9)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("NEUTRAL");
-			else if (iWet == 10)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("SNOW");
-			else if (iWet == 11)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("BLIZZARD");
-			else if (iWet == 12)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("SNOWLIGHT");
-			else if (iWet == 13)
-				GAMEPLAY::SET_WEATHER_TYPE_NOW("XMAS");
-
-			if (CanSnow && !SnowOnGround)
+		if (CanSnow)
+		{
+			if (!SnowOnGround)
 			{
 				if (getGameVersion() > eGameVersion::VER_1_0_2944_0_NOSTEAM)
 				{
@@ -1860,20 +1862,26 @@ namespace Mod_Systems
 				}
 				else
 				{
+					CanSnow = false;
 					Mod_Settings.SnowMonths = Mod_Class::SnowDates();
 					Mod_Settings.SnowMonths.Dec = false;
 					Mod_Settings.SnowMonths.Jan = false;
 					Mod_Settings.SnowMonths.Feb = false;
+
 					UiSystem::BottomLeft("This version of GTA is not compatable with this snow method.");
 				}
 			}
-			else if (!CanSnow && SnowOnGround)
+		}
+		else
+		{
+			if (SnowOnGround)
 			{
 				SnowOnGround = false;
 				invoke<Void>(0x6E9EF3A33C8899F8, false);
 				invoke<Void>(0xAEEDAD1420C65CC0, false);
 				invoke<Void>(0xA342A3763B3AFB6C, false);
 				invoke<Void>(0x4CC7F0FEA5283FE0, false);
+
 				STREAMING::_REMOVE_NAMED_PTFX_ASSET("core_snow");
 			}
 		}
