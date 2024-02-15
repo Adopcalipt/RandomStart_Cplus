@@ -5,46 +5,45 @@
 		--Modified By Adoppocalipt 2023--
 */
 
-
 #include "script.h"
+#include "keyboard.h"
 #include "ModSystems.h"
 
 using namespace Mod_Data;
 using namespace Mod_Systems;
-using namespace UiSystem;
-using namespace Locations;
-using namespace EntityActions;
+using namespace Mod_Ui;
+using namespace Mod_Maths;
+using namespace Mod_Entitys;
 
 #include <string>
 #include <vector>
 #include <iostream>
+#include <cmath>
+#include <ctime>
 
-#pragma warning(disable : 4244 4305) // double <-> float conversions
+//#pragma warning(disable : 4244 4305) // double <-> float conversions
 
-void PedditorMenu(Mod_Class::ClothBank* thisPed, int Main_Char, int iScale, float screenHeightScaleFactor);
 
 bool Mod_Load = true;
-std::string MainChar = "player_zero";
-std::string FunChar01 = "player_one";
-std::string FunChar02 = "player_two";
-std::string FunChar03 = "mp_m_freemode_01";
-std::string FunChar04 = "mp_f_freemode_01";
-
+const std::string Mod_Vesion = "1.3";
+std::string MainChar = "player_zero",  FunChar01 = "player_one", FunChar02 = "player_two", FunChar03 = "mp_m_freemode_01", FunChar04 = "mp_f_freemode_01";
 std::vector<Hash> MainProtags;
+
 const std::vector<std::string> MultC = {
-	"~r~", // Red
-	"~b~", // Blue
-	"~g~", // Green
-	"~y~", // Yellow
-	"~p~", // Purple
-	"~o~" // Orange
+    "~r~", // Red
+    "~b~", // Blue
+    "~g~", // Green
+    "~y~", // Yellow
+    "~p~", // Purple
+    "~o~" // Orange
 };
+
 std::vector<int> CheckScenarios()
 {
     LoggerLight("CheckScenarios");
     std::vector<int> RanSenaro = {};
 
-	if (Mod_Settings.BeachPed)
+    if (Mod_Settings.BeachPed)
         RanSenaro.push_back(1);
     if (Mod_Settings.Tramps)
         RanSenaro.push_back(2);
@@ -96,7 +95,7 @@ std::vector<int> CheckScenarios()
         RanSenaro.push_back(25);
 
     LoggerLight("CheckScenarios == " + std::to_string(RanSenaro.size()));
-	return RanSenaro;
+    return RanSenaro;
 }
 Mod_Class::ClothX GetYourTogs(Ped Peddy)
 {
@@ -186,7 +185,7 @@ void PrisonBreak()
     {
         if (DistanceTo(Excape[0], PLAYER::PLAYER_PED_ID()) < 5.0f)
         {
-            UiSystem::TopLeft(RSLangMenu[191]);
+            Mod_Ui::TopLeft(RSLangMenu[191]);
             if (Mod_Systems::WhileButtonDown(75, true))
             {
                 CAM::DO_SCREEN_FADE_OUT(1);
@@ -199,7 +198,7 @@ void PrisonBreak()
         }
         else if (DistanceTo(Excape[1], PLAYER::PLAYER_PED_ID()) < 5.0f)
         {
-            UiSystem::TopLeft(RSLangMenu[192]);
+            Mod_Ui::TopLeft(RSLangMenu[192]);
             if (Mod_Systems::WhileButtonDown(75, true))
             {
                 CAM::DO_SCREEN_FADE_OUT(1);
@@ -239,12 +238,17 @@ void Reposesion()
     int ScrollTime = 0;
     int Selecta = -1;
     Ped YoPlaya = PLAYER::PLAYER_PED_ID();
-    std::vector<Ped> NearPeds = CollectPeds(-1);
+    std::vector<Ped> NearPeds = CollectPeds();
     std::vector<Vector3> PedsPos = {};
     for (int i = 0; i < NearPeds.size(); i++)
     {
-        ENTITY::SET_ENTITY_AS_MISSION_ENTITY(NearPeds[i], 1, 1);
-        PedsPos.push_back(EntPosition(NearPeds[i]));
+        if (DistanceTo(NearPeds[i], PlayerPosi()) < 125.0f)
+        {
+            ENTITY::SET_ENTITY_AS_MISSION_ENTITY(NearPeds[i], 1, 1);
+            PedsPos.push_back(EntPosition(NearPeds[i]));
+        }
+        else
+            NearPeds.erase(NearPeds.begin() + i);
     }
     LoggerLight("Reposesion NearPeds == " + std::to_string((int)NearPeds.size()));
 
@@ -256,7 +260,7 @@ void Reposesion()
         {
             WAIT(1);
 
-            if (Selecta >= (int)NearPeds.size())
+            if (Selecta >= (int)NearPeds.size() || (bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
                 break;
 
             TopLeft(RSLangMenu[211]);
@@ -414,7 +418,7 @@ void DeathAndArrest(bool yaDeed)
 
 bool GotClutter = false;
 const std::vector<std::string> TrampSigns = {
-    "prop_beggers_sign_01", "prop_beggers_sign_02", "prop_beggers_sign_03", "prop_beggers_sign_04" 
+    "prop_beggers_sign_01", "prop_beggers_sign_02", "prop_beggers_sign_03", "prop_beggers_sign_04"
 };
 void RandomLocation(int iSelect)
 {
@@ -439,7 +443,7 @@ void RandomLocation(int iSelect)
     std::string NSPMLaunch = "";
     std::vector<Mod_Class::Vector4> MultiSpot = {};
     Mod_Class::Vector4 MySpot = Mod_Class::Vector4(0.0f, 0.0f, 0.0f, 0.0f);
-    Mod_Class::FubarVectors MySpotFu = Mod_Class::FubarVectors(0, Mod_Class::Vector4(0, 0, 0, 0), Mod_Class::Vector4(0, 0, 0, 0),"", 0);
+    Mod_Class::FubarVectors MySpotFu = Mod_Class::FubarVectors(0, Mod_Class::Vector4(0, 0, 0, 0), Mod_Class::Vector4(0, 0, 0, 0), "", 0);
 
     int Action = 0;    //1-DriveVeh  2-Sunbath  3-TrampSign  4-TrampSleap  5-MuscleBeach  6-GangWars  7-Jogger  8-EnterVeh  9-Meth  10-Gardener  11-Dancing  12-Sitting  15+-NSPM
     int WeaponSet = 0;
@@ -449,7 +453,7 @@ void RandomLocation(int iSelect)
 
     if (iSelect == 1)
     {
-        TIME::SET_CLOCK_TIME(12,0,0);
+        TIME::SET_CLOCK_TIME(12, 0, 0);
         WeatherReport(1);
 
         if (LessRandomInt("RandomDriver", 1, 4) < 2)
@@ -457,15 +461,15 @@ void RandomLocation(int iSelect)
 
         FillVeh = true;
 
-        if (LessRandomInt("RandomLocations01", 1, 4) < 2)
+        if (LessRandomInt("RandomMod_Maths01", 1, 4) < 2)
         {
-            MultiSpot.push_back(BeachBoat[LessRandomInt("RandomLocations01a", 0, (int)BeachBoat.size() - 1)]);
-            MultiSpot.push_back(BeachBoat[LessRandomInt("RandomLocations01a", 0, (int)BeachBoat.size() - 1)]);
+            MultiSpot.push_back(BeachBoat[LessRandomInt("RandomMod_Maths01a", 0, (int)BeachBoat.size() - 1)]);
+            MultiSpot.push_back(BeachBoat[LessRandomInt("RandomMod_Maths01a", 0, (int)BeachBoat.size() - 1)]);
             Action = 1;
         }
         else
         {
-            int iMultiStop = LessRandomInt("RandomLocations01b", 0, (int)BeachLay.size() - 1);
+            int iMultiStop = LessRandomInt("RandomMod_Maths01b", 0, (int)BeachLay.size() - 1);
             Mod_Class::Vector4 Vpos = BeachLay[iMultiStop];
             MultiSpot.push_back(Vpos);
 
@@ -485,19 +489,19 @@ void RandomLocation(int iSelect)
 
         WeatherReport(iW);
 
-        if (LessRandomInt("RandomLocations02", 1, 4) < 2)
+        if (LessRandomInt("RandomMod_Maths02", 1, 4) < 2)
         {
             TIME::SET_CLOCK_TIME(12, 0, 0);
-            MySpot = TrampSign[LessRandomInt("RandomLocations02a", 0, (int)TrampSign.size() - 1)];
+            MySpot = TrampSign[LessRandomInt("RandomMod_Maths02a", 0, (int)TrampSign.size() - 1)];
             Action = 3;
         }           //HoldSign Tramp
         else
         {
             TIME::SET_CLOCK_TIME(3, 0, 0);
-            MySpot = TrampSleap[LessRandomInt("RandomLocations02b", 0, (int)TrampSleap.size() - 1)];
+            MySpot = TrampSleap[LessRandomInt("RandomMod_Maths02b", 0, (int)TrampSleap.size() - 1)];
             Action = 4;
         }
-      
+
         WeaponSet = 1;
     }            //Tramps
     else if (iSelect == 3)
@@ -505,14 +509,14 @@ void RandomLocation(int iSelect)
         TIME::SET_CLOCK_TIME(12, 0, 0);
         WeatherReport(1);
         Action = 8;
-        MySpotFu = HighClass[LessRandomInt("RandomLocations03", 0, (int)HighClass.size() - 1)];
+        MySpotFu = HighClass[LessRandomInt("RandomMod_Maths03", 0, (int)HighClass.size() - 1)];
         WeaponSet = 2;
     }            //High class
     else if (iSelect == 4)
     {
-        RandomWeatherTime(); 
+        RandomWeatherTime();
         Action = 8;
-        MySpotFu = MidClass[LessRandomInt("RandomLocations04", 0, (int)MidClass.size() - 1)];
+        MySpotFu = MidClass[LessRandomInt("RandomMod_Maths04", 0, (int)MidClass.size() - 1)];
         WeaponSet = 3;
     }            //Mid class
     else if (iSelect == 5)
@@ -524,21 +528,21 @@ void RandomLocation(int iSelect)
         WeatherReport(iW);
 
         Action = 8;
-        MySpotFu = LowClass[LessRandomInt("RandomLocations05", 0, (int)LowClass.size() - 1)];
+        MySpotFu = LowClass[LessRandomInt("RandomMod_Maths05", 0, (int)LowClass.size() - 1)];
         WeaponSet = 3;
     }            //Low class
     else if (iSelect == 6)
     {
         RandomWeatherTime();
 
-        if (LessRandomInt("RandomLocations06", 1, 4) < 2)
+        if (LessRandomInt("RandomMod_Maths06", 1, 4) < 2)
         {
-            MySpot = Buisness[LessRandomInt("RandomLocations06a", 0, (int)Buisness.size() - 1)];
+            MySpot = Buisness[LessRandomInt("RandomMod_Maths06a", 0, (int)Buisness.size() - 1)];
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         else
         {
-            int iRanLand = LessRandomInt("RandomLocations06b", 1, 5);
+            int iRanLand = LessRandomInt("RandomMod_Maths06b", 1, 5);
             if (iRanLand == 1)
                 MultiSpot = BuisnessHeli01;
             else if (iRanLand == 2)
@@ -563,27 +567,27 @@ void RandomLocation(int iSelect)
         TIME::SET_CLOCK_TIME(12, 0, 0);
         WeatherReport(1);
 
-        SubSet = LessRandomInt("RandomLocations07", 0, (int)BodyBeach.size() - 1);
+        SubSet = LessRandomInt("RandomMod_Maths07", 0, (int)BodyBeach.size() - 1);
         MySpot = BodyBeach[SubSet];
         Action = 5;
     }            //Body builder
     else if (iSelect == 8)
     {
         RandomWeatherTime();
-        SubSet = LessRandomInt("RandomLocations08", 1, 11);
+        SubSet = LessRandomInt("RandomMod_Maths08", 1, 11);
         Action = 6;
         WeaponSet = 9;
     }            //GangStars             
     else if (iSelect == 9)
     {
         RandomWeatherTime();
-        MySpot = Epslon[LessRandomInt("RandomLocations09", 0, (int)Epslon.size() - 1)];
+        MySpot = Epslon[LessRandomInt("RandomMod_Maths09", 0, (int)Epslon.size() - 1)];
         MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
     }            //Epslon
     else if (iSelect == 10)
     {
         RandomWeatherTime();
-        SubSet = LessRandomInt("RandomLocations10", 1, 30);
+        SubSet = LessRandomInt("RandomMod_Maths10", 1, 30);
         Action = 7;
     }           //Jogger
     else if (iSelect == 11)
@@ -591,16 +595,16 @@ void RandomLocation(int iSelect)
         TIME::SET_CLOCK_TIME(12, 0, 0);
         WeatherReport(1);
 
-        if (LessRandomInt("RandomLocations11", 1, 4) < 2)
+        if (LessRandomInt("RandomMod_Maths11", 1, 4) < 2)
         {
             MultiSpot = GolfCaddy;
             FillVeh = true;
-            RanDriveTo = LessRandomInt("RandomLocations11b", 0, (int)GolfCaddy.size() -1);
+            RanDriveTo = LessRandomInt("RandomMod_Maths11b", 0, (int)GolfCaddy.size() - 1);
             Action = 1;
         }
         else
         {
-            MySpot = GolfTee[LessRandomInt("RandomLocations11a", 0, (int)GolfTee.size() - 1)];
+            MySpot = GolfTee[LessRandomInt("RandomMod_Maths11a", 0, (int)GolfTee.size() - 1)];
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         WeaponSet = 6;
@@ -610,27 +614,27 @@ void RandomLocation(int iSelect)
         TIME::SET_CLOCK_TIME(12, 0, 0);
         WeatherReport(1);
 
-        MySpot = Hiker[LessRandomInt("RandomLocations12", 0, (int)Hiker.size() - 1)];
+        MySpot = Hiker[LessRandomInt("RandomMod_Maths12", 0, (int)Hiker.size() - 1)];
         MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
     }           //Hiker
     else if (iSelect == 13)
     {
         RandomWeatherTime();
-        MySpot = MethodActing[LessRandomInt("RandomLocations13", 0, (int)MethodActing.size() - 1)];
+        MySpot = MethodActing[LessRandomInt("RandomMod_Maths13", 0, (int)MethodActing.size() - 1)];
         Action = 9;
         WeaponSet = 1;
     }           //Meth
     else if (iSelect == 14)
     {
         RandomWeatherTime();
-        if (LessRandomInt("RandomLocations12", 1, 4) < 2)
+        if (LessRandomInt("RandomMod_Maths12", 1, 4) < 2)
         {
-            MySpot = FarmingVeh[LessRandomInt("RandomLocations14a", 0, (int)FarmingVeh.size() - 1)];
+            MySpot = FarmingVeh[LessRandomInt("RandomMod_Maths14a", 0, (int)FarmingVeh.size() - 1)];
             Action = 1;
         }
         else
         {
-            MySpot = Farming[LessRandomInt("RandomLocations14b", 0, (int)Farming.size() - 1)];
+            MySpot = Farming[LessRandomInt("RandomMod_Maths14b", 0, (int)Farming.size() - 1)];
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         WeaponSet = 4;
@@ -639,7 +643,7 @@ void RandomLocation(int iSelect)
     {
         TIME::SET_CLOCK_TIME(12, 0, 0);
         WeatherReport(1);
-        SubSet = LessRandomInt("RandomLocations13", 1, 4);
+        SubSet = LessRandomInt("RandomMod_Maths13", 1, 4);
         if (SubSet == 1)
             MultiSpot = CycleRacer;      //Racer
         else if (SubSet == 2)
@@ -649,28 +653,28 @@ void RandomLocation(int iSelect)
         else
             MultiSpot = CycleCruser;      //Cruser
 
-        RanDriveTo = LessRandomInt("RandomLocations13a", 0, (int)MultiSpot.size() - 1);
+        RanDriveTo = LessRandomInt("RandomMod_Maths13a", 0, (int)MultiSpot.size() - 1);
         Action = 1;
     }           //Cycles
     else if (iSelect == 16)
     {
         TIME::SET_CLOCK_TIME(21, 0, 0);
-        MySpot = LGBQWXYZ[LessRandomInt("RandomLocations16", 0, (int)LGBQWXYZ.size() - 1)];
+        MySpot = LGBQWXYZ[LessRandomInt("RandomMod_Maths16", 0, (int)LGBQWXYZ.size() - 1)];
         MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
     }           //LGBTWXYZ
     else if (iSelect == 17)
     {
         TIME::SET_CLOCK_TIME(12, 0, 0);
         WeatherReport(1);
-        if (LessRandomInt("RandomLocations17", 0, 4) < 2)
+        if (LessRandomInt("RandomMod_Maths17", 0, 4) < 2)
         {
-            MySpot = PoolPlace[LessRandomInt("RandomLocations17a", 0, (int)PoolPlace.size() - 1)];
+            MySpot = PoolPlace[LessRandomInt("RandomMod_Maths17a", 0, (int)PoolPlace.size() - 1)];
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         else
         {
-            MySpot = BeachLounger[LessRandomInt("RandomLocations17b", 0, (int)BeachLounger.size() - 1)];
-            MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot); 
+            MySpot = BeachLounger[LessRandomInt("RandomMod_Maths17b", 0, (int)BeachLounger.size() - 1)];
+            MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
             WAIT(1000);
             Action = 12;
         }
@@ -679,35 +683,35 @@ void RandomLocation(int iSelect)
     {
         RandomWeatherTime();
 
-        SubSet = LessRandomInt("RandomLocations18", 1, 23);
+        SubSet = LessRandomInt("RandomMod_Maths18", 1, 23);
         if (SubSet == 1)
         {
-            MySpot = Worker_Autoshop[LessRandomInt("RandomLocations18a", 0, (int)Worker_Autoshop.size() - 1)];//"Autoshop Worker 2"); 
+            MySpot = Worker_Autoshop[LessRandomInt("RandomMod_Maths18a", 0, (int)Worker_Autoshop.size() - 1)];//"Autoshop Worker 2"); 
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         else if (SubSet == 2)
         {
-            MySpot = Worker_Waiter[LessRandomInt("RandomLocations18b", 0, (int)Worker_Waiter.size() - 1)];//"Waiter") ; 
+            MySpot = Worker_Waiter[LessRandomInt("RandomMod_Maths18b", 0, (int)Worker_Waiter.size() - 1)];//"Waiter") ; 
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         else if (SubSet == 3)
         {
-            MySpot = Worker_Sweatshop[LessRandomInt("RandomLocations18c", 0, (int)Worker_Sweatshop.size() - 1)];//"Sweatshop Worker  
+            MySpot = Worker_Sweatshop[LessRandomInt("RandomMod_Maths18c", 0, (int)Worker_Sweatshop.size() - 1)];//"Sweatshop Worker  
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         else if (SubSet == 4)
         {
-            MySpot = Worker_Shopkeeper[LessRandomInt("RandomLocations18d", 0, (int)Worker_Shopkeeper.size() - 1)];//"Shopkeeper (Male)"); 
+            MySpot = Worker_Shopkeeper[LessRandomInt("RandomMod_Maths18d", 0, (int)Worker_Shopkeeper.size() - 1)];//"Shopkeeper (Male)"); 
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         else if (SubSet == 5)
         {
-            MySpot = Worker_Doctor[LessRandomInt("RandomLocations18e", 0, (int)Worker_Doctor.size() - 1)];//"Doctor"); 
+            MySpot = Worker_Doctor[LessRandomInt("RandomMod_Maths18e", 0, (int)Worker_Doctor.size() - 1)];//"Doctor"); 
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         else if (SubSet == 6)
         {
-            MySpot = Worker_Maid[LessRandomInt("RandomLocations18f", 0, (int)Worker_Maid.size() - 1)];//"Maid
+            MySpot = Worker_Maid[LessRandomInt("RandomMod_Maths18f", 0, (int)Worker_Maid.size() - 1)];//"Maid
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         else if (SubSet == 7)
@@ -715,44 +719,44 @@ void RandomLocation(int iSelect)
             if (NSPM_Include)
             {
                 NSPMLaunch = "" + GetDir() + "/Scripts/NSPM/RequestGroupS.txt";
-                MySpot = GroupSixStarts[LessRandomInt("RandomLocations18g1", 0, (int)GroupSixStarts.size() - 1)];
+                MySpot = GroupSixStarts[LessRandomInt("RandomMod_Maths18g1", 0, (int)GroupSixStarts.size() - 1)];
             }
             else
             {
-                MySpot = Worker_Security[LessRandomInt("RandomLocations18g", 0, (int)Worker_Security.size() - 1)];
+                MySpot = Worker_Security[LessRandomInt("RandomMod_Maths18g", 0, (int)Worker_Security.size() - 1)];
                 FillVeh = true;
             }
             Action = 1;
         }       //"Armoured Van Security 2"); 
         else if (SubSet == 8)
         {
-            MySpot = Worker_Guard[LessRandomInt("RandomLocations18h", 0, (int)Worker_Guard.size() - 1)];
+            MySpot = Worker_Guard[LessRandomInt("RandomMod_Maths18h", 0, (int)Worker_Guard.size() - 1)];
             FillVeh = true;
             Action = 1;
         }       //"Security Guard"); 
         else if (SubSet == 9)
         {
-            MySpot = Worker_Scientist[LessRandomInt("RandomLocations18i", 0, (int)Worker_Scientist.size() - 1)];//"Scientist");  
+            MySpot = Worker_Scientist[LessRandomInt("RandomMod_Maths18i", 0, (int)Worker_Scientist.size() - 1)];//"Scientist");  
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         else if (SubSet == 10)
         {
-            MySpot = Worker_Chemical[LessRandomInt("RandomLocations18j", 0, (int)Worker_Chemical.size() - 1)]; //"Chemical Plant Worker");  
+            MySpot = Worker_Chemical[LessRandomInt("RandomMod_Maths18j", 0, (int)Worker_Chemical.size() - 1)]; //"Chemical Plant Worker");  
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         else if (SubSet == 11)
         {
-            MySpot = Worker_Construct[LessRandomInt("RandomLocations18k", 0, (int)Worker_Construct.size() - 1)];
+            MySpot = Worker_Construct[LessRandomInt("RandomMod_Maths18k", 0, (int)Worker_Construct.size() - 1)];
             Action = 1;
         }       //"construction Worker 2"); 
         else if (SubSet == 12)
         {
-            MySpot = Worker_Dock[LessRandomInt("RandomLocations18l", 0, (int)Worker_Dock.size() - 1)];
+            MySpot = Worker_Dock[LessRandomInt("RandomMod_Maths18l", 0, (int)Worker_Dock.size() - 1)];
             Action = 1;
         }       //"Dock Worker");  
         else if (SubSet == 13)
         {
-            MySpot = Worker_Airport[LessRandomInt("RandomLocations18m", 0, (int)Worker_Airport.size() - 1)];
+            MySpot = Worker_Airport[LessRandomInt("RandomMod_Maths18m", 0, (int)Worker_Airport.size() - 1)];
             Action = 1;
             AccessAllAreas(true);
         }       //Airport
@@ -765,17 +769,17 @@ void RandomLocation(int iSelect)
         }       //"Garbage Worker");  
         else if (SubSet == 15)
         {
-            MySpot = Worker_Handyman[LessRandomInt("RandomLocations18n", 0, (int)Worker_Handyman.size() - 1)];
+            MySpot = Worker_Handyman[LessRandomInt("RandomMod_Maths18n", 0, (int)Worker_Handyman.size() - 1)];
             Action = 10;
         }       //"Latino Handyman Male"); 
         else if (SubSet == 16)
         {
-            MySpot = Worker_Metro[LessRandomInt("RandomLocations18o", 0, (int)Worker_Metro.size() - 1)];//"LS Metro Worker Male");  
+            MySpot = Worker_Metro[LessRandomInt("RandomMod_Maths18o", 0, (int)Worker_Metro.size() - 1)];//"LS Metro Worker Male");  
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         else if (SubSet == 17)
         {
-            MySpot = Worker_Transport[LessRandomInt("RandomLocations18p", 0, (int)Worker_Transport.size() - 1)];
+            MySpot = Worker_Transport[LessRandomInt("RandomMod_Maths18p", 0, (int)Worker_Transport.size() - 1)];
             Action = 1;
         }       //"Transport Worker Male");  
         else if (SubSet == 18)
@@ -785,7 +789,7 @@ void RandomLocation(int iSelect)
         }
         else if (SubSet == 19)
         {
-            MySpot = Worker_Postal[LessRandomInt("RandomLocations18q", 0, (int)Worker_Postal.size() - 1)];
+            MySpot = Worker_Postal[LessRandomInt("RandomMod_Maths18q", 0, (int)Worker_Postal.size() - 1)];
             Action = 1;
         }       //"Postal Worker Male 2");  
         else if (SubSet == 20)
@@ -793,17 +797,17 @@ void RandomLocation(int iSelect)
             if (NSPM_Include)
             {
                 NSPMLaunch = "" + GetDir() + "/Scripts/NSPM/RequestDelivery.txt";
-                MySpot = DeliveryStarts[LessRandomInt("RandomLocations18r1", 0, (int)DeliveryStarts.size() - 1)];
+                MySpot = DeliveryStarts[LessRandomInt("RandomMod_Maths18r1", 0, (int)DeliveryStarts.size() - 1)];
             }
             else
             {
-                MySpot = Worker_UPS[LessRandomInt("RandomLocations18r", 0, (int)Worker_UPS.size() - 1)];
+                MySpot = Worker_UPS[LessRandomInt("RandomMod_Maths18r", 0, (int)Worker_UPS.size() - 1)];
             }
             Action = 1;
         }       //"UPS Driver 2");
         else if (SubSet == 21)
         {
-            MySpot = Worker_Vendor[LessRandomInt("RandomLocations18s", 0, (int)Worker_Vendor.size() - 1)];//"Street Vendor Young");  
+            MySpot = Worker_Vendor[LessRandomInt("RandomMod_Maths18s", 0, (int)Worker_Vendor.size() - 1)];//"Street Vendor Young");  
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
         else if (SubSet == 22)
@@ -821,7 +825,7 @@ void RandomLocation(int iSelect)
         }       //"Valet");  
         else
         {
-            MySpot = Worker_Window[LessRandomInt("RandomLocations18t", 0, (int)Worker_Window.size() - 1)];//"Window Cleaner");
+            MySpot = Worker_Window[LessRandomInt("RandomMod_Maths18t", 0, (int)Worker_Window.size() - 1)];//"Window Cleaner");
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
         }
 
@@ -831,7 +835,7 @@ void RandomLocation(int iSelect)
         TIME::SET_CLOCK_TIME(12, 0, 0);
         WeatherReport(1);
 
-        MySpot = JetSki[LessRandomInt("RandomLocations19", 0, (int)JetSki.size() - 1)];
+        MySpot = JetSki[LessRandomInt("RandomMod_Maths19", 0, (int)JetSki.size() - 1)];
         Action = 1;
     }           //jet ski Male                  
     else if (iSelect == 20)
@@ -839,7 +843,7 @@ void RandomLocation(int iSelect)
         TIME::SET_CLOCK_TIME(12, 0, 0);
         WeatherReport(1);
 
-        SubSet = LessRandomInt("RandomLocations20", 1, 4);
+        SubSet = LessRandomInt("RandomMod_Maths20", 1, 4);
         if (SubSet == 1)
             MultiSpot = OffRoadRace01;
         else if (SubSet == 2)
@@ -850,20 +854,20 @@ void RandomLocation(int iSelect)
             MultiSpot = OffRoadRace04;
         Action = 1;
 
-        RanDriveTo = LessRandomInt("RandomLocations20a", 0, (int)MultiSpot.size() - 1);
+        RanDriveTo = LessRandomInt("RandomMod_Maths20a", 0, (int)MultiSpot.size() - 1);
     }           //Bike/ATV Male
     else if (iSelect == 21)
     {
         RandomWeatherTime();
 
-        SubSet = LessRandomInt("RandomLocations21", 1, 11);
+        SubSet = LessRandomInt("RandomMod_Maths21", 1, 11);
 
         if (SubSet == 1)
         {
             TIME::SET_CLOCK_TIME(12, 0, 0);
             WeatherReport(1);
 
-            MySpot = Service_Baywatch[LessRandomInt("RandomLocations21a", 0, (int)Service_Baywatch.size() - 1)];
+            MySpot = Service_Baywatch[LessRandomInt("RandomMod_Maths21a", 0, (int)Service_Baywatch.size() - 1)];
             Action = 1;
             if (NSPM_Include)
             {
@@ -874,7 +878,7 @@ void RandomLocation(int iSelect)
         }            //"Baywatch 
         else if (SubSet == 2)
         {
-            MySpot = Service_Coastguard[LessRandomInt("RandomLocations21b", 0, (int)Service_Coastguard.size() - 1)];
+            MySpot = Service_Coastguard[LessRandomInt("RandomMod_Maths21b", 0, (int)Service_Coastguard.size() - 1)];
             FillVeh = true;
             Deputize = true;
             Action = 1;
@@ -882,8 +886,8 @@ void RandomLocation(int iSelect)
         else if (SubSet == 3)
         {
             MultiSpot = CopsOnPatrol;
-            //MySpot = Service_Cops[LessRandomInt("RandomLocations21c", 0, (int)Service_Cops.size() - 1)];
-            RanDriveTo = LessRandomInt("RandomLocations20a", 0, (int)MultiSpot.size() - 1);
+            //MySpot = Service_Cops[LessRandomInt("RandomMod_Maths21c", 0, (int)Service_Cops.size() - 1)];
+            RanDriveTo = LessRandomInt("RandomMod_Maths20a", 0, (int)MultiSpot.size() - 1);
             FillVeh = true;
             Deputize = true;
             PlayerDrives = false;
@@ -891,15 +895,15 @@ void RandomLocation(int iSelect)
         }       //><!--Cops
         else if (SubSet == 4)
         {
-            MySpot = Service_CopsBike[LessRandomInt("RandomLocations21d", 0, (int)Service_CopsBike.size() - 1)];
+            MySpot = Service_CopsBike[LessRandomInt("RandomMod_Maths21d", 0, (int)Service_CopsBike.size() - 1)];
             Deputize = true;
             Action = 1;
         }       //><!-- PoliceBike
         else if (SubSet == 5)
         {
             MultiSpot = RangersOnPatrol;
-            //MySpot = Service_CopsRanger[LessRandomInt("RandomLocations21e", 0, (int)Service_CopsRanger.size() - 1)];
-            RanDriveTo = LessRandomInt("RandomLocations20a", 0, (int)MultiSpot.size() - 1);
+            //MySpot = Service_CopsRanger[LessRandomInt("RandomMod_Maths21e", 0, (int)Service_CopsRanger.size() - 1)];
+            RanDriveTo = LessRandomInt("RandomMod_Maths20a", 0, (int)MultiSpot.size() - 1);
             FillVeh = true;
             Deputize = true;
             PlayerDrives = false;
@@ -908,8 +912,8 @@ void RandomLocation(int iSelect)
         else if (SubSet == 6)
         {
             MultiSpot = CopsOnPatrol;
-            //MySpot = Service_Sherif[LessRandomInt("RandomLocations21f", 0, (int)Service_Sherif.size() - 1)];
-            RanDriveTo = LessRandomInt("RandomLocations20a", 0, (int)MultiSpot.size() - 1);
+            //MySpot = Service_Sherif[LessRandomInt("RandomMod_Maths21f", 0, (int)Service_Sherif.size() - 1)];
+            RanDriveTo = LessRandomInt("RandomMod_Maths20a", 0, (int)MultiSpot.size() - 1);
             FillVeh = true;
             Deputize = true;
             PlayerDrives = false;
@@ -917,21 +921,21 @@ void RandomLocation(int iSelect)
         }       //><!-- Sherif
         else if (SubSet == 7)
         {
-            MySpot = Service_Fib[LessRandomInt("RandomLocations21g", 0, (int)Service_Fib.size() - 1)];
+            MySpot = Service_Fib[LessRandomInt("RandomMod_Maths21g", 0, (int)Service_Fib.size() - 1)];
             FillVeh = true;
             Deputize = true;
             Action = 1;
         }       //><!-- fib
         else if (SubSet == 8)
         {
-            MySpot = Service_Swat[LessRandomInt("RandomLocations21h", 0, (int)Service_Swat.size() - 1)];
+            MySpot = Service_Swat[LessRandomInt("RandomMod_Maths21h", 0, (int)Service_Swat.size() - 1)];
             FillVeh = true;
             Deputize = true;
             Action = 1;
         }       //><!-- swat
         else if (SubSet == 9)
         {
-            MySpot = Service_Military[LessRandomInt("RandomLocations21i", 0, (int)Service_Military.size() - 1)];
+            MySpot = Service_Military[LessRandomInt("RandomMod_Maths21i", 0, (int)Service_Military.size() - 1)];
             FillVeh = true;
             Deputize = true;
             Action = 1;
@@ -942,11 +946,11 @@ void RandomLocation(int iSelect)
             if (NSPM_Include)
             {
                 NSPMLaunch = "" + GetDir() + "/Scripts/NSPM/RequestMedic.txt";
-                MySpot = AmbulanceStarts[LessRandomInt("RandomLocations21j2", 0, (int)AmbulanceStarts.size() - 1)];
+                MySpot = AmbulanceStarts[LessRandomInt("RandomMod_Maths21j2", 0, (int)AmbulanceStarts.size() - 1)];
 
             }
             else
-                MySpot = Service_Medic[LessRandomInt("RandomLocations21j", 0, (int)Service_Medic.size() - 1)];
+                MySpot = Service_Medic[LessRandomInt("RandomMod_Maths21j", 0, (int)Service_Medic.size() - 1)];
 
             Action = 1;
         }      //medic
@@ -955,15 +959,15 @@ void RandomLocation(int iSelect)
             if (NSPM_Include)
             {
                 NSPMLaunch = "" + GetDir() + "/Scripts/NSPM/RequestFire.txt";
-                MySpot = FireStarts[LessRandomInt("RandomLocations21k1", 0, (int)FireStarts.size() - 1)];
+                MySpot = FireStarts[LessRandomInt("RandomMod_Maths21k1", 0, (int)FireStarts.size() - 1)];
             }
             else
             {
-                MySpot = Service_Fireman[LessRandomInt("RandomLocations21k", 0, (int)Service_Fireman.size() - 1)];
+                MySpot = Service_Fireman[LessRandomInt("RandomMod_Maths21k", 0, (int)Service_Fireman.size() - 1)];
                 FillVeh = true;
             }
             Action = 1;
-            
+
             Deputize = true;
         }      //fireman
     }           //Services 
@@ -971,11 +975,11 @@ void RandomLocation(int iSelect)
     {
         RandomWeatherTime();
 
-        SubSet = LessRandomInt("RandomLocations22", 1, 4);
+        SubSet = LessRandomInt("RandomMod_Maths22", 1, 4);
 
         if (SubSet == 1)
         {
-            MultiSpot.push_back(Flight_Civi[LessRandomInt("RandomLocations22a", 0, (int)Flight_Civi.size() - 1)]);
+            MultiSpot.push_back(Flight_Civi[LessRandomInt("RandomMod_Maths22a", 0, (int)Flight_Civi.size() - 1)]);
             MultiSpot.push_back(Mod_Class::Vector4(-2352.11f, 2274.94f, 1500.0f, 0.0f));
             Plane = true;
             FillVeh = true;
@@ -983,7 +987,7 @@ void RandomLocation(int iSelect)
         }       //civilian
         else if (SubSet == 2)
         {
-            MultiSpot.push_back(Flight_Milatary[LessRandomInt("RandomLocations22b", 0, (int)Flight_Milatary.size() - 1)]);
+            MultiSpot.push_back(Flight_Milatary[LessRandomInt("RandomMod_Maths22b", 0, (int)Flight_Milatary.size() - 1)]);
             MultiSpot.push_back(Mod_Class::Vector4(-2352.11f, 2274.94f, 1500.0f, 0.0f));
             Plane = true;
             FillVeh = true;
@@ -995,7 +999,7 @@ void RandomLocation(int iSelect)
             Heli = true;
             FillVeh = true;
             Action = 1;
-            RanDriveTo = LessRandomInt("RandomLocations22c", 0, (int)MultiSpot.size() - 1);
+            RanDriveTo = LessRandomInt("RandomMod_Maths22c", 0, (int)MultiSpot.size() - 1);
         }       //helitours
         else
         {
@@ -1003,7 +1007,7 @@ void RandomLocation(int iSelect)
             Heli = true;
             FillVeh = true;
             Action = 1;
-            RanDriveTo = LessRandomInt("RandomLocations22d", 0, (int)MultiSpot.size() - 1);
+            RanDriveTo = LessRandomInt("RandomMod_Maths22d", 0, (int)MultiSpot.size() - 1);
         }      //PaletoHeli
     }           //Pilot
     else if (iSelect == 23)
@@ -1011,38 +1015,38 @@ void RandomLocation(int iSelect)
         RandomWeatherTime();
 
         if (!Mod_Settings.Random_Ped || Mod_Settings.Saved_Ped)
-            SubSet = LessRandomInt("RandomLocations23a", 1, 11);
+            SubSet = LessRandomInt("RandomMod_Maths23a", 1, 11);
         else
-            SubSet = LessRandomInt("RandomLocations23b", 1, 14);
+            SubSet = LessRandomInt("RandomMod_Maths23b", 1, 14);
 
         if (SubSet == 1)
-            MySpot = Animals_Boar[LessRandomInt("RandomLocations23c", 0, (int)Animals_Boar.size() - 1)];//a_c_boar
+            MySpot = Animals_Boar[LessRandomInt("RandomMod_Maths23c", 0, (int)Animals_Boar.size() - 1)];//a_c_boar
         else if (SubSet == 2)
-            MySpot = Animals_CatsDogs[LessRandomInt("RandomLocations23d", 0, (int)Animals_CatsDogs.size() - 1)];//cats/dogs
+            MySpot = Animals_CatsDogs[LessRandomInt("RandomMod_Maths23d", 0, (int)Animals_CatsDogs.size() - 1)];//cats/dogs
         else if (SubSet == 3)
-            MySpot = Animals_Pigeon[LessRandomInt("RandomLocations23e", 0, (int)Animals_Pigeon.size() - 1)];//a_c_pigeon
+            MySpot = Animals_Pigeon[LessRandomInt("RandomMod_Maths23e", 0, (int)Animals_Pigeon.size() - 1)];//a_c_pigeon
         else if (SubSet == 4)
-            MySpot = Animals_Rat[LessRandomInt("RandomLocations23f", 0, (int)Animals_Rat.size() - 1)];//a_c_rat
+            MySpot = Animals_Rat[LessRandomInt("RandomMod_Maths23f", 0, (int)Animals_Rat.size() - 1)];//a_c_rat
         else if (SubSet == 5)
-            MySpot = Animals_Cow[LessRandomInt("RandomLocations23g", 0, (int)Animals_Cow.size() - 1)];//a_c_cow
+            MySpot = Animals_Cow[LessRandomInt("RandomMod_Maths23g", 0, (int)Animals_Cow.size() - 1)];//a_c_cow
         else if (SubSet == 6)
-            MySpot = Animals_Coyote[LessRandomInt("RandomLocations23h", 0, (int)Animals_Coyote.size() - 1)];//a_c_coyote
+            MySpot = Animals_Coyote[LessRandomInt("RandomMod_Maths23h", 0, (int)Animals_Coyote.size() - 1)];//a_c_coyote
         else if (SubSet == 7)
-            MySpot = Animals_Crow[LessRandomInt("RandomLocations23i", 0, (int)Animals_Crow.size() - 1)];//a_c_crow
+            MySpot = Animals_Crow[LessRandomInt("RandomMod_Maths23i", 0, (int)Animals_Crow.size() - 1)];//a_c_crow
         else if (SubSet == 8)
-            MySpot = Animals_DeerRabit[LessRandomInt("RandomLocations23j", 0, (int)Animals_DeerRabit.size() - 1)];//a_c_deer/a_c_rabbit_01
+            MySpot = Animals_DeerRabit[LessRandomInt("RandomMod_Maths23j", 0, (int)Animals_DeerRabit.size() - 1)];//a_c_deer/a_c_rabbit_01
         else if (SubSet == 9)
-            MySpot = Animals_Hen[LessRandomInt("RandomLocations23k", 0, (int)Animals_Hen.size() - 1)];//a_c_hen                
+            MySpot = Animals_Hen[LessRandomInt("RandomMod_Maths23k", 0, (int)Animals_Hen.size() - 1)];//a_c_hen                
         else if (SubSet == 10)
-            MySpot = Animals_Lion[LessRandomInt("RandomLocations23l", 0, (int)Animals_Lion.size() - 1)];//a_c_mtlion-mountain lion
+            MySpot = Animals_Lion[LessRandomInt("RandomMod_Maths23l", 0, (int)Animals_Lion.size() - 1)];//a_c_mtlion-mountain lion
         else if (SubSet == 11)
-            MySpot = Animals_Pig[LessRandomInt("RandomLocations23m", 0, (int)Animals_Pig.size() - 1)];//a_c_pig
+            MySpot = Animals_Pig[LessRandomInt("RandomMod_Maths23m", 0, (int)Animals_Pig.size() - 1)];//a_c_pig
         else if (SubSet == 12)
-            MySpot = Animals_Fish[LessRandomInt("RandomLocations23n", 0, (int)Animals_Fish.size() - 1)];//Fish/sharks
+            MySpot = Animals_Fish[LessRandomInt("RandomMod_Maths23n", 0, (int)Animals_Fish.size() - 1)];//Fish/sharks
         else if (SubSet == 13)
-            MySpot = Animals_Hawk[LessRandomInt("RandomLocations23o", 0, (int)Animals_Hawk.size() - 1)];//a_c_chickenhawk
+            MySpot = Animals_Hawk[LessRandomInt("RandomMod_Maths23o", 0, (int)Animals_Hawk.size() - 1)];//a_c_chickenhawk
         else
-            MySpot = Animals_Corm[LessRandomInt("RandomLocations23p", 0, (int)Animals_Corm.size() - 1)];//a_c_cormorant
+            MySpot = Animals_Corm[LessRandomInt("RandomMod_Maths23p", 0, (int)Animals_Corm.size() - 1)];//a_c_cormorant
 
         MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
     }           //Animals
@@ -1050,11 +1054,11 @@ void RandomLocation(int iSelect)
     {
         WeatherReport(RandomInt(10, 13));
 
-        if (LessRandomInt("RandomLocations24", 1, 4) < 2)
-            MySpot = Yankton[LessRandomInt("RandomLocations24a", 0, (int)Yankton.size() - 1)];
+        if (LessRandomInt("RandomMod_Maths24", 1, 4) < 2)
+            MySpot = Yankton[LessRandomInt("RandomMod_Maths24a", 0, (int)Yankton.size() - 1)];
         else
         {
-            MySpot = YanktonVeh[LessRandomInt("RandomLocations24b", 0, (int)YanktonVeh.size() - 1)];
+            MySpot = YanktonVeh[LessRandomInt("RandomMod_Maths24b", 0, (int)YanktonVeh.size() - 1)];
             Action = 1;
         }
         WeaponSet = 5;
@@ -1069,23 +1073,23 @@ void RandomLocation(int iSelect)
         TIME::SET_CLOCK_TIME(12, 0, 0);
         WeatherReport(1);
 
-        SubSet = LessRandomInt("RandomLocations25", 1, 6);
+        SubSet = LessRandomInt("RandomMod_Maths25", 1, 6);
         if (SubSet == 1)
         {
             MySpot = Mod_Class::Vector4(4979.349f, -5764.603f, 20.87796f, 45.00f);//A_C_Panther
         }
         else if (SubSet == 2)
         {
-            MySpot = Cayo_Beach[LessRandomInt("RandomLocations25a", 0, (int)Cayo_Beach.size() - 1)];
+            MySpot = Cayo_Beach[LessRandomInt("RandomMod_Maths25a", 0, (int)Cayo_Beach.size() - 1)];
             Action = 11;
         }       //A_F_Y_Beach_02
         else if (SubSet == 3)
         {
-            if (LessRandomInt("RandomLocations31", 1, 4) < 2)
-                MySpot = Cayo_Guard[LessRandomInt("RandomLocations25b", 0, (int)Cayo_Guard.size() - 1)];
+            if (LessRandomInt("RandomMod_Maths31", 1, 4) < 2)
+                MySpot = Cayo_Guard[LessRandomInt("RandomMod_Maths25b", 0, (int)Cayo_Guard.size() - 1)];
             else
             {
-                MySpot = Cayo_GuardVeh[LessRandomInt("RandomLocations25c", 0, (int)Cayo_GuardVeh.size() - 1)];
+                MySpot = Cayo_GuardVeh[LessRandomInt("RandomMod_Maths25c", 0, (int)Cayo_GuardVeh.size() - 1)];
                 Action = 1;
             }
             WeaponSet = 5;
@@ -1093,7 +1097,7 @@ void RandomLocation(int iSelect)
         else if (SubSet == 4)
             MySpot = Mod_Class::Vector4(4904.958f, -4941.593f, 3.378354f, 37.49379f); //Bar
         else if (SubSet == 5)
-            MySpot = Cayo_Workers[LessRandomInt("RandomLocations25d", 0, (int)Cayo_Workers.size() - 1)];//worker
+            MySpot = Cayo_Workers[LessRandomInt("RandomMod_Maths25d", 0, (int)Cayo_Workers.size() - 1)];//worker
         else if (SubSet == 6)
         {
             MySpot = Mod_Class::Vector4(4499.6f, -4523.962f, 4.412367f, 276.4212f);
@@ -1109,7 +1113,7 @@ void RandomLocation(int iSelect)
         if (!IplFail)
         {
             MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
-            EntityActions::CayoPartay();
+            Mod_Entitys::CayoPartay();
         }
     }                              //Cayo Perico
 
@@ -1136,12 +1140,12 @@ void RandomLocation(int iSelect)
                 Action = 0;
                 Deputize = false;
                 if (!Yankton_Loaded && !Cayo_Loaded)
-                    MoveEntity(PLAYER::PLAYER_PED_ID(), Animals_Boar[LessRandomInt("RandomLocations23c", 0, (int)Animals_Boar.size() - 1)]);
+                    MoveEntity(PLAYER::PLAYER_PED_ID(), Animals_Boar[LessRandomInt("RandomMod_Maths23c", 0, (int)Animals_Boar.size() - 1)]);
             }
         }
 
         if (Deputize)
-           PoliceAcadamy(Deputize);
+            PoliceAcadamy(Deputize);
 
         if (Action == 1)
         {
@@ -1175,7 +1179,6 @@ void RandomLocation(int iSelect)
                 WriteFile(NSPMLaunch, std::vector<std::string>{ std::to_string((int)Vbob)});
 
             GotClutter = true;
-
         }//DriveVeh
         else if (Action == 2)
         {
@@ -1324,7 +1327,7 @@ void RandomLocation(int iSelect)
                 VehicleSpawn(Att);
 
                 Hash ThisGp = MyHashKey("AMBIENT_GANG_BALLAS");
-                SetRelBetween_Gp(&ThisGp, &GP_Player, 0);
+                SetRelBetween_Gp(ThisGp, GP_Player, 0);
             }           //Ballas-- Davis, Vs --Families 
             else if (SubSet == 4)
             {
@@ -1368,7 +1371,7 @@ void RandomLocation(int iSelect)
                 VehicleSpawn(Att);
 
                 Hash ThisGp = MyHashKey("AMBIENT_GANG_FAMILY");
-                SetRelBetween_Gp(&ThisGp, &GP_Player, 0);
+                SetRelBetween_Gp(ThisGp, GP_Player, 0);
             }           //Families --Strawberry--Chamberlain Hills, Vs  Ballas
             else if (SubSet == 6)
             {
@@ -1417,7 +1420,7 @@ void RandomLocation(int iSelect)
                 VehicleSpawn(Att);
 
                 Hash ThisGp = MyHashKey("AMBIENT_GANG_MEXICAN");
-                SetRelBetween_Gp(&ThisGp, &GP_Player, 0);
+                SetRelBetween_Gp(ThisGp, GP_Player, 0);
             }           //Mexican --Rancho--Central Cypress Flats, Vs Salvadoran
             else if (SubSet == 8)
             {
@@ -1466,7 +1469,7 @@ void RandomLocation(int iSelect)
                 VehicleSpawn(Att);
 
                 Hash ThisGp = MyHashKey("AMBIENT_GANG_SALVA");
-                SetRelBetween_Gp(&ThisGp, &GP_Player, 0);
+                SetRelBetween_Gp(ThisGp, GP_Player, 0);
             }           //"Salvadoran --El Burro Heights--Vespucci Beach(night)--East Vinewood Drain Canal, Vs Mexican
             else if (SubSet == 10)
             {
@@ -1492,7 +1495,7 @@ void RandomLocation(int iSelect)
                 VehicleSpawn(Att);
 
                 Hash ThisGp = MyHashKey("AMBIENT_GANG_LOST");
-                SetRelBetween_Gp(&ThisGp, &GP_Player, 0);
+                SetRelBetween_Gp(ThisGp, GP_Player, 0);
             }           //Lost ... Vs Impex
             else if (SubSet == 11)
             {
@@ -1511,7 +1514,7 @@ void RandomLocation(int iSelect)
                     Mod_Class::Vector4(3.255534f, -1605.107f, 29.27947f, 64.94491f),
                     Mod_Class::Vector4(281.5654f, -1515.604f, 29.29159f, 242.0782f)
                 };           //Street Punk-- Vs Old Ladys
-                int iLocate = LessRandomInt("RandomLocations08Sub11", 0, (int)GStars.size() - 1);
+                int iLocate = LessRandomInt("RandomMod_Maths08Sub11", 0, (int)GStars.size() - 1);
 
                 MoveEntity(PLAYER::PLAYER_PED_ID(), GStars[iLocate]);
                 WAIT(1000);
@@ -1527,14 +1530,14 @@ void RandomLocation(int iSelect)
                 for (int i = 0; i < 4; i++)
                 {
                     int iGran = LessRandomInt("GranSub11", 0, (int)OldD.size() - 1);
-                    Mod_Class::ClothBank Cbank = Mod_Class::ClothBank("", OldD[iGran], -1, false, AddFace(false), false, false, Mod_Class::HairSets(0, 0, "H_FMM_0_0", "Close Shave", -1, -1), 0, 0, 0, 0, {}, {}, {}, {}, "");
-                    Ped Deary = PlayerPedGen(Locations::NearByStreet(GStars[iLocate]), &Cbank, true, false);
+                    Mod_Class::ClothBank Cbank = Mod_Class::ClothBank("", OldD[iGran], -1, false, AddFace(false), false, false, Mod_Class::HairSets(0, 0, "H_FMM_0_0", "Close Shave", -1, -1), 0, 0, 0, 0, {}, {}, {}, {}, "", "", "");
+                    Ped Deary = PlayerPedGen(Mod_Maths::NearByStreet(GStars[iLocate]), &Cbank, true, false);
                     FightPlayer(Deary, false, 0);
                     WEAPON::REMOVE_ALL_PED_WEAPONS(Deary, false);
                     GunningIt(Deary, 1);
                 }
             }           //Street Punk-- Vs Old Ladys
-            
+
             GotClutter = true;
         }       //GangStar--Fixup..
         else if (Action == 7)
@@ -1656,7 +1659,7 @@ void RandomLocation(int iSelect)
                 "prop_patio_lounger_2",
                 "prop_patio_lounger_3"
             };
-            Entity SunL = NULL; 
+            Entity SunL = NULL;
             int i = 0;
             for (; i < (int)Hashes.size(); i++)
             {
@@ -1668,21 +1671,21 @@ void RandomLocation(int iSelect)
             if (SunL != NULL)
             {
                 ENTITY::FREEZE_ENTITY_POSITION(SunL, true);
-                Mod_Class::Vector4 SunPos = Locations::GetPosV4(SunL);
-                Ped outPed = NearByPed(SunPos, false, 0.0f, 1.50f);
+                Mod_Class::Vector4 SunPos = Mod_Maths::GetPosV4(SunL);
+                Ped outPed = NearByPed(SunPos, 0.0f, 2.0f);
 
                 if (outPed != NULL)
-                    AI::TASK_REACT_AND_FLEE_PED(outPed, PLAYER::PLAYER_PED_ID());
+                    ENTITY::DELETE_ENTITY(&outPed);
 
                 if (i == 0)
                 {
-                    Vector3 VPos = Locations::FowardOf(SunL, 0.255f, false);
+                    Vector3 VPos = Mod_Maths::FowardOf(SunL, 0.255f, false);
                     SunPos.X = VPos.x;
                     SunPos.Y = VPos.y;
                 }
                 else if (i == 1)
                 {
-                    Vector3 VPos = Locations::FowardOf(SunL, 0.255f, true);
+                    Vector3 VPos = Mod_Maths::FowardOf(SunL, 0.255f, true);
                     SunPos.X = VPos.x;
                     SunPos.Y = VPos.y;
                     SunPos.Z += 0.16f;
@@ -1724,22 +1727,11 @@ void RandomStart(bool Bypass)
     LoggerLight("RandomStart");
 
     int PickPlace = -1;
-    if ((int)Avalable_Scenarios.size() == 0)
-    {
-        Avalable_Scenarios = CheckScenarios();
-        if ((int)Avalable_Scenarios.size() != 0)
-        {
-            int ListSpot = RandomInt(0, (int)Avalable_Scenarios.size() - 1);
-            PickPlace = Avalable_Scenarios[ListSpot];
-            Avalable_Scenarios.erase(Avalable_Scenarios.begin() + ListSpot);
-        }
-    }
+    std::vector<int> NumList = CheckScenarios();
+    if ((int)NumList.size() == 0)
+        Bypass = false;
     else
-    {
-        int ListSpot = RandomInt(0, (int)Avalable_Scenarios.size() - 1);
-        PickPlace = Avalable_Scenarios[ListSpot];
-        Avalable_Scenarios.erase(Avalable_Scenarios.begin() + ListSpot);
-    }
+        PickPlace = LessRandomInt("PickASenareo", NumList);
 
     LoggerLight("PickPlace == " + std::to_string(PickPlace));
     CAM::DO_SCREEN_FADE_OUT(1000);
@@ -1759,6 +1751,9 @@ void RandomStart(bool Bypass)
 
     if (Bypass)
         RandomLocation(PickPlace);
+
+    if (FileExists(GetDir() + "/Scripts/HeadCam.dll"))
+        CAM::SET_FOLLOW_PED_CAM_VIEW_MODE(2);
 }
 
 void KeyCapture()
@@ -1781,28 +1776,52 @@ void ControlerCapture()
 }
 void WeaponCapture()
 {
-    Player_Weaps.clear();
-    std::string weapon = "";
-    int ammo = 0;
-    for (int i = 0; i < (int)Weapons_List.size(); i++)
-    {
-        weapon = Weapons_List[i];
-        if (WEAPON::HAS_PED_GOT_WEAPON(PLAYER::PLAYER_PED_ID(), MyHashKey(weapon), false))
-        {
-            ammo = WEAPON::GET_AMMO_IN_PED_WEAPON(PLAYER::PLAYER_PED_ID(), MyHashKey(weapon));
 
-            std::vector<std::string> myAddons = {};
-            for (int j = 0; j < (int)WeapAdd_List.size(); j++)
+    if (FileExists(GetDir() + "/RandomStart/MyWeaps.ini"))
+        Player_Weaps = LoadSavedWeapons();
+    else
+    {
+        Player_Weaps.clear();
+        std::string weapon = "";
+        int ammo = 0;
+        for (int i = 0; i < (int)Weapons_List.size(); i++)
+        {
+            weapon = Weapons_List[i];
+            if (WEAPON::HAS_PED_GOT_WEAPON(PLAYER::PLAYER_PED_ID(), MyHashKey(weapon), false))
             {
-                if (WEAPON::HAS_PED_GOT_WEAPON_COMPONENT(PLAYER::PLAYER_PED_ID(), MyHashKey(weapon), MyHashKey(WeapAdd_List[j])))
-                    myAddons.push_back(WeapAdd_List[j]);
+                ammo = WEAPON::GET_AMMO_IN_PED_WEAPON(PLAYER::PLAYER_PED_ID(), MyHashKey(weapon));
+
+                std::vector<std::string> myAddons = {};
+                for (int j = 0; j < (int)WeapAdd_List.size(); j++)
+                {
+                    if (WEAPON::HAS_PED_GOT_WEAPON_COMPONENT(PLAYER::PLAYER_PED_ID(), MyHashKey(weapon), MyHashKey(WeapAdd_List[j])))
+                        myAddons.push_back(WeapAdd_List[j]);
+                }
+                Player_Weaps.push_back(Mod_Class::WeaponSaver(weapon, myAddons, ammo));
             }
-            Player_Weaps.push_back(Mod_Class::WeaponSaver(weapon, myAddons, ammo));
         }
+        SaveMyWeaps();
     }
-    SaveMyWeaps();
 }
 
+void CanRandondomizeStart()
+{
+    std::string sLocate = "" + GetDir() + "/Scripts/NSPM/Settings/Settings.Xml";
+    bool LOY = false;
+
+    std::vector<std::string> MyColect = ReadSetFile(sLocate);
+
+    for (int i = 0; i < MyColect.size(); i++)
+    {
+        std::string line = MyColect[i];
+        if (StringContains("<StartOnYAcht>", line))
+            LOY = StringBool(line);
+    }
+
+
+    if (LOY)
+        Mod_Settings.Auto_Run = false;
+}
 void SetWeatherDate()
 {
     CanSnow = false;
@@ -1837,13 +1856,16 @@ void LoadinData()
     LoggerLight("LoadinData");
     FindSettings(&Mod_Settings);
     MainProtags = { MyHashKey(MainChar), MyHashKey(FunChar01), MyHashKey(FunChar02), MyHashKey(FunChar03), MyHashKey(FunChar04) };
-	GP_Player = GetRelationship();
-	FollowMe = PED::GET_PED_GROUP_INDEX(PLAYER::PLAYER_PED_ID());// PED::CREATE_GROUP(0);
-	Gp_Friend = AddRelationship("FrendlyNPCs");
-	GP_Attack = AddRelationship("AttackNPCs");
-	Gp_Follow = AddRelationship("FollowerNPCs");
-	GP_Mental = AddRelationship("MentalNPCs");
-	SetRelationType(true);
+    GP_Player = GetRelationship();
+    FollowMe = PED::GET_PED_GROUP_INDEX(PLAYER::PLAYER_PED_ID());// PED::CREATE_GROUP(0);
+    Gp_Friend = AddRelationship("FrendlyNPCs");
+    GP_Attack = AddRelationship("AttackNPCs");
+    Gp_Follow = AddRelationship("FollowerNPCs");
+    GP_Mental = AddRelationship("MentalNPCs");
+    SetRelationType(true);
+
+    FindAddCars();
+    FindAddPeds();
 
     int iAm = YourCharIs();
     if (iAm == 1)
@@ -1851,7 +1873,7 @@ void LoadinData()
         MainChar = "player_zero";
         FunChar01 = "player_two";
         FunChar02 = "player_one";
-        Mod_Class::ClothBank MyNewBank = Mod_Class::ClothBank("Michael", "player_zero", MyHashKey("player_zero"), false, FreeFaces(PLAYER::PLAYER_PED_ID(), false), true, false, PickAStyle(true), 0, 0, 0, 0, AddOverLay(true, false), {}, { GetYourTogs(PLAYER::PLAYER_PED_ID()) }, {}, "");
+        Mod_Class::ClothBank MyNewBank = Mod_Class::ClothBank("Michael", "player_zero", MyHashKey("player_zero"), false, FreeFaces(PLAYER::PLAYER_PED_ID(), false), true, false, PickAStyle(true), 0, 0, 0, 0, AddOverLay(true, false), {}, { GetYourTogs(PLAYER::PLAYER_PED_ID()) }, {}, "", "", "");
         SavedPeds.push_back(MyNewBank);
 
     }//Michal
@@ -1860,7 +1882,7 @@ void LoadinData()
         MainChar = "player_two";
         FunChar01 = "player_one";
         FunChar02 = "player_zero";
-        Mod_Class::ClothBank MyNewBank = Mod_Class::ClothBank("Trevor", "player_two", MyHashKey("player_two"), false, FreeFaces(PLAYER::PLAYER_PED_ID(), false), true, false, PickAStyle(true), 0, 0, 0, 0, AddOverLay(true, false), {}, { GetYourTogs(PLAYER::PLAYER_PED_ID()) }, {}, "");
+        Mod_Class::ClothBank MyNewBank = Mod_Class::ClothBank("Trevor", "player_two", MyHashKey("player_two"), false, FreeFaces(PLAYER::PLAYER_PED_ID(), false), true, false, PickAStyle(true), 0, 0, 0, 0, AddOverLay(true, false), {}, { GetYourTogs(PLAYER::PLAYER_PED_ID()) }, {}, "", "", "");
         SavedPeds.push_back(MyNewBank);
     }//Trevor
     else
@@ -1868,42 +1890,82 @@ void LoadinData()
         MainChar = "player_one";
         FunChar01 = "player_two";
         FunChar02 = "player_zero";
-        Mod_Class::ClothBank MyNewBank = Mod_Class::ClothBank("Franklin", "player_one", MyHashKey("player_one"), false, FreeFaces(PLAYER::PLAYER_PED_ID(), false), true, false, PickAStyle(true), 0, 0, 0, 0, AddOverLay(true, false), {}, { GetYourTogs(PLAYER::PLAYER_PED_ID()) }, {}, "");
+        Mod_Class::ClothBank MyNewBank = Mod_Class::ClothBank("Franklin", "player_one", MyHashKey("player_one"), false, FreeFaces(PLAYER::PLAYER_PED_ID(), false), true, false, PickAStyle(true), 0, 0, 0, 0, AddOverLay(true, false), {}, { GetYourTogs(PLAYER::PLAYER_PED_ID()) }, {}, "", "", "");
         SavedPeds.push_back(MyNewBank);
     }//Frank
 
-	LoadSavedPeds();
+    LoadSavedPeds();
 
-	Disable_RL = CanRandondomizeStart();
+    CanRandondomizeStart();
     NSPM_Include = FileExists(GetDir() + "/Scripts/NSPM/Settings/NSPMach.NSPM");
     Ahhhh = GetDir() + "/RandomStart/heavenly_choir.wav";
     std::string BannerLoc = GetDir() + "/RandomStart/RandomStartBanner@256x64.png";
     MyBannerPng = createTexture(BannerLoc.c_str());
-	BottomLeft("" + MultC[LessRandomInt("LoadinData01", 0, 5)] + "Random Start " + MultC[LessRandomInt("LoadinData01", 0, 5)] + "1.21" + MultC[LessRandomInt("LoadinData01", 0, 5)] + " by" + MultC[LessRandomInt("LoadinData01", 0, 5)] + " Adopcalipt " + MultC[LessRandomInt("LoadinData01", 0, 5)] + "Loaded" + MultC[LessRandomInt("LoadinData01", 0, 5)] + ".");
-    
+    BottomLeft("" + MultC[LessRandomInt("LoadinData01", 0, 5)] + "Random Start " + MultC[LessRandomInt("LoadinData01", 0, 5)] + Mod_Vesion + MultC[LessRandomInt("LoadinData01", 0, 5)] + " by" + MultC[LessRandomInt("LoadinData01", 0, 5)] + " Adopcalipt " + MultC[LessRandomInt("LoadinData01", 0, 5)] + "Loaded" + MultC[LessRandomInt("LoadinData01", 0, 5)] + ".");
+
     if (FileExists(GetDir() + "/PlayerZero++.asi"))
         GotPlayZero = true;
 
     LoadLang();
-
-    if (First_Load)
-        WeaponCapture();
-
+    WeaponCapture();
     SetWeatherDate();
 
     if (Mod_Settings.Auto_Run)
         RandomStart(false);
 }
-void UpdateSavedClothBanks()
-{
-    for (int i = 1; i < (int)SavedPeds.size(); i++)
-        SaveClothBank(&SavedPeds[i]);
-}
 
 bool MenuOpen = false;
+int Menu_YourPed = 0;
 int Menu_IndexI = -1;
 int Menu_IndexII = -1;
 int Menu_IndexIII = -1;
+Mod_Class::ClothBank MyNewBank = Mod_Class::ClothBank("", "", 0, false, FreeFaces(0, false), false, false, PickAStyle(false), 0, 0, 0, 0, AddOverLay(false, false), {}, {}, {}, "", "", "");
+
+void PedBanking()
+{
+    Menu_YourPed = -1;
+    Hash pedHash = ENTITY::GET_ENTITY_MODEL(PLAYER::PLAYER_PED_ID());
+
+    bool freeMode = false;
+    if (pedHash == MainProtags[3] || pedHash == MainProtags[4])
+        freeMode = true;
+    bool male = PED::IS_PED_MALE(PLAYER::PLAYER_PED_ID());
+
+    bool animal_Farm = false;
+    if (PED::GET_PED_TYPE(PLAYER::PLAYER_PED_ID()) == 28)
+        animal_Farm = true;
+
+    MyNewBank = Mod_Class::ClothBank("Current", "", pedHash, freeMode, FreeFaces(PLAYER::PLAYER_PED_ID(), freeMode), male, animal_Farm, PickAStyle(male), 0, 0, 0, 0, AddOverLay(male, freeMode), {}, { GetYourTogs(PLAYER::PLAYER_PED_ID()) }, {}, "", "", "");
+
+    for (int i = 0; i < (int)SavedPeds.size(); i++)
+    {
+        if (MyNewBank.ModelHash == SavedPeds[i].ModelHash)
+        {
+            if (MyNewBank.FreeMode && SavedPeds[i].FreeMode)
+            {
+                if (MyNewBank.MyFaces.ShapeFirstID == SavedPeds[i].MyFaces.ShapeFirstID && MyNewBank.MyFaces.ShapeSecondID == SavedPeds[i].MyFaces.ShapeSecondID && MyNewBank.MyFaces.ShapeThirdID == SavedPeds[i].MyFaces.ShapeThirdID)
+                {
+                    if (MyNewBank.Cothing[0].ClothA[6] == SavedPeds[i].Cothing[SavedPeds[i].Cloth_Pick].ClothA[6] && MyNewBank.Cothing[0].ClothA[3] == SavedPeds[i].Cothing[SavedPeds[i].Cloth_Pick].ClothA[3])
+                    {
+                        if (MyNewBank.Cothing[0].ClothA[2] == SavedPeds[i].Cothing[SavedPeds[i].Cloth_Pick].ClothA[2] || MyNewBank.Cothing[0].ClothA[2] == SavedPeds[i].MyHair.Comp)
+                        {
+                            Menu_YourPed = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (!MyNewBank.FreeMode && !SavedPeds[i].FreeMode)
+            {
+                if (MyNewBank.Cothing[0].ClothA[0] == SavedPeds[i].Cothing[SavedPeds[i].Cloth_Pick].ClothA[0])
+                {
+                    Menu_YourPed = i;
+                    break;
+                }
+            }
+        }
+    }
+}
 
 const std::vector<std::string> VoicesMale = {
                 "Default",
@@ -2872,7 +2934,7 @@ const std::vector<std::string> VoicesFemale = {
             "S_F_Y_SHOP_MID_WHITE_MINI_01" //77B47F14", //2008317716", //2008317716
 };
 
-const std::vector<std::string> PedComposList= { RSLangMenu[127], RSLangMenu[128], RSLangMenu[129], RSLangMenu[130], RSLangMenu[131], RSLangMenu[132], RSLangMenu[133], RSLangMenu[134], RSLangMenu[135], RSLangMenu[136], RSLangMenu[137], RSLangMenu[138] };
+const std::vector<std::string> PedComposList = { RSLangMenu[127], RSLangMenu[128], RSLangMenu[129], RSLangMenu[130], RSLangMenu[131], RSLangMenu[132], RSLangMenu[133], RSLangMenu[134], RSLangMenu[135], RSLangMenu[136], RSLangMenu[137], RSLangMenu[138] };
 const std::vector<std::string> PedPropsList = { RSLangMenu[139], RSLangMenu[140], RSLangMenu[141], RSLangMenu[142] };
 const std::vector<std::string> PedTatsProList = { RSLangMenu[143], RSLangMenu[144], RSLangMenu[145], RSLangMenu[146], RSLangMenu[147], RSLangMenu[148] };
 const std::vector<std::string> PedTatsFreeList = { RSLangMenu[149],RSLangMenu[150],RSLangMenu[151],RSLangMenu[144], RSLangMenu[145], RSLangMenu[146], RSLangMenu[147], RSLangMenu[148] };
@@ -2881,318 +2943,338 @@ const std::vector<std::string> PedOversList = { RSLangMenu[172],RSLangMenu[173],
 
 void PeditorMenu_Parenting(Mod_Class::ClothBank* Outfit, int iScale, float screenHeightScaleFactor)
 {
-    LoggerLight("PeditorMenu_Parenting");
-    MenuOpen = true;
-    Ped Peddy = PLAYER::PLAYER_PED_ID();
-    int ShapeMix = (int)(Outfit->MyFaces.ShapeMix * 100);
-    int SkinMix = (int)(Outfit->MyFaces.SkinMix * 100);
-    int ThirdMix = (int)(Outfit->MyFaces.ThirdMix * 100);
-
-    std::vector<Mod_Class::MeunFields> PedCompOut = {
-
-        Mod_Class::MeunFields(RSLangMenu[122], "", false, true, 0, 45, Outfit->MyFaces.ShapeFirstID),
-        Mod_Class::MeunFields(RSLangMenu[123], "", false, true, 0, 45, Outfit->MyFaces.ShapeSecondID),
-        Mod_Class::MeunFields(RSLangMenu[124], "", false, true, 0, 100, ShapeMix),
-        Mod_Class::MeunFields(RSLangMenu[125], "", false, true, 0, 100, SkinMix),
-        Mod_Class::MeunFields(RSLangMenu[126], "", false, true, 0, 100, ThirdMix)
-    };
-
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 5, false, PedCompOut);
-    myMenu.waitTime = InGameTime() + 150;
-
-    while (true)
+    if (Outfit != nullptr)
     {
-        if (Close_Menu)
-            break;
+        LoggerLight("PeditorMenu_Parenting");
+        MenuOpen = true;
+        Ped Peddy = PLAYER::PLAYER_PED_ID();
+        int ShapeMix = (int)(Outfit->MyFaces.ShapeMix * 100.0f);
+        int SkinMix = (int)(Outfit->MyFaces.SkinMix * 100.0f);
+        int ThirdMix = (int)(Outfit->MyFaces.ThirdMix * 100.0f);
 
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
+        std::vector<Mod_Class::MeunFields> PedCompOut = {
 
-        if (myMenu._Exit)
+            Mod_Class::MeunFields(RSLangMenu[122], "", false, true, 0, 45, Outfit->MyFaces.ShapeFirstID),
+            Mod_Class::MeunFields(RSLangMenu[123], "", false, true, 0, 45, Outfit->MyFaces.ShapeSecondID),
+            Mod_Class::MeunFields(RSLangMenu[124], "", false, true, 0, 100, ShapeMix),
+            Mod_Class::MeunFields(RSLangMenu[125], "", false, true, 0, 100, SkinMix),
+            Mod_Class::MeunFields(RSLangMenu[126], "", false, true, 0, 100, ThirdMix)
+        };
+
+
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 5, false, PedCompOut);
+        myMenu.waitTime = InGameTime() + 150;
+
+        while (true)
         {
-            Menu_Index = 1;
-            break;
-        }
-        else if (myMenu._Activate)
-        {
-            myMenu.Menu_Form[myMenu.Index].Current = 0;
+            if (Close_Menu)
+                break;
 
-            if (myMenu.Index == 0)
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
             {
-                Outfit->MyFaces.ShapeFirstID = 0;
-                Outfit->MyFaces.ShapeThirdID = 0;
-                Outfit->MyFaces.SkinFirstID = 0;
-                Outfit->MyFaces.SkinThirdID = 0;
+                Menu_Index = 1;
+                break;
             }
-            else if (myMenu.Index == 1)
+            else if (myMenu._Activate)
             {
-                Outfit->MyFaces.ShapeSecondID = 0;
-                Outfit->MyFaces.SkinSecondID = 0;
-            }
-            else if (myMenu.Index == 2)
-                Outfit->MyFaces.ShapeMix = 0.0f;
-            else if (myMenu.Index == 3)
-                Outfit->MyFaces.SkinMix = 0.0f;
-            else if (myMenu.Index == 4)
-                Outfit->MyFaces.ThirdMix = 0.0f;
+                myMenu.Menu_Form[myMenu.Index].Current = 0;
 
-            PED::SET_PED_HEAD_BLEND_DATA(Peddy, Outfit->MyFaces.ShapeFirstID, Outfit->MyFaces.ShapeSecondID, Outfit->MyFaces.ShapeThirdID, Outfit->MyFaces.SkinFirstID, Outfit->MyFaces.SkinSecondID, Outfit->MyFaces.SkinThirdID, Outfit->MyFaces.ShapeMix, Outfit->MyFaces.SkinMix, Outfit->MyFaces.ThirdMix, 0);
-        }
-        else if (myMenu._Left || myMenu._Right)
-        {
-            if (myMenu.Index == 0)
-            {
-                Outfit->MyFaces.ShapeFirstID = myMenu.Menu_Form[myMenu.Index].Current;
-                Outfit->MyFaces.ShapeThirdID = myMenu.Menu_Form[myMenu.Index].Current;
-                Outfit->MyFaces.SkinFirstID = myMenu.Menu_Form[myMenu.Index].Current;
-                Outfit->MyFaces.SkinThirdID = myMenu.Menu_Form[myMenu.Index].Current;
-            }
-            else if (myMenu.Index == 1)
-            {
-                Outfit->MyFaces.ShapeSecondID = myMenu.Menu_Form[myMenu.Index].Current;
-                Outfit->MyFaces.SkinSecondID = myMenu.Menu_Form[myMenu.Index].Current;
-            }
-            else
-            {
-                float fEat = myMenu.Menu_Form[myMenu.Index].Current;
-
-                if (fEat != 0)
-                    fEat /= 100;
-
-
+                if (myMenu.Index == 0)
+                {
+                    Outfit->MyFaces.ShapeFirstID = 0;
+                    Outfit->MyFaces.ShapeThirdID = 0;
+                    Outfit->MyFaces.SkinFirstID = 0;
+                    Outfit->MyFaces.SkinThirdID = 0;
+                }
+                else if (myMenu.Index == 1)
+                {
+                    Outfit->MyFaces.ShapeSecondID = 0;
+                    Outfit->MyFaces.SkinSecondID = 0;
+                }
                 else if (myMenu.Index == 2)
-                    Outfit->MyFaces.ShapeMix = fEat;
+                    Outfit->MyFaces.ShapeMix = 0.0f;
                 else if (myMenu.Index == 3)
-                    Outfit->MyFaces.SkinMix = fEat;
+                    Outfit->MyFaces.SkinMix = 0.0f;
                 else if (myMenu.Index == 4)
-                    Outfit->MyFaces.ThirdMix = fEat;
+                    Outfit->MyFaces.ThirdMix = 0.0f;
 
+                PED::SET_PED_HEAD_BLEND_DATA(Peddy, Outfit->MyFaces.ShapeFirstID, Outfit->MyFaces.ShapeSecondID, Outfit->MyFaces.ShapeThirdID, Outfit->MyFaces.SkinFirstID, Outfit->MyFaces.SkinSecondID, Outfit->MyFaces.SkinThirdID, Outfit->MyFaces.ShapeMix, Outfit->MyFaces.SkinMix, Outfit->MyFaces.ThirdMix, 0);
             }
+            else if (myMenu._Left || myMenu._Right)
+            {
+                if (myMenu.Index == 0)
+                {
+                    Outfit->MyFaces.ShapeFirstID = myMenu.Menu_Form[myMenu.Index].Current;
+                    Outfit->MyFaces.ShapeThirdID = myMenu.Menu_Form[myMenu.Index].Current;
+                    Outfit->MyFaces.SkinFirstID = myMenu.Menu_Form[myMenu.Index].Current;
+                    Outfit->MyFaces.SkinThirdID = myMenu.Menu_Form[myMenu.Index].Current;
+                }
+                else if (myMenu.Index == 1)
+                {
+                    Outfit->MyFaces.ShapeSecondID = myMenu.Menu_Form[myMenu.Index].Current;
+                    Outfit->MyFaces.SkinSecondID = myMenu.Menu_Form[myMenu.Index].Current;
+                }
+                else
+                {
+                    float fEat = (float)myMenu.Menu_Form[myMenu.Index].Current;
 
-            PED::SET_PED_HEAD_BLEND_DATA(Peddy, Outfit->MyFaces.ShapeFirstID, Outfit->MyFaces.ShapeSecondID, Outfit->MyFaces.ShapeThirdID, Outfit->MyFaces.SkinFirstID, Outfit->MyFaces.SkinSecondID, Outfit->MyFaces.SkinThirdID, Outfit->MyFaces.ShapeMix, Outfit->MyFaces.SkinMix, Outfit->MyFaces.ThirdMix, 0);
+                    if (fEat != 0.0f)
+                        fEat /= 100.0f;
+
+
+                    else if (myMenu.Index == 2)
+                        Outfit->MyFaces.ShapeMix = fEat;
+                    else if (myMenu.Index == 3)
+                        Outfit->MyFaces.SkinMix = fEat;
+                    else if (myMenu.Index == 4)
+                        Outfit->MyFaces.ThirdMix = fEat;
+
+                }
+
+                PED::SET_PED_HEAD_BLEND_DATA(Peddy, Outfit->MyFaces.ShapeFirstID, Outfit->MyFaces.ShapeSecondID, Outfit->MyFaces.ShapeThirdID, Outfit->MyFaces.SkinFirstID, Outfit->MyFaces.SkinSecondID, Outfit->MyFaces.SkinThirdID, Outfit->MyFaces.ShapeMix, Outfit->MyFaces.SkinMix, Outfit->MyFaces.ThirdMix, 0);
+            }
         }
+        MenuOpen = false;
     }
-    MenuOpen = false;
+    else
+        Menu_Index = 0;
 }
 void PeditorMenu_FaceShape(Mod_Class::ClothBank* Outfit, int iScale, float screenHeightScaleFactor)
 {
-    LoggerLight("PedCompMenu");
-    MenuOpen = true;
-    int iTotal = 0;
-    int iColour = -1;
-
-    if (Outfit->FaceScale.size() == 0)
+    if (Outfit != nullptr)
     {
+        LoggerLight("PedCompMenu");
+        MenuOpen = true;
+        int iTotal = 0;
+        int iColour = -1;
+
+        if (Outfit->FaceScale.size() == 0)
+        {
+            for (int i = 0; i < PedFaceFeat.size(); i++)
+                Outfit->FaceScale.push_back(0.0f);
+        }
+
+        Ped Peddy = PLAYER::PLAYER_PED_ID();
+        std::vector<Mod_Class::MeunFields> PedCompOut = {};
+
         for (int i = 0; i < PedFaceFeat.size(); i++)
-            Outfit->FaceScale.push_back(0.0f);
+            PedCompOut.push_back(Mod_Class::MeunFields(PedFaceFeat[i], "", false, true, -100, 100, 0));
+
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 7, true, PedCompOut);
+        myMenu.waitTime = InGameTime() + 150;
+
+        while (true)
+        {
+            if (Close_Menu)
+                break;
+
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
+            {
+                Menu_Index = 1;
+                break;
+            }
+            else if (myMenu._Activate)
+            {
+                myMenu.Menu_Form[myMenu.Index].Current = 0;
+
+                Outfit->FaceScale[myMenu.Index] = 0.0f;
+                PED::_SET_PED_FACE_FEATURE(PLAYER::PLAYER_PED_ID(), myMenu.Index, Outfit->FaceScale[myMenu.Index]);
+            }
+            else if (myMenu._Left || myMenu._Right)
+            {
+                float fEat = (float)myMenu.Menu_Form[myMenu.Index].Current;
+                if (fEat != 0.0f)
+                    fEat /= 100.0f;
+                Outfit->FaceScale[myMenu.Index] = fEat;
+                PED::_SET_PED_FACE_FEATURE(PLAYER::PLAYER_PED_ID(), myMenu.Index, Outfit->FaceScale[myMenu.Index]);
+            }
+        }
+        MenuOpen = false;
     }
-
-    Ped Peddy = PLAYER::PLAYER_PED_ID();
-    std::vector<Mod_Class::MeunFields> PedCompOut = {};
-
-    for (int i = 0; i < PedFaceFeat.size(); i++)
-        PedCompOut.push_back(Mod_Class::MeunFields(PedFaceFeat[i], "", false, true, -100, 100, 0));
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 7, true, PedCompOut);
-    myMenu.waitTime = InGameTime() + 150;
-
-    while (true)
-    {
-        if (Close_Menu)
-            break;
-
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
-
-        if (myMenu._Exit)
-        {
-            Menu_Index = 1;
-            break;
-        }
-        else if (myMenu._Activate)
-        {
-            myMenu.Menu_Form[myMenu.Index].Current = 0;
-
-            Outfit->FaceScale[myMenu.Index] = 0.0f;
-            PED::_SET_PED_FACE_FEATURE(PLAYER::PLAYER_PED_ID(), myMenu.Index, Outfit->FaceScale[myMenu.Index]);
-        }
-        else if (myMenu._Left || myMenu._Right)
-        {
-            float fEat = myMenu.Menu_Form[myMenu.Index].Current;
-            if (fEat != 0)
-                fEat /= 100;
-            Outfit->FaceScale[myMenu.Index] = fEat;
-            PED::_SET_PED_FACE_FEATURE(PLAYER::PLAYER_PED_ID(), myMenu.Index, Outfit->FaceScale[myMenu.Index]);
-        }
-    }
-    MenuOpen = false;
+    else
+        Menu_Index = 0;
 }
 void PeditorMenu_FaceFeatsList(int iComp, int iTotal, int iColour, Mod_Class::ClothBank* Outfit, int iScale, float screenHeightScaleFactor)
 {
-    LoggerLight("PeditorMenu_FaceFeatsList");
-    MenuOpen = true;
-
-    int iOPC = (int)(Outfit->MyOverlay[iComp].OverOpc * 100);
-    int iNums = 2;
-    std::vector<Mod_Class::MeunFields> PedCompOut = {
-        Mod_Class::MeunFields(RSLangMenu[117], PedOversList[iComp], false, true, -1, iTotal, Outfit->MyOverlay[iComp].Overlay),
-        Mod_Class::MeunFields(RSLangMenu[120], PedOversList[iComp], false, true, 0, 100, iOPC),
-    };
-    if (iColour != -1)
+    if (Outfit != nullptr)
     {
-        PedCompOut.push_back(Mod_Class::MeunFields(RSLangMenu[121], PedOversList[iComp], false, true, 0, 62, Outfit->MyOverlay[iComp].OverCol));
-        iNums++;
+        LoggerLight("PeditorMenu_FaceFeatsList");
+        MenuOpen = true;
+
+        int iOPC = (int)(Outfit->MyOverlay[iComp].OverOpc * 100);
+        int iNums = 2;
+        std::vector<Mod_Class::MeunFields> PedCompOut = {
+            Mod_Class::MeunFields(RSLangMenu[117], PedOversList[iComp], false, true, -1, iTotal, Outfit->MyOverlay[iComp].Overlay),
+            Mod_Class::MeunFields(RSLangMenu[120], PedOversList[iComp], false, true, 0, 100, iOPC),
+        };
+        if (iColour != -1)
+        {
+            PedCompOut.push_back(Mod_Class::MeunFields(RSLangMenu[121], PedOversList[iComp], false, true, 0, 62, Outfit->MyOverlay[iComp].OverCol));
+            iNums++;
+        }
+
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, iNums, false, PedCompOut);
+        myMenu.waitTime = InGameTime() + 150;
+
+        while (true)
+        {
+            if (Close_Menu)
+                break;
+
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
+            {
+                Menu_Index = 4;
+                break;
+            }
+            else if (myMenu._Activate)
+            {
+                myMenu.Menu_Form[myMenu.Index].Current = 0;
+
+                if (iComp == 1)
+                    iColour = 1;//Facial Hair
+                else if (iComp == 2)
+                    iColour = 1;//Eyebrows
+                else if (iComp == 5)
+                    iColour = 2;//Blush
+                else if (iComp == 8)
+                    iColour = 2;//Lipstick
+                else if (iComp == 10)
+                    iColour = 1;//Chest Hair
+
+                if (myMenu.Index == 0)
+                {
+                    int iChange = myMenu.Menu_Form[myMenu.Index].Current;
+                    if (iChange == -1)
+                        iChange = 255;
+                    Outfit->MyOverlay[iComp].Overlay = iChange;
+                }
+                else if (myMenu.Index == 1)
+                {
+                    float fVar = (float)myMenu.Menu_Form[myMenu.Index].Current;
+                    if (fVar != 0.0f)
+                        fVar /= 100.0f;
+                    Outfit->MyOverlay[iComp].OverOpc = fVar;
+                }
+                else if (myMenu.Index == 2)
+                    Outfit->MyOverlay[iComp].OverCol = myMenu.Menu_Form[myMenu.Index].Current;
+
+                Ped Pedx = PLAYER::PLAYER_PED_ID();
+
+                PED::SET_PED_HEAD_OVERLAY(Pedx, iComp, Outfit->MyOverlay[iComp].Overlay, Outfit->MyOverlay[iComp].OverOpc);
+
+                if (iColour != -1)
+                    PED::_SET_PED_HEAD_OVERLAY_COLOR(Pedx, iComp, iColour, Outfit->MyOverlay[iComp].OverCol, 0);
+            }
+            else if (myMenu._Left || myMenu._Right)
+            {
+                if (iComp == 1)
+                    iColour = 1;//Facial Hair
+                else if (iComp == 2)
+                    iColour = 1;//Eyebrows
+                else if (iComp == 5)
+                    iColour = 2;//Blush
+                else if (iComp == 8)
+                    iColour = 2;//Lipstick
+                else if (iComp == 10)
+                    iColour = 1;//Chest Hair
+
+                if (myMenu.Index == 0)
+                {
+                    int iChange = myMenu.Menu_Form[myMenu.Index].Current;
+                    if (iChange == -1)
+                        iChange = 255;
+                    Outfit->MyOverlay[iComp].Overlay = iChange;
+                }
+                else if (myMenu.Index == 1)
+                {
+                    float fVar = (float)myMenu.Menu_Form[myMenu.Index].Current;
+                    if (fVar > 0.0f)
+                        fVar /= 100.0f;
+                    Outfit->MyOverlay[iComp].OverOpc = fVar;
+                }
+                else if (myMenu.Index == 2)
+                    Outfit->MyOverlay[iComp].OverCol = myMenu.Menu_Form[myMenu.Index].Current;
+
+                Ped Pedx = PLAYER::PLAYER_PED_ID();
+
+                PED::SET_PED_HEAD_OVERLAY(Pedx, iComp, Outfit->MyOverlay[iComp].Overlay, Outfit->MyOverlay[iComp].OverOpc);
+
+                if (iColour != -1)
+                    PED::_SET_PED_HEAD_OVERLAY_COLOR(Pedx, iComp, iColour, Outfit->MyOverlay[iComp].OverCol, 0);
+            }
+        }
+        MenuOpen = false;
     }
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, iNums, false, PedCompOut);
-    myMenu.waitTime = InGameTime() + 150;
-
-    while (true)
-    {
-        if (Close_Menu)
-            break;
-
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
-
-        if (myMenu._Exit)
-        {
-            Menu_Index = 4;
-            break;
-        }
-        else if (myMenu._Activate)
-        {
-            myMenu.Menu_Form[myMenu.Index].Current = 0;
-
-            if (iComp == 1)
-                iColour = 1;//Facial Hair
-            else if (iComp == 2)
-                iColour = 1;//Eyebrows
-            else if (iComp == 5)
-                iColour = 2;//Blush
-            else if (iComp == 8)
-                iColour = 2;//Lipstick
-            else if (iComp == 10)
-                iColour = 1;//Chest Hair
-
-            if (myMenu.Index == 0)
-            {
-                int iChange = myMenu.Menu_Form[myMenu.Index].Current;
-                if (iChange == -1)
-                    iChange = 255;
-                Outfit->MyOverlay[iComp].Overlay = iChange;
-            }
-            else if (myMenu.Index == 1)
-            {
-                float fVar = myMenu.Menu_Form[myMenu.Index].Current;
-                if (fVar != 0)
-                    fVar /= 100;
-                Outfit->MyOverlay[iComp].OverOpc = fVar;
-            }
-            else if (myMenu.Index == 2)
-                Outfit->MyOverlay[iComp].OverCol = myMenu.Menu_Form[myMenu.Index].Current;
-
-            Ped Pedx = PLAYER::PLAYER_PED_ID();
-
-            PED::SET_PED_HEAD_OVERLAY(Pedx, iComp, Outfit->MyOverlay[iComp].Overlay, Outfit->MyOverlay[iComp].OverOpc);
-
-            if (iColour != -1)
-                PED::_SET_PED_HEAD_OVERLAY_COLOR(Pedx, iComp, iColour, Outfit->MyOverlay[iComp].OverCol, 0);
-        }
-        else if (myMenu._Left || myMenu._Right)
-        {
-            if (iComp == 1)
-                iColour = 1;//Facial Hair
-            else if (iComp == 2)
-                iColour = 1;//Eyebrows
-            else if (iComp == 5)
-                iColour = 2;//Blush
-            else if (iComp == 8)
-                iColour = 2;//Lipstick
-            else if (iComp == 10)
-                iColour = 1;//Chest Hair
-
-            if (myMenu.Index == 0)
-            {
-                int iChange = myMenu.Menu_Form[myMenu.Index].Current;
-                if (iChange == -1)
-                    iChange = 255;
-                Outfit->MyOverlay[iComp].Overlay = iChange;
-            }
-            else if (myMenu.Index == 1)
-            {
-                float fVar = myMenu.Menu_Form[myMenu.Index].Current;
-                if (fVar > 0)
-                    fVar /= 100;
-                Outfit->MyOverlay[iComp].OverOpc = fVar;
-            }
-            else if (myMenu.Index == 2)
-                Outfit->MyOverlay[iComp].OverCol = myMenu.Menu_Form[myMenu.Index].Current;
-
-            Ped Pedx = PLAYER::PLAYER_PED_ID();
-
-            PED::SET_PED_HEAD_OVERLAY(Pedx, iComp, Outfit->MyOverlay[iComp].Overlay, Outfit->MyOverlay[iComp].OverOpc);
-
-            if (iColour != -1)
-                PED::_SET_PED_HEAD_OVERLAY_COLOR(Pedx, iComp, iColour, Outfit->MyOverlay[iComp].OverCol, 0);
-        }
-    }
-    MenuOpen = false;
+    else
+        Menu_Index = 0;
 }
 void PeditorMenu_FaceFeats(Mod_Class::ClothBank* Outfit, int iScale, float screenHeightScaleFactor)
 {
-    LoggerLight("PeditorMenu_FaceFeats");
-    MenuOpen = true;
-    int iTotal = 0;
-    int iColour = -1;
-
-    Ped Peddy = PLAYER::PLAYER_PED_ID();
-    std::vector<Mod_Class::MeunFields> PedCompOut = {};
-
-    for (int i = 0; i < (int)PedOversList.size(); i++)
-        PedCompOut.push_back(Mod_Class::MeunFields(PedOversList[i], "Select " + PedOversList[i], false, false, -1, GetPedOverlayValues(i), GetPedOverlay(Peddy, i)));
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 7, true, PedCompOut);
-    myMenu.waitTime = InGameTime() + 150;
-
-    while (true)
+    if (Outfit != nullptr)
     {
-        if (Close_Menu)
-            break;
+        LoggerLight("PeditorMenu_FaceFeats");
+        MenuOpen = true;
+        int iTotal = 0;
+        int iColour = -1;
 
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
+        Ped Peddy = PLAYER::PLAYER_PED_ID();
+        std::vector<Mod_Class::MeunFields> PedCompOut = {};
 
-        if (myMenu._Exit)
+        for (int i = 0; i < (int)PedOversList.size(); i++)
+            PedCompOut.push_back(Mod_Class::MeunFields(PedOversList[i], "Select " + PedOversList[i], false, false, -1, GetPedOverlayValues(i), GetPedOverlay(Peddy, i)));
+
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 7, true, PedCompOut);
+        myMenu.waitTime = InGameTime() + 150;
+
+        while (true)
         {
-            Menu_Index = 1;
-            break;
+            if (Close_Menu)
+                break;
+
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
+            {
+                Menu_Index = 1;
+                break;
+            }
+            else if (myMenu._Activate)
+            {
+                if (myMenu.Index == 1 || myMenu.Index == 2 || myMenu.Index == 10)
+                    iColour = 1;
+                else if (myMenu.Index == 5 || myMenu.Index == 8)
+                    iColour = 2;
+
+                iTotal = myMenu.Menu_Form[myMenu.Index].Max;
+
+
+                Menu_Index = 12;
+                Menu_IndexI = myMenu.Index;
+                Menu_IndexII = iTotal;
+                Menu_IndexIII = iColour;
+
+                break;
+            }
         }
-        else if (myMenu._Activate)
-        {
-            if (myMenu.Index == 1 || myMenu.Index == 2 || myMenu.Index == 10)
-                iColour = 1;
-            else if (myMenu.Index == 5 || myMenu.Index == 8)
-                iColour = 2;
 
-            iTotal = myMenu.Menu_Form[myMenu.Index].Max;
-
-
-            Menu_Index = 12;
-            Menu_IndexI = myMenu.Index;
-            Menu_IndexII = iTotal;
-            Menu_IndexIII = iColour;
-
-            break;
-        }
+        MenuOpen = false;
     }
-
-    MenuOpen = false;
+    else
+        Menu_Index = 0;
 }
 
 std::vector<Mod_Class::Tattoo> TattoosList(int iPed, int iZone)
@@ -3441,131 +3523,140 @@ std::vector<Mod_Class::Tattoo> TattoosList(int iPed, int iZone)
 }
 void PeditorMenu_TattooParList(Mod_Class::ClothBank* Outfit, int Main_Char, int iSelect, int iScale, float screenHeightScaleFactor)
 {
-    LoggerLight("TattooParListMenu");
-    MenuOpen = true;
-    std::vector<Mod_Class::MeunFields> PedCompOut = {};
-
-    std::vector<Mod_Class::Tattoo> myTattoosList = TattoosList(Main_Char, iSelect);;
-
-    for (int i = 0; i < (int)myTattoosList.size(); i++)
+    if (Outfit != nullptr)
     {
-        int iGotit = 0;
-        for (int j = 0; j < (int)Outfit->MyTattoo.size(); j++)
+        LoggerLight("TattooParListMenu");
+        MenuOpen = true;
+        std::vector<Mod_Class::MeunFields> PedCompOut = {};
+
+        std::vector<Mod_Class::Tattoo> myTattoosList = TattoosList(Main_Char, iSelect);;
+
+        for (int i = 0; i < (int)myTattoosList.size(); i++)
         {
-            if (Outfit->MyTattoo[j].TatName == myTattoosList[i].TatName)
-                iGotit = 1;
-               
-        }
-        PedCompOut.push_back(Mod_Class::MeunFields(myTattoosList[i].Name, "", true, false, 0, 1, iGotit));
-
-    }
-
-    bool MoreThan = true;
-    int iCountU = 7;
-    if ((int)myTattoosList.size() < 7)
-    {
-        MoreThan = false;
-        iCountU = (int)myTattoosList.size();
-    }
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, iCountU, MoreThan, PedCompOut);
-    myMenu.waitTime = InGameTime() + 150;
-
-    int iPosChange = 0;
-
-    while (true)
-    {
-        if (Close_Menu)
-            break;
-
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
-
-        if (myMenu._Exit)
-        {
-            Menu_Index = 3;
-            break;
-        }
-        else if (myMenu._Activate || myMenu._Left || myMenu._Right)
-        {
-            bool Add = true;
-            for (int i = 0; i < (int)Outfit->MyTattoo.size(); i++)
+            int iGotit = 0;
+            for (int j = 0; j < (int)Outfit->MyTattoo.size(); j++)
             {
-                if (Outfit->MyTattoo[i].TatName == myTattoosList[myMenu.Index].TatName)
-                {
-                    Add = false;
-                    Outfit->MyTattoo.erase(Outfit->MyTattoo.begin() + i);
-                    myMenu.Menu_Form[myMenu.Index].Current = 0;
-                }
+                if (Outfit->MyTattoo[j].TatName == myTattoosList[i].TatName)
+                    iGotit = 1;
+
             }
-            if (Add)
-                Outfit->MyTattoo.push_back(myTattoosList[myMenu.Index]);
+            PedCompOut.push_back(Mod_Class::MeunFields(myTattoosList[i].Name, "", true, false, 0, 1, iGotit));
 
-            PED::CLEAR_PED_DECORATIONS(PLAYER::PLAYER_PED_ID());
-            ApplyTats(PLAYER::PLAYER_PED_ID(), Outfit);
         }
-        else if (iPosChange != myMenu.Index)
+
+        bool MoreThan = true;
+        int iCountU = 7;
+        if ((int)myTattoosList.size() < 7)
         {
-            iPosChange = myMenu.Index;
-            PED::CLEAR_PED_DECORATIONS(PLAYER::PLAYER_PED_ID());
-            PED::_APPLY_PED_OVERLAY(PLAYER::PLAYER_PED_ID(), MyHashKey(myTattoosList[myMenu.Index].BaseName), MyHashKey(myTattoosList[myMenu.Index].TatName));
+            MoreThan = false;
+            iCountU = (int)myTattoosList.size();
         }
+
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, iCountU, MoreThan, PedCompOut);
+        myMenu.waitTime = InGameTime() + 150;
+
+        int iPosChange = 0;
+
+        while (true)
+        {
+            if (Close_Menu)
+                break;
+
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
+            {
+                Menu_Index = 3;
+                break;
+            }
+            else if (myMenu._Activate || myMenu._Left || myMenu._Right)
+            {
+                bool Add = true;
+                for (int i = 0; i < (int)Outfit->MyTattoo.size(); i++)
+                {
+                    if (Outfit->MyTattoo[i].TatName == myTattoosList[myMenu.Index].TatName)
+                    {
+                        Add = false;
+                        Outfit->MyTattoo.erase(Outfit->MyTattoo.begin() + i);
+                        myMenu.Menu_Form[myMenu.Index].Current = 0;
+                    }
+                }
+                if (Add)
+                    Outfit->MyTattoo.push_back(myTattoosList[myMenu.Index]);
+
+                PED::CLEAR_PED_DECORATIONS(PLAYER::PLAYER_PED_ID());
+                ApplyTats(PLAYER::PLAYER_PED_ID(), Outfit);
+            }
+            else if (iPosChange != myMenu.Index)
+            {
+                iPosChange = myMenu.Index;
+                PED::CLEAR_PED_DECORATIONS(PLAYER::PLAYER_PED_ID());
+                PED::_APPLY_PED_OVERLAY(PLAYER::PLAYER_PED_ID(), MyHashKey(myTattoosList[myMenu.Index].BaseName), MyHashKey(myTattoosList[myMenu.Index].TatName));
+            }
+        }
+
+        PED::CLEAR_PED_DECORATIONS(PLAYER::PLAYER_PED_ID());
+        ApplyTats(PLAYER::PLAYER_PED_ID(), Outfit);
+        MenuOpen = false;
     }
-
-    PED::CLEAR_PED_DECORATIONS(PLAYER::PLAYER_PED_ID());
-    ApplyTats(PLAYER::PLAYER_PED_ID(), Outfit);
-    MenuOpen = false;
-
+    else
+        Menu_Index = 0;
 }
 void PeditorMenu_TattooPar(Mod_Class::ClothBank* Outfit, int Main_Char, int iScale, float screenHeightScaleFactor)
 {
-    LoggerLight("TattooParMenu");
-    MenuOpen = true;
-    std::vector<Mod_Class::MeunFields> PedCompOut = {};
-    bool Loopy = true;
-    int Counter = 7;
-
-    if (Main_Char == 1 || Main_Char == 2 || Main_Char == 3)
+    if (Outfit != nullptr)
     {
-        for (int i = 0; i < PedTatsProList.size(); i++)
-            PedCompOut.push_back(Mod_Class::MeunFields(PedTatsProList[i], "", false, false, 0, 1, 0));
+        LoggerLight("TattooParMenu");
+        MenuOpen = true;
+        std::vector<Mod_Class::MeunFields> PedCompOut = {};
+        bool Loopy = true;
+        int Counter = 7;
 
-        Loopy = false;
-        Counter = 6;
+        if (Main_Char == 1 || Main_Char == 2 || Main_Char == 3)
+        {
+            for (int i = 0; i < PedTatsProList.size(); i++)
+                PedCompOut.push_back(Mod_Class::MeunFields(PedTatsProList[i], "", false, false, 0, 1, 0));
+
+            Loopy = false;
+            Counter = 6;
+        }
+        else
+        {
+            for (int i = 0; i < PedTatsFreeList.size(); i++)
+                PedCompOut.push_back(Mod_Class::MeunFields(PedTatsFreeList[i], "", false, false, 0, 1, 0));
+        }
+
+
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, Counter, Loopy, PedCompOut);
+        myMenu.waitTime = InGameTime() + 150;
+
+        while (true)
+        {
+            if (Close_Menu)
+                break;
+
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
+            {
+                Menu_Index = 1;
+                break;
+            }
+            else if (myMenu._Activate)
+            {
+                Menu_Index = 11;
+                Menu_IndexI = myMenu.Index;
+                break;
+            }
+        }
+        MenuOpen = false;
     }
     else
-    {
-        for (int i = 0; i < PedTatsFreeList.size(); i++)
-            PedCompOut.push_back(Mod_Class::MeunFields(PedTatsFreeList[i], "", false, false, 0, 1, 0));
-    }
-
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, Counter, Loopy, PedCompOut);
-    myMenu.waitTime = InGameTime() + 150;
-
-    while (true)
-    {
-        if (Close_Menu)
-            break;
-
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
-
-        if (myMenu._Exit)
-        {
-            Menu_Index = 1;
-            break;
-        }
-        else if (myMenu._Activate)
-        {
-            Menu_Index = 11;
-            Menu_IndexI = myMenu.Index;
-            break;
-        }
-    }
-    MenuOpen = false;
+        Menu_Index = 0;
 }
 
 int TshirtLabel(int CharName)
@@ -3585,373 +3676,502 @@ int TshirtLabel(int CharName)
 }
 void PeditorMenu_PropList(int Comp, Mod_Class::ClothBank* Outfit, int iScale, float screenHeightScaleFactor)
 {
-    LoggerLight("PedPropList");
-    MenuOpen = true;
-    int DrawVar = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp);
-    int TextVar = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp, Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp]);
-
-    std::vector<Mod_Class::MeunFields> PedCompOut = {
-        Mod_Class::MeunFields(RSLangMenu[117], PedPropsList[Comp], false, true, -1, DrawVar, Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp]),
-        Mod_Class::MeunFields(RSLangMenu[118], PedPropsList[Comp], false, true, 0, TextVar, Outfit->Cothing[Outfit->Cloth_Pick].ExtraB[Comp])
-    };
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 2, false, PedCompOut);
-    myMenu.waitTime = InGameTime() + 150;
-
-    while (true)
+    if (Outfit != nullptr)
     {
-        if (Close_Menu)
-            break;
+        LoggerLight("PedPropList");
+        MenuOpen = true;
+        int DrawVar = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp);
+        int TextVar = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp, Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp]);
 
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
+        std::vector<Mod_Class::MeunFields> PedCompOut = {
+            Mod_Class::MeunFields(RSLangMenu[117], PedPropsList[Comp], false, true, -1, DrawVar, Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp]),
+            Mod_Class::MeunFields(RSLangMenu[118], PedPropsList[Comp], false, true, 0, TextVar, Outfit->Cothing[Outfit->Cloth_Pick].ExtraB[Comp])
+        };
 
-        if (myMenu._Exit)
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 2, false, PedCompOut);
+        myMenu.waitTime = InGameTime() + 150;
+
+        while (true)
         {
-            Menu_Index = 8;
-            break;
-        }
-        else if (myMenu._Activate)
-        {
-            if (myMenu.Index == 0)
-            {
-                myMenu.Menu_Form[0].Current = 0;
-                myMenu.Menu_Form[1].Current = 0;
-                TextVar = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp, myMenu.Menu_Form[0].Current);
-                PedCompOut[1].Max = TextVar;
-            }
-            else
-                myMenu.Menu_Form[1].Current = 0;
-
-            Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp] = myMenu.Menu_Form[0].Current;
-            Outfit->Cothing[Outfit->Cloth_Pick].ExtraB[Comp] = myMenu.Menu_Form[1].Current;
-
-            if (Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp] == -1)
-                PED::CLEAR_ALL_PED_PROPS(PLAYER::PLAYER_PED_ID());
-            else
-                PED::SET_PED_PROP_INDEX(PLAYER::PLAYER_PED_ID(), Comp, Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp], Outfit->Cothing[Outfit->Cloth_Pick].ExtraB[Comp], false);
-        }
-        else if (myMenu._Left || myMenu._Right)
-        {
-            if (myMenu.Index == 0)
-            {
-                TextVar = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp, myMenu.Menu_Form[0].Current);
-                PedCompOut[1].Max = TextVar;
-                myMenu.Menu_Form[1].Current = 0;
-            }
-            Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp] = myMenu.Menu_Form[0].Current;
-            Outfit->Cothing[Outfit->Cloth_Pick].ExtraB[Comp] = myMenu.Menu_Form[1].Current;
-
-            if (Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp] == -1)
-                PED::CLEAR_ALL_PED_PROPS(PLAYER::PLAYER_PED_ID());
-            else
-                PED::SET_PED_PROP_INDEX(PLAYER::PLAYER_PED_ID(), Comp, Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp], Outfit->Cothing[Outfit->Cloth_Pick].ExtraB[Comp], false);
-        }
-    }
-    MenuOpen = false;
-}
-void PeditorMenu_PedProp(Mod_Class::ClothBank* Outfit, int iScale, float screenHeightScaleFactor)
-{
-    LoggerLight("PedPropMenu");
-    MenuOpen = true;
-    std::vector<Mod_Class::MeunFields> PedCompOut = {};
-    //Mod_Class::ClothX Outfit = GetYourTogs(PLAYER::PLAYER_PED_ID());
-
-    for (int i = 0; i < PedPropsList.size(); i++)
-        PedCompOut.push_back(Mod_Class::MeunFields(PedPropsList[i], "", false, false, 0, 1, 0));
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 4, false, PedCompOut);
-    myMenu.waitTime = InGameTime() + 150;
-
-    while (true)
-    {
-        if (Close_Menu)
-            break;
-
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
-
-        if (myMenu._Exit)
-        {
-            Menu_Index = 2;
-            break;
-        }
-        else if (myMenu._Activate)
-        {
-            Menu_Index = 10;
-            Menu_IndexI = myMenu.Index;
-            break;
-
-        }
-    }
-    MenuOpen = false;
-}
-void PeditorMenu_CompList(int Comp, Mod_Class::ClothBank* Outfit, int iScale, float screenHeightScaleFactor)
-{
-    LoggerLight("PedCompList");
-    MenuOpen = true;
-    int iTake = 0;
-    if (Comp == 6)
-        iTake = 2;
-    int DrawVar = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp) - iTake;
-    int TextVar = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp, Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp]);
-
-    std::vector<Mod_Class::MeunFields> PedCompOut = {
-        Mod_Class::MeunFields(RSLangMenu[117], PedComposList[Comp], false, true, -1, DrawVar, Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp]),
-        Mod_Class::MeunFields(RSLangMenu[118], PedComposList[Comp], false, true, 0, TextVar, Outfit->Cothing[Outfit->Cloth_Pick].ClothB[Comp])
-    };
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 2, false, PedCompOut);
-    myMenu.waitTime = InGameTime() + 150;
-
-    while (true)
-    {
-        if (Close_Menu)
-            break;
-
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
-
-        if (myMenu._Exit)
-        {
-            Menu_Index = 7;
-            break;
-        }
-        else if (myMenu._Activate)
-        {
-            if (myMenu.Index == 0)
-            {
-                myMenu.Menu_Form[0].Current = 0;
-                myMenu.Menu_Form[1].Current = 0;
-                TextVar = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp, myMenu.Menu_Form[0].Current);
-                PedCompOut[1].Max = TextVar;
-            }
-            else
-                myMenu.Menu_Form[1].Current = 0;
-
-            Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp] = myMenu.Menu_Form[0].Current;
-            Outfit->Cothing[Outfit->Cloth_Pick].ClothB[Comp] = myMenu.Menu_Form[1].Current;
-
-            PED::SET_PED_COMPONENT_VARIATION(PLAYER::PLAYER_PED_ID(), Comp, Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp], Outfit->Cothing[Outfit->Cloth_Pick].ClothB[Comp], 2);
-        }
-        else if (myMenu._Left || myMenu._Right)
-        {
-            if (myMenu.Index == 0)
-            {
-                TextVar = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp, myMenu.Menu_Form[0].Current);
-                PedCompOut[1].Max = TextVar;
-                myMenu.Menu_Form[1].Current = 0;
-            }
-            Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp] = myMenu.Menu_Form[0].Current;
-            Outfit->Cothing[Outfit->Cloth_Pick].ClothB[Comp] = myMenu.Menu_Form[1].Current;
-
-            PED::SET_PED_COMPONENT_VARIATION(PLAYER::PLAYER_PED_ID(), Comp, Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp], Outfit->Cothing[Outfit->Cloth_Pick].ClothB[Comp], 2);
-        }
-    }
-
-    MenuOpen = false;
-}
-void PeditorMenu_PedComp(Mod_Class::ClothBank* Outfit, int iScale, float screenHeightScaleFactor)
-{
-    LoggerLight("PedCompMenu");
-    MenuOpen = true;
-    std::vector<Mod_Class::MeunFields> PedCompOut = {};
-    //Mod_Class::ClothX Outfit = GetYourTogs(PLAYER::PLAYER_PED_ID());
-
-    for (int i = 0; i < PedComposList.size(); i++)
-        PedCompOut.push_back(Mod_Class::MeunFields(PedComposList[i], RSLangMenu[119] + PedComposList[i], false, false, 0, 1, 0));
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 7, true, PedCompOut);
-    myMenu.waitTime = InGameTime() + 150;
-
-    while (true)
-    {
-        if (Close_Menu)
-            break;
-
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
-
-        if (myMenu._Exit)
-        {
-            Menu_Index = 2;
-            break;
-        }
-        else if (myMenu._Activate)          
-        {
-            Menu_Index = 9;
-            Menu_IndexI = myMenu.Index;
-            break;
-
-        }
-    }
-    MenuOpen = false;
-}
-void PeditorMenu_Outfit(Mod_Class::ClothBank* thisPed, int iScale, float screenHeightScaleFactor)
-{
-    LoggerLight("OutfitMenu");
-    MenuOpen = true;
-    std::vector<std::string> sList = {};
-
-    if (thisPed->FreeMode)
-        sList = FindCloths(thisPed->Male);
-
-    int iSize = 4;
-    int iCharType = YourCharIs();
-
-    Mod_Class::ClothX MyCloths = thisPed->Cothing[thisPed->Cloth_Pick];
-
-    std::vector<Mod_Class::MeunFields> M_List = {
-        Mod_Class::MeunFields(RSLangMenu[109], MyCloths.Title, false, false, 0, (int)thisPed->Cothing.size() - 1, thisPed->Cloth_Pick),
-        Mod_Class::MeunFields(RSLangMenu[110], RSLangMenu[111], false, false, 0, 1, 0),
-        Mod_Class::MeunFields(RSLangMenu[112], RSLangMenu[113], false, false, 0, 1, 0),
-        Mod_Class::MeunFields(RSLangMenu[114], RSLangMenu[115], false, false, 0, 1, 0)
-    };
-
-    if (iCharType > 3)
-    {
-        iSize ++;
-        M_List.push_back(Mod_Class::MeunFields(RSLangMenu[193], "", false, false, 0, TshirtLabel(iCharType), 0));
-    }
-
-    if ((int)sList.size() > 0)
-    {
-        iSize ++;
-        M_List.push_back(Mod_Class::MeunFields(RSLangMenu[116], "", false, false, 0, (int)sList.size() - 1, 0));
-    }
-
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, iSize, false, M_List);
-    myMenu.waitTime = InGameTime() + 150;
-
-    Menu_Index = 1;
-
-    while (true)
-    {
-        if (Close_Menu)
-            break;
-
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
-
-        if (myMenu._Exit)
-            break;
-        else if (myMenu._Activate)
-        {
-            if (myMenu.Index == 1)
-            {
-                std::string sC = CaptureScreenText();
-
-                if (sC != "")
-                {
-                    thisPed->Cloth_Pick = (int)thisPed->Cothing.size();
-                    thisPed->Cothing.push_back(MyCloths);
-                    thisPed->Cothing[thisPed->Cloth_Pick].Title = sC;
-                    Menu_Index = 7;
-                }
-            }
-            else if (myMenu.Index == 2)
-            {
-                Menu_Index = 7;
+            if (Close_Menu)
                 break;
-            }
-            else if (myMenu.Index == 3)
+
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
             {
                 Menu_Index = 8;
                 break;
             }
-            else if (myMenu.Index == 4)
+            else if (myMenu._Activate)
             {
-                PED::CLEAR_PED_DECORATIONS(PLAYER::PLAYER_PED_ID());
-                myMenu.Menu_Form[myMenu.Index].Current = 0;
-                myMenu.Menu_Form[myMenu.Index].Description = "";
-                thisPed->Cothing[thisPed->Cloth_Pick].Badge.TatName = "";
-                thisPed->Cothing[thisPed->Cloth_Pick].Badge.BaseName = "";
-                ApplyTats(PLAYER::PLAYER_PED_ID(), thisPed);
+                if (myMenu.Index == 0)
+                {
+                    myMenu.Menu_Form[0].Current = 0;
+                    myMenu.Menu_Form[1].Current = 0;
+                    TextVar = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp, myMenu.Menu_Form[0].Current);
+                    PedCompOut[1].Max = TextVar;
+                }
+                else
+                    myMenu.Menu_Form[1].Current = 0;
+
+                Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp] = myMenu.Menu_Form[0].Current;
+                Outfit->Cothing[Outfit->Cloth_Pick].ExtraB[Comp] = myMenu.Menu_Form[1].Current;
+
+                if (Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp] == -1)
+                    PED::CLEAR_ALL_PED_PROPS(PLAYER::PLAYER_PED_ID());
+                else
+                    PED::SET_PED_PROP_INDEX(PLAYER::PLAYER_PED_ID(), Comp, Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp], Outfit->Cothing[Outfit->Cloth_Pick].ExtraB[Comp], false);
             }
-            else if (myMenu.Index == 5)
+            else if (myMenu._Left || myMenu._Right)
+            {
+                if (myMenu.Index == 0)
+                {
+                    TextVar = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp, myMenu.Menu_Form[0].Current);
+                    PedCompOut[1].Max = TextVar;
+                    myMenu.Menu_Form[1].Current = 0;
+                }
+                Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp] = myMenu.Menu_Form[0].Current;
+                Outfit->Cothing[Outfit->Cloth_Pick].ExtraB[Comp] = myMenu.Menu_Form[1].Current;
+
+                if (Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp] == -1)
+                    PED::CLEAR_ALL_PED_PROPS(PLAYER::PLAYER_PED_ID());
+                else
+                    PED::SET_PED_PROP_INDEX(PLAYER::PLAYER_PED_ID(), Comp, Outfit->Cothing[Outfit->Cloth_Pick].ExtraA[Comp], Outfit->Cothing[Outfit->Cloth_Pick].ExtraB[Comp], false);
+            }
+        }
+        MenuOpen = false;
+    }
+    else
+        Menu_Index = 0;
+}
+void PeditorMenu_PedProp(Mod_Class::ClothBank* Outfit, int iScale, float screenHeightScaleFactor)
+{
+    if (Outfit != nullptr)
+    {
+        LoggerLight("PedPropMenu");
+        MenuOpen = true;
+        std::vector<Mod_Class::MeunFields> PedCompOut = {};
+        //Mod_Class::ClothX Outfit = GetYourTogs(PLAYER::PLAYER_PED_ID());
+
+        for (int i = 0; i < PedPropsList.size(); i++)
+            PedCompOut.push_back(Mod_Class::MeunFields(PedPropsList[i], "", false, false, 0, 1, 0));
+
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 4, false, PedCompOut);
+        myMenu.waitTime = InGameTime() + 150;
+
+        while (true)
+        {
+            if (Close_Menu)
+                break;
+
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
+            {
+                Menu_Index = 2;
+                break;
+            }
+            else if (myMenu._Activate)
+            {
+                Menu_Index = 10;
+                Menu_IndexI = myMenu.Index;
+                break;
+
+            }
+        }
+        MenuOpen = false;
+    }
+    else
+        Menu_Index = 0;
+}
+void PeditorMenu_CompList(int Comp, Mod_Class::ClothBank* Outfit, int iScale, float screenHeightScaleFactor)
+{
+    if (Outfit != nullptr)
+    {
+        LoggerLight("PedCompList");
+        MenuOpen = true;
+        int iTake = 0;
+        if (Comp == 6)
+            iTake = 2;
+        int DrawVar = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp) - iTake;
+        int TextVar = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp, Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp]);
+
+        std::vector<Mod_Class::MeunFields> PedCompOut = {
+            Mod_Class::MeunFields(RSLangMenu[117], PedComposList[Comp], false, true, -1, DrawVar, Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp]),
+            Mod_Class::MeunFields(RSLangMenu[118], PedComposList[Comp], false, true, 0, TextVar, Outfit->Cothing[Outfit->Cloth_Pick].ClothB[Comp])
+        };
+
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 2, false, PedCompOut);
+        myMenu.waitTime = InGameTime() + 150;
+
+        while (true)
+        {
+            if (Close_Menu)
+                break;
+
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
             {
                 Menu_Index = 7;
                 break;
             }
-            else
-                break;
-        }
-        else if (myMenu._Left || myMenu._Right)
-        {
-            if (myMenu.Index == 0)
+            else if (myMenu._Activate)
             {
-                if (myMenu.Menu_Form[0].Current > -1 && myMenu.Menu_Form[0].Current < thisPed->Cothing.size())
+                if (myMenu.Index == 0)
                 {
-                    thisPed->Cloth_Pick = myMenu.Menu_Form[0].Current;
-                    myMenu.Menu_Form[0].Description = thisPed->Cothing[thisPed->Cloth_Pick].Title;
-                    Mod_Class::ClothX Cloths = thisPed->Cothing[thisPed->Cloth_Pick];
-                    OnlineDress(PLAYER::PLAYER_PED_ID(), &Cloths);
-
-                    if (thisPed->FreeMode)
-                    {
-                        Mod_Class::HairSets Hairs = thisPed->MyHair;
-                        SetingtheHair(PLAYER::PLAYER_PED_ID(), &Hairs);
-                    }
+                    myMenu.Menu_Form[0].Current = 0;
+                    myMenu.Menu_Form[1].Current = 0;
+                    TextVar = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp, myMenu.Menu_Form[0].Current);
+                    PedCompOut[1].Max = TextVar;
                 }
+                else
+                    myMenu.Menu_Form[1].Current = 0;
 
+                Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp] = myMenu.Menu_Form[0].Current;
+                Outfit->Cothing[Outfit->Cloth_Pick].ClothB[Comp] = myMenu.Menu_Form[1].Current;
+
+                PED::SET_PED_COMPONENT_VARIATION(PLAYER::PLAYER_PED_ID(), Comp, Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp], Outfit->Cothing[Outfit->Cloth_Pick].ClothB[Comp], 2);
             }
-            else if (myMenu.Index == 4)
+            else if (myMenu._Left || myMenu._Right)
             {
-                if (iCharType == 4)
+                if (myMenu.Index == 0)
                 {
-                    if (myMenu.Menu_Form[myMenu.Index].Current > -1 && myMenu.Menu_Form[myMenu.Index].Current < (int)MaleTshirt.size())
-                    {
-                        thisPed->Cothing[thisPed->Cloth_Pick].Badge.BaseName = MaleTshirt[myMenu.Menu_Form[myMenu.Index].Current].BaseName;
-                        thisPed->Cothing[thisPed->Cloth_Pick].Badge.TatName = MaleTshirt[myMenu.Menu_Form[myMenu.Index].Current].TatName;
-                    }
+                    TextVar = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(PLAYER::PLAYER_PED_ID(), Comp, myMenu.Menu_Form[0].Current);
+                    PedCompOut[1].Max = TextVar;
+                    myMenu.Menu_Form[1].Current = 0;
                 }
-                else if (iCharType == 5)
-                {
-                    if (myMenu.Menu_Form[myMenu.Index].Current > -1 && myMenu.Menu_Form[myMenu.Index].Current < (int)FemaleTshirt.size())
-                    {
-                        thisPed->Cothing[thisPed->Cloth_Pick].Badge.BaseName = FemaleTshirt[myMenu.Menu_Form[myMenu.Index].Current].BaseName;
-                        thisPed->Cothing[thisPed->Cloth_Pick].Badge.TatName = FemaleTshirt[myMenu.Menu_Form[myMenu.Index].Current].TatName;
-                    }
-                }
+                Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp] = myMenu.Menu_Form[0].Current;
+                Outfit->Cothing[Outfit->Cloth_Pick].ClothB[Comp] = myMenu.Menu_Form[1].Current;
 
-                myMenu.Menu_Form[myMenu.Index].Description = thisPed->Cothing[thisPed->Cloth_Pick].Badge.TatName;
-                PED::CLEAR_PED_DECORATIONS(PLAYER::PLAYER_PED_ID());
-                PED::_APPLY_PED_OVERLAY(PLAYER::PLAYER_PED_ID(), MyHashKey(thisPed->Cothing[thisPed->Cloth_Pick].Badge.BaseName), MyHashKey(thisPed->Cothing[thisPed->Cloth_Pick].Badge.TatName));
-                ApplyTats(PLAYER::PLAYER_PED_ID(), thisPed);
-            }
-            else if (myMenu.Index == 5)
-            {
-
-                if (myMenu.Menu_Form[myMenu.Index].Current > -1 && myMenu.Menu_Form[myMenu.Index].Current < sList.size())
-                {
-                    MyCloths = LoadCloths(sList[myMenu.Menu_Form[myMenu.Index].Current]);
-                    thisPed->Cothing[thisPed->Cloth_Pick] = MyCloths;;
-
-                    myMenu.Menu_Form[myMenu.Index].Description = MyCloths.Title;
-                    OnlineDress(PLAYER::PLAYER_PED_ID(), &MyCloths);
-
-                    if (thisPed->FreeMode)
-                    {
-                        Mod_Class::HairSets Hairs = thisPed->MyHair;
-                        SetingtheHair(PLAYER::PLAYER_PED_ID(), &Hairs);
-                    }
-                }
+                PED::SET_PED_COMPONENT_VARIATION(PLAYER::PLAYER_PED_ID(), Comp, Outfit->Cothing[Outfit->Cloth_Pick].ClothA[Comp], Outfit->Cothing[Outfit->Cloth_Pick].ClothB[Comp], 2);
             }
         }
+
+        MenuOpen = false;
     }
+    else
+        Menu_Index = 0;
+}
+void PeditorMenu_PedComp(Mod_Class::ClothBank* Outfit, int iScale, float screenHeightScaleFactor)
+{
+    if (Outfit != nullptr)
+    {
+        LoggerLight("PedCompMenu");
+        MenuOpen = true;
+        std::vector<Mod_Class::MeunFields> PedCompOut = {};
+        //Mod_Class::ClothX Outfit = GetYourTogs(PLAYER::PLAYER_PED_ID());
 
-    MenuOpen = false;
+        for (int i = 0; i < PedComposList.size(); i++)
+            PedCompOut.push_back(Mod_Class::MeunFields(PedComposList[i], RSLangMenu[119] + PedComposList[i], false, false, 0, 1, 0));
+
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 7, true, PedCompOut);
+        myMenu.waitTime = InGameTime() + 150;
+
+        while (true)
+        {
+            if (Close_Menu)
+                break;
+
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
+            {
+                Menu_Index = 2;
+                break;
+            }
+            else if (myMenu._Activate)
+            {
+                Menu_Index = 9;
+                Menu_IndexI = myMenu.Index;
+                break;
+
+            }
+        }
+        MenuOpen = false;
+    }
+    else
+        Menu_Index = 0;
+}
+void PeditorMenu_Outfit(Mod_Class::ClothBank* thisPed, int iScale, float screenHeightScaleFactor)
+{
+    if (thisPed != nullptr)
+    {
+        LoggerLight("OutfitMenu");
+        MenuOpen = true;
+        std::vector<std::string> sList = {};
+
+        if (thisPed->FreeMode)
+            sList = FindCloths(thisPed->Male);
+
+        int iSize = 4;
+        int iCharType = YourCharIs();
+
+        Mod_Class::ClothX MyCloths = thisPed->Cothing[thisPed->Cloth_Pick];
+
+        std::vector<Mod_Class::MeunFields> M_List = {
+            Mod_Class::MeunFields(RSLangMenu[109], MyCloths.Title, false, false, 0, (int)thisPed->Cothing.size() - 1, thisPed->Cloth_Pick),
+            Mod_Class::MeunFields(RSLangMenu[110], RSLangMenu[111], false, false, 0, 1, 0),
+            Mod_Class::MeunFields(RSLangMenu[112], RSLangMenu[113], false, false, 0, 1, 0),
+            Mod_Class::MeunFields(RSLangMenu[114], RSLangMenu[115], false, false, 0, 1, 0)
+        };
+
+        if (iCharType > 3)
+        {
+            iSize++;
+            M_List.push_back(Mod_Class::MeunFields(RSLangMenu[193], "", false, false, 0, TshirtLabel(iCharType), 0));
+        }
+
+        if ((int)sList.size() > 0)
+        {
+            iSize++;
+            M_List.push_back(Mod_Class::MeunFields(RSLangMenu[116], "", false, false, 0, (int)sList.size() - 1, 0));
+        }
+
+
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, iSize, false, M_List);
+        myMenu.waitTime = InGameTime() + 150;
+
+        Menu_Index = 1;
+
+        while (true)
+        {
+            if (Close_Menu)
+                break;
+
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
+                break;
+            else if (myMenu._Activate)
+            {
+                if (myMenu.Index == 1)
+                {
+                    std::string sC = CaptureScreenText();
+
+                    if (sC != "")
+                    {
+                        thisPed->Cloth_Pick = (int)thisPed->Cothing.size();
+                        thisPed->Cothing.push_back(MyCloths);
+                        thisPed->Cothing[thisPed->Cloth_Pick].Title = sC;
+                        Menu_Index = 7;
+                    }
+                }
+                else if (myMenu.Index == 2)
+                {
+                    Menu_Index = 7;
+                    break;
+                }
+                else if (myMenu.Index == 3)
+                {
+                    Menu_Index = 8;
+                    break;
+                }
+                else if (myMenu.Index == 4)
+                {
+                    PED::CLEAR_PED_DECORATIONS(PLAYER::PLAYER_PED_ID());
+                    myMenu.Menu_Form[myMenu.Index].Current = 0;
+                    myMenu.Menu_Form[myMenu.Index].Description = "";
+                    thisPed->Cothing[thisPed->Cloth_Pick].Badge.TatName = "";
+                    thisPed->Cothing[thisPed->Cloth_Pick].Badge.BaseName = "";
+                    ApplyTats(PLAYER::PLAYER_PED_ID(), thisPed);
+                }
+                else if (myMenu.Index == 5)
+                {
+                    Menu_Index = 7;
+                    break;
+                }
+                else
+                    break;
+            }
+            else if (myMenu._Left || myMenu._Right)
+            {
+                if (myMenu.Index == 0)
+                {
+                    if (myMenu.Menu_Form[0].Current > -1 && myMenu.Menu_Form[0].Current < thisPed->Cothing.size())
+                    {
+                        thisPed->Cloth_Pick = myMenu.Menu_Form[0].Current;
+                        myMenu.Menu_Form[0].Description = thisPed->Cothing[thisPed->Cloth_Pick].Title;
+                        Mod_Class::ClothX Cloths = thisPed->Cothing[thisPed->Cloth_Pick];
+                        OnlineDress(PLAYER::PLAYER_PED_ID(), &Cloths);
+
+                        if (thisPed->FreeMode)
+                        {
+                            Mod_Class::HairSets Hairs = thisPed->MyHair;
+                            SetingtheHair(PLAYER::PLAYER_PED_ID(), &Hairs);
+                        }
+                    }
+
+                }
+                else if (myMenu.Index == 4)
+                {
+                    if (iCharType == 4)
+                    {
+                        if (myMenu.Menu_Form[myMenu.Index].Current > -1 && myMenu.Menu_Form[myMenu.Index].Current < (int)MaleTshirt.size())
+                        {
+                            thisPed->Cothing[thisPed->Cloth_Pick].Badge.BaseName = MaleTshirt[myMenu.Menu_Form[myMenu.Index].Current].BaseName;
+                            thisPed->Cothing[thisPed->Cloth_Pick].Badge.TatName = MaleTshirt[myMenu.Menu_Form[myMenu.Index].Current].TatName;
+                        }
+                    }
+                    else if (iCharType == 5)
+                    {
+                        if (myMenu.Menu_Form[myMenu.Index].Current > -1 && myMenu.Menu_Form[myMenu.Index].Current < (int)FemaleTshirt.size())
+                        {
+                            thisPed->Cothing[thisPed->Cloth_Pick].Badge.BaseName = FemaleTshirt[myMenu.Menu_Form[myMenu.Index].Current].BaseName;
+                            thisPed->Cothing[thisPed->Cloth_Pick].Badge.TatName = FemaleTshirt[myMenu.Menu_Form[myMenu.Index].Current].TatName;
+                        }
+                    }
+
+                    myMenu.Menu_Form[myMenu.Index].Description = thisPed->Cothing[thisPed->Cloth_Pick].Badge.TatName;
+                    PED::CLEAR_PED_DECORATIONS(PLAYER::PLAYER_PED_ID());
+                    PED::_APPLY_PED_OVERLAY(PLAYER::PLAYER_PED_ID(), MyHashKey(thisPed->Cothing[thisPed->Cloth_Pick].Badge.BaseName), MyHashKey(thisPed->Cothing[thisPed->Cloth_Pick].Badge.TatName));
+                    ApplyTats(PLAYER::PLAYER_PED_ID(), thisPed);
+                }
+                else if (myMenu.Index == 5)
+                {
+
+                    if (myMenu.Menu_Form[myMenu.Index].Current > -1 && myMenu.Menu_Form[myMenu.Index].Current < sList.size())
+                    {
+                        MyCloths = LoadCloths(sList[myMenu.Menu_Form[myMenu.Index].Current]);
+                        thisPed->Cothing[thisPed->Cloth_Pick] = MyCloths;;
+
+                        myMenu.Menu_Form[myMenu.Index].Description = MyCloths.Title;
+                        OnlineDress(PLAYER::PLAYER_PED_ID(), &MyCloths);
+
+                        if (thisPed->FreeMode)
+                        {
+                            Mod_Class::HairSets Hairs = thisPed->MyHair;
+                            SetingtheHair(PLAYER::PLAYER_PED_ID(), &Hairs);
+                        }
+                    }
+                }
+            }
+        }
+
+        MenuOpen = false;
+    }
+    else
+        Menu_Index = 0;
 }
 
-void MakinAMove(int Type, Mod_Class::AnimatedActions Anim)
+const std::vector<std::string> M_Walks = {
+    "Default",
+    "move_action@generic@core",
+    "move_f@arrogant@a",
+    "move_f@chubby@a",
+    "move_f@depressed@a",
+    "move_f@fat@a",
+    "move_f@generic",
+    "move_f@heels@c",
+    "move_f@heels@d",
+    "move_f@multiplayer",
+    "move_f@sad@a",
+    "move_f@sexy@a",
+    "move_injured_generic",
+    "move_m@business@a",
+    "move_m@business@b",
+    "move_m@business@c",
+    "move_m@casual@a",
+    "move_m@casual@b",
+    "move_m@casual@c",
+    "move_m@casual@d",
+    "move_m@casual@e",
+    "move_m@casual@f",
+    "move_m@confident",
+    "move_m@depressed@b",
+    "move_m@drunk@slightlydrunk",
+    "move_m@fat@a",
+    "move_m@gangster@generic",
+    "move_m@generic",
+    "move_m@hobo@b",
+    "move_m@injured",
+    "move_m@multiplayer",
+    "move_m@shadyped@a",
+    "move_m@swagger",
+    "move_m@swagger@b",
+    "move_m@tool_belt@a",
+    "move_p_m_one",
+    "move_p_m_two",
+    "move_p_m_zero"
+};
+const std::vector<std::string> F_Walks = {
+    "Default",
+    "move_action@generic@core",
+    "move_f@arrogant@a",
+    "move_f@chubby@a",
+    "move_f@depressed@a",
+    "move_f@fat@a",
+    "move_f@generic",
+    "move_f@heels@c",
+    "move_f@heels@d",
+    "move_f@multiplayer",
+    "move_f@sad@a",
+    "move_f@sexy@a",
+    "move_m@business@a",
+    "move_m@business@c",
+    "move_m@casual@a",
+    "move_m@casual@b",
+    "move_m@casual@c",
+    "move_m@casual@d",
+    "move_m@casual@f",
+    "move_m@confident",
+    "move_m@depressed@b",
+    "move_m@fat@a",
+    "move_m@gangster@generic",
+    "move_m@generic",
+    "move_m@multiplayer",
+    "move_m@shadyped@a",
+    "move_m@swagger",
+    "move_m@swagger@b",
+    "move_m@tool_belt@a",
+    "move_p_m_one",
+    "move_p_m_two",
+    "move_p_m_zero"
+};
+const std::vector<std::string> FaceAn = {
+    "Default",
+    "mood_aiming_1",
+    "mood_angry_1",
+    "mood_drivefast_1",
+    "mood_drunk_1",
+    "mood_happy_1",
+    "mood_injured_1",
+    "mood_knockout_1",
+    "mood_normal_1",
+    "mood_skydive_1",
+    "mood_sleeping_1",
+    "mood_smug_1",
+    "mood_stressed_1",
+    "mood_sulk_1",
+    "mood_excited_1",
+    "mood_frustrated_1",
+    "mood_talking_1"
+};
+
+int WalkCount(bool male)
 {
-    PED::SET_PED_ALTERNATE_MOVEMENT_ANIM(PLAYER::PLAYER_PED_ID(), Type, (LPSTR)Anim.Libary.c_str(), (LPSTR)Anim.Action.c_str(), 1.0f, true);
+    if (male)
+        return (int)M_Walks.size() - 1;
+    else
+        return (int)F_Walks.size() - 1;
+}
+std::string YourWalkes(bool male, int inPlace)
+{
+    if (male)
+        return M_Walks[inPlace];
+    else
+        return F_Walks[inPlace];
 }
 int VoiceCount(bool male)
 {
@@ -3960,7 +4180,7 @@ int VoiceCount(bool male)
     else
         return (int)VoicesFemale.size() - 1;
 }
-std::string YourVoice(bool male,int inPlace)
+std::string YourVoice(bool male, int inPlace)
 {
     if (male)
         return VoicesMale[inPlace];
@@ -3969,480 +4189,673 @@ std::string YourVoice(bool male,int inPlace)
 }
 void PeditorMenu_Other(Mod_Class::ClothBank* thisPed, int iScale, float screenHeightScaleFactor)
 {
-    LoggerLight("PeditorMenu_Other");
-    MenuOpen = true;
-
-    std::vector<Mod_Class::MeunFields> M_List = {
-        Mod_Class::MeunFields(RSLangMenu[87], RSLangMenu[88], false, false, 0, 0, 0),
-        Mod_Class::MeunFields(RSLangMenu[89], RSLangMenu[90], false, false, 0, 0, 0),
-        Mod_Class::MeunFields(RSLangMenu[104], thisPed->Voice, false, false, 0, VoiceCount(thisPed->Male), 0),
-        Mod_Class::MeunFields(RSLangMenu[105], RSLangMenu[106], false, false, 0, 0, 0),
-        Mod_Class::MeunFields(RSLangMenu[107], RSLangMenu[108], false, false, 0, 0, 0)
-    };
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 5, false, M_List);
-    myMenu.waitTime = InGameTime() + 150;
-
-    Menu_Index = 0;
-
-    while (true)
+    if (thisPed != nullptr)
     {
-        if (Close_Menu)
-            break;
+        LoggerLight("PeditorMenu_Other");
+        MenuOpen = true;
 
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
+        std::vector<Mod_Class::MeunFields> M_List = {
+            Mod_Class::MeunFields(RSLangMenu[87], RSLangMenu[88], false, false, 0, 0, 0),
+            Mod_Class::MeunFields(RSLangMenu[89], RSLangMenu[90], false, false, 0, 0, 0),
+            Mod_Class::MeunFields(RSLangMenu[104], thisPed->Voice, false, false, 0, VoiceCount(thisPed->Male), 0),
+            Mod_Class::MeunFields("Face Moods", thisPed->Moods, false, false, 0, (int)FaceAn.size() - 1, 0),
+            Mod_Class::MeunFields("Walk Style", thisPed->Walkies, false, false, 0, WalkCount(thisPed->Male), 0),
+            Mod_Class::MeunFields(RSLangMenu[105], RSLangMenu[106], false, false, 0, 0, 0),
+            Mod_Class::MeunFields(RSLangMenu[107], RSLangMenu[108], false, false, 0, 0, 0)
+        };
 
-        if (myMenu._Exit)
-            break;
-        else if (myMenu._Activate)
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 7, false, M_List);
+        myMenu.waitTime = InGameTime() + 150;
+
+        Menu_Index = 0;
+
+        while (true)
         {
-            if (myMenu.Index == 0)
-            {
-                std::string sC = CaptureScreenText();
-                if (sC != "")
-                    thisPed->CharName = sC;
-            }
-            else if (myMenu.Index == 1)
-            {
-                Menu_Index = 2;
+            if (Close_Menu)
                 break;
-            }
-            else if (myMenu.Index == 2)
+
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
+                break;
+            else if (myMenu._Activate)
             {
-                std::string Vo = YourVoice(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
-                if (Vo == "Default")
+                if (myMenu.Index == 0)
                 {
-                    invoke <Void>(0x40CF0D12D142A9E8, PLAYER::PLAYER_PED_ID());
-                    invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
-                    thisPed->Voice = "";
+                    std::string newNames = CaptureScreenText();
+                    if (newNames != "" || thisPed->CharName != newNames)
+                    {
+                        if (Menu_YourPed != -1)
+                        {
+                            FileRemoval(GetDir() + "/RandomStart/SavedPeds/" + thisPed->CharName + ".ini");
+                            thisPed->CharName = newNames;
+                            SaveClothBank(SavedPeds[Menu_YourPed]);
+                        }
+                        else
+                            thisPed->CharName = newNames;
+                    }
+                }
+                else if (myMenu.Index == 1)
+                {
+                    Menu_Index = 2;
+                    break;
+                }
+                else if (myMenu.Index == 2)
+                {
+                    std::string Vo = YourVoice(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
+                    if (Vo == "Default")
+                    {
+                        invoke <Void>(0x40CF0D12D142A9E8, PLAYER::PLAYER_PED_ID());
+                        invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
+                        thisPed->Voice = "";
+                    }
+                    else
+                    {
+                        ThemVoices(Vo);
+                        thisPed->Voice = Vo;
+                    }
+                }
+                else if (myMenu.Index == 3)
+                {
+                    myMenu.Menu_Form[myMenu.Index].Current = 0;
+                    PED::CLEAR_FACIAL_IDLE_ANIM_OVERRIDE(PLAYER::PLAYER_PED_ID());
+                    thisPed->Moods = "";
+                    myMenu.Menu_Form[myMenu.Index].Description = "Default";
+                }
+                else if (myMenu.Index == 4)
+                {
+                    myMenu.Menu_Form[myMenu.Index].Current = 0;
+                    PED::RESET_PED_MOVEMENT_CLIPSET(PLAYER::PLAYER_PED_ID(), 0.0f);
+                    thisPed->Walkies = "";
+                    myMenu.Menu_Form[myMenu.Index].Description = "Default";
+                }
+                else if (myMenu.Index == 5)
+                {
+                    std::string newNames = thisPed->CharName;
+                    if (newNames == "" || newNames == "Current")
+                        newNames = CaptureScreenText();
+
+                    if (newNames != "")
+                    {
+                        thisPed->CharName = newNames;
+
+                        if (Menu_YourPed != -1)
+                            SaveClothBank(SavedPeds[Menu_YourPed]);
+                        else
+                        {
+                            SavedPeds.push_back(MyNewBank);
+                            SaveClothBank(MyNewBank);
+                            break;
+                        }
+                    }
+                }
+                else if (myMenu.Index == 6)
+                {
+                    for (int i = 0; i < (int)SavedPeds.size(); i++)
+                    {
+                        if (SavedPeds[i].CharName == thisPed->CharName)
+                            SavedPeds.erase(SavedPeds.begin() + i);
+                    }
+                    FileRemoval(GetDir() + "/RandomStart/SavedPeds/" + thisPed->CharName + ".ini");
+                    break;
                 }
                 else
+                    break;
+            }
+            else if (myMenu._Left || myMenu._Right)
+            {
+                if (myMenu.Index == 2)
+                    myMenu.Menu_Form[myMenu.Index].Description = YourVoice(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
+                else if (myMenu.Index == 3)
                 {
-                    AUDIO::SET_AMBIENT_VOICE_NAME(PLAYER::PLAYER_PED_ID(), (LPSTR)Vo.c_str());
-                    invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
-                    thisPed->Voice = Vo;
+                    std::string Wlk = FaceAn[myMenu.Menu_Form[myMenu.Index].Current];
+                    if (Wlk == "Default")
+                    {
+                        PED::CLEAR_FACIAL_IDLE_ANIM_OVERRIDE(PLAYER::PLAYER_PED_ID());
+                        thisPed->Moods = "";
+                    }
+                    else
+                    {
+                        thisPed->Moods = Wlk;
+                        PullingFaces(Wlk);
+                    }
+                    myMenu.Menu_Form[myMenu.Index].Description = Wlk;
+                }
+                else if (myMenu.Index == 4)
+                {
+                    std::string Wlk = YourWalkes(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
+                    if (Wlk == "Default")
+                    {
+                        PED::RESET_PED_MOVEMENT_CLIPSET(PLAYER::PLAYER_PED_ID(), 0.0f);
+                        thisPed->Walkies = "";
+                    }
+                    else
+                    {
+                        WalkingStyle(PLAYER::PLAYER_PED_ID(), Wlk);
+                        thisPed->Walkies = Wlk;
+                    }
+                    myMenu.Menu_Form[myMenu.Index].Description = Wlk;
                 }
             }
-            else if (myMenu.Index == 3)
-            {
-                if (thisPed->CharName == "")
-                    thisPed->CharName = CaptureScreenText();
+        }
 
-                UpdateSavedClothBanks();
-            }
-            else if (myMenu.Index == 4)
-            {
-                for (int i = 0; i < (int)SavedPeds.size(); i++)
-                {
-                    FileRemoval(GetDir() + "/RandomStart/SavedPeds/" + thisPed->CharName + ".ini");
-                    if (SavedPeds[i].CharName == thisPed->CharName)
-                        SavedPeds.erase(SavedPeds.begin() + i);
-                }
-                break;
-            }
-            else
-                break;
-        }
-        else if (myMenu._Left || myMenu._Right)
-        {
-            if (myMenu.Index == 2)
-                myMenu.Menu_Form[myMenu.Index].Description = YourVoice(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
-        }
+        MenuOpen = false;
     }
-
-    MenuOpen = false;
+    else
+        Menu_Index = 0;
 }
 void PeditorMenu_MainChar(Mod_Class::ClothBank* thisPed, int Main_Char, int iScale, float screenHeightScaleFactor)
 {
-    LoggerLight("PeditorMenu_MainChar");
-    MenuOpen = true;
-    std::string PedVoice = thisPed->Voice;
-
-    std::vector<Mod_Class::MeunFields> M_List = {
-        Mod_Class::MeunFields(RSLangMenu[87], RSLangMenu[88], false, false, 0, 0, 0),
-        Mod_Class::MeunFields(RSLangMenu[89], RSLangMenu[90], false, false, 0, 0, 0),
-        Mod_Class::MeunFields(RSLangMenu[91], RSLangMenu[92], false, false, 0, 0, 0),
-        Mod_Class::MeunFields(RSLangMenu[104], PedVoice, false, false, 0, VoiceCount(thisPed->Male), 0),
-        Mod_Class::MeunFields(RSLangMenu[105], RSLangMenu[106], false, false, 0, 0, 0),
-        Mod_Class::MeunFields(RSLangMenu[107], RSLangMenu[108], false, false, 0, 0, 0)
-    };
-
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 6, false, M_List);
-    myMenu.waitTime = InGameTime() + 150;
-
-    Menu_Index = 0;
-
-    while (true)
+    if (thisPed != nullptr)
     {
-        if (Close_Menu)
-            break;
+        LoggerLight("PeditorMenu_MainChar");
+        MenuOpen = true;
+        std::string PedVoice = thisPed->Voice;
 
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
+        std::vector<Mod_Class::MeunFields> M_List = {
+            Mod_Class::MeunFields(RSLangMenu[87], RSLangMenu[88], false, false, 0, 0, 0),
+            Mod_Class::MeunFields(RSLangMenu[89], RSLangMenu[90], false, false, 0, 0, 0),
+            Mod_Class::MeunFields(RSLangMenu[91], RSLangMenu[92], false, false, 0, 0, 0),
+            Mod_Class::MeunFields(RSLangMenu[104], PedVoice, false, false, 0, VoiceCount(thisPed->Male), 0),
+            Mod_Class::MeunFields("Face Moods", thisPed->Moods, false, false, 0, (int)FaceAn.size() - 1, 0),
+            Mod_Class::MeunFields("Walk Style", thisPed->Walkies, false, false, 0, WalkCount(thisPed->Male), 0),
+            Mod_Class::MeunFields(RSLangMenu[105], RSLangMenu[106], false, false, 0, 0, 0),
+            Mod_Class::MeunFields(RSLangMenu[107], RSLangMenu[108], false, false, 0, 0, 0)
+        };
 
-        if (myMenu._Exit)
-            break;
-        else if (myMenu._Activate)
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 7, true, M_List);
+        myMenu.waitTime = InGameTime() + 150;
+
+        Menu_Index = 0;
+
+        while (true)
         {
-            if (myMenu.Index == 0)
-            {
-                std::string sC = CaptureScreenText();
-                if (sC != "")
-                    thisPed->CharName = sC;
-            }
-            else if (myMenu.Index == 1)
-            {
-                Menu_Index = 2;
+            if (Close_Menu)
                 break;
-            }
-            else if (myMenu.Index == 2)
-            {
-                Menu_Index = 3;
+
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
                 break;
-            }
-            else if (myMenu.Index == 3)
+            else if (myMenu._Activate)
             {
-                std::string Vo = YourVoice(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
-                if (Vo == "Default")
+                if (myMenu.Index == 0)
                 {
-                    invoke <Void>(0x40CF0D12D142A9E8, PLAYER::PLAYER_PED_ID());
-                    invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
-                    thisPed->Voice = "";
+                    std::string newNames = CaptureScreenText();
+                    if (newNames != "" || thisPed->CharName != newNames)
+                    {
+                        if (Menu_YourPed != -1)
+                        {
+                            FileRemoval(GetDir() + "/RandomStart/SavedPeds/" + thisPed->CharName + ".ini");
+                            thisPed->CharName = newNames;
+                            SaveClothBank(SavedPeds[Menu_YourPed]);
+                        }
+                        else
+                            thisPed->CharName = newNames;
+                    }
+                }
+                else if (myMenu.Index == 1)
+                {
+                    Menu_Index = 2;
+                    break;
+                }
+                else if (myMenu.Index == 2)
+                {
+                    Menu_Index = 3;
+                    break;
+                }
+                else if (myMenu.Index == 3)
+                {
+                    std::string Vo = YourVoice(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
+                    if (Vo == "Default")
+                    {
+                        invoke <Void>(0x40CF0D12D142A9E8, PLAYER::PLAYER_PED_ID());
+                        invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
+                        thisPed->Voice = "";
+                    }
+                    else
+                    {
+                        ThemVoices(Vo);
+                        thisPed->Voice = Vo;
+                    }
+                }
+                else if (myMenu.Index == 4)
+                {
+                    myMenu.Menu_Form[myMenu.Index].Current = 0;
+                    PED::CLEAR_FACIAL_IDLE_ANIM_OVERRIDE(PLAYER::PLAYER_PED_ID());
+                    thisPed->Moods = "";
+                    myMenu.Menu_Form[myMenu.Index].Description = "Default";
+                }
+                else if (myMenu.Index == 5)
+                {
+                    myMenu.Menu_Form[myMenu.Index].Current = 0;
+                    PED::RESET_PED_MOVEMENT_CLIPSET(PLAYER::PLAYER_PED_ID(), 0.0f);
+                    thisPed->Walkies = "";
+                    myMenu.Menu_Form[myMenu.Index].Description = "Default";
+                }
+                else if (myMenu.Index == 6)
+                {
+                    std::string newNames = thisPed->CharName;
+                    if (newNames == "" || newNames == "Current")
+                        newNames = CaptureScreenText();
+
+                    if (newNames != "")
+                    {
+                        thisPed->CharName = newNames;
+
+                        if (Menu_YourPed != -1)
+                            SaveClothBank(SavedPeds[Menu_YourPed]);
+                        else
+                        {
+                            SavedPeds.push_back(MyNewBank);
+                            SaveClothBank(MyNewBank);
+                            break;
+                        }
+                    }
+                }
+                else if (myMenu.Index == 7)
+                {
+
+                    for (int i = 0; i < (int)SavedPeds.size(); i++)
+                    {
+                        if (SavedPeds[i].CharName == thisPed->CharName)
+                            SavedPeds.erase(SavedPeds.begin() + i);
+                    }
+                    FileRemoval(GetDir() + "/RandomStart/SavedPeds/" + thisPed->CharName + ".ini");
+                    break;
                 }
                 else
+                    break;
+            }
+            else if (myMenu._Left || myMenu._Right)
+            {
+                if (myMenu.Index == 3)
+                    myMenu.Menu_Form[myMenu.Index].Description = YourVoice(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
+                else if (myMenu.Index == 4)
                 {
-                    AUDIO::SET_AMBIENT_VOICE_NAME(PLAYER::PLAYER_PED_ID(), (LPSTR)Vo.c_str());
-                    invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
-                    thisPed->Voice = Vo;
+                    std::string Wlk = FaceAn[myMenu.Menu_Form[myMenu.Index].Current];
+                    if (Wlk == "Default")
+                    {
+                        PED::CLEAR_FACIAL_IDLE_ANIM_OVERRIDE(PLAYER::PLAYER_PED_ID());
+                        thisPed->Moods = "";
+                    }
+                    else
+                    {
+                        thisPed->Moods = Wlk;
+                        PullingFaces(Wlk);
+                    }
+                    myMenu.Menu_Form[myMenu.Index].Description = Wlk;
+                }
+                else if (myMenu.Index == 5)
+                {
+                    std::string Wlk = YourWalkes(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
+                    if (Wlk == "Default")
+                    {
+                        PED::RESET_PED_MOVEMENT_CLIPSET(PLAYER::PLAYER_PED_ID(), 0.0f);
+                        thisPed->Walkies = "";
+                    }
+                    else
+                    {
+                        WalkingStyle(PLAYER::PLAYER_PED_ID(), Wlk);
+                        thisPed->Walkies = Wlk;
+                    }
+                    myMenu.Menu_Form[myMenu.Index].Description = Wlk;
                 }
             }
-            else if (myMenu.Index == 4)
-            {
-                if (thisPed->CharName == "")
-                    thisPed->CharName = CaptureScreenText();
 
-                UpdateSavedClothBanks();
-            }
-            else if (myMenu.Index == 5)
-            {
-
-                for (int i = 0; i < (int)SavedPeds.size(); i++)
-                {
-                    if (SavedPeds[i].CharName == thisPed->CharName)
-                        SavedPeds.erase(SavedPeds.begin() + i);
-                    FileRemoval(GetDir() + "/RandomStart/SavedPeds/" + thisPed->CharName + ".ini");
-                }
-                break;
-            }
-            else
-                break;
         }
-        else if (myMenu._Left || myMenu._Right)
-        {
-            if (myMenu.Index == 3)
-                myMenu.Menu_Form[myMenu.Index].Description = YourVoice(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
-        }
-
+        MenuOpen = false;
     }
-    MenuOpen = false;
+    else
+        Menu_Index = 0;
 }
 void PeditorMenu_FreeMode(Mod_Class::ClothBank* thisPed, int Main_Char, int iScale, float screenHeightScaleFactor)
 {
-    LoggerLight("PeditorMenu_FreeMode");
-    MenuOpen = true;
-
-    int EyeTotal = 22;
-    if (thisPed->Male)
-        EyeTotal = 22;
-    int iHair = 0;
-    for (int i = 0; i < SizeUpHairList(thisPed->Male); i++)
+    if (thisPed != nullptr)
     {
-        if (PickAStyle(i, thisPed->Male).Name == thisPed->MyHair.Name)
+        LoggerLight("PeditorMenu_FreeMode");
+        MenuOpen = true;
+
+        int EyeTotal = 22;
+
+        int iHair = 0;
+        for (int i = 0; i < SizeUpHairList(thisPed->Male); i++)
         {
-            iHair = i;
-            break;
+            if (PickAStyle(i, thisPed->Male).Name == thisPed->MyHair.Name)
+            {
+                iHair = i;
+                break;
+            }
         }
-    }
-    int Voices = 0;
-    for (int i = 0; i < SizeUpHairList(thisPed->Male); i++)
-    {
-        if (YourVoice(thisPed->Male, i) == thisPed->Voice)
+        int Voices = 0;
+        for (int i = 0; i < VoiceCount(thisPed->Male); i++)
         {
-            Voices = i;
-            break;
+            if (YourVoice(thisPed->Male, i) == thisPed->Voice)
+            {
+                Voices = i;
+                break;
+            }
         }
-    }
 
-    std::vector<Mod_Class::MeunFields> M_List = {
-        Mod_Class::MeunFields(RSLangMenu[87] ,RSLangMenu[88], false, false, 0, 0, 0),
-        Mod_Class::MeunFields(RSLangMenu[89], RSLangMenu[90], false, false, 0, 0, 0),            //ext
-        Mod_Class::MeunFields(RSLangMenu[91], RSLangMenu[92], false, false, 0, 0, 0),                    //ext
-        Mod_Class::MeunFields(RSLangMenu[93], thisPed->MyHair.Name, false, true, 0, SizeUpHairList(thisPed->Male), iHair),
-        Mod_Class::MeunFields(RSLangMenu[94], RSLangMenu[95], false, true, 0, EyeTotal, thisPed->EyeColour),
-        Mod_Class::MeunFields(RSLangMenu[96], thisPed->MyHair.Name, false, true, 0, 61, thisPed->HairColour),
-        Mod_Class::MeunFields(RSLangMenu[97], thisPed->MyHair.Name, false, true, 0, 61, thisPed->HairStreaks),
-        Mod_Class::MeunFields(RSLangMenu[98], RSLangMenu[99], false, false, 0, 0, 0),                     //ext
-        Mod_Class::MeunFields(RSLangMenu[100], RSLangMenu[101], false, false, 0, 0, 0),        //ext
-        Mod_Class::MeunFields(RSLangMenu[102], RSLangMenu[103], false, false, 0, 0, 0),            //ext
-        Mod_Class::MeunFields(RSLangMenu[104], thisPed->Voice, false, false, 0, VoiceCount(thisPed->Male), Voices),
-        Mod_Class::MeunFields(RSLangMenu[105], RSLangMenu[106], false, false, 0, 0, 0),
-        Mod_Class::MeunFields(RSLangMenu[107], RSLangMenu[108], false, false, 0, 0, 0)
-    };
+        std::vector<Mod_Class::MeunFields> M_List = {
+            Mod_Class::MeunFields(RSLangMenu[87] ,RSLangMenu[88], false, false, 0, 0, 0),
+            Mod_Class::MeunFields(RSLangMenu[89], RSLangMenu[90], false, false, 0, 0, 0),            //ext
+            Mod_Class::MeunFields(RSLangMenu[91], RSLangMenu[92], false, false, 0, 0, 0),                    //ext
+            Mod_Class::MeunFields(RSLangMenu[93], thisPed->MyHair.Name, false, true, 0, SizeUpHairList(thisPed->Male), iHair),
+            Mod_Class::MeunFields(RSLangMenu[94], RSLangMenu[95], false, true, 0, EyeTotal, thisPed->EyeColour),
+            Mod_Class::MeunFields(RSLangMenu[96], thisPed->MyHair.Name, false, true, 0, 61, thisPed->HairColour),
+            Mod_Class::MeunFields(RSLangMenu[97], thisPed->MyHair.Name, false, true, 0, 61, thisPed->HairStreaks),
+            Mod_Class::MeunFields(RSLangMenu[98], RSLangMenu[99], false, false, 0, 0, 0),                     //ext
+            Mod_Class::MeunFields(RSLangMenu[100], RSLangMenu[101], false, false, 0, 0, 0),        //ext
+            Mod_Class::MeunFields(RSLangMenu[102], RSLangMenu[103], false, false, 0, 0, 0),            //ext
+            Mod_Class::MeunFields(RSLangMenu[104], thisPed->Voice, false, false, 0, VoiceCount(thisPed->Male), Voices),
+            Mod_Class::MeunFields("Face Moods", thisPed->Moods, false, false, 0, (int)FaceAn.size() - 1, 0),
+            Mod_Class::MeunFields("Walk Style", thisPed->Walkies, false, false, 0, WalkCount(thisPed->Male), 0),
+            Mod_Class::MeunFields(RSLangMenu[105], RSLangMenu[106], false, false, 0, 0, 0),
+            Mod_Class::MeunFields(RSLangMenu[107], RSLangMenu[108], false, false, 0, 0, 0)
+        };
 
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 7, true, M_List);
-    myMenu.waitTime = InGameTime() + 150;
+        Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 7, true, M_List);
+        myMenu.waitTime = InGameTime() + 150;
 
-    Menu_Index = 0;
-    
-    while (true)
-    {
-        if (Close_Menu)
-            break;
+        Menu_Index = 0;
 
-        MenuDisplay(&myMenu, screenHeightScaleFactor);
-        GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
-        WAIT(0);
-
-        if (myMenu._Exit)
-            break;
-        else if (myMenu._Activate)
+        while (true)
         {
-            if (myMenu.Index == 0)
-            {
-                std::string sC = CaptureScreenText();
-                if (sC != "")
-                    thisPed->CharName = sC;
-            }
-            else if (myMenu.Index == 1)
-            {
-                if ((int)thisPed->Cothing.size() == 0)
-                {
-                    thisPed->Cloth_Pick = 0;
-                    thisPed->Cothing.push_back(GetYourTogs(PLAYER::PLAYER_PED_ID()));
-                }
-                Menu_Index = 2;
+            if (Close_Menu)
                 break;
-            }
-            else if (myMenu.Index == 2)
-            {
-                Menu_Index = 3; 
-                break;
-            }
-            else if (myMenu.Index == 3)
-            {
-                myMenu.Menu_Form[myMenu.Index].Current = 0;
-                Mod_Class::HairSets newHair = PickAStyle(myMenu.Menu_Form[myMenu.Index].Current, thisPed->Male);
-                SetingtheHair(PLAYER::PLAYER_PED_ID(), &newHair);
-                myMenu.Menu_Form[myMenu.Index].Description = newHair.Name;
-                thisPed->MyHair = newHair;
-            }
-            else if (myMenu.Index == 4)
-            {
-                thisPed->EyeColour = 0;
-                myMenu.Menu_Form[myMenu.Index].Current = 0;
-                PED::_SET_PED_EYE_COLOR(PLAYER::PLAYER_PED_ID(), 0);
-            }
-            else if (myMenu.Index == 5)
-            {
-                thisPed->HairColour = 0;
-                myMenu.Menu_Form[myMenu.Index].Current = 0;
-                PED::_SET_PED_HAIR_COLOR(PLAYER::PLAYER_PED_ID(), thisPed->HairColour, thisPed->HairStreaks);
-            }
-            else if (myMenu.Index == 6)
-            {
-                thisPed->HairStreaks = 0;
-                myMenu.Menu_Form[myMenu.Index].Current = 0;
-                PED::_SET_PED_HAIR_COLOR(PLAYER::PLAYER_PED_ID(), thisPed->HairColour, thisPed->HairStreaks);
-            }
-            else if (myMenu.Index == 7)
-            {
-                Menu_Index = 4;
-                break;
-            }
-            else if (myMenu.Index == 8)
-            {
-                Menu_Index = 5;
-                break;
-            }
-            else if (myMenu.Index == 9)
-            {
-                Menu_Index = 6;
-                break;
-            }
-            else if (myMenu.Index == 10)
-            {
-                std::string Vo = YourVoice(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
-                if (Vo == "Default")
-                {
-                    invoke <Void>(0x40CF0D12D142A9E8, PLAYER::PLAYER_PED_ID());
-                    invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
-                    thisPed->Voice = "";
-                }
-                else
-                {
-                    AUDIO::SET_AMBIENT_VOICE_NAME(PLAYER::PLAYER_PED_ID(), (LPSTR)Vo.c_str());
-                    invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
-                    thisPed->Voice = Vo;
-                }
-            }
-            else if (myMenu.Index == 11)
-            {
-                if (thisPed->CharName == "")
-                    thisPed->CharName = CaptureScreenText();
 
-                UpdateSavedClothBanks();
+            MenuDisplay(&myMenu, screenHeightScaleFactor);
+            GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 0);
+            WAIT(0);
+
+            if (myMenu._Exit)
                 break;
-            }
-            else if (myMenu.Index == 12)
+            else if (myMenu._Activate)
             {
-                for (int i = 0; i < (int)SavedPeds.size(); i++)
+                if (myMenu.Index == 0)
                 {
+                    std::string newNames = CaptureScreenText();
+                    if (newNames != "" || thisPed->CharName != newNames)
+                    {
+                        if (Menu_YourPed != -1)
+                        {
+                            FileRemoval(GetDir() + "/RandomStart/SavedPeds/" + thisPed->CharName + ".ini");
+                            thisPed->CharName = newNames;
+                            SaveClothBank(SavedPeds[Menu_YourPed]);
+                        }
+                        else
+                            thisPed->CharName = newNames;
+                    }
+                }
+                else if (myMenu.Index == 1)
+                {
+                    if ((int)thisPed->Cothing.size() == 0)
+                    {
+                        thisPed->Cloth_Pick = 0;
+                        thisPed->Cothing.push_back(GetYourTogs(PLAYER::PLAYER_PED_ID()));
+                    }
+                    Menu_Index = 2;
+                    break;
+                }
+                else if (myMenu.Index == 2)
+                {
+                    Menu_Index = 3;
+                    break;
+                }
+                else if (myMenu.Index == 3)
+                {
+                    myMenu.Menu_Form[myMenu.Index].Current = 0;
+                    Mod_Class::HairSets newHair = PickAStyle(myMenu.Menu_Form[myMenu.Index].Current, thisPed->Male);
+                    SetingtheHair(PLAYER::PLAYER_PED_ID(), &newHair);
+                    myMenu.Menu_Form[myMenu.Index].Description = newHair.Name;
+                    thisPed->MyHair = newHair;
+                }
+                else if (myMenu.Index == 4)
+                {
+                    thisPed->EyeColour = 0;
+                    myMenu.Menu_Form[myMenu.Index].Current = 0;
+                    PED::_SET_PED_EYE_COLOR(PLAYER::PLAYER_PED_ID(), 0);
+                }
+                else if (myMenu.Index == 5)
+                {
+                    thisPed->HairColour = 0;
+                    myMenu.Menu_Form[myMenu.Index].Current = 0;
+                    PED::_SET_PED_HAIR_COLOR(PLAYER::PLAYER_PED_ID(), thisPed->HairColour, thisPed->HairStreaks);
+                }
+                else if (myMenu.Index == 6)
+                {
+                    thisPed->HairStreaks = 0;
+                    myMenu.Menu_Form[myMenu.Index].Current = 0;
+                    PED::_SET_PED_HAIR_COLOR(PLAYER::PLAYER_PED_ID(), thisPed->HairColour, thisPed->HairStreaks);
+                }
+                else if (myMenu.Index == 7)
+                {
+                    Menu_Index = 4;
+                    break;
+                }
+                else if (myMenu.Index == 8)
+                {
+                    Menu_Index = 5;
+                    break;
+                }
+                else if (myMenu.Index == 9)
+                {
+                    Menu_Index = 6;
+                    break;
+                }
+                else if (myMenu.Index == 10)
+                {
+                    std::string Vo = YourVoice(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
+                    if (Vo == "Default")
+                    {
+                        invoke <Void>(0x40CF0D12D142A9E8, PLAYER::PLAYER_PED_ID());
+                        invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
+                        thisPed->Voice = "";
+                    }
+                    else
+                    {
+
+                        thisPed->Voice = Vo;
+                    }
+                }
+                else if (myMenu.Index == 11)
+                {
+                    myMenu.Menu_Form[myMenu.Index].Current = 0;
+                    PED::CLEAR_FACIAL_IDLE_ANIM_OVERRIDE(PLAYER::PLAYER_PED_ID());
+                    thisPed->Moods = "";
+                    myMenu.Menu_Form[myMenu.Index].Description = "Default";
+                }
+                else if (myMenu.Index == 12)
+                {
+                    myMenu.Menu_Form[myMenu.Index].Current = 0;
+                    PED::RESET_PED_MOVEMENT_CLIPSET(PLAYER::PLAYER_PED_ID(), 0.0f);
+                    thisPed->Walkies = "";
+                    myMenu.Menu_Form[myMenu.Index].Description = "Default";
+                }
+                else if (myMenu.Index == 13)
+                {
+                    std::string newNames = thisPed->CharName;
+                    if (newNames == "" || newNames == "Current")
+                        newNames = CaptureScreenText();
+
+                    if (newNames != "")
+                    {
+                        thisPed->CharName = newNames;
+
+                        if (Menu_YourPed != -1)
+                            SaveClothBank(SavedPeds[Menu_YourPed]);
+                        else
+                        {
+                            SavedPeds.push_back(MyNewBank);
+                            SaveClothBank(MyNewBank);
+                            break;
+                        }
+                    }
+                }
+                else if (myMenu.Index == 14)
+                {
+                    for (int i = 0; i < (int)SavedPeds.size(); i++)
+                    {
+                        if (SavedPeds[i].CharName == thisPed->CharName)
+                            SavedPeds.erase(SavedPeds.begin() + i);
+                    }
                     FileRemoval(GetDir() + "/RandomStart/SavedPeds/" + thisPed->CharName + ".ini");
-                    if (SavedPeds[i].CharName == thisPed->CharName)
-                        SavedPeds.erase(SavedPeds.begin() + i);
-                }
-                break;
-            }
-            else
-                break;
-        }
-        else if (myMenu._Left || myMenu._Right)
-        {
-            if (myMenu.Index == 3)
-            {
-                Mod_Class::HairSets newHair = PickAStyle(myMenu.Menu_Form[myMenu.Index].Current, thisPed->Male);
-                SetingtheHair(PLAYER::PLAYER_PED_ID(), &newHair);
-                myMenu.Menu_Form[myMenu.Index].Description = newHair.Name;
-                thisPed->MyHair = newHair;
-            }
-            else if (myMenu.Index == 4)
-            {
-                thisPed->EyeColour = myMenu.Menu_Form[myMenu.Index].Current;
-                PED::_SET_PED_EYE_COLOR(PLAYER::PLAYER_PED_ID(), thisPed->EyeColour);
-            }
-            else if (myMenu.Index == 5)
-            {
-                thisPed->HairColour = myMenu.Menu_Form[myMenu.Index].Current;
-                PED::_SET_PED_HAIR_COLOR(PLAYER::PLAYER_PED_ID(), thisPed->HairColour, thisPed->HairStreaks);
-            }
-            else if (myMenu.Index == 6)
-            {
-                thisPed->HairStreaks = myMenu.Menu_Form[myMenu.Index].Current;
-                PED::_SET_PED_HAIR_COLOR(PLAYER::PLAYER_PED_ID(), thisPed->HairColour, thisPed->HairStreaks);
-            }
-            else if (myMenu.Index == 10)
-            {
-                std::string Vo = YourVoice(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
-                if (Vo == "Default")
-                {
-                    invoke <Void>(0x40CF0D12D142A9E8, PLAYER::PLAYER_PED_ID());
-                    invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
-                    thisPed->Voice = "";
+                    break;
                 }
                 else
+                    break;
+            }
+            else if (myMenu._Left || myMenu._Right)
+            {
+                if (myMenu.Index == 3)
                 {
-                    AUDIO::SET_AMBIENT_VOICE_NAME(PLAYER::PLAYER_PED_ID(), (LPSTR)Vo.c_str());
-                    invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
-                    thisPed->Voice = Vo;
+                    Mod_Class::HairSets newHair = PickAStyle(myMenu.Menu_Form[myMenu.Index].Current, thisPed->Male);
+                    SetingtheHair(PLAYER::PLAYER_PED_ID(), &newHair);
+                    myMenu.Menu_Form[myMenu.Index].Description = newHair.Name;
+                    thisPed->MyHair = newHair;
                 }
-                myMenu.Menu_Form[myMenu.Index].Description = Vo;
+                else if (myMenu.Index == 4)
+                {
+                    thisPed->EyeColour = myMenu.Menu_Form[myMenu.Index].Current;
+                    PED::_SET_PED_EYE_COLOR(PLAYER::PLAYER_PED_ID(), thisPed->EyeColour);
+                }
+                else if (myMenu.Index == 5)
+                {
+                    thisPed->HairColour = myMenu.Menu_Form[myMenu.Index].Current;
+                    PED::_SET_PED_HAIR_COLOR(PLAYER::PLAYER_PED_ID(), thisPed->HairColour, thisPed->HairStreaks);
+                }
+                else if (myMenu.Index == 6)
+                {
+                    thisPed->HairStreaks = myMenu.Menu_Form[myMenu.Index].Current;
+                    PED::_SET_PED_HAIR_COLOR(PLAYER::PLAYER_PED_ID(), thisPed->HairColour, thisPed->HairStreaks);
+                }
+                else if (myMenu.Index == 10)
+                {
+                    std::string Vo = YourVoice(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
+                    if (Vo == "Default")
+                    {
+                        invoke <Void>(0x40CF0D12D142A9E8, PLAYER::PLAYER_PED_ID());
+                        invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
+                        thisPed->Voice = "";
+                    }
+                    else
+                    {
+                        ThemVoices(Vo);
+                        thisPed->Voice = Vo;
+                    }
+                    myMenu.Menu_Form[myMenu.Index].Description = Vo;
+                }
+                else if (myMenu.Index == 11)
+                {
+                    std::string Wlk = FaceAn[myMenu.Menu_Form[myMenu.Index].Current];
+                    if (Wlk == "Default")
+                    {
+                        PED::CLEAR_FACIAL_IDLE_ANIM_OVERRIDE(PLAYER::PLAYER_PED_ID());
+                        thisPed->Moods = "";
+                    }
+                    else
+                    {
+                        thisPed->Moods = Wlk;
+                        PullingFaces(Wlk);
+                    }
+                    myMenu.Menu_Form[myMenu.Index].Description = Wlk;
+                }
+                else if (myMenu.Index == 12)
+                {
+                    std::string Wlk = YourWalkes(thisPed->Male, myMenu.Menu_Form[myMenu.Index].Current);
+                    if (Wlk == "Default")
+                    {
+                        PED::RESET_PED_MOVEMENT_CLIPSET(PLAYER::PLAYER_PED_ID(), 0.0f);
+                        thisPed->Walkies = "";
+                    }
+                    else
+                    {
+                        WalkingStyle(PLAYER::PLAYER_PED_ID(), Wlk);
+                        thisPed->Walkies = Wlk;
+                    }
+                    myMenu.Menu_Form[myMenu.Index].Description = Wlk;
+                }
             }
         }
+        if (myMenu._Exit)
+        {
+            if (thisPed->CharName == "")
+                SavedPeds.pop_back();
+        }
+        MenuOpen = false;
     }
-    if (myMenu._Exit)
-    {
-        if (thisPed->CharName == "")
-            SavedPeds.pop_back();
-    }
-    MenuOpen = false;
+    else 
+        Menu_Index = 0;
 }
 
 void PedditorMenu(Mod_Class::ClothBank* thisPed)
 {
     LoggerLight("PedditorMenu");
 
-    float screenHeightScaleFactor = GRAPHICS::_GET_SCREEN_ASPECT_RATIO(true);
-
-    std::vector<std::string> sInstBut = { RSLangMenu[0], RSLangMenu[1], RSLangMenu[2], RSLangMenu[3] };
-    std::vector<int> iInstBut = { 21, 45, 189, 190 };
-    int Main_Char = YourCharIs();
-    int iScale = BottomRight(iInstBut, sInstBut);
-
-    Menu_Index = 1;
-
-    while (true)
+    if (thisPed != nullptr)
     {
-        if (Close_Menu)
-            break;
-        else if (Menu_Index == 1)
+        float screenHeightScaleFactor = GRAPHICS::_GET_SCREEN_ASPECT_RATIO(true);
+
+        std::vector<std::string> sInstBut = { RSLangMenu[0], RSLangMenu[1], RSLangMenu[2], RSLangMenu[3] };
+        std::vector<int> iInstBut = { 21, 45, 189, 190 };
+        int Main_Char = YourCharIs();
+        int iScale = BottomRight(iInstBut, sInstBut);
+
+        Menu_Index = 1;
+
+        while (true)
         {
-            if (Main_Char == 1 || Main_Char == 2 || Main_Char == 3)
-                PeditorMenu_MainChar(thisPed, Main_Char, iScale, screenHeightScaleFactor);
-            else if (Main_Char == 4 || Main_Char == 5)
-                PeditorMenu_FreeMode(thisPed, Main_Char, iScale, screenHeightScaleFactor);
+            if (Close_Menu)
+                break;
+            else if (Menu_Index == 1)
+            {
+                if (Main_Char == 1 || Main_Char == 2 || Main_Char == 3)
+                    PeditorMenu_MainChar(thisPed, Main_Char, iScale, screenHeightScaleFactor);
+                else if (Main_Char == 4 || Main_Char == 5)
+                    PeditorMenu_FreeMode(thisPed, Main_Char, iScale, screenHeightScaleFactor);
+                else
+                    PeditorMenu_Other(thisPed, iScale, screenHeightScaleFactor);
+            }
+            else if (Menu_Index == 2)
+                PeditorMenu_Outfit(thisPed, iScale, screenHeightScaleFactor);
+            else if (Menu_Index == 3)
+                PeditorMenu_TattooPar(thisPed, Main_Char, iScale, screenHeightScaleFactor);
+            else if (Menu_Index == 4)
+                PeditorMenu_FaceFeats(thisPed, iScale, screenHeightScaleFactor);
+            else if (Menu_Index == 5)
+                PeditorMenu_FaceShape(thisPed, iScale, screenHeightScaleFactor);
+            else if (Menu_Index == 6)
+                PeditorMenu_Parenting(thisPed, iScale, screenHeightScaleFactor);
+            else if (Menu_Index == 7)
+                PeditorMenu_PedComp(thisPed, iScale, screenHeightScaleFactor);
+            else if (Menu_Index == 8)
+                PeditorMenu_PedProp(thisPed, iScale, screenHeightScaleFactor);
+            else if (Menu_Index == 9)
+                PeditorMenu_CompList(Menu_IndexI, thisPed, iScale, screenHeightScaleFactor);
+            else if (Menu_Index == 10)
+                PeditorMenu_PropList(Menu_IndexI, thisPed, iScale, screenHeightScaleFactor);
+            else if (Menu_Index == 11)
+                PeditorMenu_TattooParList(thisPed, Main_Char, Menu_IndexI, iScale, screenHeightScaleFactor);
+            else if (Menu_Index == 12)
+                PeditorMenu_FaceFeatsList(Menu_IndexI, Menu_IndexII, Menu_IndexIII, thisPed, iScale, screenHeightScaleFactor);
             else
-                PeditorMenu_Other(thisPed, iScale, screenHeightScaleFactor);
+                break;
         }
-        else if (Menu_Index == 2)
-            PeditorMenu_Outfit(thisPed, iScale, screenHeightScaleFactor);
-        else if (Menu_Index == 3)
-            PeditorMenu_TattooPar(thisPed, Main_Char, iScale, screenHeightScaleFactor);
-        else if (Menu_Index == 4)
-            PeditorMenu_FaceFeats(thisPed, iScale, screenHeightScaleFactor);
-        else if (Menu_Index == 5)
-            PeditorMenu_FaceShape(thisPed, iScale, screenHeightScaleFactor);
-        else if (Menu_Index == 6)
-            PeditorMenu_Parenting(thisPed, iScale, screenHeightScaleFactor);
-        else if (Menu_Index == 7)
-            PeditorMenu_PedComp(thisPed, iScale, screenHeightScaleFactor);
-        else if (Menu_Index == 8)
-            PeditorMenu_PedProp(thisPed, iScale, screenHeightScaleFactor);
-        else if (Menu_Index == 9)
-            PeditorMenu_CompList(Menu_IndexI, thisPed, iScale, screenHeightScaleFactor);
-        else if (Menu_Index == 10)
-            PeditorMenu_PropList(Menu_IndexI, thisPed, iScale, screenHeightScaleFactor);
-        else if (Menu_Index == 11)
-            PeditorMenu_TattooParList(thisPed, Main_Char, Menu_IndexI, iScale, screenHeightScaleFactor);
-        else if (Menu_Index == 12)
-            PeditorMenu_FaceFeatsList(Menu_IndexI, Menu_IndexII, Menu_IndexIII, thisPed, iScale, screenHeightScaleFactor);
-        else
-            break;
+
+        CloseBaseHelpBar(iScale);
     }
-    if (thisPed->CharName != "")
-        UpdateSavedClothBanks();
-    CloseBaseHelpBar(iScale);
 }
 
-void SaveCurrentPed()
-{
-    Hash pedHash = ENTITY::GET_ENTITY_MODEL(PLAYER::PLAYER_PED_ID());
-
-    bool freeMode = false;
-    if (pedHash == MainProtags[3] || pedHash == MainProtags[4])
-        freeMode = true;
-    bool male = PED::IS_PED_MALE(PLAYER::PLAYER_PED_ID());
-
-    bool animal_Farm = false;
-    if (PED::GET_PED_TYPE(PLAYER::PLAYER_PED_ID()) == 28)
-        animal_Farm = true;
-
-    Mod_Class::ClothBank MyNewBank = Mod_Class::ClothBank("", "", pedHash, freeMode, FreeFaces(PLAYER::PLAYER_PED_ID(), freeMode), male, animal_Farm, PickAStyle(male), 0, 0, 0, 0, AddOverLay(male, freeMode), {}, { GetYourTogs(PLAYER::PLAYER_PED_ID()) }, {}, "");
-
-    SavedPeds.push_back(MyNewBank);
-
-    Menu_IndexI = (int)SavedPeds.size() - 1;
-
-    Menu_Index = -1;
-}
 void NewRandomFreePed()
 {
-    Menu_IndexI = (int)SavedPeds.size();
-    SavedPeds.push_back(NewFreeModePed());
-    SavedPlayer(&SavedPeds[Menu_IndexI], -1);
-    Menu_Index = -1;
+    MyNewBank = NewFreeModePed();
+    SavedPlayer(&MyNewBank, -1);
+    Menu_YourPed = -1;
 }
 void RsMenu_LoadSavePed(int iScale, float screenHeightScaleFactor)
 {
@@ -4452,6 +4865,8 @@ void RsMenu_LoadSavePed(int iScale, float screenHeightScaleFactor)
     if ((int)SavedPeds.size() > 0)
     {
         std::vector<Mod_Class::MeunFields> PedCompOut = {};
+
+
 
         for (int i = 0; i < (int)SavedPeds.size(); i++)
             PedCompOut.push_back(Mod_Class::MeunFields(SavedPeds[i].CharName, RSLangMenu[86], false, false, 0, 1, 0));
@@ -4490,8 +4905,8 @@ void RsMenu_LoadSavePed(int iScale, float screenHeightScaleFactor)
                 Menu_Index = 1;
             else if (myMenu._Activate)
             {
-                Menu_IndexI = myMenu.Index;
-                SavedPlayer(&SavedPeds[Menu_IndexI], -1);
+                Menu_YourPed = myMenu.Index;
+                SavedPlayer(&SavedPeds[Menu_YourPed], -1);
                 Menu_Index = -1;
             }
         }
@@ -4502,14 +4917,27 @@ void RsMenu_LoadSavePed(int iScale, float screenHeightScaleFactor)
 void RsMenu_SavePed(int iScale, float screenHeightScaleFactor)
 {
     LoggerLight("RsMenu_SavePed");
+    PedBanking();
+
+    std::string SaveEdit01 = RSLangMenu[80];
+    std::string PedTitle = MyNewBank.CharName;
+
+    if (Menu_YourPed != -1)
+    {
+        PedTitle = SavedPeds[Menu_YourPed].CharName;;
+        SaveEdit01 = RSLangMenu[227] + " " + PedTitle;
+    }
+
+
     MenuOpen = true;
     std::vector<Mod_Class::MeunFields> M_List = {
+        Mod_Class::MeunFields(PedTitle, "", false, false, 0, 0, 0),   //NamePlate
         Mod_Class::MeunFields(RSLangMenu[78], RSLangMenu[79], false, false, 0, 0, 0),   //Ext
-        Mod_Class::MeunFields(RSLangMenu[80], RSLangMenu[81], false, false, 0, 0, 0),    //Ext
+        Mod_Class::MeunFields(SaveEdit01, RSLangMenu[81], false, false, 0, 0, 0),    //Ext
         Mod_Class::MeunFields(RSLangMenu[82], RSLangMenu[83], false, false, 0, 0, 0),
         Mod_Class::MeunFields(RSLangMenu[84], RSLangMenu[85], false, false, 0, 0, 0)
     };
-    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 4, false, M_List);
+    Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 5, false, M_List);
     myMenu.waitTime = InGameTime() + 150;
 
     Menu_Index = 0;
@@ -4523,24 +4951,32 @@ void RsMenu_SavePed(int iScale, float screenHeightScaleFactor)
         WAIT(0);
 
         if (myMenu._Exit)
-        {
-            Menu_Index = 1;
             break;
-        }
         else if (myMenu._Activate)
-            break;
+        {
+            if (myMenu.Index == 0)
+            {
+
+            }
+            if (myMenu.Index == 3)
+            {
+                NewRandomFreePed();
+                M_List[0].Title = MyNewBank.CharName;
+                M_List[2].Title = RSLangMenu[227] + " " + PedTitle;
+            }
+            else
+                break;
+        }
     }
 
     MenuOpen = false;
     if (myMenu._Exit)
         Menu_Index = 1;
-    else if (myMenu.Index == 0)
-        Menu_Index = 5;
     else if (myMenu.Index == 1)
-        Menu_Index = 6;
+        Menu_Index = 5;
     else if (myMenu.Index == 2)
-        Menu_Index = 7;
-    else if (myMenu.Index == 3)
+        Menu_Index = -1;
+    else if (myMenu.Index == 4)
         Menu_Index = 100;
 }
 void RsMenu_ScenarioToggles(int index)
@@ -4866,7 +5302,7 @@ void RsMenu_Main(int iScale, float screenHeightScaleFactor)
         Mod_Class::MeunFields(RSLangMenu[213],RSLangMenu[226], false, false, 0, 0, 0),         //Ext
         Mod_Class::MeunFields(TranlatesTo[Mod_Settings.Lang_Set], "", false, false, 0, 0, 0)
     };
-    
+
     Mod_Class::MeunSystem myMenu = Mod_Class::MeunSystem(0, 7, true, M_List);
     myMenu.waitTime = InGameTime() + 150;
 
@@ -4958,7 +5394,7 @@ void RsMenu_Main(int iScale, float screenHeightScaleFactor)
                 RsMenu_MainToggles(myMenu.Index, &myMenu);
         }
     }
-    MenuOpen = false;    
+    MenuOpen = false;
 }
 
 void FindThisScale(int iSkale, float fChange, Mod_Class::MeunSystem* myMenu)
@@ -5092,15 +5528,11 @@ void RandomStartMenu()
         else if (Menu_Index == 2)
             RsMenu_Scenario(iScale, screenHeightScaleFactor);
         else if (Menu_Index == 3)
-            RsMenu_SavePed(iScale, screenHeightScaleFactor);       
+            RsMenu_SavePed(iScale, screenHeightScaleFactor);
         else if (Menu_Index == 4)
             RsMenu_Winter(iScale, screenHeightScaleFactor);
         else if (Menu_Index == 5)
             RsMenu_LoadSavePed(iScale, screenHeightScaleFactor);
-        else if (Menu_Index == 6)
-            SaveCurrentPed();
-        else if (Menu_Index == 7)
-            NewRandomFreePed();
         else if (Menu_Index == 8)
             RsMenu_KeyCapture(iScale, screenHeightScaleFactor);
         else
@@ -5111,8 +5543,14 @@ void RandomStartMenu()
 
     if (Menu_Index == 100)
         Reposesion();
-    else if (Menu_Index == -1 && Menu_IndexI > -1 && Menu_IndexI < (int)SavedPeds.size())
-        PedditorMenu(&SavedPeds[Menu_IndexI]);
+    else if (Menu_Index == -1)
+    {
+        if (Menu_YourPed > -1 && Menu_YourPed < (int)SavedPeds.size())
+            PedditorMenu(&SavedPeds[Menu_YourPed]);
+        else
+            PedditorMenu(&MyNewBank);
+    }
+        
 }
 
 int iWait = 0;
@@ -5121,7 +5559,7 @@ void RemoveWhenFar()
 {
     if ((int)Vehicle_List.size() > 0)
     {
-        if (DistanceTo(PlayerPosi(),EntPosition(Vehicle_List[0])) > 150.00f)
+        if (DistanceTo(PlayerPosi(), EntPosition(Vehicle_List[0])) > 150.00f)
             ClearAllEntitys(true);
         GotClutter = false;
     }
@@ -5140,6 +5578,7 @@ const Mod_Class::Vector4 CayoDance02 = Mod_Class::Vector4(4890.318f, -4923.923f,
 
 bool PrivateDancer = false;
 int Strictly = 0;
+
 void StrictlyCome()
 {
     if (Strictly < (int)CayDancers.size())
@@ -5157,7 +5596,7 @@ void YouMakeMeFeal()
 {
     if (PrivateDancer)
     {
-        UiSystem::TopLeft(RSLangMenu[209]);
+        Mod_Ui::TopLeft(RSLangMenu[209]);
         if (Mod_Systems::WhileButtonDown(75, true))
         {
             AI::CLEAR_PED_TASKS_IMMEDIATELY(PLAYER::PLAYER_PED_ID());
@@ -5170,7 +5609,7 @@ void YouMakeMeFeal()
     }
     else
     {
-        UiSystem::TopLeft(RSLangMenu[210]);
+        Mod_Ui::TopLeft(RSLangMenu[210]);
         if (Mod_Systems::WhileButtonDown(46, true))
         {
             DanceDanceDance(PLAYER::PLAYER_PED_ID());
@@ -5178,12 +5617,49 @@ void YouMakeMeFeal()
         }
     }
 }
-void SecondLoop()
+void main()
 {
-	while (true)
-	{	 
-		if (!Mod_Load)
-		{
+    while (true)
+    {
+        if (Mod_Load)
+        {
+            if (!(bool)DLC2::GET_IS_LOADING_SCREEN_ACTIVE())
+            {
+                LoadinData();
+                Mod_Load = false;
+                //BuildProps("prop_fib_3b_cover1", NewVector3(-282.8405f, 2834.9153f, 53.3622f), NewVector3(0.00f, 0.00f, 151.3774f), false, false);
+
+            }
+        }
+        else
+        {
+            if (Disp_Advice)
+            {
+                if (Side_Add_Time < InGameTime())
+                    Disp_Advice = false;
+                else
+                    Mod_Ui::MeunDescrition(&SideAdvice, Disp_Pick, true);
+            }
+
+            if (!MenuOpen)
+            {
+                bool Key0 = false;
+                Menu_Button_state(&Key0);
+                if (Mod_Data::Mod_Settings.ControlSupport)
+                {
+                    if (ButtonDown(Mod_Data::Mod_Settings.ControlA, false) && ButtonDown(Mod_Data::Mod_Settings.ControlB, false))
+                        Key0 = true;
+                }
+
+                if (Key0)
+                {
+                    CAM::DO_SCREEN_FADE_IN(1);
+                    Close_Menu = false;
+                    MenuOpen = true;
+                    RandomStartMenu();
+                }
+            }
+
             if (DeadOrArestCheck)
             {
                 if ((bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
@@ -5196,7 +5672,7 @@ void SecondLoop()
                     DeathAndArrest((bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()));
                 }
             }
-            
+
             if (BackStagePass)
                 InRestrictedArea();
             else if (Cayo_Loaded)
@@ -5222,64 +5698,13 @@ void SecondLoop()
             }
             else if (GotClutter)
                 RemoveWhenFar();
-		}
-		WAIT(1);
-	}
-}
-void main()
-{
-	while (true)
-	{
-		if (Mod_Load)
-		{
-			if (!(bool)DLC2::GET_IS_LOADING_SCREEN_ACTIVE())
-			{
-				LoadinData();
-				Mod_Load = false;
-				//BuildProps("prop_fib_3b_cover1", NewVector3(-282.8405f, 2834.9153f, 53.3622f), NewVector3(0.00f, 0.00f, 151.3774f), false, false);
-
-			}
-		}
-		else
-		{
-            if (Disp_Advice)
-            {
-                if (Side_Add_Time < InGameTime())
-                    Disp_Advice = false;
-                else
-                    UiSystem::MeunDescrition(&SideAdvice, &Disp_Pick, true);
-            }
-
-            if (!MenuOpen)
-            {
-                bool Key0 = false;
-                Menu_Button_state(&Key0);
-                if (Mod_Data::Mod_Settings.ControlSupport)
-                {
-                    if (ButtonDown(Mod_Data::Mod_Settings.ControlA, false) && ButtonDown(Mod_Data::Mod_Settings.ControlB, false))
-                        Key0 = true;
-                }
-               
-                if (Key0)
-                {
-                    CAM::DO_SCREEN_FADE_IN(1);
-                    Close_Menu = false;
-                    MenuOpen = true;
-                    RandomStartMenu();
-                }
-            }
-		}
-        WAIT(1);
-	}
+        }
+        WAIT(0);
+    }
 }
 
-void ScriptSecond()
-{
-	srand(GetTickCount());
-	SecondLoop();
-}
 void ScriptMain()
 {
-	srand(GetTickCount());
-	main();
+    srand(GetTickCount());
+    main();
 }
