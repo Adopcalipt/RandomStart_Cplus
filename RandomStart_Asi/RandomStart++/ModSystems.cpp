@@ -5,18 +5,21 @@
 
 #include "ModSystems.h"
 #include "keyboard.h"
-#include "filesystem.hpp"
-#include <Windows.h>
 
 using namespace Mod_Data;
 using namespace Mod_Systems;
 
-#include <cstdlib>
-#include <sys/stat.h>
-#include <ctime>
-#include <cmath>
-#include <iostream>
-#include <filesystem>
+#include <cstdlib>		//sRand - Random Number Generator
+#include <ctime>		//time_t - Get the current date/time
+#include <cmath>		//Math Functions Cos Tan etc...
+#include <filesystem>	//Directory control Add/Remove Folders
+#include <iostream>		//Header that defines the standard input/output stream objects:
+
+#include <wchar.h>		//Support for w_Chars
+#include <locale>		//streamng Support for w_Chars
+//#include <stdio.h>			//Makes Stream Pointers to files
+//#include <sys/stat.h>			//File Type Finder
+
 
 #pragma comment(lib, "Winmm.lib")
 
@@ -43,7 +46,7 @@ namespace Mod_Systems
 		MultiByteToWideChar(CP_ACP, 0, str.c_str(), (int)str.length(), &wstr[0], count);
 		return wstr;
 	}
-	
+
 	std::string GetExeFileName()
 	{
 		WCHAR buffer[MAX_PATH]{};
@@ -66,7 +69,7 @@ namespace Mod_Systems
 		tm[tm.length() - 1] = char(32);//32 is this fails testing the _s version..
 		return tm;
 	}
-	bool FileExists(std::string filename)
+	bool FileExists(const std::string& filename)
 	{
 		try
 		{
@@ -79,14 +82,14 @@ namespace Mod_Systems
 		}
 	}
 
-	void Play_Wav(std::string soundFile)
+	void Play_Wav(const std::string& soundFile)
 	{
 		const wchar_t* path = ConvertAnsiToWide((LPSTR)soundFile.c_str()).c_str();
 		PlaySound(path, GetModuleHandle(NULL), SND_FILENAME | SND_ASYNC);
 		//(LPCWSTR)soundFile.c_str()
 	}
 
-	bool FileRemoval(std::string filename)
+	bool FileRemoval(const std::string& filename)
 	{
 		bool Removed = false;
 		try {
@@ -99,20 +102,28 @@ namespace Mod_Systems
 		}
 		return Removed;
 	}
-	const std::string RSFolder = GetDir() + "/RandomStart";
-	const std::string sLogThis = RSFolder + "/LoggerLight.txt";
+
+	void RemoveBlankStrings(std::vector<std::string>& stringlist)
+	{
+		for (int i = 0; i < (int)stringlist.size(); i++)
+		{
+			if (stringlist[i] == "")
+				stringlist.erase(stringlist.begin() + i);
+		}
+	}
+	const std::string sLogThis = GetDir() + "/RandomStart/LoggerLight.txt";
 	bool startLogs = false;
-	bool ListContains(std::vector<int>* List, int item)
+	bool ListContains(std::vector<int>& List, int item)
 	{
 		bool b = false;
-		for (int i = 0; i < List->size(); i++)
+		for (int i = 0; i < List.size(); i++)
 		{
-			if (List->at(i) == item)
+			if (List[i] == item)
 				b = true;
 		}
 		return b;
 	}
-	std::vector<std::string> Space38(std::string myLine)
+	std::vector<std::string> Space38(const std::string& myLine)
 	{
 		std::vector<std::string> output = {};
 		if ((int)myLine.length() < 38)
@@ -126,7 +137,7 @@ namespace Mod_Systems
 				if ((int)sLine.length() < 38)
 				{
 					sLine += myLine[i];
-					if (i20 < 0 )
+					if (i20 < 0)
 					{
 						if (myLine[i] == char(46) || myLine[i] == char(44) || myLine[i] == char(32))
 						{
@@ -148,8 +159,9 @@ namespace Mod_Systems
 		}
 		return output;
 	}
-	void LoggerLight(std::string text)
+	void LoggerLight(const std::string& text)
 	{
+		std::string RSFolder = GetDir() + "/RandomStart";
 		if (CreateDirectoryA((LPSTR)RSFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
 			First_Load = true;
 		else
@@ -180,7 +192,7 @@ namespace Mod_Systems
 			}
 		}
 	}
-	void WriteFile(std::string file, std::vector<std::string> text)
+	void WriteFile(const std::string& file, std::vector<std::string>& text)
 	{
 		std::ofstream MyFile(file);
 		for (int i = 0; i < text.size(); i++)
@@ -190,7 +202,7 @@ namespace Mod_Systems
 		}
 		MyFile.close();
 	}
-	std::vector<std::string> IntoString(std::vector<int> text)
+	std::vector<std::string> IntoString(std::vector<int>& text)
 	{
 		std::vector<std::string> output = {};
 
@@ -199,7 +211,7 @@ namespace Mod_Systems
 
 		return output;
 	}
-	std::vector<std::string> ReadFile(const std::string fileName)
+	std::vector<std::string> ReadSetFile(const std::string& fileName)
 	{
 		std::string myText;
 		std::vector<std::string> textList = {};
@@ -218,7 +230,7 @@ namespace Mod_Systems
 
 		return textList;
 	}
-	bool StringContains(std::string line, std::string wholeString)
+	bool StringContains(const std::string& line, const std::string& wholeString)
 	{
 		bool Contain = false;
 		int iLine = 0;
@@ -266,7 +278,7 @@ namespace Mod_Systems
 
 		return Contain;
 	}
-	bool StringContains(char line, std::string wholeString)
+	bool StringContains(char line, const std::string& wholeString)
 	{
 		bool Contain = false;
 		for (int i = 0; i < wholeString.length(); i++)
@@ -279,7 +291,7 @@ namespace Mod_Systems
 		}
 		return Contain;
 	}
-	int FindCharicter(char chars, std::string wholeString)
+	int FindCharicter(char chars, const std::string& wholeString)
 	{
 		int iLine = -1;
 		for (int i = 0; i < wholeString.length(); i++)
@@ -292,7 +304,7 @@ namespace Mod_Systems
 		}
 		return iLine;
 	}
-	int FindCharicter(std::string chars, std::string wholeString)
+	int FindCharicter(const std::string& chars, const std::string& wholeString)
 	{
 		int iLine = -1;
 		for (int i = 0; i < wholeString.length(); i++)
@@ -305,7 +317,7 @@ namespace Mod_Systems
 		}
 		return iLine;
 	}
-	int StingNumbersInt(std::string line)
+	int StingNumbersInt(const std::string& line)
 	{
 		int iNum = 0;
 		int iTimes = 0;
@@ -388,7 +400,7 @@ namespace Mod_Systems
 
 		return iNum;
 	}
-	std::string AfterEqual(std::string tag)
+	std::string AfterEqual(const std::string& tag)
 	{
 		int iSt = 0;
 		std::string out;
@@ -405,7 +417,7 @@ namespace Mod_Systems
 
 		return out;
 	}
-	float StingNumbersFloat(std::string line)
+	float StingNumbersFloat(const std::string& line)
 	{
 		float fNum = 0;
 		bool bNegative = false;
@@ -504,7 +516,7 @@ namespace Mod_Systems
 
 		return fNum;
 	}
-	bool StringBool(std::string line)
+	bool StringBool(const std::string& line)
 	{
 		if (StringContains("True", line))
 			return true;
@@ -525,7 +537,7 @@ namespace Mod_Systems
 
 		return s;
 	}
-	float TwoDecimal(std::string Number)
+	float TwoDecimal(const std::string& Number)
 	{
 		int iSize = (int)Number.length();
 		std::string Output = "";
@@ -537,12 +549,12 @@ namespace Mod_Systems
 		}
 		return StingNumbersFloat(Output);
 	}
-	bool ListstringContains(std::vector<std::string>* List, std::string item)
+	bool ListstringContains(std::vector<std::string>& List, const std::string& item)
 	{
 		bool b = false;
-		for (int i = 0; i < List->size(); i++)
+		for (int i = 0; i < List.size(); i++)
 		{
-			if (StringContains(item, List->at(i)))
+			if (StringContains(item, List[i]))
 				b = true;
 		}
 		return b;
@@ -566,7 +578,7 @@ namespace Mod_Systems
 
 		return iDay;
 	}
-	
+
 	float RandomFloat(float min, float max)
 	{
 		if (min < max)
@@ -580,7 +592,7 @@ namespace Mod_Systems
 	}
 	bool ERando = false;
 	int RandomInt(int min, int max)
-    {
+	{
 		int EllRando = max - min;
 		if (EllRando > 10)
 		{
@@ -607,7 +619,7 @@ namespace Mod_Systems
 		}
 		else
 			return min;
-    }	
+	}
 	std::vector<int> NewNums(int min, int max)
 	{
 		std::vector<int> Nums = {};
@@ -616,13 +628,13 @@ namespace Mod_Systems
 		return Nums;
 	}
 	bool DirTest = true;
-	const std::string RandNumFolder = RSFolder + "/Randoms";
-	int LessRandomInt(std::string sName, int min, int max)
+	const std::string RandNumFolder = GetDir() + "/RandomStart/Randoms";
+	int LessRandomInt(const std::string& sName, int min, int max)
 	{
 		if (DirTest)
 		{
 			LoggerLight("LessRandomInt, Direct Test");
-			if (CreateDirectoryA((LPSTR)RandNumFolder.c_str(), NULL) ||	ERROR_ALREADY_EXISTS == GetLastError())
+			if (CreateDirectoryA((LPSTR)RandNumFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
 			{
 				LoggerLight("LessRandomInt, Direct Working");
 				DirTest = false;
@@ -646,19 +658,19 @@ namespace Mod_Systems
 		{
 			int yourPlace = 0;
 			int yourNum = min;
-			std::vector<std::string> MyNums = ReadFile(RandNumFolder + "/" + sName + ".txt");
+			std::vector<std::string> MyNums = ReadSetFile(RandNumFolder + "/" + sName + ".txt");
 			std::vector<int> NumList = {};
 
 			if (MyNums.size() < 2)
 				NumList = NewNums(min, max);
-			else 
+			else
 			{
 				bool newWrite = false;
 				if (StringContains("min=", MyNums[0]))
 				{
 					if (StingNumbersInt(MyNums[0]) != min)
 						newWrite = true;
-					
+
 					if (StringContains("max=", MyNums[1]))
 					{
 						if (StingNumbersInt(MyNums[1]) != max)
@@ -689,9 +701,50 @@ namespace Mod_Systems
 		}
 		else
 			return min;
-	}	
+	}
+	int LessRandomInt(const std::string& sName, std::vector<int>& ranNum)
+	{
+		if (DirTest)
+		{
+			LoggerLight("LessRandomInt, Direct Test");
+			if (CreateDirectoryA((LPSTR)RandNumFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
+			{
+				LoggerLight("LessRandomInt, Direct Working");
+				DirTest = false;
+			}
+		}
 
-	void StartScript(std::string scriptName, int buffer)
+		if ((int)ranNum.size() > 0)
+		{
+			int yourPlace = 0;
+			int yourNum = 0;
+			std::vector<std::string> MyNums = ReadSetFile(RandNumFolder + "/" + sName + ".txt");
+			std::vector<int> NumList = {};
+
+			for (int i = 0; i < MyNums.size(); i++)
+				NumList.push_back(StingNumbersInt(MyNums[i]));;
+
+			if (NumList.size() == 0)
+				NumList = ranNum;
+
+			yourPlace = RandomInt(0, (int)NumList.size());
+			yourNum = NumList[yourPlace];
+			NumList.erase(NumList.begin() + yourPlace);
+
+			std::vector<std::string> output = {};
+
+			for (int i = 0; i < NumList.size(); i++)
+				output.push_back(std::to_string(NumList[i]));
+
+			WriteFile(RandNumFolder + "/" + sName + ".txt", output);
+
+			return yourNum;
+		}
+		else
+			return 0;
+	}
+
+	void StartScript(const std::string& scriptName, int buffer)
 	{
 		SCRIPT::REQUEST_SCRIPT((LPSTR)scriptName.c_str());
 		while (!SCRIPT::HAS_SCRIPT_LOADED((LPSTR)scriptName.c_str()))
@@ -703,210 +756,220 @@ namespace Mod_Systems
 		SYSTEM::START_NEW_SCRIPT((LPSTR)scriptName.c_str(), buffer);
 		SCRIPT::SET_SCRIPT_AS_NO_LONGER_NEEDED((LPSTR)scriptName.c_str());
 	}
-	
+
 	void ReBuildIni(Mod_Class::Settings_Ini* PSet)
 	{
-		LoggerLight("ReBuildIni");
-		std::vector<std::string> AddIni = {
-			"[Settings]",
-			"MenuKey=" + std::to_string(PSet->MenuKey),
-			"Auto_Run=" + BoolToString(PSet->Auto_Run),
-			"Random_Ped=" + BoolToString(PSet->Random_Ped),
-			"Saved_Ped=" + BoolToString(PSet->Saved_Ped),
-			"Disable_Record_Key=" + BoolToString(PSet->Disable_Record_Key),
-			"Random_Weapons=" + BoolToString(PSet->Random_Weapons),
-			"Funeral=" + BoolToString(PSet->Funeral),
-			"Prison=" + BoolToString(PSet->Prison),
-			"BeachPart=" + BoolToString(PSet->BeachPart),
-			"[Reincarnation]",
-			"Reincarnate=" + BoolToString(PSet->Reincarnate),
-			"ReCurr=" + BoolToString(PSet->ReCurr),
-			"[Controler]",
-			"ControlSupport=" + BoolToString(PSet->ControlSupport),
-			"ControlA=" + std::to_string(PSet->ControlA),
-			"ControlB=" + std::to_string(PSet->ControlB),
-			"[Language]",
-			"Lang_Set=" + std::to_string(PSet->Lang_Set),
-			"[Senarios]",
-			"BeachPed=" + BoolToString(PSet->BeachPed),
-			"Tramps=" + BoolToString(PSet->Tramps),
-			"Highclass=" + BoolToString(PSet->Highclass),
-			"Midclass=" + BoolToString(PSet->Midclass),
-			"Lowclass=" + BoolToString(PSet->Lowclass),
-			"Business=" + BoolToString(PSet->Business),
-			"Bodybuilder=" + BoolToString(PSet->Bodybuilder),
-			"GangStars=" + BoolToString(PSet->GangStars),
-			"Epsilon=" + BoolToString(PSet->Epsilon),
-			"Jogger=" + BoolToString(PSet->Jogger),
-			"Golfer=" + BoolToString(PSet->Golfer),
-			"Hiker=" + BoolToString(PSet->Hiker),
-			"Methaddict=" + BoolToString(PSet->Methaddict),
-			"Rural=" + BoolToString(PSet->Rural),
-			"Cyclist=" + BoolToString(PSet->Cyclist),
-			"LGBTWXYZ=" + BoolToString(PSet->LGBTWXYZ),
-			"PoolPeds=" + BoolToString(PSet->PoolPeds),
-			"Workers=" + BoolToString(PSet->Workers),
-			"Jetski=" + BoolToString(PSet->Jetski),
-			"BikeATV=" + BoolToString(PSet->BikeATV),
-			"Services=" + BoolToString(PSet->Services),
-			"Pilot=" + BoolToString(PSet->Pilot),
-			"Animals=" + BoolToString(PSet->Animals),
-			"Yankton=" + BoolToString(PSet->Yankton),
-			"Cayo=" + BoolToString(PSet->Cayo),
-			"[Additional]",
-			"Loging=" + BoolToString(PSet->Loging),
-			"[Snow Months]",
-			"SDJan=" + BoolToString(PSet->SnowMonths.Jan),
-			"SDFeb=" + BoolToString(PSet->SnowMonths.Feb),
-			"SDMar=" + BoolToString(PSet->SnowMonths.Mar),
-			"SDApr=" + BoolToString(PSet->SnowMonths.Apr),
-			"SDMay=" + BoolToString(PSet->SnowMonths.May),
-			"SDJun=" + BoolToString(PSet->SnowMonths.Jun),
-			"SDJul=" + BoolToString(PSet->SnowMonths.Jul),
-			"SDAug=" + BoolToString(PSet->SnowMonths.Aug),
-			"SDSep=" + BoolToString(PSet->SnowMonths.Sep),
-			"SDOct=" + BoolToString(PSet->SnowMonths.Oct),
-			"SDNov=" + BoolToString(PSet->SnowMonths.Nov),
-			"SDDec=" + BoolToString(PSet->SnowMonths.Dec)
-		};
-
-		std::ofstream MyFile(RSFolder + "/Settings.ini");
-
-		for (int i = 0; i < AddIni.size(); i++)
+		if (PSet != nullptr)
 		{
-			MyFile << AddIni[i];
-			MyFile << "\n";
+			LoggerLight("ReBuildIni");
+			std::string RSFolder = GetDir() + "/RandomStart";
+			std::vector<std::string> AddIni = {
+				"[Settings]",
+				"MenuKey=" + std::to_string(PSet->MenuKey),
+				"Auto_Run=" + BoolToString(PSet->Auto_Run),
+				"Random_Ped=" + BoolToString(PSet->Random_Ped),
+				"Saved_Ped=" + BoolToString(PSet->Saved_Ped),
+				"Disable_Record_Key=" + BoolToString(PSet->Disable_Record_Key),
+				"Random_Weapons=" + BoolToString(PSet->Random_Weapons),
+				"Funeral=" + BoolToString(PSet->Funeral),
+				"Prison=" + BoolToString(PSet->Prison),
+				"BeachPart=" + BoolToString(PSet->BeachPart),
+				"[Reincarnation]",
+				"Reincarnate=" + BoolToString(PSet->Reincarnate),
+				"ReCurr=" + BoolToString(PSet->ReCurr),
+				"[Controler]",
+				"ControlSupport=" + BoolToString(PSet->ControlSupport),
+				"ControlA=" + std::to_string(PSet->ControlA),
+				"ControlB=" + std::to_string(PSet->ControlB),
+				"[Language]",
+				"Lang_Set=" + std::to_string(PSet->Lang_Set),
+				"[Senarios]",
+				"BeachPed=" + BoolToString(PSet->BeachPed),
+				"Tramps=" + BoolToString(PSet->Tramps),
+				"Highclass=" + BoolToString(PSet->Highclass),
+				"Midclass=" + BoolToString(PSet->Midclass),
+				"Lowclass=" + BoolToString(PSet->Lowclass),
+				"Business=" + BoolToString(PSet->Business),
+				"Bodybuilder=" + BoolToString(PSet->Bodybuilder),
+				"GangStars=" + BoolToString(PSet->GangStars),
+				"Epsilon=" + BoolToString(PSet->Epsilon),
+				"Jogger=" + BoolToString(PSet->Jogger),
+				"Golfer=" + BoolToString(PSet->Golfer),
+				"Hiker=" + BoolToString(PSet->Hiker),
+				"Methaddict=" + BoolToString(PSet->Methaddict),
+				"Rural=" + BoolToString(PSet->Rural),
+				"Cyclist=" + BoolToString(PSet->Cyclist),
+				"LGBTWXYZ=" + BoolToString(PSet->LGBTWXYZ),
+				"PoolPeds=" + BoolToString(PSet->PoolPeds),
+				"Workers=" + BoolToString(PSet->Workers),
+				"Jetski=" + BoolToString(PSet->Jetski),
+				"BikeATV=" + BoolToString(PSet->BikeATV),
+				"Services=" + BoolToString(PSet->Services),
+				"Pilot=" + BoolToString(PSet->Pilot),
+				"Animals=" + BoolToString(PSet->Animals),
+				"Yankton=" + BoolToString(PSet->Yankton),
+				"Cayo=" + BoolToString(PSet->Cayo),
+				"[Additional]",
+				"Loging=" + BoolToString(PSet->Loging),
+				"[Snow Months]",
+				"SDJan=" + BoolToString(PSet->SnowMonths.Jan),
+				"SDFeb=" + BoolToString(PSet->SnowMonths.Feb),
+				"SDMar=" + BoolToString(PSet->SnowMonths.Mar),
+				"SDApr=" + BoolToString(PSet->SnowMonths.Apr),
+				"SDMay=" + BoolToString(PSet->SnowMonths.May),
+				"SDJun=" + BoolToString(PSet->SnowMonths.Jun),
+				"SDJul=" + BoolToString(PSet->SnowMonths.Jul),
+				"SDAug=" + BoolToString(PSet->SnowMonths.Aug),
+				"SDSep=" + BoolToString(PSet->SnowMonths.Sep),
+				"SDOct=" + BoolToString(PSet->SnowMonths.Oct),
+				"SDNov=" + BoolToString(PSet->SnowMonths.Nov),
+				"SDDec=" + BoolToString(PSet->SnowMonths.Dec)
+			};
+
+			std::ofstream MyFile(GetDir() + "/RandomStart/Settings.ini");
+
+			for (int i = 0; i < AddIni.size(); i++)
+			{
+				MyFile << AddIni[i];
+				MyFile << "\n";
+			}
+
+			MyFile.close();
 		}
 
-		MyFile.close();
 	}
 	void FindSettings(Mod_Class::Settings_Ini* mySets)
 	{
-		LoggerLight("FindSettings");
-		std::vector<std::string> MySet = ReadFile(RSFolder + "/Settings.ini");
+		if (mySets != nullptr)
+		{
 
-		if (MySet.size() == 0)
-		{
-			if (CreateDirectoryA((LPSTR)RSFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
-				First_Load = true;
-			else
-				LoggerLight("Settings_Ini Folder Load Fail...");
-		}
-		else
-		{
-			for (int i = 0; i < (int)MySet.size(); i++)
+			LoggerLight("FindSettings");
+			std::vector<std::string> MySet = ReadSetFile(GetDir() + "/RandomStart/Settings.ini");
+			std::string RSFolder = GetDir() + "/RandomStart";
+			if (MySet.size() == 0)
 			{
-				std::string line = MySet[i];
-				if (StringContains("MenuKey", line))
-					mySets->MenuKey = StingNumbersInt(line);
-				else if (StringContains("Auto_Run", line))
-					mySets->Auto_Run = StringBool(line);
-				else if (StringContains("Random_Ped", line))
-					mySets->Random_Ped = StringBool(line);
-				else if (StringContains("Saved_Ped", line))
-					mySets->Saved_Ped = StringBool(line);
-				else if (StringContains("Disable_Record_Key", line))
-					mySets->Disable_Record_Key = StringBool(line);
-				else if (StringContains("Random_Weapons", line))
-					mySets->Random_Weapons = StringBool(line);
-				else if (StringContains("Funeral", line))
-					mySets->Funeral = StringBool(line);
-				else if (StringContains("Prison", line))
-					mySets->Prison = StringBool(line);
-				else if (StringContains("BeachPart", line))
-					mySets->BeachPart = StringBool(line);
-				else if (StringContains("Reincarnate", line))
-					mySets->Reincarnate = StringBool(line);
-				else if (StringContains("ReCurr", line))
-					mySets->ReCurr = StringBool(line);
-				else if (StringContains("ControlSupport", line))
-					mySets->ControlSupport = StringBool(line);
-				else if (StringContains("ControlA", line))
-					mySets->ControlA = StingNumbersInt(line);
-				else if (StringContains("ControlB", line))
-					mySets->ControlB = StingNumbersInt(line);
-				else if (StringContains("Lang_Set", line))
-					mySets->Lang_Set = StingNumbersInt(line);
-				else if (StringContains("BeachPed", line))
-					mySets->BeachPed = StringBool(line);
-				else if (StringContains("Tramps", line))
-					mySets->Tramps = StringBool(line);
-				else if (StringContains("Highclass", line))
-					mySets->Highclass = StringBool(line);
-				else if (StringContains("Midclass", line))
-					mySets->Midclass = StringBool(line);
-				else if (StringContains("Lowclass", line))
-					mySets->Lowclass = StringBool(line);
-				else if (StringContains("Business", line))
-					mySets->Business = StringBool(line);
-				else if (StringContains("Bodybuilder", line))
-					mySets->Bodybuilder = StringBool(line);
-				else if (StringContains("GangStars", line))
-					mySets->GangStars = StringBool(line);
-				else if (StringContains("Epsilon", line))
-					mySets->Epsilon = StringBool(line);
-				else if (StringContains("Jogger", line))
-					mySets->Jogger = StringBool(line);
-				else if (StringContains("Golfer", line))
-					mySets->Golfer = StringBool(line);
-				else if (StringContains("Hiker", line))
-					mySets->Hiker = StringBool(line);
-				else if (StringContains("Methaddict", line))
-					mySets->Methaddict = StringBool(line);
-				else if (StringContains("Rural", line))
-					mySets->Rural = StringBool(line);
-				else if (StringContains("Cyclist", line))
-					mySets->Cyclist = StringBool(line);
-				else if (StringContains("LGBTWXYZ", line))
-					mySets->LGBTWXYZ = StringBool(line);
-				else if (StringContains("PoolPeds", line))
-					mySets->PoolPeds = StringBool(line);
-				else if (StringContains("Workers", line))
-					mySets->Workers = StringBool(line);
-				else if (StringContains("Jetski", line))
-					mySets->Jetski = StringBool(line);
-				else if (StringContains("BikeATV", line))
-					mySets->BikeATV = StringBool(line);
-				else if (StringContains("Services", line))
-					mySets->Services = StringBool(line);
-				else if (StringContains("Pilot", line))
-					mySets->Pilot = StringBool(line);
-				else if (StringContains("Animals", line))
-					mySets->Animals = StringBool(line);
-				else if (StringContains("Yankton", line))
-					mySets->Yankton = StringBool(line);
-				else if (StringContains("Cayo", line))
-					mySets->Cayo = StringBool(line);
-				else if (StringContains("Loging", line))
-					mySets->Loging = StringBool(line);
-				else if (StringContains("SDJan", line))
-					mySets->SnowMonths.Jan = StringBool(line);
-				else if (StringContains("SDFeb", line))
-					mySets->SnowMonths.Feb = StringBool(line);
-				else if (StringContains("SDMar", line))
-					mySets->SnowMonths.Mar = StringBool(line);
-				else if (StringContains("SDApr", line))
-					mySets->SnowMonths.Apr = StringBool(line);
-				else if (StringContains("SDMay", line))
-					mySets->SnowMonths.May = StringBool(line);
-				else if (StringContains("SDJun", line))
-					mySets->SnowMonths.Jun = StringBool(line);
-				else if (StringContains("SDJul", line))
-					mySets->SnowMonths.Jul = StringBool(line);
-				else if (StringContains("SDAug", line))
-					mySets->SnowMonths.Aug = StringBool(line);
-				else if (StringContains("SDSep", line))
-					mySets->SnowMonths.Sep = StringBool(line);
-				else if (StringContains("SDOct", line))
-					mySets->SnowMonths.Oct = StringBool(line);
-				else if (StringContains("SDNov", line))
-					mySets->SnowMonths.Nov = StringBool(line);
-				else if (StringContains("SDDec", line))
-					mySets->SnowMonths.Dec = StringBool(line);
+				if (CreateDirectoryA((LPSTR)RSFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
+					First_Load = true;
+				else
+					LoggerLight("Settings_Ini Folder Load Fail...");
 			}
+			else
+			{
+				for (int i = 0; i < (int)MySet.size(); i++)
+				{
+					std::string line = MySet[i];
+					if (StringContains("MenuKey", line))
+						mySets->MenuKey = StingNumbersInt(line);
+					else if (StringContains("Auto_Run", line))
+						mySets->Auto_Run = StringBool(line);
+					else if (StringContains("Random_Ped", line))
+						mySets->Random_Ped = StringBool(line);
+					else if (StringContains("Saved_Ped", line))
+						mySets->Saved_Ped = StringBool(line);
+					else if (StringContains("Disable_Record_Key", line))
+						mySets->Disable_Record_Key = StringBool(line);
+					else if (StringContains("Random_Weapons", line))
+						mySets->Random_Weapons = StringBool(line);
+					else if (StringContains("Funeral", line))
+						mySets->Funeral = StringBool(line);
+					else if (StringContains("Prison", line))
+						mySets->Prison = StringBool(line);
+					else if (StringContains("BeachPart", line))
+						mySets->BeachPart = StringBool(line);
+					else if (StringContains("Reincarnate", line))
+						mySets->Reincarnate = StringBool(line);
+					else if (StringContains("ReCurr", line))
+						mySets->ReCurr = StringBool(line);
+					else if (StringContains("ControlSupport", line))
+						mySets->ControlSupport = StringBool(line);
+					else if (StringContains("ControlA", line))
+						mySets->ControlA = StingNumbersInt(line);
+					else if (StringContains("ControlB", line))
+						mySets->ControlB = StingNumbersInt(line);
+					else if (StringContains("Lang_Set", line))
+						mySets->Lang_Set = StingNumbersInt(line);
+					else if (StringContains("BeachPed", line))
+						mySets->BeachPed = StringBool(line);
+					else if (StringContains("Tramps", line))
+						mySets->Tramps = StringBool(line);
+					else if (StringContains("Highclass", line))
+						mySets->Highclass = StringBool(line);
+					else if (StringContains("Midclass", line))
+						mySets->Midclass = StringBool(line);
+					else if (StringContains("Lowclass", line))
+						mySets->Lowclass = StringBool(line);
+					else if (StringContains("Business", line))
+						mySets->Business = StringBool(line);
+					else if (StringContains("Bodybuilder", line))
+						mySets->Bodybuilder = StringBool(line);
+					else if (StringContains("GangStars", line))
+						mySets->GangStars = StringBool(line);
+					else if (StringContains("Epsilon", line))
+						mySets->Epsilon = StringBool(line);
+					else if (StringContains("Jogger", line))
+						mySets->Jogger = StringBool(line);
+					else if (StringContains("Golfer", line))
+						mySets->Golfer = StringBool(line);
+					else if (StringContains("Hiker", line))
+						mySets->Hiker = StringBool(line);
+					else if (StringContains("Methaddict", line))
+						mySets->Methaddict = StringBool(line);
+					else if (StringContains("Rural", line))
+						mySets->Rural = StringBool(line);
+					else if (StringContains("Cyclist", line))
+						mySets->Cyclist = StringBool(line);
+					else if (StringContains("LGBTWXYZ", line))
+						mySets->LGBTWXYZ = StringBool(line);
+					else if (StringContains("PoolPeds", line))
+						mySets->PoolPeds = StringBool(line);
+					else if (StringContains("Workers", line))
+						mySets->Workers = StringBool(line);
+					else if (StringContains("Jetski", line))
+						mySets->Jetski = StringBool(line);
+					else if (StringContains("BikeATV", line))
+						mySets->BikeATV = StringBool(line);
+					else if (StringContains("Services", line))
+						mySets->Services = StringBool(line);
+					else if (StringContains("Pilot", line))
+						mySets->Pilot = StringBool(line);
+					else if (StringContains("Animals", line))
+						mySets->Animals = StringBool(line);
+					else if (StringContains("Yankton", line))
+						mySets->Yankton = StringBool(line);
+					else if (StringContains("Cayo", line))
+						mySets->Cayo = StringBool(line);
+					else if (StringContains("Loging", line))
+						mySets->Loging = StringBool(line);
+					else if (StringContains("SDJan", line))
+						mySets->SnowMonths.Jan = StringBool(line);
+					else if (StringContains("SDFeb", line))
+						mySets->SnowMonths.Feb = StringBool(line);
+					else if (StringContains("SDMar", line))
+						mySets->SnowMonths.Mar = StringBool(line);
+					else if (StringContains("SDApr", line))
+						mySets->SnowMonths.Apr = StringBool(line);
+					else if (StringContains("SDMay", line))
+						mySets->SnowMonths.May = StringBool(line);
+					else if (StringContains("SDJun", line))
+						mySets->SnowMonths.Jun = StringBool(line);
+					else if (StringContains("SDJul", line))
+						mySets->SnowMonths.Jul = StringBool(line);
+					else if (StringContains("SDAug", line))
+						mySets->SnowMonths.Aug = StringBool(line);
+					else if (StringContains("SDSep", line))
+						mySets->SnowMonths.Sep = StringBool(line);
+					else if (StringContains("SDOct", line))
+						mySets->SnowMonths.Oct = StringBool(line);
+					else if (StringContains("SDNov", line))
+						mySets->SnowMonths.Nov = StringBool(line);
+					else if (StringContains("SDDec", line))
+						mySets->SnowMonths.Dec = StringBool(line);
+				}
+			}
+
+			ReBuildIni(mySets);
 		}
 
-		ReBuildIni(mySets);
 	}
 
 	void SaveMyWeaps()
@@ -925,7 +988,7 @@ namespace Mod_Systems
 		}
 
 
-		std::ofstream MyFile(RSFolder + "/MyWeaps.ini");
+		std::ofstream MyFile(GetDir() + "/RandomStart/MyWeaps.ini");
 
 		for (int i = 0; i < (int)NewSave.size(); i++)
 		{
@@ -939,8 +1002,8 @@ namespace Mod_Systems
 	{
 		bool Addons = false;
 		std::vector<Mod_Class::WeaponSaver> MyWeaopns = {};
-		std::vector<std::string> MyColect = ReadFile(RSFolder + "/MyWeaps.ini");
-		
+		std::vector<std::string> MyColect = ReadSetFile(GetDir() + "/RandomStart/MyWeaps.ini");
+
 		std::string weapon = "";
 		int ammo = 0;
 		std::vector<std::string> MyAddons = {};
@@ -969,50 +1032,284 @@ namespace Mod_Systems
 
 		return MyWeaopns;
 	}
-	
+
 	void LoadLang()
 	{
 		LoggerLight("LoadLang");
-		int MyLan = Mod_Settings.Lang_Set;
-		std::vector<std::string> HoldMyLang = RSLangMenu;
 
+		const std::vector<std::string> LangEng = {
+			"Enter",                                                                                    //0
+			"Back",                                                                                     //1
+			"Left",                                                                                     //2
+			"Right",                                                                                    //3
+			"Random Scenarios",                                                                         //4
+			"Select available or launch a random scenario.",                                            //5
+			"Save Ped Menu",                                                                            //6
+			"Change customize and save characters.",                                                    //7
+			"Random Start",                                                                             //8
+			"Select a random scenario when game loads.",                                                //9
+			"Random Ped",                                                                               //10
+			"Load as or re-spawn as a random ped (includes animals).",                                  //11
+			"Saved Ped",                                                                                //12
+			"Load as or re-spawn as a saved ped.",                                                      //13
+			"Reincarnation",                                                                            //14
+			"Life after death?",                                                                        //15
+			"Re-spawn",                                                                                 //16
+			"Return as your current character in the area you died in.",                                //17
+			"Funeral",                                                                                  //18
+			"If you are using a random or non main character have a funeral service on death.",         //19
+			"Prison",                                                                                   //20
+			"Go straight to Bolingbroke do not pass go do not collect 200.",                            //21
+			"Random Weapons",                                                                           //22
+			"Get a random weapon selection or keep your current weapons.",                              //23
+			"Capture Weapon Load-out",                                                                  //24
+			"Save you current weapon selection.",                                                       //25
+			"Change Key-bindings",                                                                      //26
+			"Select menu load key.",                                                                    //27
+			"Beach Ped",                                                                                //28
+			"Sun bathing and motor boating.",                                                           //29
+			"Tramps",                                                                                   //30
+			"Down and out in Los Santos.",                                                              //31
+			"High class",                                                                               //32
+			"Nice house, nice car, nice weather.",                                                      //33
+			"Mid class",                                                                                //34
+			"Reasonable house, reasonable car, reasonable weather.",                                    //35
+			"Low class",                                                                                //36
+			"Rubbish house, trash car, crap weather.",                                                  //37
+			"Business",                                                                                 //38
+			"The high flying Los Santos elite.",                                                        //39
+			"Body builder",                                                                             //40
+			"Use the facilities at muscle beach.",                                                      //41
+			"Gangsters",                                                                                //42
+			"Defend your turf in the Los Santos war zones.",                                            //43
+			"Epsilon ",                                                                                 //44
+			"Join a cult and look down on the non-believers.",                                          //45
+			"Jogger",                                                                                   //46
+			"Take a run in some random location.",                                                      //47
+			"Golfer",                                                                                   //48
+			"Play a round or just burn up the turf in your caddy.",                                     //49
+			"Hiker",                                                                                    //50
+			"Explore the wilderness of Los Santos.",                                                    //51
+			"Meth addict",                                                                              //52
+			"Strawberry fields for ever.",                                                              //53
+			"Rural",                                                                                    //54
+			"Down on the farm.",                                                                        //55
+			"Cyclist",                                                                                  //56
+			"Put on the lycra and start peddling.",                                                     //57
+			"LGBTWXYZ",                                                                                 //58
+			"I am the very model of a modern Major-General I've information vegetable, animal, and mineral.",//59
+			"Pool Peds",                                                                                //60
+			"Take a swim or just chill by the pool.",                                                   //61
+			"Workers",                                                                                  //62
+			"The many trades and occupations in Los Santos.",                                           //63
+			"Jet ski",                                                                                  //64
+			"Race your jet-ski or just ride around for fun.",                                           //65
+			"Bike/ATV",                                                                                 //66
+			"Do some off-roading around Los Santos.",                                                   //67
+			"Services",                                                                                 //68
+			"Do your civic duty with fire, police, ambulance or military.",                             //69
+			"Pilot",                                                                                    //70
+			"Earn your wings gallivanting above Los Santos.",                                           //71
+			"Animals",                                                                                  //72
+			"Soar like a bird, strut like a deer, swim like a fish.",                                   //73
+			"Yankton",                                                                                  //74
+			"Visit snowy Yankton.",                                                                     //75
+			"Cayo Piero",                                                                               //76
+			"Visit sunny Cayo Piero.",                                                                  //77
+			"Saved Peds",                                                                               //78
+			"Select and edit your ped collection.",                                                     //79
+			"Save current ped",                                                                         //80
+			"save your current character.",                                                             //81
+			"Freemode Ped",                                                                             //82
+			"Generate a random freemode ped.",                                                          //83
+			"Reposes Ped",                                                                              //84
+			"Become a nearby ped.",                                                                     //85
+			"Select a Ped",                                                                             //86
+			"Rename Ped",                                                                               //87
+			"Change the name of your ped.",                                                             //88
+			"Change Outfit",                                                                            //89
+			"Change your outfit.",                                                                      //90
+			"Tattoo Pallor",                                                                            //91
+			"Add Tattoos to your character.",                                                           //92
+			"Set Hair Style",                                                                           //93
+			"Eye Colour",                                                                               //94
+			"Pick the colour of your eyes .",                                                           //95
+			"Pick Hair Colour",                                                                         //96
+			"Pick Hair Streaks",                                                                        //97
+			"Set Overlays",                                                                             //98
+			"Ped decals like age blush facial hair and make-up.",                                       //99
+			"Alter Face Shape",                                                                         //100
+			"Change position of chin, mouth, nose.",                                                    //101
+			"Change Parents",                                                                           //102
+			"Alter the base parents of your freemode character.",                                       //103
+			"Set Voice",                                                                                //104
+			"Save Changes",                                                                             //105
+			"Create or update saved peds ini.",                                                         //106
+			"Delete Ped",                                                                               //107
+			"Remove this ped from saved peds directory.",                                               //108
+			"Select outfit",                                                                            //109  
+			"Create New Outfit",                                                                        //110
+			"Save a new outfit on your character.",                                                     //111
+			"Edit Outfits",                                                                             //112
+			"edit the components on current outfit.",                                                   //113
+			"Edit Props",                                                                               //114
+			"Pick hats and glasses.",                                                                   //115
+			"Pre-made outfits",                                                                         //116
+			"Base Component",                                                                           //117
+			"Texture",                                                                                  //118
+			"Select ",                                                                                  //119
+			"Opacity",                                                                                  //120
+			"Colour",                                                                                   //121
+			"First Parent",                                                                             //122
+			"Second Parent",                                                                            //123
+			"Shape Mix",                                                                                //124
+			"Skin Mix",                                                                                 //125
+			"Third Mix",                                                                                //126
+			"Face",                                                                                     //127
+			"Head",                                                                                     //128
+			"Hair",                                                                                     //129
+			"Torso",                                                                                    //130
+			"Legs",                                                                                     //131
+			"Back Packs",                                                                               //132
+			"Feet",                                                                                     //133
+			"Accessories",                                                                              //134
+			"Top Add-ons",                                                                              //135
+			"Armour",                                                                                   //136
+			"Textures",                                                                                 //137
+			"Coats",                                                                                    //138
+			"Hats",                                                                                     //139
+			"Glasses",                                                                                  //140
+			"Ears",                                                                                     //141
+			"Watches",                                                                                  //142
+			"Torso",                                                                                    //143
+			"Head",                                                                                     //144
+			"Left Arm",                                                                                 //145
+			"Right Arm",                                                                                //146
+			"Left Leg",                                                                                 //147
+			"Right Leg",                                                                                //148
+			"Back",                                                                                     //149
+			"Chest",                                                                                    //150
+			"Stomach",                                                                                  //151
+			"Nose Width",                                                                               //152
+			"Nose Peak Hight",                                                                          //153
+			"Nose Peak Length",                                                                         //154
+			"Nose Bone_High",                                                                           //155
+			"Nose Peak Lowering",                                                                       //156
+			"Nose Bone Twist",                                                                          //157
+			"Eye Brow High",                                                                            //158
+			"Eye Brow Forward",                                                                         //159
+			"Cheeks Bone High",                                                                         //160
+			"Cheeks Bone Width",                                                                        //161
+			"Cheeks Width",                                                                             //162
+			"Eyes Opening",                                                                             //163
+			"Lips Thickness",                                                                           //164
+			"Jaw Bone Width 'Bone size to sides",                                                       //165
+			"Jaw Bone Back Length 'Bone size to back",                                                  //166
+			"Chimp_Bone_Lowering 'Go Down",                                                             //167
+			"Chimp Bone Length 'Go forward",                                                            //168
+			"Chimp Bone Width", "Chimp Hole",                                                           //169
+			"Neck Thickness",                                                                           //170
+			"Blemishes",                                                                                //171
+			"Facial Hair",                                                                              //172
+			"Eyebrows",                                                                                 //173
+			"Ageing",                                                                                   //174
+			"Make-up",                                                                                  //175
+			"Blush",                                                                                    //176
+			"Complexion",                                                                               //177
+			"Sun Damage",                                                                               //178
+			"Lipstick",                                                                                 //179
+			"Moles & Freckles",                                                                         //180
+			"Chest Hair",                                                                               //181
+			"Body Blemishes",                                                                           //182
+			"Add Body Blemishes",                                                                       //183
+			"Select a Keyboard Key",                                                                    //184
+			"Sets the menu open key.",                                                                  //185
+			"Select a Controller Combo",                                                                //186
+			"Choose two controller keys to open menu.",                                                 //187
+			"Hold ~INPUT_VEH_EXIT~ to take control",                                                    //188
+			"Hold the key you would like to use.",                                                      //189
+			"Key Changed",                                                                              //190
+			"Hold ~INPUT_VEH_EXIT~ to hide under van",                                                  //191
+			"Hold ~INPUT_VEH_EXIT~ to hide in waste bin",                                               //192
+			"Top Decal",                                                                                //193
+			"Explore the World: GTA games often feature vast open worlds with a lot of hidden content, collectibles, and easter eggs. Take your time to explore and enjoy the scenery.",
+			"Follow the Story: While you can engage in random chaos, the main story missions provide structure and context for the game. Completing these missions often unlocks new content and areas.",
+			"Use Cover: In gunfights, always use cover to protect yourself. Pop out to shoot, then take cover again. This reduces the chances of getting shot.",
+			"Manage Your Health: Keep an eye on your health and armor levels. You can usually find health packs and armor scattered throughout the game world. Stock up before difficult missions.",
+			"Plan Your Getaways: After committing a crime, have an escape plan. Know where you're going and what you'll do to evade the police.",
+			"Invest in Properties: In some GTA games, you can buy properties. These can provide a passive income and sometimes even offer other benefits.",
+			"Experiment with Vehicles: GTA games have a wide variety of vehicles, from cars to planes to bicycles. Experiment with different vehicles to see which ones suit your style and mission needs.",
+			"Customize Your Character: Many GTA games allow you to customize your character's appearance. Experiment with clothing and accessories to create your own unique style.",
+			"Use the Internet: In later GTA games, characters have smartphones and access to the internet. You can use it to buy vehicles, properties, and more.",
+			"Save Your Game: Don't forget to save your progress regularly, especially after completing important missions. This will prevent you from losing a lot of progress in case you fail a mission or get busted.",
+			"Don't Ignore Side Missions: Side missions can offer fun and unique experiences, as well as rewards like weapons, money, and even character upgrades.",
+			"Respect Traffic Rules (or Not): Sometimes following traffic rules can help you blend in and avoid the attention of the police. On the other hand, reckless driving can be a lot of fun. It's up to you!",
+			"Be Mindful of Police: Committing crimes will get the attention of the police. Pay attention to wanted levels and use Pay 'n' Spray or other hiding spots to lose the cops.",
+			"Play with Friends: If the game supports it, playing GTA with friends can be a blast. You can complete missions together or engage in chaotic, open-world mayhem.",
+			"Have Fun: Ultimately, GTA games are meant to be enjoyed. Whether you prefer causing chaos, following the story, or just exploring, remember that it's a game, and the goal is to have fun.",
+			"Press ~INPUT_TALK~ to change dance, hold ~INPUT_VEH_EXIT~ to  stop Dancing",              //209
+			"Press ~INPUT_TALK~ to start dancing",                                                       //210
+			"press ~INPUT_DUCK~ to select a ped, press ~INPUT_SPRINT~ to  become this ped, Press ~INPUT_RELOAD~ to Close.",                                                       //211
+			"Press ~INPUT_TALK~ to change action, hold ~INPUT_VEH_EXIT~ to exit.",                                                       //212
+			"Winter is Coming",                                                       //213
+			"January",                                                       //214
+			"February",                                                       //215
+			"March",                                                       //216
+			"April",                                                       //217
+			"May",                                                       //218
+			"June",                                                       //219
+			"July",                                                       //220
+			"August",                                                     //221
+			"September",                                                     //222
+			"October",                                                     //223
+			"November",                                                     //224
+			"December",                                                     //225
+			"Set your winter months",                                    //226
+			"Blank",                                                       //227
+			"Blank",                                                       //228
+			"Blank",                                                       //229
+			"Blank"                                                       //230
+		};
+
+		int MyLan = Mod_Settings.Lang_Set;
+		
 		if (MyLan == -1)
 			MyLan = UNK::_GET_UI_LANGUAGE_ID(); // 2BDD44CC428A7EAE
 
 		if (MyLan == 0)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/English.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/English.txt");
 		else if (MyLan == 1)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/French.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/French.txt");
 		else if (MyLan == 2)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/German.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/German.txt");
 		else if (MyLan == 3)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/Italian.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Italian.txt");
 		else if (MyLan == 4)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/Spanish.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Spanish.txt");
 		else if (MyLan == 5)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/Portuguese.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Portuguese.txt");
 		else if (MyLan == 6)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/Polish.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Polish.txt");
 		else if (MyLan == 7)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/Russian.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Russian.txt");
 		else if (MyLan == 8)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/Korean.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Korean.txt");
 		else if (MyLan == 9)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/Chinese.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Chinese.txt");
 		else if (MyLan == 10)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/Japanese.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Japanese.txt");
 		else if (MyLan == 11)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/Spanish.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Spanish.txt");
 		else if (MyLan == 12)
-			RSLangMenu = ReadFile(RSFolder + "/Translate/ChineseSimplify.txt");
+			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/ChineseSimplify.txt");
 
 		if ((int)RSLangMenu.size() < 224)
-			RSLangMenu = HoldMyLang;
+			RSLangMenu = LangEng;
 
 		Mod_Settings.Lang_Set = MyLan;
 	}
-	
-	Hash MyHashKey(std::string name)
+
+	Hash MyHashKey(const std::string& name)
 	{
 		return GAMEPLAY::GET_HASH_KEY((LPSTR)name.c_str());
 	}
@@ -1386,7 +1683,9 @@ namespace Mod_Systems
 	}
 	void ButtonDisabler(int LButt)
 	{
-		CONTROLS::DISABLE_CONTROL_ACTION(0, LButt, true);
+		CONTROLS::ENABLE_CONTROL_ACTION(0, LButt, false);
+		CONTROLS::ENABLE_CONTROL_ACTION(1, LButt, false);
+		CONTROLS::ENABLE_CONTROL_ACTION(2, LButt, false);
 	}
 	bool WhileButtonDown(int CButt, bool bDisable)
 	{
@@ -1432,10 +1731,10 @@ namespace Mod_Systems
 
 		while (true)
 		{
-			if (PlayerIsDead)
+			if ((bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
 				break;
 
-			UiSystem::TopLeft(RSLangMenu[189]);
+			Mod_Ui::TopLeft(RSLangMenu[189]);
 
 			if (Control)
 			{
@@ -1443,7 +1742,7 @@ namespace Mod_Systems
 				{
 					if (ButtonDown(TestCase, false))
 					{
-						UiSystem::BottomLeft(RSLangMenu[190]);
+						Mod_Ui::BottomLeft(RSLangMenu[190]);
 						iReturn = TestCase;
 						break;
 					}
@@ -1458,7 +1757,7 @@ namespace Mod_Systems
 				{
 					if (IsKeyDown(KeyFind[TestCase]))
 					{
-						UiSystem::BottomLeft(RSLangMenu[190]);
+						Mod_Ui::BottomLeft(RSLangMenu[190]);
 						iReturn = TestCase;
 						break;
 					}
@@ -1492,7 +1791,7 @@ namespace Mod_Systems
 		return isSafe;
 	}
 
-	const std::string SavedPedFolder = RSFolder + "/SavedPeds";
+	const std::string SavedPedFolder = GetDir() + "/RandomStart/SavedPeds";
 	void LoadSavedPeds()
 	{
 		LoggerLight("LoadSavedPeds");
@@ -1509,15 +1808,18 @@ namespace Mod_Systems
 
 		for (int i = 0; i < Files.size(); i++)
 		{
-			std::string model = "", name = ""; Hash modelHash = 0; bool freeMode = false;
+			std::string model = "", name = "", walkySt = "", moods = "", HairTag = "H_FMM_3_4", HairName = "", voice = "";
+			
+			Hash modelHash = 0;
 
-			int cloth_Pick = 0, shapeFirstID = 5, shapeSecondID = 5; float shapeMix = 0.0, skinMix = 0.92, thirdMix = 0.0;
+			int hairColour = 7, hairStreaks = 7, eyeColour = 0, comp = 3, text = 4, overLib = -1, over = 1, cloth_Pick = 0, shapeFirstID = 5, shapeSecondID = 5;
+			
+			float shapeMix = 0.0, skinMix = 0.92, thirdMix = 0.0;
 
-			bool male = true, animal_Farm = false; int hairColour = 7,hairStreaks = 7, eyeColour = 0;
-
-			int comp = 3, text = 4; std::string HairTag = "H_FMM_3_4", HairName = ""; int overLib = -1, over = 1;
+			bool male = true, animal_Farm = false, freeMode = false;
 
 			bool ClothBuild = false;
+
 			int intList = 0;
 			int ClothNo = -1;
 
@@ -1525,9 +1827,8 @@ namespace Mod_Systems
 			std::vector<Mod_Class::FreeOverLay> myOverlay = {};
 			std::vector<Mod_Class::Tattoo> myTattoo = {};
 			std::vector<float> faceScale = {};
-			std::string voice = "";
 
-			std::vector<std::string> MyColect = ReadFile(Files[i]);
+			std::vector<std::string> MyColect = ReadSetFile(Files[i]);
 
 			for (int i = 0; i < MyColect.size(); i++)
 			{
@@ -1603,6 +1904,8 @@ namespace Mod_Systems
 					cloth_Pick = StingNumbersInt(line);
 				else if (StringContains("EyeColour", line))
 					eyeColour = StingNumbersInt(line);
+				else if (StringContains("WalkStyle", line))
+					walkySt = AfterEqual(line);
 				else if (StringContains("ShapeFirstID", line))
 					shapeFirstID = StingNumbersInt(line);
 				else if (StringContains("ShapeSecondID", line))
@@ -1635,6 +1938,8 @@ namespace Mod_Systems
 					intList = 6;
 				else if (StringContains("[FaceScale]", line))
 					intList = 7;
+				else if (StringContains("Mood", line))
+					moods = AfterEqual(line);
 				else if (StringContains("[ClothX]", line))
 					ClothBuild = true;
 				else if (intList == 5)
@@ -1653,28 +1958,28 @@ namespace Mod_Systems
 						faceScale.push_back(StingNumbersFloat(line));
 				}
 			}
-			
+
 			bool bReBuild = false;
-			
+
 			Mod_Class::FaceBank myFaces = Mod_Class::FaceBank(shapeFirstID, shapeSecondID, shapeMix, skinMix, thirdMix);
 			Mod_Class::HairSets myHair = Mod_Class::HairSets(comp, text, HairTag, HairName, overLib, over);
 			if (myOutfits[0].Title != "Default")
 				myOutfits[0].Title = "Default";
 
-			Mod_Class::ClothBank ThisBank = Mod_Class::ClothBank(name, model, modelHash, freeMode, myFaces, male, animal_Farm, myHair, hairColour, hairStreaks, eyeColour, cloth_Pick, myOverlay, myTattoo, myOutfits, faceScale, voice);
+			Mod_Class::ClothBank ThisBank = Mod_Class::ClothBank(name, model, modelHash, freeMode, myFaces, male, animal_Farm, myHair, hairColour, hairStreaks, eyeColour, cloth_Pick, myOverlay, myTattoo, myOutfits, faceScale, voice, walkySt, moods);
 
 			PzCont.push_back(ThisBank);
 		}
 
 		for (int i = 0; i < PzCont.size(); i++)
 		{
-			if (PzCont[i].Cloth_Pick < 0 || PzCont[i].Cloth_Pick > (int)PzCont[i].Cothing.size() - 1)
+			if (PzCont[i].Cloth_Pick < 0 || PzCont[i].Cloth_Pick >(int)PzCont[i].Cothing.size() - 1)
 				PzCont[i].Cloth_Pick = 0;
 
 			SavedPeds.push_back(PzCont[i]);
 		}
-	}	
-	void SaveClothBank(Mod_Class::ClothBank* bank)
+	}
+	void SaveClothBank(Mod_Class::ClothBank& bank)
 	{
 		LoggerLight("SaveClothBank");
 		if (CreateDirectoryA((LPSTR)SavedPedFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
@@ -1682,91 +1987,96 @@ namespace Mod_Systems
 
 		}
 
-		std::vector<std::string> NewSave = {
-			"[ClothBank]",
-			"CharName=" + bank->CharName,
-			"Model=" + bank->Model,
-			"XmodelHash=" + std::to_string(bank->ModelHash),
-			"FreeMode=" + BoolToString(bank->FreeMode),
-			"Male=" + BoolToString(bank->Male),
-			"Animal_Farm=" + BoolToString(bank->Animal_Farm),
-			"Voice=" + bank->Voice,
-			"Cloth_Pick=" + std::to_string(bank->Cloth_Pick),
-			"EyeColour=" + std::to_string(bank->EyeColour),
-			"[FaceBank]",
-			"ShapeFirstID=" + std::to_string(bank->MyFaces.ShapeFirstID),
-			"ShapeSecondID=" + std::to_string(bank->MyFaces.ShapeSecondID),
-			"ShapeMix=" + std::to_string(bank->MyFaces.ShapeMix),
-			"SkinMix=" + std::to_string(bank->MyFaces.SkinMix),
-			"ThirdMix=" + std::to_string(bank->MyFaces.ThirdMix),
-			"[Hair]",
-			"HairColour=" + std::to_string(bank->HairColour),
-			"HairStreaks=" + std::to_string(bank->HairStreaks),
-			"Comp=" + std::to_string(bank->MyHair.Comp),
-			"Text=" + std::to_string(bank->MyHair.Text),
-			"HairTag=" + bank->MyHair.HandName,
-			"HairName=" + bank->MyHair.Name,
-			"OverLib=" + std::to_string(bank->MyHair.OverLib),
-			"OverOb=" + std::to_string(bank->MyHair.Over),
-			"[FreeOverLay]"
-		};
-
-		for (int i = 0; i < bank->MyOverlay.size(); i++)
+		if (bank.CharName != "")
 		{
-			NewSave.push_back("[OverLay]");
-			NewSave.push_back("Overlay=" + std::to_string(bank->MyOverlay[i].Overlay));
-			NewSave.push_back("OverCol=" + std::to_string(bank->MyOverlay[i].OverCol));
-			NewSave.push_back("OverOpc=" + std::to_string(bank->MyOverlay[i].OverOpc));
+			std::vector<std::string> NewSave = {
+				"[ClothBank]",
+				"CharName=" + bank.CharName,
+				"Model=" + bank.Model,
+				"XmodelHash=" + std::to_string(bank.ModelHash),
+				"FreeMode=" + BoolToString(bank.FreeMode),
+				"Male=" + BoolToString(bank.Male),
+				"Animal_Farm=" + BoolToString(bank.Animal_Farm),
+				"Voice=" + bank.Voice,
+				"Cloth_Pick=" + std::to_string(bank.Cloth_Pick),
+				"EyeColour=" + std::to_string(bank.EyeColour),
+				"WalkStyle=" + bank.Walkies,
+				"[FaceBank]",
+				"ShapeFirstID=" + std::to_string(bank.MyFaces.ShapeFirstID),
+				"ShapeSecondID=" + std::to_string(bank.MyFaces.ShapeSecondID),
+				"ShapeMix=" + std::to_string(bank.MyFaces.ShapeMix),
+				"SkinMix=" + std::to_string(bank.MyFaces.SkinMix),
+				"ThirdMix=" + std::to_string(bank.MyFaces.ThirdMix),
+				"[Hair]",
+				"HairColour=" + std::to_string(bank.HairColour),
+				"HairStreaks=" + std::to_string(bank.HairStreaks),
+				"Comp=" + std::to_string(bank.MyHair.Comp),
+				"Text=" + std::to_string(bank.MyHair.Text),
+				"HairTag=" + bank.MyHair.HandName,
+				"HairName=" + bank.MyHair.Name,
+				"OverLib=" + std::to_string(bank.MyHair.OverLib),
+				"OverOb=" + std::to_string(bank.MyHair.Over),
+				"Mood=" + bank.Moods,
+				"[FreeOverLay]"
+			};
+
+			for (int i = 0; i < bank.MyOverlay.size(); i++)
+			{
+				NewSave.push_back("[OverLay]");
+				NewSave.push_back("Overlay=" + std::to_string(bank.MyOverlay[i].Overlay));
+				NewSave.push_back("OverCol=" + std::to_string(bank.MyOverlay[i].OverCol));
+				NewSave.push_back("OverOpc=" + std::to_string(bank.MyOverlay[i].OverOpc));
+			}
+
+			NewSave.push_back("[Tattoo]");
+
+			for (int i = 0; i < bank.MyTattoo.size(); i++)
+			{
+				NewSave.push_back("[Tat]");
+				NewSave.push_back("BaseName=" + bank.MyTattoo[i].BaseName);
+				NewSave.push_back("TatsDesc=" + bank.MyTattoo[i].Name);
+				NewSave.push_back("TatName=" + bank.MyTattoo[i].TatName);
+			}
+
+			NewSave.push_back("[FaceScale]");
+
+			for (int i = 0; i < bank.FaceScale.size(); i++)
+				NewSave.push_back("Face=" + std::to_string(bank.FaceScale[i]));
+
+			for (int i = 0; i < bank.Cothing.size(); i++)
+			{
+				NewSave.push_back("[ClothX]");
+				NewSave.push_back("Title=" + bank.Cothing[i].Title);
+				NewSave.push_back("DecalLib=" + bank.Cothing[i].Badge.BaseName);
+				NewSave.push_back("DecalName=" + bank.Cothing[i].Badge.TatName);
+
+				NewSave.push_back("[ClothA]");
+				for (int j = 0; j < bank.Cothing[i].ClothA.size(); j++)
+					NewSave.push_back("ClothA=" + std::to_string(bank.Cothing[i].ClothA[j]));
+
+				NewSave.push_back("[ClothB]");
+				for (int j = 0; j < bank.Cothing[i].ClothB.size(); j++)
+					NewSave.push_back("ClothB=" + std::to_string(bank.Cothing[i].ClothB[j]));
+
+				NewSave.push_back("[ExtraA]");
+				for (int j = 0; j < bank.Cothing[i].ExtraA.size(); j++)
+					NewSave.push_back("ExtraA=" + std::to_string(bank.Cothing[i].ExtraA[j]));
+
+				NewSave.push_back("[ExtraB]");
+				for (int j = 0; j < bank.Cothing[i].ExtraA.size(); j++)
+					NewSave.push_back("ExtraB=" + std::to_string(bank.Cothing[i].ExtraB[j]));
+			}
+
+			std::ofstream MyFile(SavedPedFolder + "/" + bank.CharName + ".ini");
+
+			for (int i = 0; i < NewSave.size(); i++)
+			{
+				MyFile << NewSave[i];
+				MyFile << "\n";
+			}
+
+			MyFile.close();
 		}
-
-		NewSave.push_back("[Tattoo]");
-
-		for (int i = 0; i < bank->MyTattoo.size(); i++)
-		{
-			NewSave.push_back("[Tat]");
-			NewSave.push_back("BaseName=" + bank->MyTattoo[i].BaseName);
-			NewSave.push_back("TatsDesc=" + bank->MyTattoo[i].Name);
-			NewSave.push_back("TatName=" + bank->MyTattoo[i].TatName);
-		}
-
-		NewSave.push_back("[FaceScale]");
-
-		for (int i = 0; i < bank->FaceScale.size(); i++)
-			NewSave.push_back("Face=" + std::to_string(bank->FaceScale[i]));
-
-		for (int i = 0; i < bank->Cothing.size(); i++)
-		{
-			NewSave.push_back("[ClothX]");
-			NewSave.push_back("Title=" + bank->Cothing[i].Title);
-			NewSave.push_back("DecalLib=" + bank->Cothing[i].Badge.BaseName);
-			NewSave.push_back("DecalName=" + bank->Cothing[i].Badge.TatName);
-
-			NewSave.push_back("[ClothA]");
-			for (int j = 0; j < bank->Cothing[i].ClothA.size(); j++)
-				NewSave.push_back("ClothA=" + std::to_string(bank->Cothing[i].ClothA[j]));
-
-			NewSave.push_back("[ClothB]");
-			for (int j = 0; j < bank->Cothing[i].ClothB.size(); j++)
-				NewSave.push_back("ClothB=" + std::to_string(bank->Cothing[i].ClothB[j]));
-
-			NewSave.push_back("[ExtraA]");
-			for (int j = 0; j < bank->Cothing[i].ExtraA.size(); j++)
-				NewSave.push_back("ExtraA=" + std::to_string(bank->Cothing[i].ExtraA[j]));
-
-			NewSave.push_back("[ExtraB]");
-			for (int j = 0; j < bank->Cothing[i].ExtraA.size(); j++)
-				NewSave.push_back("ExtraB=" + std::to_string(bank->Cothing[i].ExtraB[j]));
-		}
-
-		std::ofstream MyFile(SavedPedFolder + "/" + bank->CharName + ".ini");
-
-		for (int i = 0; i < NewSave.size(); i++)
-		{
-			MyFile << NewSave[i];
-			MyFile << "\n";
-		}
-
-		MyFile.close();
 	}
 
 	void AddMonies(int iAmount)
@@ -1785,34 +2095,826 @@ namespace Mod_Systems
 		STATS::STAT_SET_INT(iPedCred, Credit, 1);
 	}
 
-	bool CanRandondomizeStart()
+	void FindAddCars()
 	{
-		std::string sLocate = "" + GetDir() + "/Scripts/NSPM/Settings/Settings.Xml";
-		bool LOY = false;
-
-		std::vector<std::string> MyColect = ReadFile(sLocate);
-
-		for (int i = 0; i < MyColect.size(); i++)
+		std::string OutputFolder = GetDir() + "/RandomStart/Vehicles";
+		if (CreateDirectoryA((LPSTR)OutputFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
 		{
-			std::string line = MyColect[i];
-			if (StringContains("<StartOnYAcht>", line))
-				LOY = StringBool(line);
+			LoggerLight("RandomStart/Vehicles, Direct Working");
+		}
+		else
+		{
+			LoggerLight("RandomStart/Vehicles, Direct failed");
 		}
 
+		const std::string sVehList01 = GetDir() + "/RandomStart/Vehicles/Boats.ini";
+		PreVeh_01 = ReadSetFile(sVehList01);
+		if (PreVeh_01.size() == 0)
+		{
+			const std::vector<std::string> PreVehSet_01 = {
+				"AVISA",//<!-- Kraken Avisa -->
+				"DINGHY",//
+				"DINGHY5",//<!-- Dinghy weaponized variant -->
+				"JETMAX",//
+				"LONGFIN",//<!-- Shitzu Longfin -->
+				"MARQUIS",//
+				"PREDATOR",//
+				"PATROLBOAT",//<!-- Kurtz 31 Patrol Boat -->
+				"SEASHARK",//
+				"SPEEDER",//
+				"SQUALO",//
+				"SUNTRAP",//
+				"TORO",//
+				"TROPIC"//
+			};
 
-		return LOY;
+			PreVeh_01 = PreVehSet_01;
+			WriteFile(sVehList01, PreVeh_01);
+		}
+		else
+			RemoveBlankStrings(PreVeh_01);
+		const std::string sVehList02 = GetDir() + "/RandomStart/Vehicles/HighValueVeh.ini";
+		PreVeh_02 = ReadSetFile(sVehList02);
+		if (PreVeh_02.size() == 0)
+		{
+			const std::vector<std::string> PreVehSet_02 = {
+				"PFISTER811",  //<!-- 811 -->
+				"ADDER",  //
+				"AUTARCH",  //
+				"BANSHEE2",  //<!-- Banshee 900R -->
+				"BULLET",  //
+				"CHAMPION",  //
+				"CHEETAH",  //
+				"CYCLONE",  //
+				"DEVESTE",  //
+				"EMERUS",  //
+				"ENTITYXF",  //
+				"ENTITY3",  //<!-- Entity MT -->
+				"ENTITY2",  //<!-- Entity XXR -->
+				"SHEAVA",  //<!-- ETR1 -->
+				"FMJ",  //
+				"FURIA",  //
+				"GP1",  //
+				"IGNUS",  //
+				"INFERNUS",  //
+				"ITALIGTB",  //
+				"ITALIGTB2",  //<!-- Itali GTB Custom -->
+				"KRIEGER",  //
+				"LM87",  //
+				"OSIRIS",  //
+				"NERO",  //
+				"NERO2",  //<!-- Nero Custom -->
+				"PENETRATOR",  //
+				"LE7B",  //<!-- RE-7B -->
+				"REAPER",  //
+				"VOLTIC2",  //<!-- Rocket Voltic -->
+				"S80",  //
+				"SC1",  //
+				"SCRAMJET",  //
+				"SULTANRS",  //
+				"T20",  //
+				"TAIPAN",  //
+				"TEMPESTA",  //
+				"TEZERACT",  //
+				"THRAX",  //
+				"TIGON",  //
+				"TORERO2",  //<!-- Torero XO -->
+				"TURISMOR",  //
+				"TYRANT",  //
+				"TYRUS",  //
+				"VACCA",  //
+				"VAGNER",  //
+				"VIGILANTE",  //
+				"VIRTUE",  //
+				"VISIONE",  //
+				"VOLTIC",  //
+				"PROTOTIPO",  //<!-- X80 Proto -->
+				"XA21",  //
+				"ZENO",  //
+				"ZENTORNO",  //
+				"ZORRUSSO",  //
+				"R300",  //<!-- 300R -->
+				"DRAFTER",  //<!-- 8F Drafter -->
+				"NINEF",  //
+				"NINEF2",  //<!-- 9F Cabrio -->
+				"TENF",  //
+				"TENF2",  //<!-- 10F Widebody -->
+				"ALPHA",  //
+				"ZR380",  //<!-- Apocalypse ZR380 -->
+				"BANSHEE",  //
+				"BESTIAGTS",  //
+				"BLISTA2",  //<!-- Blista Compact -->
+				"BUFFALO",  //
+				"BUFFALO2",  //<!-- Buffalo S -->
+				"CALICO",  //<!-- Calico GTF -->
+				"CARBONIZZARE",  //
+				"COMET2",  //<!-- Comet -->
+				"COMET3",  //<!-- Comet Retro Custom -->
+				"COMET6",  //<!-- Comet S2 -->
+				"COMET7",  //<!-- Comet S2 Cabrio -->
+				"COMET4",  //<!-- Comet Safari -->
+				"COMET5",  //<!-- Comet SR -->
+				"COQUETTE",  //
+				"COQUETTE4",  //<!-- Coquette D10 -->
+				"CORSITA",  //
+				"CYPHER",  //
+				"TAMPA2",  //<!-- Drift Tampa -->
+				"ELEGY",  //<!-- Elegy Retro Custom -->
+				"ELEGY2",  //<!-- Elegy RH8 -->
+				"EUROS",  //
+				"FELTZER2",  //<!-- Feltzer -->
+				"FLASHGT",  //
+				"FUROREGT",  //
+				"FUSILADE",  //
+				"FUTO",  //
+				"FUTO2",  //<!-- Futo GTX -->
+				"ZR3802",  //<!-- Future Shock ZR380 -->
+				"GB200",  //
+				"BLISTA3",  //<!-- Go Go Monkey Blista -->
+				"GROWLER",  //
+				"EVERON2",  //<!-- Hotring Everon -->
+				"GAUNTLET6",  //<!-- Hotring Hellfire -->
+				"HOTRING",  //<!-- Hotring Sabre -->
+				"IMORGON",  //
+				"ISSI7",  //<!-- Issi Sport -->
+				"ITALIGTO",  //
+				"STINGERTT",  //<!-- Issi GTO Stinger TT -->
+				"ITALIRSX",  //
+				"JESTER",  //
+				"JESTER2",  //<!-- Jester (Racecar) -->
+				"JESTER3",  //<!-- Jester Classic -->
+				"JESTER4",  //<!-- Jester RR -->
+				"JUGULAR",  //
+				"KHAMELION",  //
+				"KOMODA",  //
+				"KURUMA",  //
+				"KURUMA2",  //<!-- Kuruma (Armored) -->
+				"COUREUR",  //<!-- La Coureuse -->
+				"LOCUST",  //
+				"LYNX",  //
+				"MASSACRO",  //
+				"MASSACRO2",  //<!-- Massacro (Racecar) -->
+				"NEO",  //
+				"NEON",  //
+				"ZR3803",  //<!-- Nightmare ZR380 -->
+				"OMNIS",  //
+				"OMNISEGT",  //
+				"PANTHERE",  //
+				"PARAGON",  //
+				"PARAGON2",  //<!-- Paragon R (Armored) -->
+				"PARIAH",  //
+				"PENUMBRA",  //
+				"PENUMBRA2",  //<!-- Penumbra FF -->
+				"RAIDEN",  //
+				"RAPIDGT",  //
+				"RAPIDGT2",  //<!-- Rapid GT Cabrio -->
+				"RAPTOR",  //
+				"REMUS",  //
+				"REVOLTER",  //
+				"RT3000",  //
+				"RUSTON",  //
+				"SCHAFTER4",  //<!-- Schafter LWB -->
+				"SCHAFTER3",  //<!-- Schafter V12 -->
+				"SCHLAGEN",  //
+				"SCHWARZER",  //
+				"SENTINEL3",  //<!-- Sentinel Classic -->
+				"SENTINEL4",  //<!-- Sentinel Classic Widebody -->
+				"SEVEN70",  //
+				"SM722",  //
+				"SPECTER",  //
+				"SPECTER2",  //<!-- Specter Custom -->
+				"BUFFALO3",  //<!-- Sprunk Buffalo -->
+				"STREITER",  //
+				"SUGOI",  //
+				"SULTAN",  //
+				"SULTAN2",  //<!-- Sultan Classic -->
+				"SULTAN3",  //<!-- Sultan RS Classic -->
+				"SURANO",  //
+				"TROPOS",  //
+				"VSTR",  //<!-- V-STR -->
+				"VECTRE",  //
+				"VERLIERER2",  //
+				"VETO",  //<!-- Veto Classic -->
+				"VETO2",  //<!-- Veto Modern -->
+				"ZR350",  //
+				"turismo3", // Super
+				"dominator9", // Muscle
+				"driftyosemite", // Muscle
+				"impaler6", // Muscle
+				"Vigero3" // Muscle
+			};
+
+			PreVeh_02 = PreVehSet_02;
+			WriteFile(sVehList02, PreVeh_02);
+		}
+		else
+			RemoveBlankStrings(PreVeh_02);
+
+		const std::string sVehList03 = GetDir() + "/RandomStart/Vehicles/MidValueVeh.ini";
+		PreVeh_03 = ReadSetFile(sVehList03);
+		if (PreVeh_03.size() == 0)
+		{
+			const std::vector<std::string> PreVehSet_03 = {
+				"COGCABRIO",  //
+				"EXEMPLAR",  //
+				"F620",  //
+				"BRIGHAM",  //
+				"FELON",  //
+				"FELON2",  //<!-- Felon GT -->
+				"JACKAL",  //
+				"KANJOSJ",  //
+				"ORACLE",  //
+				"ORACLE2",  //<!-- Oracle XS -->
+				"POSTLUDE",  //
+				"PREVION",  //
+				"SENTINEL2",  //<!-- Sentinel -->
+				"SENTINEL",  //<!-- Sentinel XS -->
+				"WINDSOR",  //
+				"WINDSOR2",  //<!-- Windsor Drop -->
+				"ZION",  //
+				"ZION2",  //<!-- Zion Cabrio -->
+				"ASEA",  //
+				"ASEA2",  //<!-- Asea North Yankton variant -->
+				"ASTEROPE",  //
+				"CINQUEMILA",  //
+				"COGNOSCENTI",  //
+				"COGNOSCENTI2",  //<!-- Cognoscenti (Armored) -->
+				"COG55",  //<!-- Cognoscenti 55 -->
+				"COG552",  //<!-- Cognoscenti 55 (Armored) -->
+				"DEITY",  //
+				"FUGITIVE",  //
+				"GLENDALE2",  //<!-- Glendale Custom -->
+				"INTRUDER",  //
+				"PREMIER",  //
+				"PRIMO2",  //<!-- Primo Custom -->
+				"REGINA",  //
+				"RHINEHART",  //
+				"ROMERO",  //
+				"SCHAFTER2",  //
+				"SCHAFTER6",  //<!-- Schafter LWB (Armored) -->
+				"SCHAFTER5",  //<!-- Schafter V12 (Armored) -->
+				"STAFFORD",  //
+				"STANIER",  //
+				"STRATUM",  //
+				"STRETCH",  //
+				"SUPERD",  //
+				"SURGE",  //
+				"TAILGATER",  //
+				"TAILGATER2",  //<!-- Tailgater S -->
+				"LIMO2",  //<!-- Turreted Limo -->
+				"WARRENER2",  //<!-- Warrener HKR -->
+				"WASHINGTON",  //
+				"ASTRON",  //
+				"BALLER",  //
+				"BALLER2",  //<!-- Baller 2nd gen variant -->
+				"BALLER3",  //<!-- Baller LE -->
+				"BALLER5",  //<!-- Baller LE (Armored) -->
+				"BALLER4",  //<!-- Baller LE LWB -->
+				"BALLER6",  //<!-- Baller LE LWB (Armored) -->
+				"BALLER7",  //<!-- Baller ST -->
+				"BJXL",  //
+				"CAVALCADE",  //
+				"CAVALCADE2",  //<!-- Cavalcade 2nd gen variant -->
+				"CONTENDER",  //
+				"DUBSTA",  //
+				"DUBSTA2",  //<!-- Dubsta black variant -->
+				"FQ2",  //
+				"GRANGER",  //
+				"GRANGER2",  //<!-- Granger 3600LX -->
+				"GRESLEY",  //
+				"HUNTLEY",  //
+				"ISSI8",  //<!-- Issi Rally -->
+				"IWAGEN",  //
+				"JUBILEE",  //
+				"LANDSTALKER",  //
+				"LANDSTALKER2",  //<!-- Landstalker XL -->
+				"MESA",  //
+				"MESA2",  //<!-- Mesa North Yankton variant -->
+				"NOVAK",  //
+				"PATRIOT",  //
+				"PATRIOT2",  //<!-- Patriot Stretch -->
+				"RADI",  //
+				"REBLA",  //
+				"ROCOTO",  //
+				"SEMINOLE",  //
+				"SEMINOLE2",  //<!-- Seminole Frontier -->
+				"SERRANO",  //
+				"SQUADDIE",  //
+				"TOROS",  //
+				"XLS",  //
+				"XLS2",  //<!-- XLS (Armored) -->
+				"aleutian", // SUVs
+				"baller8", // SUVs
+				"cavalcade3", // SUVs
+				"dorado", // SUVs
+				"vivanite", // SUVs
+				"asterope2", // Sedans
+				"impaler5", // Sedans
+				"drifteuros", // Sports
+				"driftfuto", // Sports
+				"driftjester", // Sports
+				"driftremus", // Sports
+				"drifttampa", // Sports
+				"driftzr350", // Sports
+				"driftfr36", // Coupes
+				"fr36", // Coupes
+				"terminus" // Off-Road
+			};
+
+			PreVeh_03 = PreVehSet_03;
+			WriteFile(sVehList03, PreVeh_03);
+		}
+		else
+			RemoveBlankStrings(PreVeh_03);
+
+		const std::string sVehList04 = GetDir() + "/RandomStart/Vehicles/LowValueVeh.ini";
+		PreVeh_04 = ReadSetFile(sVehList04);
+		if (PreVeh_04.size() == 0)
+		{
+			const std::vector<std::string> PreVehSet_04 = {
+				"GREENWOOD",  //
+				"MOONBEAM",  //
+				"DILETTANTE",  //
+				"PANTO",  //
+				"RHAPSODY",  //
+				"EMPEROR",  //
+				"EMPEROR2",  //<!-- Emperor beater variant -->
+				"GLENDALE",  //
+				"INGOT",  //
+				"PRIMO",  //
+				"WARRENER",  //
+				"HABANERO"  //
+			};
+
+			PreVeh_04 = PreVehSet_04;
+			WriteFile(sVehList04, PreVeh_04);
+		}
+		else
+			RemoveBlankStrings(PreVeh_04);
+
+		const std::string sVehList10 = GetDir() + "/RandomStart/Vehicles/Planes.ini";
+		PreVeh_10 = ReadSetFile(sVehList10);
+		if (PreVeh_10.size() == 0)
+		{
+			const std::vector<std::string> PreVehSet_10 = {
+				"ALPHAZ1",  //
+				"STRIKEFORCE",  //<!-- B-11 Strikeforce -->
+				"BESRA",  //
+				"RAIJU",  //<!-- F-160 Raiju -->
+				"HYDRA",  //
+				"STARLING",  //<!-- LF-22 Starling -->
+				"MAMMATUS",  //
+				"MOGUL",  //
+				"LAZER",  //<!-- P-996 LAZER -->
+				"PYRO",  //
+				"BOMBUSHKA",  //<!-- RM-10 Bombushka -->
+				"ROGUE",  //
+				"ALKONOST",  //<!-- RO-86 Alkonost -->
+				"TITAN",  //
+				"TULA",  //
+				"MOLOTOK",  //<!-- V-65 Molotok -->
+				"VOLATOL",  //
+				"CARGOPLANE",  //
+				"CARGOPLANE2",  //
+				"CUBAN800",  //
+				"DODO",  //
+				"JET",  //
+				"LUXOR",  //
+				"LUXOR2",  //<!-- Luxor Deluxe -->
+				"MILJET",  //
+				"NIMBUS",  //
+				"SHAMAL",  //
+				"STREAMER216",  //
+				"VELUM",  //
+				"VELUM2",  //<!-- Velum 5-Seater -->
+				"VESTRA"  //
+			};
+
+			PreVeh_10 = PreVehSet_10;
+			WriteFile(sVehList10, PreVeh_10);
+		}
+		else
+			RemoveBlankStrings(PreVeh_10);
+
+		const std::string sVehList11 = GetDir() + "/RandomStart/Vehicles/Helicopters.ini";
+		PreVeh_11 = ReadSetFile(sVehList11);
+		if (PreVeh_11.size() == 0)
+		{
+			const std::vector<std::string> PreVehSet_11 = {
+				"CONADA",  //
+				"FROGGER",  //
+				"MAVERICK",  //
+				"SUPERVOLITO",  //
+				"SUPERVOLITO2",  //<!-- SuperVolito Carbon -->
+				"SWIFT",  //
+				"SWIFT2",  //<!-- Swift Deluxe -->
+				"VOLATUS"  //
+			};
+
+			PreVeh_11 = PreVehSet_11;
+			WriteFile(sVehList11, PreVeh_11);
+		}
+		else
+			RemoveBlankStrings(PreVeh_11);
 	}
+	void FindAddPeds()
+	{
+		std::string OutputFolder = GetDir() + "/RandomStart/Peds";
+		if (CreateDirectoryA((LPSTR)OutputFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
+		{
+			LoggerLight("RandomStart/Vehicles, Direct Working");
+		}
+		else
+		{
+			LoggerLight("RandomStart/Vehicles, Direct failed");
+		}
 
+		const std::string sPedList01 = GetDir() + "/RandomStart/Peds/Beach.ini";
+		PrePed_01 = ReadSetFile(sPedList01);
+		if (PrePed_01.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_01 = {
+				"a_f_m_beach_01",//"Beach Female",  		
+				"a_f_m_fatcult_01",//"Fat Cult Female",  
+				"a_f_y_hippie_01",//"Hippie Female", 
+				"a_f_y_yoga_01",//"Yoga Female", 
+				"a_m_m_beach_01",//"Beach Male",  
+				"a_m_y_beach_01",//"Beach Young Male",  
+				"a_m_y_beach_02",//"Beach Young Male 2",  
+				"a_m_y_beach_03",//"Beach Young Male 3", 
+				"a_m_y_breakdance_01",//"Breakdancer Male",
+				"a_m_y_hippy_01",//"Hippie Male",  
+				"a_m_y_sunbathe_01",//"Sunbather Male",  
+				"a_m_y_surfer_01",//"Surfer",
+				"a_m_y_beachvesp_01",//"Vespucci Beach Male",  
+				"a_m_y_beachvesp_02",//"Vespucci Beach Male 2",  
+				"a_m_y_stwhi_01",//"White Street Male",  
+				"a_m_y_yoga_01",//"Yoga Male",
+				"a_f_m_trampbeac_01"//"Beach Tramp Female", 
+			};
+
+			PrePed_01 = PrePeSet_01;
+			WriteFile(sPedList01, PrePed_01);
+		}
+		else
+			RemoveBlankStrings(PrePed_01);
+
+		const std::string sPedList02 = GetDir() + "/RandomStart/Peds/Tramp.ini";
+		PrePed_02 = ReadSetFile(sPedList02);
+		if (PrePed_02.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_02 = {
+				"a_f_m_trampbeac_01",//"Beach Tramp Female",  
+				"a_f_m_tramp_01",//"Tramp Female",  
+				"a_m_o_beach_01",//"Beach Old Male",  
+				"a_m_m_trampbeac_01",//"Beach Tramp Male",  
+				"a_m_m_tramp_01",//"Tramp Male",  
+				"a_m_o_tramp_01"//"Tramp Old Male",  
+			};
+
+			PrePed_02 = PrePeSet_02;
+			WriteFile(sPedList02, PrePed_02);
+		}
+		else
+			RemoveBlankStrings(PrePed_02);
+
+		const std::string sPedList03 = GetDir() + "/RandomStart/Peds/HighClass.ini";
+		PrePed_03 = ReadSetFile(sPedList03);
+		if (PrePed_03.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_03 = {
+				"a_f_y_scdressy_01",//"Dressy Female",  
+				"a_f_y_bevhills_04",//"Beverly Hills Young Female 4", 
+				"a_f_y_clubcust_01",//"Club Customer Female 1",  
+				"a_f_y_clubcust_02",//"Club Customer Female 2",  
+				"a_f_y_clubcust_03",//"Club Customer Female 3", 
+				"a_f_y_smartcaspat_01",//"Formel Casino Guest",  
+				"s_f_y_movprem_01",//"Movie Premiere Female",  
+				"A_F_Y_StudioParty_01",
+				"A_F_Y_StudioParty_02",
+				"a_m_y_bevhills_02",//"Beverly Hills Young Male 2", 
+				"a_m_y_smartcaspat_01",//"Formel Casino Guests", 
+				"a_m_m_malibu_01",//"Malibu Male",  
+				"a_m_y_soucent_04",//"South Central Young Male 4",  
+				"s_m_m_movprem_01",//"Movie Premiere Male",  
+				"A_M_M_StudioParty_01",
+				"A_M_Y_StudioParty_01",
+				"a_f_y_bevhills_01",//"Beverly Hills Young Female",  
+				"a_f_y_bevhills_02",//"Beverly Hills Young Female 2",  
+				"a_f_y_bevhills_03",//"Beverly Hills Young Female 3", 
+				"a_f_y_eastsa_01",//"East SA Young Female",  
+				"a_f_y_eastsa_02",//"East SA Young Female 2",  
+				"a_f_y_genhot_01",//"General Hot Young Female",  
+				"a_f_y_hipster_01",//"Hipster Female",  
+				"a_f_y_hipster_02",//"Hipster Female 2",  
+				"a_f_y_hipster_03",//"Hipster Female 3",  
+				"a_f_y_hipster_04"//"Hipster Female 4", 
+			};
+
+			PrePed_03 = PrePeSet_03;
+			WriteFile(sPedList03, PrePed_03);
+		}
+		else
+			RemoveBlankStrings(PrePed_03);
+	
+		const std::string sPedList04 = GetDir() + "/RandomStart/Peds/MidClass.ini";
+		PrePed_04 = ReadSetFile(sPedList04);
+		if (PrePed_04.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_04 = {
+				"a_f_y_indian_01",//"Indian Young Female",  
+				"a_f_y_soucent_03",//"South Central Young Female 3",  
+				"a_f_y_tourist_01",//"Tourist Young Female",  
+				"a_f_y_vinewood_01",//"Vinewood Female",  
+				"a_f_y_vinewood_02",//"Vinewood Female 2",  
+				"a_f_y_vinewood_03",//"Vinewood Female 3",  
+				"a_f_y_vinewood_04",//"Vinewood Female 4", 
+				"A_F_Y_CarClub_01",
+				"A_M_Y_CarClub_01",
+				"a_m_m_afriamer_01",//"African American Male",  
+				"a_m_m_bevhills_01",//"Beverly Hills Male",  
+				"a_m_m_bevhills_02",//"Beverly Hills Male 2",  
+				"a_m_y_bevhills_01",//"Beverly Hills Young Male",  
+				"a_m_y_stbla_02",//"Black Street Male 2",
+				"a_m_y_gencaspat_01",//"Casual Casino Guests",  
+				"a_m_y_genstreet_01",//"General Street Young Male",  
+				"a_m_y_genstreet_02",//"General Street Young Male 2",  
+				"a_m_m_hasjew_01",//"Hasidic Jew Male",  
+				"a_m_y_hasjew_01",//"Hasidic Jew Young Male",  
+				"a_m_y_hipster_01",//"Hipster Male",  
+				"a_m_y_hipster_02",//"Hipster Male 2",  
+				"a_m_y_hipster_03",//"Hipster Male 3",  
+				"a_m_y_indian_01",//"Indian Young Male",  
+				"a_m_y_ktown_01",//"Korean Young Male",  
+				"a_m_y_ktown_02",//"Korean Young Male 2",  
+				"a_m_y_polynesian_01",//"Polynesian Young", 
+				"a_m_y_vindouche_01",//"Vinewood Douche",  
+				"a_m_y_vinewood_01",//"Vinewood Male",  
+				"a_m_y_vinewood_02",//"Vinewood Male 2",  
+				"a_m_y_vinewood_03",//"Vinewood Male 3",  
+				"a_m_y_vinewood_04",//"Vinewood Male 4",  
+				"a_m_y_stwhi_02",//"White Street Male 2", 
+				"a_m_y_clubcust_01",//"Club Customer Male 1",  
+				"a_m_y_clubcust_02",//"Club Customer Male 2",  
+				"a_m_y_clubcust_03",//"Club Customer Male 3", 
+				"A_M_Y_CarClub_01",
+				"a_f_m_downtown_01",//"Downtown Female", 
+				"a_f_y_gencaspat_01"//"Casual Casino Guest",  
+			};
+
+			PrePed_04 = PrePeSet_04;
+			WriteFile(sPedList04, PrePed_04);
+		}
+		else
+			RemoveBlankStrings(PrePed_04);
+	
+		const std::string sPedList05 = GetDir() + "/RandomStart/Peds/LowClass.ini";
+		PrePed_05 = ReadSetFile(sPedList05);
+		if (PrePed_05.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_05 = {
+				"a_f_m_eastsa_01",//"East SA Female",  
+				"a_f_m_eastsa_02",//"East SA Female 2",  
+				"a_f_m_fatbla_01",//"Fat Black Female",  
+				"a_f_m_fatwhite_01",//"Fat White Female",  
+				"a_f_o_genstreet_01",//"General Street Old Female",  
+				"a_f_o_indian_01",//"Indian Old Female",  
+				"a_f_m_ktown_01",//"Korean Female",  
+				"a_f_m_ktown_02",//"Korean Female 2",  
+				"a_f_o_ktown_01",//"Korean Old Female",  
+				"a_f_m_skidrow_01",//"Skid Row Female",  
+				"a_f_m_soucent_01",//"South Central Female",  
+				"a_f_m_soucent_02",//"South Central Female 2",  
+				"a_f_m_soucentmc_01",//"South Central MC Female",  
+				"a_f_o_soucent_01",//"South Central Old Female",  
+				"a_f_o_soucent_02",//"South Central Old Female 2",  
+				"a_f_y_soucent_01",//"South Central Young Female",  
+				"a_f_y_soucent_02",//"South Central Young Female 2",  
+				"a_f_m_tourist_01",//"Tourist Female",  
+				"a_f_y_tourist_02",//"Tourist Young Female 2",  
+				"a_m_y_stbla_01",//"Black Street Male",  
+				"a_m_y_downtown_01",//"Downtown Male",  
+				"a_m_m_eastsa_01",//"East SA Male",  
+				"a_m_m_eastsa_02",//"East SA Male 2",  
+				"a_m_y_eastsa_01",//"East SA Young Male",  
+				"a_m_y_eastsa_02",//"East SA Young Male 2",  
+				"a_m_m_fatlatin_01",//"Fat Latino Male",  
+				"a_m_m_genfat_01",//"General Fat Male",  
+				"a_m_m_genfat_02",//"General Fat Male 2",  
+				"a_m_o_genstreet_01",//"General Street Old Male",  
+				"a_m_m_indian_01",//"Indian Male", 
+				"a_m_m_ktown_01",//"Korean Male",  
+				"a_m_o_ktown_01",//"Korean Old Male", 
+				"a_m_m_stlat_02",//"Latino Street Male 2",  
+				"a_m_y_stlat_01",//"Latino Street Young Male",  
+				"a_m_y_latino_01",//"Latino Young Male",
+				"a_m_m_mexlabor_01",//"Mexican Labourer",  
+				"a_m_m_mexcntry_01",//"Mexican Rural", 
+				"a_m_m_polynesian_01",//"Polynesian",   
+				"a_m_m_skidrow_01",//"Skid Row Male",  
+				"a_m_m_socenlat_01",//"South Central Latino Male",  
+				"a_m_m_soucent_01",//"South Central Male",  
+				"a_m_m_soucent_02",//"South Central Male 2",  
+				"a_m_m_soucent_03",//"South Central Male 3",  
+				"a_m_m_soucent_04",//"South Central Male 4",  
+				"a_m_o_soucent_01",//"South Central Old Male",  
+				"a_m_o_soucent_02",//"South Central Old Male 2",  
+				"a_m_o_soucent_03",//"South Central Old Male 3",  
+				"a_m_y_soucent_01",//"South Central Young Male",  
+				"a_m_y_soucent_02",//"South Central Young Male 2",  
+				"a_m_y_soucent_03",//"South Central Young Male 3", 
+				"a_m_m_tourist_01"//"Tourist Male",  
+			};
+
+			PrePed_05 = PrePeSet_05;
+			WriteFile(sPedList05, PrePed_05);
+		}
+		else
+			RemoveBlankStrings(PrePed_05);
+
+		const std::string sPedList06 = GetDir() + "/RandomStart/Peds/Buisness.ini";
+		PrePed_06 = ReadSetFile(sPedList06);
+		if (PrePed_06.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_06 = {
+				"g_m_m_casrn_01",//"Casino Guests?",  
+				"a_f_m_bevhills_01",//"Beverly Hills Female",  
+				"a_f_m_bevhills_02",//"Beverly Hills Female 2", 
+				"a_f_m_business_02",//"Business Female 2",  
+				"a_f_y_business_01",//"Business Young Female",  
+				"a_f_y_business_02",//"Business Young Female 2",  
+				"a_f_y_business_03",//"Business Young Female 3",  
+				"a_f_y_business_04",//"Business Young Female 4",  
+				"a_f_y_femaleagent",//"Female Agent",  
+				"a_m_y_busicas_01",//"Business Casual",  
+				"a_m_m_business_01",//"Business Male",  
+				"a_m_y_business_01",//"Business Young Male",  
+				"a_m_y_business_02",//"Business Young Male 2",  
+				"a_m_y_business_03",//"Business Young Male 3",  
+				"a_m_m_prolhost_01"//"Prologue Host Male",  
+			};
+
+			PrePed_06 = PrePeSet_06;
+			WriteFile(sPedList06, PrePed_06);
+		}
+		else
+			RemoveBlankStrings(PrePed_06);
+
+		const std::string sPedList07 = GetDir() + "/RandomStart/Peds/BodyBuilders.ini";
+		PrePed_07 = ReadSetFile(sPedList07);
+		if (PrePed_07.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_07 = {
+				"a_f_m_bodybuild_01",//"Bodybuilder Female",  
+				"a_m_y_musclbeac_01",//"Beach Muscle Male",  
+				"a_m_y_musclbeac_02"//"Beach Muscle Male 2", 
+			};
+
+			PrePed_07 = PrePeSet_07;
+			WriteFile(sPedList07, PrePed_07);
+		}
+		else
+			RemoveBlankStrings(PrePed_07);
+
+		const std::string sPedList08 = GetDir() + "/RandomStart/Peds/Joggers.ini";
+		PrePed_08 = ReadSetFile(sPedList08);
+		if (PrePed_08.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_08 = {
+				"a_f_y_fitness_01",//"Fitness Female",  
+				"a_f_y_fitness_02",//"Fitness Female 2",  
+				"a_f_y_runner_01",//"Jogger Female",
+				"a_f_y_tennis_01",//"Tennis Player Female",  
+				"a_m_y_runner_01",//"Jogger Male",  
+				"a_m_y_runner_02"//"Jogger Male 2", 
+			};
+
+			PrePed_08 = PrePeSet_08;
+			WriteFile(sPedList08, PrePed_08);
+		}
+		else
+			RemoveBlankStrings(PrePed_08);
+
+		const std::string sPedList09 = GetDir() + "/RandomStart/Peds/Golfer.ini";
+		PrePed_09 = ReadSetFile(sPedList09);
+		if (PrePed_09.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_09 = {
+				"a_f_y_golfer_01",//"Golfer Young Female",  
+				"a_m_m_golfer_01",//"Golfer Male",  
+				"a_m_y_golfer_01"//"Golfer Young Male",  
+			};
+
+			PrePed_09 = PrePeSet_09;
+			WriteFile(sPedList09, PrePed_09);
+		}
+		else
+			RemoveBlankStrings(PrePed_09);
+
+		const std::string sPedList10 = GetDir() + "/RandomStart/Peds/Hiker.ini";
+		PrePed_10 = ReadSetFile(sPedList10);
+		if (PrePed_10.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_10 = {
+				"a_f_y_hiker_01",//"Hiker Female",  
+				"a_m_y_hiker_01"//"Hiker Male",  
+			};
+
+			PrePed_10 = PrePeSet_10;
+			WriteFile(sPedList10, PrePed_10);
+		}
+		else
+			RemoveBlankStrings(PrePed_10);
+
+		const std::string sPedList11 = GetDir() + "/RandomStart/Peds/MethodAct.ini";
+		PrePed_11 = ReadSetFile(sPedList11);
+		if (PrePed_11.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_11 = {
+				"a_f_y_juggalo_01",//"Juggalo Female",  
+				"a_m_y_juggalo_01",//"Juggalo Male", 
+				"a_f_y_rurmeth_01",//"Rural Meth Addict Female",  
+				"a_m_m_rurmeth_01",//"Rural Meth Addict Male",  
+				"a_f_m_salton_01",//"Salton Female",  
+				"a_f_o_salton_01",//"Salton Old Female", 
+				"a_m_m_farmer_01",//"Farmer", 
+				"a_m_m_hillbilly_01",//"Hillbilly Male",  
+				"a_m_m_hillbilly_02",//"Hillbilly Male 2",  
+				"a_m_y_methhead_01"//"Meth Addict",  
+			};
+
+			PrePed_11 = PrePeSet_11;
+			WriteFile(sPedList11, PrePed_11);
+		}
+		else
+			RemoveBlankStrings(PrePed_11);
+
+		const std::string sPedList12 = GetDir() + "/RandomStart/Peds/Rural.ini";
+		PrePed_12 = ReadSetFile(sPedList12);
+		if (PrePed_12.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_12 = {
+				"a_m_m_salton_01",//"Salton Male",  
+				"a_m_m_salton_02",//"Salton Male 2",  
+				"a_m_m_salton_03",//"Salton Male 3",  
+				"a_m_m_salton_04",//"Salton Male 4",  
+				"a_m_o_salton_01",//"Salton Old Male",  
+				"a_m_y_salton_01",//"Salton Young Male",  
+				"s_m_m_cntrybar_01"//"Bartender (Rural)",
+			};
+
+			PrePed_12 = PrePeSet_12;
+			WriteFile(sPedList12, PrePed_12);
+		}
+		else
+			RemoveBlankStrings(PrePed_12);
+
+		const std::string sPedList13 = GetDir() + "/RandomStart/Peds/Cycleist.ini";
+		PrePed_13 = ReadSetFile(sPedList13);
+		if (PrePed_13.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_13 = {
+				"a_f_y_skater_01",//"Skater Female",  
+				"a_m_y_cyclist_01",//"Cyclist Male",  
+				"a_m_y_dhill_01",//"Downhill Cyclist", 
+				"a_m_y_roadcyc_01",//"Road Cyclist",  
+				"a_m_y_skater_01",//"Skater Young Male",  
+				"a_m_y_skater_02",//"Skater Young Male 2",  
+				"a_m_m_tennis_01"//"Tennis Player Male",  
+			};
+
+			PrePed_13 = PrePeSet_13;
+			WriteFile(sPedList13, PrePed_13);
+		}
+		else
+			RemoveBlankStrings(PrePed_13);
+
+		const std::string sPedList14 = GetDir() + "/RandomStart/Peds/LLGBQWXYZ.ini";
+		PrePed_14 = ReadSetFile(sPedList14);
+		if (PrePed_14.size() == 0)
+		{
+			const std::vector<std::string> PrePeSet_14 = {
+				"a_m_y_gay_01",//"Gay Male",  
+				"a_m_y_gay_02",//"Gay Male 2", 
+				"a_m_m_tranvest_01",//"Transvestite Male",  
+				"a_m_m_tranvest_02"//"Transvestite Male 2", 
+			};
+
+			PrePed_14 = PrePeSet_14;
+			WriteFile(sPedList14, PrePed_14);
+		}
+		else
+			RemoveBlankStrings(PrePed_14);
+	}
 	bool SnowOnGround = false;
-
 	void WeatherReport(int iWet)
 	{
 		if (iWet == -1)
 		{
 			if (CanSnow)
-				iWet = LessRandomInt("RanWeather", 10, 13);
+				iWet = LessRandomInt("RanWeatherWinter", 10, 13);
 			else
-				iWet = LessRandomInt("RanWeather", 1, 9);
+				iWet = LessRandomInt("RanWeatherSummer", 1, 9);
 		}
 
 		if (iWet == 1)
@@ -1868,7 +2970,7 @@ namespace Mod_Systems
 					Mod_Settings.SnowMonths.Jan = false;
 					Mod_Settings.SnowMonths.Feb = false;
 
-					UiSystem::BottomLeft("This version of GTA is not compatable with this snow method.");
+					Mod_Ui::BottomLeft("This version of GTA is not compatable with this snow method.");
 				}
 			}
 		}
@@ -1895,7 +2997,7 @@ namespace Mod_Systems
 	}
 }
 
-namespace Locations
+namespace Mod_Maths
 {
 	const std::vector<std::string> MainLandIPLs = {
 		"vw_casino_billboard_lod",
@@ -2151,7 +3253,7 @@ namespace Locations
 	{
 		return MyZone(NewVector3(VPos.X, VPos.Y, VPos.Z));
 	}
-	
+
 	Vector3 MyWayPoint()
 	{
 		return UI::GET_BLIP_INFO_ID_COORD(UI::GET_FIRST_BLIP_INFO_ID(8));
@@ -2235,7 +3337,7 @@ namespace Locations
 	Mod_Class::Vector4 PlayerV4()
 	{
 		return GetPosV4(PLAYER::PLAYER_PED_ID());
-	}	
+	}
 	Mod_Class::Vector4 InAreaOf(Mod_Class::Vector4  area, float minDist, float maxDist)
 	{
 		float X = RandomFloat(maxDist * -1, maxDist);
@@ -2269,7 +3371,7 @@ namespace Locations
 		PATHFIND::GET_SAFE_COORD_FOR_PED(Here.X, Here.Y, Here.Z, true, &VMe, 16);
 		return Mod_Class::Vector4(VMe.x, VMe.y, VMe.z, 0.0f);
 	}
-	
+
 	std::vector<int> BeenThereA = {};
 	std::vector<int> BeenThereB = {};
 	std::vector<int> BeenThereC = {};
@@ -2282,7 +3384,7 @@ namespace Locations
 		{
 			for (int i = 0; i < (int)Yankton.size(); i++)
 			{
-				if (DistanceTo(Yankton[i], Pos) < fAr && !Mod_Systems::ListContains(&BeenThereA, i))
+				if (DistanceTo(Yankton[i], Pos) < fAr && !Mod_Systems::ListContains(BeenThereA, i))
 				{
 					fAr = DistanceTo(Yankton[i], Pos);
 					Near = i;
@@ -2299,7 +3401,7 @@ namespace Locations
 		{
 			for (int i = 0; i < (int)CayoSpPoint.size(); i++)
 			{
-				if (DistanceTo(CayoSpPoint[i], Pos) < fAr && !Mod_Systems::ListContains(&BeenThereB, i))
+				if (DistanceTo(CayoSpPoint[i], Pos) < fAr && !Mod_Systems::ListContains(BeenThereB, i))
 				{
 					fAr = DistanceTo(CayoSpPoint[i], Pos);
 					Near = i;
@@ -2316,7 +3418,7 @@ namespace Locations
 		{
 			for (int i = 0; i < (int)SpPoint.size(); i++)
 			{
-				if (DistanceTo(SpPoint[i], Pos) < fAr && !Mod_Systems::ListContains(&BeenThereC, i))
+				if (DistanceTo(SpPoint[i], Pos) < fAr && !Mod_Systems::ListContains(BeenThereC, i))
 				{
 					fAr = DistanceTo(SpPoint[i], Pos);
 					Near = i;
@@ -2356,7 +3458,7 @@ namespace Locations
 		return GHight;
 	}
 
-	const std::vector<Vector3> landSand = std::vector<Vector3>{
+	const std::vector<Vector3> landSand = {
 	 NewVector3(225.8934, 2841.527, 200.0402),
 	 NewVector3(796.0992, 3011.926, 90.13193),
 	 NewVector3(1495.307, 3187.998, 41.04951),
@@ -2368,7 +3470,7 @@ namespace Locations
 	 NewVector3(-175.5016, 1448.899, 598.845),
 	 NewVector3(-349.6658, -187.2563, 398.4032)
 	};
-	const std::vector<Vector3> landLS = std::vector<Vector3>{
+	const std::vector<Vector3> landLS = {
 		 NewVector3(-1002.727, -1650.774, 134.2087),
 		 NewVector3(-1193.304, -1941.04, 59.51603),
 		 NewVector3(-1571.467, -2617.15, 14.57554),
@@ -2419,15 +3521,17 @@ namespace Locations
 			invoke<Void>(0x9BAE5AD2508DF078, false);
 			invoke<Void>(0x9133955F1A2DA957, true);
 
+			std::vector<std::string> PzTest = {};
+
 			for (int i = 0; i < YanktonIPLs.size(); i++)
 			{
 				STREAMING::REQUEST_IPL((LPSTR)YanktonIPLs[i].c_str());
 				WAIT(1);
 				if (!STREAMING::IS_IPL_ACTIVE((LPSTR)YanktonIPLs[i].c_str()))
 					bFailed = true;
-			}			
+			}
 			if (GotPlayZero)
-				WriteFile(ZeroYank, {});
+				WriteFile(ZeroYank, PzTest);
 			Yankton_Loaded = true;
 		}
 
@@ -2484,6 +3588,8 @@ namespace Locations
 
 			invoke<Void>(0xF8DEE0A5600CBB93, 1);
 
+			std::vector<std::string> PzTest = {};
+
 			for (int i = 0; i < CayoPericoIPLs.size(); i++)
 			{
 				STREAMING::REQUEST_IPL((LPSTR)CayoPericoIPLs[i].c_str());
@@ -2493,7 +3599,7 @@ namespace Locations
 			}
 
 			if (GotPlayZero)
-				WriteFile(ZeroCayo, {});
+				WriteFile(ZeroCayo, PzTest);
 
 			Cayo_Loaded = true;
 		}
@@ -2505,13 +3611,13 @@ namespace Locations
 		if (Meth_Act)
 		{
 			Meth_Act = false;
-			EntityActions::MethEdd(Meth_Act);
+			Mod_Entitys::MethEdd(Meth_Act);
 		}
 
 		if (Deputize)
 		{
 			Deputize = false;
-			EntityActions::PoliceAcadamy(Deputize);
+			Mod_Entitys::PoliceAcadamy(Deputize);
 		}
 
 		if (MainLand)
@@ -2519,7 +3625,7 @@ namespace Locations
 			if (Cayo_Loaded && iSelect != 25)
 			{
 				CayoPericoIPL();
-				EntityActions::CayoAudio();
+				Mod_Entitys::CayoAudio();
 			}
 			else if (Yankton_Loaded && iSelect != 24)
 				YanktonIPL();
@@ -2527,9 +3633,9 @@ namespace Locations
 	}
 }
 
-namespace EntityActions
+namespace Mod_Entitys
 {
-	int AddRelationship(std::string name)
+	int AddRelationship(const std::string& name)
 	{
 		Hash hash = -1;
 		PED::ADD_RELATIONSHIP_GROUP((LPSTR)name.c_str(), &hash);
@@ -2544,43 +3650,43 @@ namespace EntityActions
 	{
 		PED::SET_PED_RELATIONSHIP_GROUP_HASH(Peddy, group);
 	}
-	void SetRelBetween_Gp(Hash* Group1, Hash* Group2, int Rel)
+	void SetRelBetween_Gp(Hash Group1, Hash Group2, int Rel)
 	{
-		PED::SET_RELATIONSHIP_BETWEEN_GROUPS(Rel, *Group1, *Group2);
-		PED::SET_RELATIONSHIP_BETWEEN_GROUPS(Rel, *Group2, *Group1);
+		PED::SET_RELATIONSHIP_BETWEEN_GROUPS(Rel, Group1, Group2);
+		PED::SET_RELATIONSHIP_BETWEEN_GROUPS(Rel, Group2, Group1);
 	}
 	void SetRelationType(bool friendly)
 	{
 		if (friendly)
 		{
-			SetRelBetween_Gp(&GP_Player, &Gp_Follow, 0);
-			SetRelBetween_Gp(&Gp_Follow, &Gp_Friend, 1);
-			SetRelBetween_Gp(&GP_Attack, &Gp_Follow, 5);
-			SetRelBetween_Gp(&GP_Mental, &Gp_Follow, 5);
-			SetRelBetween_Gp(&GP_Player, &Gp_Friend, 2);
-			SetRelBetween_Gp(&GP_Attack, &Gp_Friend, 5);
-			SetRelBetween_Gp(&GP_Player, &GP_Attack, 5);
-			SetRelBetween_Gp(&GP_Mental, &Gp_Friend, 5);
-			SetRelBetween_Gp(&GP_Attack, &GP_Mental, 5);
-			SetRelBetween_Gp(&GP_Player, &GP_Mental, 5);
+			SetRelBetween_Gp(GP_Player, Gp_Follow, 0);
+			SetRelBetween_Gp(Gp_Follow, Gp_Friend, 1);
+			SetRelBetween_Gp(GP_Attack, Gp_Follow, 5);
+			SetRelBetween_Gp(GP_Mental, Gp_Follow, 5);
+			SetRelBetween_Gp(GP_Player, Gp_Friend, 2);
+			SetRelBetween_Gp(GP_Attack, Gp_Friend, 5);
+			SetRelBetween_Gp(GP_Player, GP_Attack, 5);
+			SetRelBetween_Gp(GP_Mental, Gp_Friend, 5);
+			SetRelBetween_Gp(GP_Attack, GP_Mental, 5);
+			SetRelBetween_Gp(GP_Player, GP_Mental, 5);
 
 			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(5, GP_Mental, GP_Mental);
 		}
 		else
 		{
-			SetRelBetween_Gp(&GP_Player, &Gp_Follow, 2);
-			SetRelBetween_Gp(&Gp_Follow, &Gp_Friend, 2);
-			SetRelBetween_Gp(&GP_Attack, &Gp_Follow, 5);
-			SetRelBetween_Gp(&GP_Mental, &Gp_Follow, 5);
-			SetRelBetween_Gp(&GP_Player, &Gp_Friend, 2);
-			SetRelBetween_Gp(&GP_Attack, &Gp_Friend, 5);
-			SetRelBetween_Gp(&GP_Player, &GP_Attack, 5);
-			SetRelBetween_Gp(&GP_Mental, &Gp_Friend, 5);
-			SetRelBetween_Gp(&GP_Attack, &GP_Mental, 5);
-			SetRelBetween_Gp(&GP_Player, &GP_Mental, 5);
+			SetRelBetween_Gp(GP_Player, Gp_Follow, 2);
+			SetRelBetween_Gp(Gp_Follow, Gp_Friend, 2);
+			SetRelBetween_Gp(GP_Attack, Gp_Follow, 5);
+			SetRelBetween_Gp(GP_Mental, Gp_Follow, 5);
+			SetRelBetween_Gp(GP_Player, Gp_Friend, 2);
+			SetRelBetween_Gp(GP_Attack, Gp_Friend, 5);
+			SetRelBetween_Gp(GP_Player, GP_Attack, 5);
+			SetRelBetween_Gp(GP_Mental, Gp_Friend, 5);
+			SetRelBetween_Gp(GP_Attack, GP_Mental, 5);
+			SetRelBetween_Gp(GP_Player, GP_Mental, 5);
 		}
 	}
-	
+
 	void MoveEntity(Entity MyEnt, Vector3 position)
 	{
 		ENTITY::SET_ENTITY_COORDS(MyEnt, position.x, position.y, position.z, 1, 0, 0, 1);
@@ -2589,16 +3695,12 @@ namespace EntityActions
 	{
 		ENTITY::SET_ENTITY_COORDS(MyEnt, position.X, position.Y, position.Z, 1, 0, 0, 1);
 		ENTITY::SET_ENTITY_HEADING(MyEnt, position.R);
-	}	
+	}
 	void StayOnGround(Vehicle Vhick)
 	{
-		while (!VEHICLE::IS_VEHICLE_ON_ALL_WHEELS(Vhick))
-		{
-			VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(Vhick);
-			WAIT(10);
-		}
+		VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(Vhick);
 	}
-	
+
 	int GetPedOverlayValues(int overlay)
 	{
 		return PED::_GET_NUM_HEAD_OVERLAY_VALUES(overlay);
@@ -2607,7 +3709,7 @@ namespace EntityActions
 	{
 		return PED::_GET_PED_HEAD_OVERLAY_VALUE(peddy, overlay);
 	}
-	
+
 	std::vector<int> RandVehModsist()
 	{
 		std::vector<int> RandMods = {};
@@ -2617,8 +3719,8 @@ namespace EntityActions
 
 		return RandMods;
 	}
-	
-	Prop BuildProps(std::string sObject, Vector3 vPos, Vector3 vRot, bool bPush, bool Frozen)
+
+	Prop BuildProps(const std::string& sObject, Vector3 vPos, Vector3 vRot, bool bPush, bool Frozen)
 	{
 		LoggerLight("BuildProps == " + sObject);
 		Prop Plop = OBJECT::CREATE_OBJECT(MyHashKey(sObject), vPos.x, vPos.y, vPos.z, 1, 1, 1);
@@ -2632,11 +3734,11 @@ namespace EntityActions
 		Prop_List.push_back(Plop);
 		return Plop;
 	}
-	Prop BuildProps(std::string sObject, Mod_Class::Vector4 vPos, bool bPush, bool Frozen)
+	Prop BuildProps(const std::string& sObject, Mod_Class::Vector4 vPos, bool bPush, bool Frozen)
 	{
-		return BuildProps(sObject, Locations::NewVector3(vPos.X, vPos.Y, vPos.Z), Locations::NewVector3(0.0f, 0.0f, vPos.R), bPush, Frozen);
+		return BuildProps(sObject, Mod_Maths::NewVector3(vPos.X, vPos.Y, vPos.Z), Mod_Maths::NewVector3(0.0f, 0.0f, vPos.R), bPush, Frozen);
 	}
-	
+
 	void EraseBlip(Blip MyBlip)
 	{
 		if (MyBlip != NULL)
@@ -2677,7 +3779,7 @@ namespace EntityActions
 		if (andPeds)
 			ClearAllPeds();
 	}
-	
+
 	const std::vector<Mod_Class::VehBlips> vehBlips = {
 		Mod_Class::VehBlips("BUFFALO4",825),
 		Mod_Class::VehBlips("CHAMPION",824),
@@ -2922,14 +4024,14 @@ namespace EntityActions
 
 		return iBeLip;
 	}
-	
-	Prop FindingProps(Vector3 Area, float radius, std::string modelHash)
+
+	Prop FindingProps(Vector3 Area, float radius, const std::string& modelHash)
 	{
 		return OBJECT::GET_CLOSEST_OBJECT_OF_TYPE(Area.x, Area.y, Area.z, radius, MyHashKey(modelHash), false, 1, 1);
 	}
-	Prop FindingProps(Mod_Class::Vector4 Area, float radius, std::string modelHash)
-	{		
-		return FindingProps(Locations::NewVector3(Area.X, Area.Y, Area.Z), radius, modelHash);
+	Prop FindingProps(Mod_Class::Vector4 Area, float radius, const std::string& modelHash)
+	{
+		return FindingProps(Mod_Maths::NewVector3(Area.X, Area.Y, Area.Z), radius, modelHash);
 	}
 
 	Object AddDecals(Vector3 pos, int decalType, float width = 1.0f, float height = 1.0f, float rCoef = 0.1f, float gCoef = 0.1f, float bCoef = 0.1f, float opacity = 1.0f, float timeout = 20.0f)
@@ -3027,7 +4129,7 @@ namespace EntityActions
 		return bIn;
 	}
 
-	void BlipFiler(Blip MyBlip, int iBlippy, std::string sName, int iColour)
+	void BlipFiler(Blip MyBlip, int iBlippy, const std::string& sName, int iColour)
 	{
 		UI::SET_BLIP_SPRITE(MyBlip, iBlippy);
 		UI::SET_BLIP_AS_SHORT_RANGE(MyBlip, true);
@@ -3047,7 +4149,7 @@ namespace EntityActions
 			//UI::END_TEXT_COMMAND_SET_BLIP_NAME( MyBlip);
 		}
 	}
-	Blip PedBlimp(Blip CurBlip, Ped pEdd, int iBlippy, std::string sName, int iColour, bool heading)
+	Blip PedBlimp(Blip CurBlip, Ped pEdd, int iBlippy, const std::string& sName, int iColour, bool heading)
 	{
 		LoggerLight("PedBlimp, iBlippy == " + std::to_string(iBlippy) + ", sName == " + sName + ", iColour" + std::to_string(iColour));
 
@@ -3061,7 +4163,7 @@ namespace EntityActions
 
 		return MyBlip;
 	}
-	Blip LocalBlip(Blip CurBlip, Mod_Class::Vector4 Vlocal, int iBlippy, std::string sName, int iColour)
+	Blip LocalBlip(Blip CurBlip, Mod_Class::Vector4 Vlocal, int iBlippy, const std::string& sName, int iColour)
 	{
 		LoggerLight("BuildObjects, iBlippy == " + std::to_string(iBlippy) + ", sName == " + sName);
 
@@ -3071,23 +4173,56 @@ namespace EntityActions
 		return MyBlip;
 	}
 
+	const std::vector<std::string> Mk2Weaps = {
+		"WEAPON_pistol_mk2",  //0xBFE256D4",---------19
+		"WEAPON_snspistol_mk2",  //0x88374054",---24
+		"WEAPON_revolver_mk2",  //0xCB96392F",----29
+		"WEAPON_smg_mk2",  //0x78A97CD0",-----40
+		"WEAPON_pumpshotgun_mk2",  //0x555AF99A",-----------47
+		"WEAPON_assaultrifle_mk2",  //0x394F415C",-------57
+		"WEAPON_carbinerifle_mk2",  //0xFAD1F1C9",------59
+		"WEAPON_specialcarbine_mk2",  //0x969C3D67",------62
+		"WEAPON_bullpuprifle_mk2",  //0x84D6FAFD",----64
+		"WEAPON_combatmg_mk2",  //0xDBBD7280",------71
+		"WEAPON_heavysniper_mk2",  //0xA914799",---75
+		"WEAPON_marksmanrifle_mk2"  //0x6A6C02E0"--77
+	};
+	bool WeaponIsMk2(Hash WeapHash)
+	{
+		bool b = false;
+		for (int i = 0; i < Mk2Weaps.size(); i++)
+		{
+			if (MyHashKey(Mk2Weaps[i]) == WeapHash)
+				b = true;
+		}
+
+		return b;
+	}
 	void ReturnPlayerWeapons()
 	{
 		if (PED::GET_PED_TYPE(PLAYER::PLAYER_PED_ID()) != 28)
 		{
 			for (int i = 0; i < (int)Player_Weaps.size(); i++)
 			{
-				WEAPON::GIVE_WEAPON_TO_PED(PLAYER::PLAYER_PED_ID(), MyHashKey(Player_Weaps[i].MyWeapon), Player_Weaps[i].Ammo, false, true);
-
+				Hash MyWeap = MyHashKey(Player_Weaps[i].MyWeapon);
+				WEAPON::GIVE_WEAPON_TO_PED(PLAYER::PLAYER_PED_ID(), MyWeap, 0, false, true);
+				WEAPON::SET_CURRENT_PED_WEAPON(PLAYER::PLAYER_PED_ID(), MyWeap, true);
 				for (int j = 0; j < (int)Player_Weaps[i].MyAddons.size(); j++)
 				{
-					if (WEAPON::DOES_WEAPON_TAKE_WEAPON_COMPONENT, MyHashKey(Player_Weaps[i].MyWeapon), MyHashKey(Player_Weaps[i].MyAddons[j]))
-						WEAPON::GIVE_WEAPON_COMPONENT_TO_PED(PLAYER::PLAYER_PED_ID(), MyHashKey(Player_Weaps[i].MyWeapon), MyHashKey(Player_Weaps[i].MyAddons[j]));
+					Hash MyAdon = MyHashKey(Player_Weaps[i].MyAddons[j]);
+					if (WEAPON::DOES_WEAPON_TAKE_WEAPON_COMPONENT, MyWeap, MyAdon)
+						WEAPON::GIVE_WEAPON_COMPONENT_TO_PED(PLAYER::PLAYER_PED_ID(), MyWeap, MyAdon);
 
 				}
+				if (WeaponIsMk2(MyWeap))
+					WAIT(500);
+				//int Yourammo;
+				//WEAPON::GET_MAX_AMMO(PLAYER::PLAYER_PED_ID(), MyHashKey(Player_Weaps[i].MyWeapon), &Yourammo);
+				WEAPON::SET_PED_AMMO(PLAYER::PLAYER_PED_ID(), MyWeap, Player_Weaps[i].Ammo);
+				WEAPON::SET_AMMO_IN_CLIP(PLAYER::PLAYER_PED_ID(), MyWeap, WEAPON::GET_MAX_AMMO_IN_CLIP(PLAYER::PLAYER_PED_ID(), MyWeap, true));
 			}
-			WEAPON::SET_PED_CURRENT_WEAPON_VISIBLE(PLAYER::PLAYER_PED_ID(), false, true, true, true);
-
+			//WEAPON::SET_PED_CURRENT_WEAPON_VISIBLE(PLAYER::PLAYER_PED_ID(), false, true, true, true);
+			WEAPON::SET_CURRENT_PED_WEAPON(PLAYER::PLAYER_PED_ID(), -1569615261, true);
 		}
 	}
 
@@ -3519,8 +4654,12 @@ namespace EntityActions
 		GetInVehicle(PLAYER::PLAYER_PED_ID(), Vhick, iSeats, false);
 		VehicleEnter = false;
 	}
-
-	void ForceAnim(Ped peddy, std::string sAnimDict, std::string sAnimName, Vector3 AnPos, Vector3 AnRot)
+	
+	void WalkingStyle(Ped myPEd, const std::string& Anim)
+	{
+		PED::SET_PED_MOVEMENT_CLIPSET(myPEd, (LPSTR)Anim.c_str(), 1.0f);
+	}
+	void ForceAnim(Ped peddy, const std::string& sAnimDict, const std::string& sAnimName, Vector3 AnPos, Vector3 AnRot)
 	{
 		AI::CLEAR_PED_TASKS(peddy);
 		STREAMING::REQUEST_ANIM_DICT((LPSTR)sAnimDict.c_str());
@@ -3535,28 +4674,29 @@ namespace EntityActions
 			}
 			WAIT(1);
 		}
-		
+
 		if (bFine)
 			AI::TASK_PLAY_ANIM_ADVANCED(peddy, (LPSTR)sAnimDict.c_str(), (LPSTR)sAnimName.c_str(), AnPos.x, AnPos.y, AnPos.z, AnRot.x, AnRot.y, AnRot.z, 8.0f, 0.0f, -1, 0, 0.01f, 0, 0);
 		STREAMING::REMOVE_ANIM_DICT((LPSTR)sAnimDict.c_str());
 	}
-	void ForceAnim(Ped peddy, std::string sAnimDict, std::string sAnimName, Mod_Class::Vector4 AnPos)
+	void ForceAnim(Ped peddy, const std::string& sAnimDict, const std::string& sAnimName, Mod_Class::Vector4 AnPos)
 	{
-		ForceAnim(peddy, sAnimDict, sAnimName, Locations::NewVector3(AnPos.X, AnPos.Y, AnPos.Z), Locations::NewVector3(0.0f, 0.0f, AnPos.R));
+		ForceAnim(peddy, sAnimDict, sAnimName, Mod_Maths::NewVector3(AnPos.X, AnPos.Y, AnPos.Z), Mod_Maths::NewVector3(0.0f, 0.0f, AnPos.R));
 	}
 	void ForceAnim(Ped peddy, Mod_Class::AnimatedActions sAnim, Mod_Class::Vector4 AnPos)
 	{
-		ForceAnim(peddy, sAnim.Libary, sAnim.Action, Locations::NewVector3(AnPos.X, AnPos.Y, AnPos.Z), Locations::NewVector3(0.0f, 0.0f, AnPos.R));
+		ForceAnim(peddy, sAnim.Libary, sAnim.Action, Mod_Maths::NewVector3(AnPos.X, AnPos.Y, AnPos.Z), Mod_Maths::NewVector3(0.0f, 0.0f, AnPos.R));
 	}
-	void ForceSenario(std::string senareo, Mod_Class::Vector4 vpos, bool sitting)
+	void ForceSenario(const std::string& senareo, Mod_Class::Vector4 vpos, bool sitting)
 	{
 		Ped peddy = PLAYER::PLAYER_PED_ID();
 		AI::TASK_START_SCENARIO_AT_POSITION(peddy, (LPSTR)senareo.c_str(), vpos.X, vpos.Y, vpos.Z, vpos.R, -1, sitting, true);
 		while (true)
 		{
-			UiSystem::TopLeft(RSLangMenu[188]);
-
-			if (WhileButtonDown(75, true))
+			Mod_Ui::TopLeft(RSLangMenu[188]);
+			if ((bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
+				break;
+			else if (WhileButtonDown(75, true))
 			{
 				AI::CLEAR_PED_TASKS_IMMEDIATELY(peddy);
 				AI::CLEAR_PED_TASKS(peddy);
@@ -3566,7 +4706,7 @@ namespace EntityActions
 			WAIT(1);
 		}
 	}
-	void AddSenario(Ped Peddy, std::string senareo, Mod_Class::Vector4 vpos)
+	void AddSenario(Ped Peddy, const std::string& senareo, Mod_Class::Vector4 vpos)
 	{
 		AI::TASK_START_SCENARIO_AT_POSITION(Peddy, (LPSTR)senareo.c_str(), vpos.X, vpos.Y, vpos.Z, vpos.R, -1, true, true);
 	}
@@ -3579,11 +4719,11 @@ namespace EntityActions
 		while (true)
 		{
 			if ((int)myAnim.Middle.size() > 0)
-				UiSystem::TopLeft(RSLangMenu[212]);
+				Mod_Ui::TopLeft(RSLangMenu[212]);
 			else
-				UiSystem::TopLeft(RSLangMenu[188]);
+				Mod_Ui::TopLeft(RSLangMenu[188]);
 
-			if (Mod_Systems::WhileButtonDown(75, false))
+			if (Mod_Systems::WhileButtonDown(75, false) || (bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
 				break;
 			else if (!AI::GET_IS_TASK_ACTIVE(peddy, 134) || Mod_Systems::ButtonDown(46, false))
 			{
@@ -3617,7 +4757,7 @@ namespace EntityActions
 	}
 	void DanceDanceDance(Ped Dancer)
 	{
-		Mod_Class::Vector4 DanceHere = Locations::GetPosV4(Dancer);
+		Mod_Class::Vector4 DanceHere = Mod_Maths::GetPosV4(Dancer);
 		int iRanSpeed = LessRandomInt("DanceDanceDance01", 1, 3);
 		if (PED::IS_PED_MALE(Dancer))
 		{
@@ -3782,7 +4922,7 @@ namespace EntityActions
 		float HeliSpeed = fSpeed;
 		float HeliLandArea = flanding;
 
-		Vector3 VHickPos = Locations::EntPosition(Vhick);
+		Vector3 VHickPos = Mod_Maths::EntPosition(Vhick);
 
 		float dx = VHickPos.x - HeliDesX;
 		float dy = VHickPos.y - HeliDesY;
@@ -3795,7 +4935,7 @@ namespace EntityActions
 	}
 	void FlyPlane(Ped Pedd, Vehicle Vhick, Vector3 vPlaneDest)
 	{
-		float fAngle = Locations::GetAngle(ENTITY::GET_ENTITY_COORDS(Vhick, true), vPlaneDest);
+		float fAngle = Mod_Maths::GetAngle(ENTITY::GET_ENTITY_COORDS(Vhick, true), vPlaneDest);
 		AI::CLEAR_PED_TASKS(Pedd);
 
 		AI::TASK_PLANE_MISSION(Pedd, Vhick, 0, 0, vPlaneDest.x, vPlaneDest.y, vPlaneDest.z, 6, 20, 50, fAngle, 50, 1);
@@ -3831,7 +4971,7 @@ namespace EntityActions
 			}
 		}
 	}
-	void PedDoGetIn(Vehicle GetV, Ped Peddy, std::string sId)
+	void PedDoGetIn(Vehicle GetV, Ped Peddy, const std::string& sId)
 	{
 		int iSeats = FindUSeat(GetV);
 		Vector3 PedPos = ENTITY::GET_ENTITY_COORDS(Peddy, true);
@@ -3839,7 +4979,7 @@ namespace EntityActions
 
 		if (iSeats > -1)
 		{
-			if (Locations::DistanceTo(PedPos, VehPos) < 65.00)
+			if (Mod_Maths::DistanceTo(PedPos, VehPos) < 65.00)
 			{
 				GetInVehicle(Peddy, GetV, iSeats, false);
 			}
@@ -3871,71 +5011,64 @@ namespace EntityActions
 			AI::TASK_COMBAT_PED(Peddy, Victim, 0, 16);
 		}
 	}
-	void JogOn(std::vector<Mod_Class::Vector4> Route, int start)
+	void JogOn(std::vector<Mod_Class::Vector4>& Route, int start)
 	{
 		MoveEntity(PLAYER::PLAYER_PED_ID(), Route[start]);
 		while (true)
 		{
-			UiSystem::TopLeft(RSLangMenu[188]);
-			if (Mod_Systems::WhileButtonDown(75, true))
+			Mod_Ui::TopLeft(RSLangMenu[188]);
+			if (Mod_Systems::WhileButtonDown(75, true) || (bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
 				break;
-			else if (Locations::DistanceTo(PLAYER::PLAYER_PED_ID(), Route[start]) < 3.0f)
+			else if (Mod_Maths::DistanceTo(PLAYER::PLAYER_PED_ID(), Route[start]) < 3.0f)
 			{
 				if (start < Route.size())
 					start++;
 				else
 					start = 0;
 
-				RunHere(PLAYER::PLAYER_PED_ID(), Locations::NewVector3(Route[start].X, Route[start].Y, Route[start].Z));
+				RunHere(PLAYER::PLAYER_PED_ID(), Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z));
 			}
 			WAIT(1);
 		}
-		ForceSenario("WORLD_HUMAN_JOG_STANDING", Locations::PlayerV4(), false);
+		ForceSenario("WORLD_HUMAN_JOG_STANDING", Mod_Maths::PlayerV4(), false);
 		WAIT(4000);
 		AI::CLEAR_PED_TASKS(PLAYER::PLAYER_PED_ID());
 	}
-	void Drive_Fly_On(Ped peddy, Vehicle vic, std::vector<Mod_Class::Vector4> Route, bool plane, bool heli, bool playerDrives, int start)
+	void Drive_Fly_On(Ped peddy, Vehicle vic, std::vector<Mod_Class::Vector4>& Route, bool plane, bool heli, bool playerDrives, int start)
 	{
-		bool oneStop = false;
-		if (Route.size() == 2)
-			oneStop = true;
-
 		if (plane)
-			FlyPlane(peddy, vic, Locations::NewVector3(Route[start].X, Route[start].Y, Route[start].Z));
+			FlyPlane(peddy, vic, Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z));
 		else if (heli)
-			FlyHeli(peddy, vic, Locations::NewVector3(Route[start].X, Route[start].Y, Route[start].Z), 45.0f, 5.0f);
+			FlyHeli(peddy, vic, Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z), 45.0f, 5.0f);
 		else
-			DriveToooDest(peddy, Locations::NewVector3(Route[start].X, Route[start].Y, Route[start].Z), 25.0f);
+			DriveToooDest(peddy, Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z), 25.0f);
 
-		if (!oneStop)
+		while (true)
 		{
-			while (true)
+			if (playerDrives)
 			{
-				if (playerDrives)
-				{
-					UiSystem::TopLeft(RSLangMenu[188]);
-					if (WhileButtonDown(75, true))
-						break;
-				}
-
-				if (Locations::DistanceTo(PLAYER::PLAYER_PED_ID(), vic) > 50.0f)
+				Mod_Ui::TopLeft(RSLangMenu[188]);
+				if (WhileButtonDown(75, true) || (bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
 					break;
-
-				if (Locations::DistanceTo(vic, Route[start]) < 3.0f)
-				{
-					start++;
-					if (start >= Route.size())
-						start = 0;
-
-					if (plane)
-						FlyPlane(peddy, vic, Locations::NewVector3(Route[start].X, Route[start].Y, Route[start].Z));
-					else if (heli)
-						FlyHeli(peddy, vic, Locations::NewVector3(Route[start].X, Route[start].Y, Route[start].Z), 45.0f, 5.0f);
-					else
-						DriveToooDest(peddy, Locations::NewVector3(Route[start].X, Route[start].Y, Route[start].Z), 25.0f);
-				}
-				WAIT(1);
 			}
+
+			if (Mod_Maths::DistanceTo(PLAYER::PLAYER_PED_ID(), vic) > 50.0f)
+				break;
+
+			if (Mod_Maths::DistanceTo(vic, Route[start]) < 3.0f)
+			{
+				start++;
+				if (start >= Route.size())
+					start = 0;
+
+				if (plane)
+					FlyPlane(peddy, vic, Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z));
+				else if (heli)
+					FlyHeli(peddy, vic, Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z), 45.0f, 5.0f);
+				else
+					DriveToooDest(peddy, Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z), 25.0f);
+			}
+			WAIT(1);
 		}
 
 		if (playerDrives)
@@ -4061,7 +5194,7 @@ namespace EntityActions
 		else if (cT == 15 || cT == 16)
 			VEHICLE::_SET_VEHICLE_LANDING_GEAR(Vehic, 3);
 	}
-	void MakeModsNotWar(Vehicle Vehic, std::vector<int> MyMods)
+	void MakeModsNotWar(Vehicle Vehic, std::vector<int>& MyMods)
 	{
 		LoggerLight("MakeModsNotWar");
 
@@ -4142,7 +5275,7 @@ namespace EntityActions
 			SavedPlayer(&SavedPeds[0], 50);
 		PLAYER::SET_POLICE_IGNORE_PLAYER(PLAYER::PLAYER_ID(), togg);
 	}
-	
+
 	const std::vector<Mod_Class::HairSets> MHairsets = {
 		Mod_Class::HairSets(1, 0, "H_FMM_1_0", "Buzzcut Dark Brown", -1, -1),
 		Mod_Class::HairSets(1, 1, "H_FMM_1_1", "Buzzcut Light Brown", -1, -1),
@@ -4591,15 +5724,15 @@ namespace EntityActions
 
 		return Files;
 	}
-	
-	Mod_Class::ClothX LoadCloths(std::string file)
+
+	Mod_Class::ClothX LoadCloths(const std::string& file)
 	{
 		LoggerLight("-LoadCloths-");
 		std::string Cloths = "";
 		std::vector<int> ClothA = {}, ClothB = {}, ExtraA = {}, ExtraB = {};
 		int intList = 0;
 
-		std::vector<std::string> MyColect = ReadFile(file);
+		std::vector<std::string> MyColect = ReadSetFile(file);
 
 		for (int i = 0; i < MyColect.size(); i++)
 		{
@@ -4690,7 +5823,7 @@ namespace EntityActions
 	}
 	Mod_Class::HairSets PickAStyle(bool bMale)
 	{
-		return PickAStyle(bMale, LessRandomInt("PickAStyle0" + std::to_string(bMale), 0, SizeUpHairList(bMale)));	 
+		return PickAStyle(bMale, LessRandomInt("PickAStyle0" + std::to_string(bMale), 0, SizeUpHairList(bMale)));
 	}
 	Mod_Class::FaceBank AddFace(bool male)
 	{
@@ -4920,7 +6053,7 @@ namespace EntityActions
 			std::string Model = "mp_m_freemode_01";
 			Mod_Class::ClothX Cothing = GetCloths(true);
 			Mod_Class::HairSets MyHair = PickAStyle(Male);
-			return Mod_Class::ClothBank("", Model, 0, true, AddFace(Male), Male, false, MyHair, RandomInt(1, 61), RandomInt(1, 61), RandomInt(0, 10), 0, AddOverLay(Male, true), AddRandTats(Male), std::vector<Mod_Class::ClothX>{ Cothing }, {}, "");
+			return Mod_Class::ClothBank("", Model, 0, true, AddFace(Male), Male, false, MyHair, RandomInt(1, 61), RandomInt(1, 61), RandomInt(0, 10), 0, AddOverLay(Male, true), AddRandTats(Male), std::vector<Mod_Class::ClothX>{ Cothing }, {}, "", "", "");
 		}
 		else
 		{
@@ -4928,169 +6061,24 @@ namespace EntityActions
 			std::string Model = "mp_f_freemode_01";
 			Mod_Class::ClothX Cothing = GetCloths(false);
 			Mod_Class::HairSets MyHair = PickAStyle(Male);
-			return Mod_Class::ClothBank("", Model, 0, true, AddFace(Male), Male, false, MyHair, RandomInt(1, 61), RandomInt(1, 61), RandomInt(0, 10), 0, AddOverLay(Male, true), AddRandTats(Male), std::vector<Mod_Class::ClothX>{ Cothing }, {}, "");
+			return Mod_Class::ClothBank("", Model, 0, true, AddFace(Male), Male, false, MyHair, RandomInt(1, 61), RandomInt(1, 61), RandomInt(0, 10), 0, AddOverLay(Male, true), AddRandTats(Male), std::vector<Mod_Class::ClothX>{ Cothing }, {}, "", "", "");
 		}
 	}
 
 	bool ItsChristmas;
 	bool ItHalloween;
 
-	const std::vector<std::string> PedPicks = {
-		"a_f_m_beach_01",//"Beach Female",  
-		"a_f_m_fatcult_01",//"Fat Cult Female",  
-		"a_f_y_hippie_01",//"Hippie Female", 
-		"a_f_y_yoga_01",//"Yoga Female", 
-		"a_m_m_beach_01",//"Beach Male",  
-		"a_m_y_beach_01",//"Beach Young Male",  
-		"a_m_y_beach_02",//"Beach Young Male 2",  
-		"a_m_y_beach_03",//"Beach Young Male 3", 
-		"a_m_y_breakdance_01",//"Breakdancer Male",
-		"a_m_y_hippy_01",//"Hippie Male",  
-		"a_m_y_sunbathe_01",//"Sunbather Male",  
-		"a_m_y_surfer_01",//"Surfer",
-		"a_m_y_beachvesp_01",//"Vespucci Beach Male",  
-		"a_m_y_beachvesp_02",//"Vespucci Beach Male 2",  
-		"a_m_y_stwhi_01",//"White Street Male",  
-		"a_m_y_yoga_01",//"Yoga Male",
-		"a_f_m_trampbeac_01",//"Beach Tramp Female",  
-		"a_f_m_tramp_01",//"Tramp Female",  
-		"a_m_o_beach_01",//"Beach Old Male",  
-		"a_m_m_trampbeac_01",//"Beach Tramp Male",  
-		"a_m_m_tramp_01",//"Tramp Male",  
-		"a_m_o_tramp_01",//"Tramp Old Male",  
-		"a_f_y_scdressy_01",//"Dressy Female",  
-		"a_f_y_bevhills_04",//"Beverly Hills Young Female 4", 
-		"a_f_y_clubcust_01",//"Club Customer Female 1",  
-		"a_f_y_clubcust_02",//"Club Customer Female 2",  
-		"a_f_y_clubcust_03",//"Club Customer Female 3", 
-		"a_f_y_smartcaspat_01",//"Formel Casino Guest",  
-		"s_f_y_movprem_01",//"Movie Premiere Female",  
-		"A_F_Y_StudioParty_01",
-		"A_F_Y_StudioParty_02",
-		"a_m_y_bevhills_02",//"Beverly Hills Young Male 2", 
-		"a_m_y_smartcaspat_01",//"Formel Casino Guests", 
-		"a_m_m_malibu_01",//"Malibu Male",  
-		"a_m_y_soucent_04",//"South Central Young Male 4",  
-		"s_m_m_movprem_01",//"Movie Premiere Male",  
-		"A_M_M_StudioParty_01",
-		"A_M_Y_StudioParty_01",
-		"a_f_y_bevhills_01",//"Beverly Hills Young Female",  
-		"a_f_y_bevhills_02",//"Beverly Hills Young Female 2",  
-		"a_f_y_bevhills_03",//"Beverly Hills Young Female 3", 
-		"a_f_y_eastsa_01",//"East SA Young Female",  
-		"a_f_y_eastsa_02",//"East SA Young Female 2",  
-		"a_f_y_genhot_01",//"General Hot Young Female",  
-		"a_f_y_hipster_01",//"Hipster Female",  
-		"a_f_y_hipster_02",//"Hipster Female 2",  
-		"a_f_y_hipster_03",//"Hipster Female 3",  
-		"a_f_y_hipster_04",//"Hipster Female 4", 
-		"a_f_y_indian_01",//"Indian Young Female",  
-		"a_f_y_soucent_03",//"South Central Young Female 3",  
-		"a_f_y_tourist_01",//"Tourist Young Female",  
-		"a_f_y_vinewood_01",//"Vinewood Female",  
-		"a_f_y_vinewood_02",//"Vinewood Female 2",  
-		"a_f_y_vinewood_03",//"Vinewood Female 3",  
-		"a_f_y_vinewood_04",//"Vinewood Female 4", 
-		"A_F_Y_CarClub_01",
-		"A_M_Y_CarClub_01",
-		"a_m_m_afriamer_01",//"African American Male",  
-		"a_m_m_bevhills_01",//"Beverly Hills Male",  
-		"a_m_m_bevhills_02",//"Beverly Hills Male 2",  
-		"a_m_y_bevhills_01",//"Beverly Hills Young Male",  
-		"a_m_y_stbla_02",//"Black Street Male 2",
-		"a_m_y_gencaspat_01",//"Casual Casino Guests",  
-		"a_m_y_genstreet_01",//"General Street Young Male",  
-		"a_m_y_genstreet_02",//"General Street Young Male 2",  
-		"a_m_m_hasjew_01",//"Hasidic Jew Male",  
-		"a_m_y_hasjew_01",//"Hasidic Jew Young Male",  
-		"a_m_y_hipster_01",//"Hipster Male",  
-		"a_m_y_hipster_02",//"Hipster Male 2",  
-		"a_m_y_hipster_03",//"Hipster Male 3",  
-		"a_m_y_indian_01",//"Indian Young Male",  
-		"a_m_y_ktown_01",//"Korean Young Male",  
-		"a_m_y_ktown_02",//"Korean Young Male 2",  
-		"a_m_y_polynesian_01",//"Polynesian Young", 
-		"a_m_y_vindouche_01",//"Vinewood Douche",  
-		"a_m_y_vinewood_01",//"Vinewood Male",  
-		"a_m_y_vinewood_02",//"Vinewood Male 2",  
-		"a_m_y_vinewood_03",//"Vinewood Male 3",  
-		"a_m_y_vinewood_04",//"Vinewood Male 4",  
-		"a_m_y_stwhi_02",//"White Street Male 2", 
-		"a_m_y_clubcust_01",//"Club Customer Male 1",  
-		"a_m_y_clubcust_02",//"Club Customer Male 2",  
-		"a_m_y_clubcust_03",//"Club Customer Male 3", 
-		"A_M_Y_CarClub_01",
-		"a_f_m_downtown_01",//"Downtown Female", 
-		"a_f_y_gencaspat_01",//"Casual Casino Guest",  
-		"a_f_m_eastsa_01",//"East SA Female",  
-		"a_f_m_eastsa_02",//"East SA Female 2",  
-		"a_f_m_fatbla_01",//"Fat Black Female",  
-		"a_f_m_fatwhite_01",//"Fat White Female",  
-		"a_f_o_genstreet_01",//"General Street Old Female",  
-		"a_f_o_indian_01",//"Indian Old Female",  
-		"a_f_m_ktown_01",//"Korean Female",  
-		"a_f_m_ktown_02",//"Korean Female 2",  
-		"a_f_o_ktown_01",//"Korean Old Female",  
-		"a_f_m_skidrow_01",//"Skid Row Female",  
-		"a_f_m_soucent_01",//"South Central Female",  
-		"a_f_m_soucent_02",//"South Central Female 2",  
-		"a_f_m_soucentmc_01",//"South Central MC Female",  
-		"a_f_o_soucent_01",//"South Central Old Female",  
-		"a_f_o_soucent_02",//"South Central Old Female 2",  
-		"a_f_y_soucent_01",//"South Central Young Female",  
-		"a_f_y_soucent_02",//"South Central Young Female 2",  
-		"a_f_m_tourist_01",//"Tourist Female",  
-		"a_f_y_tourist_02",//"Tourist Young Female 2",  
-		"a_m_y_stbla_01",//"Black Street Male",  
-		"a_m_y_downtown_01",//"Downtown Male",  
-		"a_m_m_eastsa_01",//"East SA Male",  
-		"a_m_m_eastsa_02",//"East SA Male 2",  
-		"a_m_y_eastsa_01",//"East SA Young Male",  
-		"a_m_y_eastsa_02",//"East SA Young Male 2",  
-		"a_m_m_fatlatin_01",//"Fat Latino Male",  
-		"a_m_m_genfat_01",//"General Fat Male",  
-		"a_m_m_genfat_02",//"General Fat Male 2",  
-		"a_m_o_genstreet_01",//"General Street Old Male",  
-		"a_m_m_indian_01",//"Indian Male", 
-		"a_m_m_ktown_01",//"Korean Male",  
-		"a_m_o_ktown_01",//"Korean Old Male", 
-		"a_m_m_stlat_02",//"Latino Street Male 2",  
-		"a_m_y_stlat_01",//"Latino Street Young Male",  
-		"a_m_y_latino_01",//"Latino Young Male",
-		"a_m_m_mexlabor_01",//"Mexican Labourer",  
-		"a_m_m_mexcntry_01",//"Mexican Rural", 
-		"a_m_m_polynesian_01",//"Polynesian",   
-		"a_m_m_skidrow_01",//"Skid Row Male",  
-		"a_m_m_socenlat_01",//"South Central Latino Male",  
-		"a_m_m_soucent_01",//"South Central Male",  
-		"a_m_m_soucent_02",//"South Central Male 2",  
-		"a_m_m_soucent_03",//"South Central Male 3",  
-		"a_m_m_soucent_04",//"South Central Male 4",  
-		"a_m_o_soucent_01",//"South Central Old Male",  
-		"a_m_o_soucent_02",//"South Central Old Male 2",  
-		"a_m_o_soucent_03",//"South Central Old Male 3",  
-		"a_m_y_soucent_01",//"South Central Young Male",  
-		"a_m_y_soucent_02",//"South Central Young Male 2",  
-		"a_m_y_soucent_03",//"South Central Young Male 3", 
-		"a_m_m_tourist_01",//"Tourist Male",  
-		"g_m_m_casrn_01",//"Casino Guests?",  
-		"a_f_m_bevhills_01",//"Beverly Hills Female",  
-		"a_f_m_bevhills_02",//"Beverly Hills Female 2", 
-		"a_f_m_business_02",//"Business Female 2",  
-		"a_f_y_business_01",//"Business Young Female",  
-		"a_f_y_business_02",//"Business Young Female 2",  
-		"a_f_y_business_03",//"Business Young Female 3",  
-		"a_f_y_business_04",//"Business Young Female 4",  
-		"a_f_y_femaleagent",//"Female Agent",  
-		"a_m_y_busicas_01",//"Business Casual",  
-		"a_m_m_business_01",//"Business Male",  
-		"a_m_y_business_01",//"Business Young Male",  
-		"a_m_y_business_02",//"Business Young Male 2",  
-		"a_m_y_business_03",//"Business Young Male 3",  
-		"a_m_m_prolhost_01",//"Prologue Host Male",  
-		"a_f_m_bodybuild_01",//"Bodybuilder Female",  
-		"a_m_y_musclbeac_01",//"Beach Muscle Male",  
-		"a_m_y_musclbeac_02",//"Beach Muscle Male 2", 
+	void ThemVoices(const std::string& voip)
+	{
+		AUDIO::SET_AMBIENT_VOICE_NAME(PLAYER::PLAYER_PED_ID(), (LPSTR)voip.c_str());
+		invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
+	}
+	void PullingFaces(const std::string& aniName)
+	{
+		PED::SET_FACIAL_IDLE_ANIM_OVERRIDE(PLAYER::PLAYER_PED_ID(), (LPSTR)aniName.c_str(), 0);
+	}
+
+	const std::vector<std::string> LsGstars = {
 		"g_f_importexport_01",//"Gang Female (Import-Export)", 
 		"a_f_y_eastsa_03",//"East SA Young Female 3", 
 		"g_f_importexport_01",//"Import Export Female", 
@@ -5106,8 +6094,8 @@ namespace EntityActions
 		"g_m_m_chiboss_01",//"Chinese Boss",   textstyle-- korean
 		"g_m_m_chigoon_01",//"Chinese Goon",  
 		"g_m_m_chigoon_02",//"Chinese Goon 2",  
-		"g_m_m_chicold_01",//"Chinese Goon Older",  
-		"g_f_y_families_01",//"Families Female",Strawberry--Chamberlain Hills-- Ballas-- Vagos-- Mexican Street Gang-- The Lost MC--
+		"g_m_m_chicold_01",//"Chinese Goon Older", 
+		"g_f_y_families_01",//"Families Female",
 		"g_m_y_famca_01",//"Families CA Male",  
 		"g_m_y_famdnf_01",//"Families DNF Male",  
 		"g_m_y_famfor_01",//"Families FOR Male", 
@@ -5116,8 +6104,8 @@ namespace EntityActions
 		"g_m_y_korean_01",//"Korean Young Male",  
 		"g_m_y_korean_02",//"Korean Young Male 2", 
 		"g_m_y_azteca_01",//"Azteca", 
-		"g_f_y_vagos_01",//"Vagos Female", Rancho--Central Cypress Flats,--Families--Ballas
-		"a_m_y_mexthug_01",//"Mexican Thug", -- Northern Rancho --The Lost MC--Salvadoran Street Gang
+		"g_f_y_vagos_01",//"Vagos Female",
+		"a_m_y_mexthug_01",//"Mexican Thug", 
 		"g_m_m_mexboss_01",//"Mexican Boss",  
 		"g_m_m_mexboss_02",//"Mexican Boss 2",  
 		"g_m_y_mexgang_01",//"Mexican Gang Member",  
@@ -5125,8 +6113,8 @@ namespace EntityActions
 		"g_m_y_mexgoon_02",//"Mexican Goon 2",  
 		"g_m_y_mexgoon_03",//"Mexican Goon 3",  
 		"g_m_y_pologoon_01",//"Polynesian Goon",  
-		"g_m_y_pologoon_02",//"Polynesian Goon 2",  
-		"g_m_y_salvaboss_01",//"Salvadoran Boss",  El Burro Heights--Vespucci Beach(night)--East Vinewood Drain Canal,---Mexican Street Gang--Los Santos Vagos--Ballas
+		"g_m_y_pologoon_02",//"Polynesian Goon 2", 
+		"g_m_y_salvaboss_01",//"Salvadoran Boss",  
 		"g_m_y_salvagoon_01",//"Salvadoran Goon",  
 		"g_m_y_salvagoon_02",//"Salvadoran Goon 2",  
 		"g_m_y_salvagoon_03",//"Salvadoran Goon 3",  
@@ -5139,171 +6127,140 @@ namespace EntityActions
 		"g_m_y_strpunk_01",//"Street Punk",  
 		"g_m_y_strpunk_02",//"Street Punk 2",  
 		"G_M_M_GenThug_01",
-		"G_M_M_Goons_01",
+		"G_M_M_Goons_01"
+	};
+	const std::vector<std::string> Eplomes = {
 		"a_f_y_epsilon_01",//"Epsilon Female",  
 		"a_m_y_epsilon_01",//"Epsilon Male",  
 		"a_m_y_epsilon_02",//"Epsilon Male 2", 
-		"a_f_y_fitness_01",//"Fitness Female",  
-		"a_f_y_fitness_02",//"Fitness Female 2",  
-		"a_f_y_runner_01",//"Jogger Female",
-		"a_f_y_tennis_01",//"Tennis Player Female",  
-		"a_m_y_runner_01",//"Jogger Male",  
-		"a_m_y_runner_02",//"Jogger Male 2", 
-		"a_f_y_golfer_01",//"Golfer Young Female",  
-		"a_m_m_golfer_01",//"Golfer Male",  
-		"a_m_y_golfer_01",//"Golfer Young Male",  
-		"a_f_y_hiker_01",//"Hiker Female",  
-		"a_m_y_hiker_01",//"Hiker Male",  
-		"a_f_y_juggalo_01",//"Juggalo Female",  
-		"a_m_y_juggalo_01",//"Juggalo Male", 
-		"a_f_y_rurmeth_01",//"Rural Meth Addict Female",  
-		"a_m_m_rurmeth_01",//"Rural Meth Addict Male",  
-		"a_f_m_salton_01",//"Salton Female",  
-		"a_f_o_salton_01",//"Salton Old Female",  
-		"a_m_m_farmer_01",//"Farmer", 
-		"a_m_m_hillbilly_01",//"Hillbilly Male",  
-		"a_m_m_hillbilly_02",//"Hillbilly Male 2",  
-		"a_m_y_methhead_01",//"Meth Addict",  
-		"a_m_m_salton_01",//"Salton Male",  
-		"a_m_m_salton_02",//"Salton Male 2",  
-		"a_m_m_salton_03",//"Salton Male 3",  
-		"a_m_m_salton_04",//"Salton Male 4",  
-		"a_m_o_salton_01",//"Salton Old Male",  
-		"a_m_y_salton_01",//"Salton Young Male",  
-		"s_m_m_cntrybar_01",//"Bartender (Rural)",
-		"a_f_y_skater_01",//"Skater Female",  
-		"a_m_y_cyclist_01",//"Cyclist Male",  
-		"a_m_y_dhill_01",//"Downhill Cyclist", 
-		"a_m_y_roadcyc_01",//"Road Cyclist",  
-		"a_m_y_skater_01",//"Skater Young Male",  
-		"a_m_y_skater_02",//"Skater Young Male 2",  
-		"a_m_m_tennis_01",//"Tennis Player Male",  
-		"a_m_y_gay_01",//"Gay Male",  
-		"a_m_y_gay_02",//"Gay Male 2", 
-		"a_m_m_tranvest_01",//"Transvestite Male",  
-		"a_m_m_tranvest_02",//"Transvestite Male 2", 
-		"a_f_y_beach_01",//"Beach Young Female", --Acc set to 1 for swimm 
-		"a_m_m_beach_02",//"Beach Male 2",--set torso to 0 for swim
-		"mp_f_bennymech_01",//"Benny Mechanic (Female)", 
-		"s_m_m_autoshop_01",//"Autoshop Worker",  
-		"s_m_m_autoshop_02",//"Autoshop Worker 2",  
-		"s_f_y_bartender_01",//"Bartender",  
-		"s_f_y_clubbar_01",//"Club Bartender Female", 
-		"s_m_y_barman_01",//"Barman",
-		"s_m_y_waiter_01",//"Waiter", 
-		"s_f_y_factory_01",//"Factory Worker Female",  
-		"s_f_m_sweatshop_01",//"Sweatshop Worker",  
-		"s_f_y_sweatshop_01",//"Sweatshop Worker Young",  
-		"S_F_M_Warehouse_01",
-		"S_M_M_Warehouse_01",
-		"mp_m_shopkeep_01",//"Shopkeeper (Male)", 
-		"s_f_y_scrubs_01",//"Hospital Scrubs Female",  
-		"s_m_m_doctor_01",//"Doctor", 
-		"s_f_m_maid_01",//"Maid",  
-		"s_f_y_migrant_01",//"Migrant Female--cleaner",  
-		"s_m_m_migrant_01",//"Migrant Male",  
-		"mp_s_m_armoured_01",//"Armoured Van Security Male", 
-		"s_m_m_armoured_01",//"Armoured Van Security",  
-		"s_m_m_armoured_02",//"Armoured Van Security 2", 
-		"s_m_m_chemsec_01",//"Chemical Plant Security",  
-		"mp_m_securoguard_01",//"Securoserve Guard (Male)", 
-		"s_m_m_security_01",//"Security Guard",  
-		"s_m_y_autopsy_01",//"Autopsy Tech",  
-		"s_m_m_scientist_01",//"Scientist",  
-		"g_m_m_chemwork_01",//"Chemical Plant Worker",  
-		"s_m_y_construct_01",//"construction Worker",  
-		"s_m_y_construct_02",//"construction Worker 2",  
-		"s_m_m_dockwork_01",//"Dock Worker",  
-		"s_m_y_dockwork_01",//"Dock Worker",  
-		"s_m_y_airworker",//"Air Worker Male", 
-		"s_m_y_dwservice_01",//"DW Airport Worker",  
-		"s_m_y_dwservice_02",//"DW Airport Worker 2",   
-		"s_m_y_garbage",//"Garbage Worker",  
-		"s_m_m_gardener_01",//"Gardener",  
-		"s_m_m_lathandy_01",//"Latino Handyman Male",  
-		"s_m_m_lsmetro_01",//"LS Metro Worker Male",  
-		"s_m_m_gentransport",//"Transport Worker Male",  
-		"s_m_y_pestcont_01",//"Pest Control",  
-		"s_m_m_postal_01",//"Postal Worker Male",  
-		"s_m_m_postal_02",//"Postal Worker Male 2",  
-		"s_m_m_ups_01",//"UPS Driver",  
-		"s_m_m_ups_02",//"UPS Driver 2",  
-		"s_m_m_strvend_01",//"Street Vendor",  
-		"s_m_y_strvend_01",//"Street Vendor Young", 
-		"s_m_y_valet_01",//"Valet",  
-		"s_m_y_winclean_01",//"Window Cleaner",   
-		"a_m_y_jetski_01",//"Jetskier",  
+	};
+	const std::vector<std::string> WorkinClass = { 
+		"mp_f_bennymech_01",//"Benny Mechanic (Female)",	0
+		"s_m_m_autoshop_01",//"Autoshop Worker",			1
+		"s_m_m_autoshop_02",//"Autoshop Worker 2",			2
+		"s_f_y_bartender_01",//"Bartender",					3
+		"s_f_y_clubbar_01",//"Club Bartender Female",		4
+		"s_m_y_barman_01",//"Barman",						5
+		"s_m_y_waiter_01",//"Waiter",						6
+		"s_f_y_factory_01",//"Factory Worker Female",		7
+		"s_f_m_sweatshop_01",//"Sweatshop Worker",			8
+		"s_f_y_sweatshop_01",//"Sweatshop Worker Young",	9
+		"S_F_M_Warehouse_01",	//							10
+		"S_M_M_Warehouse_01",	//							11
+		"mp_m_shopkeep_01",//"Shopkeeper (Male)",			12
+		"s_f_y_scrubs_01",//"Hospital Scrubs Female",		13
+		"s_m_m_doctor_01",//"Doctor",						14
+		"s_f_m_maid_01",//"Maid",							15
+		"s_f_y_migrant_01",//"Migrant Female--cleaner",		16
+		"s_m_m_migrant_01",//"Migrant Male",				17
+		"mp_s_m_armoured_01",//"Armoured Van Security Male",18
+		"s_m_m_armoured_01",//"Armoured Van Security",		19
+		"s_m_m_armoured_02",//"Armoured Van Security 2",	20	
+		"s_m_m_chemsec_01",//"Chemical Plant Security",		21
+		"mp_m_securoguard_01",//"Securoserve Guard (Male)", 22
+		"s_m_m_security_01",//"Security Guard",				23
+		"s_m_y_autopsy_01",//"Autopsy Tech",				24			
+		"s_m_m_scientist_01",//"Scientist",					25
+		"g_m_m_chemwork_01",//"Chemical Plant Worker",		26
+		"s_m_y_construct_01",//"construction Worker",		27
+		"s_m_y_construct_02",//"construction Worker 2",		28
+		"s_m_m_dockwork_01",//"Dock Worker",				29
+		"s_m_y_dockwork_01",//"Dock Worker",				30
+		"s_m_y_airworker",//"Air Worker Male",				31
+		"s_m_y_dwservice_01",//"DW Airport Worker",			32
+		"s_m_y_dwservice_02",//"DW Airport Worker 2",		33
+		"s_m_y_garbage",//"Garbage Worker",					34		
+		"s_m_m_gardener_01",//"Gardener",					35
+		"s_m_m_lathandy_01",//"Latino Handyman Male",		36
+		"s_m_m_lsmetro_01",//"LS Metro Worker Male",		37
+		"s_m_m_gentransport",//"Transport Worker Male",		38
+		"s_m_y_pestcont_01",//"Pest Control",				39
+		"s_m_m_postal_01",//"Postal Worker Male",			40
+		"s_m_m_postal_02",//"Postal Worker Male 2",			41
+		"s_m_m_ups_01",//"UPS Driver",						42
+		"s_m_m_ups_02",//"UPS Driver 2",					43
+		"s_m_m_strvend_01",//"Street Vendor",				44
+		"s_m_y_strvend_01",//"Street Vendor Young",			45
+		"s_m_y_valet_01",//"Valet",							46
+		"s_m_y_winclean_01"//"Window Cleaner",				47
+	};
+
+	const std::vector<std::string> MotoCrossPeds = {
 		"a_m_y_motox_01",//"Motocross Biker",  
-		"a_m_y_motox_02",//"Motocross Biker 2", 
-		"s_f_y_baywatch_01",//"Baywatch Female", 
-		"s_m_y_baywatch_01",//"Baywatch Male", 
-		"s_m_y_uscg_01",//"US Coastguard", 
-		"s_m_y_cop_01",//"Cop Male",  
-		"s_f_y_cop_01",//"Cop Female",
-		"s_m_y_hwaycop_01",//"Highway Cop",  
-		"s_f_y_ranger_01",//"Ranger Female", 
-		"s_m_y_ranger_01",//"Ranger Male",  
-		"s_f_y_sheriff_01",//"Sheriff Female", 
-		"s_m_y_sheriff_01",//"Sheriff Male",  
-		"s_m_m_fibsec_01",//"FIB Security", 
-		"s_m_y_swat_01",//"SWAT",  
-		"s_m_y_armymech_01",//"Army Mechanic",  
-		"s_m_m_ccrew_01",//"Crew Member", 
-		"s_m_y_blackops_01",//"Black Ops Soldier",  
-		"s_m_y_blackops_02",//"Black Ops Soldier 2",  
-		"s_m_y_blackops_03",//"Black Ops Soldier 3",  
-		"s_m_m_marine_01",//"Marine",  
-		"s_m_m_marine_02",//"Marine 2",  
-		"s_m_y_marine_01",//"Marine Young",  
-		"s_m_y_marine_02",//"Marine Young 2",  
-		"s_m_y_marine_03",//"Marine Young 3", 
-		"s_m_m_paramedic_01",//"Paramedic", 
-		"s_m_y_fireman_01",//"Fireman Male", 
+		"a_m_y_motox_02",//"Motocross Biker 2",
+	};
+	const std::vector<std::string> ServicePeds = {
+		"s_f_y_baywatch_01",//"Baywatch Female",	0
+		"s_m_y_baywatch_01",//"Baywatch Male",		1
+		"s_m_y_uscg_01",//"US Coastguard",			2
+		"s_m_y_cop_01",//"Cop Male",				3
+		"s_f_y_cop_01",//"Cop Female",				4
+		"s_m_y_hwaycop_01",//"Highway Cop",			5
+		"s_f_y_ranger_01",//"Ranger Female",		6
+		"s_m_y_ranger_01",//"Ranger Male",			7
+		"s_f_y_sheriff_01",//"Sheriff Female",		8
+		"s_m_y_sheriff_01",//"Sheriff Male",		9
+		"s_m_m_fibsec_01",//"FIB Security",			10
+		"s_m_y_swat_01",//"SWAT",					11
+		"s_m_y_armymech_01",//"Army Mechanic",		12
+		"s_m_m_ccrew_01",//"Crew Member",			13
+		"s_m_y_blackops_01",//"Black Ops Soldier",	14
+		"s_m_y_blackops_02",//"Black Ops Soldier 2",15
+		"s_m_y_blackops_03",//"Black Ops Soldier 3",16
+		"s_m_m_marine_01",//"Marine",				17
+		"s_m_m_marine_02",//"Marine 2",				18
+		"s_m_y_marine_01",//"Marine Young",			19	
+		"s_m_y_marine_02",//"Marine Young 2",		20
+		"s_m_y_marine_03",//"Marine Young 3",		21
+		"s_m_m_paramedic_01",//"Paramedic",			22
+		"s_m_y_fireman_01"//"Fireman Male",			23
+	};
+	const std::vector<std::string> PilotPeds = {
 		"s_m_y_pilot_01",//"Pilot",  
 		"s_m_m_pilot_02",//"Pilot 2", 
-		"s_m_m_pilot_01",//"Pilot",  
-		"mp_f_helistaff_01",//"Heli-Staff Female" />
-		"a_c_boar",//"a_c_boar",  
-		"a_c_cat_01",
-		"a_c_husky",
-		"a_c_poodle",
-		"a_c_pug",
-		"a_c_retriever",
-		"a_c_rottweiler",
-		"a_c_shepherd",
-		"a_c_westy",
-		"a_c_pigeon",//"a_c_pigeon" />
-		"a_c_rat",//"a_c_rat" />
-		"a_c_cow",//"a_c_cow" />
-		"a_c_coyote",//"a_c_coyote" />
-		"a_c_crow",//"a_c_crow" />
-		"a_c_rabbit_01",//"a_c_rabbit_01" />
-		"a_c_deer",//"a_c_deer" />
-		"a_c_hen",//"a_c_hen" />
-		"a_c_mtlion",//"mountain lion" />
-		"a_c_pig",//"a_c_pig" />
-		"a_c_dolphin",//"fish/sharks" />
-		"a_c_fish",
-		"a_c_sharkhammer",
-		"a_c_humpback",
-		"a_c_killerwhale",
-		"a_c_stingray",
-		"a_c_sharktiger",
-		"a_c_chickenhawk",//"a_c_chickenhawk",  
-		"a_c_cormorant",//"a_c_cormorant" />
-		"a_c_seagull",
+		"s_m_m_pilot_01"//"Pilot",  
+	};
+	const std::vector<std::string> AnimalsPeds = {
+		"a_c_boar",//"a_c_boar",		0
+		"a_c_cat_01",//					1
+		"a_c_husky",//					2
+		"a_c_poodle",//					3
+		"a_c_pug",//					4
+		"a_c_retriever",//				5
+		"a_c_rottweiler",//				6
+		"a_c_shepherd",//				7
+		"a_c_westy",//					8
+		"a_c_pigeon",//"a_c_pigeon" />	9
+		"a_c_rat",//"a_c_rat" />		10
+		"a_c_cow",//"a_c_cow" />		11
+		"a_c_coyote",//"a_c_coyote" />	12
+		"a_c_crow",//"a_c_crow" />		13
+		"a_c_rabbit_01",//"a_c_rabbit_01" />14
+		"a_c_deer",//"a_c_deer" />			15
+		"a_c_hen",//"a_c_hen" />		16
+		"a_c_mtlion",//"mountain lion" />17
+		"a_c_pig",//"a_c_pig" />		18
+		"a_c_dolphin",//"fish/sharks" />19
+		"a_c_fish",//					20
+		"a_c_sharkhammer",//			21
+		"a_c_humpback",//				22
+		"a_c_killerwhale",//			23
+		"a_c_stingray",//				24
+		"a_c_sharktiger",//				25
+		"a_c_chickenhawk",//"a_c_chickenhawk",  26
+		"a_c_cormorant",//"a_c_cormorant" />	27
+		"a_c_seagull"//					28
+	};
+	const std::vector<std::string> YankoPPeds = {
 		"csb_prologuedriver",
 		"csb_prolsec",
 		"cs_prolsec_02",
 		"ig_prolsec_02",
 		"u_f_o_prolhost_01",
-		"u_f_m_promourn_01",
+		"u_f_m_promourn_01"
+	};
+	const std::vector<std::string> CayoPercPeds = {
 		"A_C_Panther",
-		"A_F_Y_Beach_02",
-		"A_M_O_Beach_02",
-		"A_M_Y_Beach_04",
-		"A_F_Y_ClubCust_04",
-		"A_M_Y_ClubCust_04",
 		"G_M_M_CartelGuards_01",
 		"G_M_M_CartelGuards_02",
 		"S_M_M_HighSec_04",
@@ -5321,491 +6278,213 @@ namespace EntityActions
 		"IG_OldRichGuy",
 		"IG_SSS"
 	};
+
 	std::string RandomPed(int iPedtype, int iSubType)
 	{
-		int Min = 0;
-		int Max = (int)PedPicks.size() - 1;
-
+		std::string YourPed = "s_m_y_clown_01";
 		if (iPedtype == 1)
-		{
-			Max = 15;
-		}            //Beach Peds
+			YourPed = PrePed_01[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_01.size() - 1)];		//Beach Peds
 		else if (iPedtype == 2)
-		{
-			Min = 16;
-			Max = 21;
-		}       //Tramps
+			YourPed = PrePed_02[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_02.size() - 1)];		//Tramps
 		else if (iPedtype == 3)
-		{
-			Min = 22;
-			Max = 37;
-		}       //High class
+			YourPed = PrePed_03[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_03.size() - 1)];		//High class
 		else if (iPedtype == 4)
-		{
-			Min = 38;
-			Max = 83;
-		}       //Mid class
+			YourPed = PrePed_04[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_04.size() - 1)];		//Mid class
 		else if (iPedtype == 5)
-		{
-			Min = 84;
-			Max = 137;
-		}       //Low class 
+			YourPed = PrePed_05[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_05.size() - 1)];		//Low class 
 		else if (iPedtype == 6)
-		{
-			Min = 138;
-			Max = 151;
-		}       //Buisness
+			YourPed = PrePed_06[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_06.size() - 1)];		//Buisness
 		else if (iPedtype == 7)
-		{
-			Min = 152;
-			Max = 154;
-		}       //Body builder
+			YourPed = PrePed_07[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_07.size() - 1)];		//Body builder
 		else if (iPedtype == 8)
 		{
 			if (iSubType == 1)
-			{
-				Min = 155;
-				Max = 158;
-			}
+				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 0, 3)];
 			else if (iSubType == 2)
-			{
-				Min = 159;
-				Max = 162;
-			}
+				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 4, 7)];
 			else if (iSubType == 3)
-			{
-				Min = 163;
-				Max = 166;
-			}
+				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 8, 11)];
 			else if (iSubType == 4)
-			{
-				Min = 167;
-				Max = 170;
-			}
+				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 12, 15)];
 			else if (iSubType == 5)
-			{
-				Min = 171;
-				Max = 174;
-			}
+				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 16, 19)];
 			else if (iSubType == 6)
-			{
-				Min = 175;
-				Max = 178;
-			}
+				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 20, 23)];
 			else if (iSubType == 7)
-			{
-				Min = 179;
-				Max = 187;
-			}
+				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 24, 32)];
 			else if (iSubType == 8)
-			{
-				Min = 188;
-				Max = 189;
-			}
+				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 33, 34)];
 			else if (iSubType == 9)
-			{
-				Min = 190;
-				Max = 193;
-			}
+				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 35, 38)];
 			else if (iSubType == 10)
-			{
-				Min = 194;
-				Max = 199;
-			}
+				YourPed = LsGstars[LessRandomInt("RandGsPed_" + std::to_string(iSubType), 39, 44)];
 			else
-			{
-				Min = 200;
-				Max = 203;
-			}
+				YourPed = LsGstars[LessRandomInt("RandGsPed_" + std::to_string(iSubType), 45, (int)LsGstars.size() - 1)];
 		}       //GangStars--Subset
 		else if (iPedtype == 9)
-		{
-			Min = 204;
-			Max = 206;
-		}       //Epslon 
+			YourPed = Eplomes[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)Eplomes.size() - 1)];			//Epslon 
 		else if (iPedtype == 10)
-		{
-			Min = 207;
-			Max = 212;
-		}       //Jogger
+			YourPed = PrePed_08[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_08.size() - 1)];		//Jogger
 		else if (iPedtype == 11)
-		{
-			Min = 213;
-			Max = 215;
-		}       //Golfer
+			YourPed = PrePed_09[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_09.size() - 1)];		//Golfer
 		else if (iPedtype == 12)
-		{
-			Min = 216;
-			Max = 217;
-		}       //Hiker
+			YourPed = PrePed_10[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)PrePed_10.size() - 1)];		//Hiker
 		else if (iPedtype == 13)
-		{
-			Min = 218;
-			Max = 221;
-		}       //Meth
+			YourPed = PrePed_11[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)PrePed_11.size() - 1)];		//Meth
 		else if (iPedtype == 14)
-		{
-			Min = 222;
-			Max = 234;
-		}       //Rural 
+			YourPed = PrePed_12[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)PrePed_12.size() - 1)];		//Rural 
 		else if (iPedtype == 15)
-		{
-			Min = 235;
-			Max = 241;
-		}       //Cycles
+			YourPed = PrePed_13[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)PrePed_13.size() - 1)];		//Cycles
 		else if (iPedtype == 16)
-		{
-			Min = 242;
-			Max = 245;
-		}       //LGBTQWSTRVX
+			YourPed = PrePed_14[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)PrePed_14.size() - 1)];		//LGBTQWSTRVX
 		else if (iPedtype == 17)
-		{
-			Min = 246;
-			Max = 247;
-		}       //Pool Peds
+			YourPed = PrePed_01[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)PrePed_01.size() - 1)];		//Pool Peds
 		else if (iPedtype == 18)
 		{
 			if (iSubType == 1)
-			{
-				Min = 248;
-				Max = 250;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 0, 2)];
 			else if (iSubType == 2)
-			{
-				Min = 251;
-				Max = 254;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 3, 6)];
 			else if (iSubType == 3)
-			{
-				Min = 255;
-				Max = 259;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 7, 11)];
 			else if (iSubType == 4)
-			{
-				Min = 260;
-				Max = 260;
-			}
+				YourPed = WorkinClass[12];
 			else if (iSubType == 5)
-			{
-				Min = 261;
-				Max = 262;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 13, 14)];
 			else if (iSubType == 6)
-			{
-				Min = 263;
-				Max = 265;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 15, 17)];
 			else if (iSubType == 7)
-			{
-				Min = 266;
-				Max = 268;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 18, 20)];
 			else if (iSubType == 8)
-			{
-				Min = 269;
-				Max = 271;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 21, 23)];
 			else if (iSubType == 9)
-			{
-				Min = 271;
-				Max = 273;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 24, 25)];
 			else if (iSubType == 10)
-			{
-				Min = 274;
-				Max = 274;
-			}
+				YourPed = WorkinClass[26];
 			else if (iSubType == 11)
-			{
-				Min = 275;
-				Max = 276;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 27, 28)];
 			else if (iSubType == 12)
-			{
-				Min = 277;
-				Max = 278;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 29, 30)];
 			else if (iSubType == 13)
-			{
-				Min = 279;
-				Max = 281;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 31, 33)];
 			else if (iSubType == 14)
-			{
-				Min = 282;
-				Max = 282;
-			}
+				YourPed = WorkinClass[34];
 			else if (iSubType == 15)
-			{
-				Min = 283;
-				Max = 284;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 35, 36)];
 			else if (iSubType == 16)
-			{
-				Min = 285;
-				Max = 285;
-			}
+				YourPed = WorkinClass[37];
 			else if (iSubType == 17)
-			{
-				Min = 286;
-				Max = 286;
-			}
+				YourPed = WorkinClass[38];
 			else if (iSubType == 18)
-			{
-				Min = 287;
-				Max = 287;
-			}
+				YourPed = WorkinClass[39];
 			else if (iSubType == 19)
-			{
-				Min = 288;
-				Max = 289;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 40, 41)];
 			else if (iSubType == 20)
-			{
-				Min = 290;
-				Max = 291;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 42, 43)];
 			else if (iSubType == 21)
-			{
-				Min = 292;
-				Max = 293;
-			}
+				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 44, 45)];
 			else if (iSubType == 22)
-			{
-				Min = 294;
-				Max = 294;
-			}
+				YourPed = WorkinClass[46];
 			else
-			{
-				Min = 295;
-				Max = 295;
-			}
+				YourPed = WorkinClass[(int)WorkinClass.size() - 1];
 		}       //Workers--Subset
 		else if (iPedtype == 19)
-		{
-			Min = 296;
-			Max = 296;
-		}       //jet ski
+			YourPed = "a_m_y_jetski_01";		//jet ski
 		else if (iPedtype == 20)
-		{
-			Min = 297;
-			Max = 298;
-		}       //Bike/ATV Male
+			YourPed = MotoCrossPeds[LessRandomInt("RandMcPed_" + std::to_string(iPedtype), 0, 1)];		//Bike/ATV Male
 		else if (iPedtype == 21)
 		{
 			if (iSubType == 1)
-			{
-				Min = 299;
-				Max = 300;
-			}//"Baywatch 
+				YourPed = ServicePeds[LessRandomInt("RandSvPed_0" + std::to_string(iSubType), 0, 1)];		//"Baywatch 
 			else if (iSubType == 2)
-			{
-				Min = 301;
-				Max = 301;
-			}//"US Coastguard
+				YourPed = ServicePeds[2];																	//"US Coastguard
 			else if (iSubType == 3)
-			{
-				Min = 302;
-				Max = 303;
-			}//><!--Cops
+				YourPed = ServicePeds[LessRandomInt("RandSvPed_0" + std::to_string(iSubType), 3, 4)];		//><!--Cops
 			else if (iSubType == 4)
-			{
-				Min = 304;
-				Max = 304;
-			}//><!-- PoliceBike
+				YourPed = ServicePeds[5];																	//><!-- PoliceBike
 			else if (iSubType == 5)
-			{
-				Min = 305;
-				Max = 306;
-			}//><!-- Ranger
+				YourPed = ServicePeds[LessRandomInt("RandSvPed_0" + std::to_string(iSubType), 6, 7)];		//><!-- Ranger
 			else if (iSubType == 6)
-			{
-				Min = 307;
-				Max = 308;
-			}//><!-- Sherif
+				YourPed = ServicePeds[LessRandomInt("RandSvPed_0" + std::to_string(iSubType), 8, 9)];		//><!-- Sherif
 			else if (iSubType == 7)
-			{
-				Min = 309;
-				Max = 309;
-			}//><!-- fib
+				YourPed = ServicePeds[10];																	//><!-- fib
 			else if (iSubType == 8)
-			{
-				Min = 310;
-				Max = 310;
-			}//><!-- swat
+				YourPed = ServicePeds[11];																	//><!-- swat
 			else if (iSubType == 9)
-			{
-				Min = 311;
-				Max = 320;
-			}//military
+				YourPed = ServicePeds[LessRandomInt("RandSvPed_0" + std::to_string(iSubType), 12, 21)];		//military
 			else if (iSubType == 10)
-			{
-				Min = 321;
-				Max = 321;
-			} //medic
+				YourPed = ServicePeds[22];																	//medic
 			else
-			{
-				Min = 322;
-				Max = 322;
-			}  //fireman
+				YourPed = ServicePeds[(int)ServicePeds.size() - 1];											//fireman
 		}       //Services
 		else if (iPedtype == 22)
 		{
-			if (iSubType == 1)
-			{
-				Min = 22;
-				Max = 37;
-			}
-			else if (iSubType == 2)
-			{
-				Min = 324;
-				Max = 324;
-			}
-			else if (iSubType == 3)
-			{
-				Min = 22;
-				Max = 37;
-			}
+			if (iSubType == 2)
+				YourPed = "mp_f_helistaff_01";
 			else
-			{
-				Min = 22;
-				Max = 37;
-			}
+				YourPed = PilotPeds[LessRandomInt("RandPiPed", 0, (int)PilotPeds.size() - 1)];
 		}       //Pilot
 		else if (iPedtype == 23)
 		{
 			if (iSubType == 1)
-			{
-				Min = 327;
-				Max = 327;
-			}
+				YourPed = AnimalsPeds[0];
 			else if (iSubType == 2)
-			{
-				Min = 328;
-				Max = 335;
-			}                //"Cats/dogs", 
+				YourPed = AnimalsPeds[LessRandomInt("RandAnPed_0" + std::to_string(iSubType), 1, 8)];		//"Cats/dogs", 
 			else if (iSubType == 3)
-			{
-				Min = 336;
-				Max = 336;
-			}
+				YourPed = AnimalsPeds[9];
 			else if (iSubType == 4)
-			{
-				Min = 337;
-				Max = 337;
-			}
+				YourPed = AnimalsPeds[10];
 			else if (iSubType == 5)
-			{
-				Min = 338;
-				Max = 338;
-			}
+				YourPed = AnimalsPeds[11];
 			else if (iSubType == 6)
-			{
-				Min = 339;
-				Max = 339;
-			}
+				YourPed = AnimalsPeds[12];
 			else if (iSubType == 7)
-			{
-				Min = 340;
-				Max = 340;
-			}
+				YourPed = AnimalsPeds[13];
 			else if (iSubType == 8)
-			{
-				Min = 341;
-				Max = 342;
-			}
+				YourPed = AnimalsPeds[LessRandomInt("RandAnPed_0" + std::to_string(iSubType), 14, 15)];		//"dearRabbit", 
 			else if (iSubType == 9)
-			{
-				Min = 343;
-				Max = 343;
-			}
+				YourPed = AnimalsPeds[16];
 			else if (iSubType == 10)
-			{
-				Min = 344;
-				Max = 344;
-			}
+				YourPed = AnimalsPeds[17];
 			else if (iSubType == 11)
-			{
-				Min = 345;
-				Max = 345;
-			}
+				YourPed = AnimalsPeds[18];
 			else if (iSubType == 12)
-			{
-				Min = 346;
-				Max = 352;
-			}
+				YourPed = AnimalsPeds[LessRandomInt("RandAnPed_" + std::to_string(iSubType), 19, 25)];
 			else if (iSubType == 13)
-			{
-				Min = 353;
-				Max = 353;
-			}
+				YourPed = AnimalsPeds[26];
 			else
-			{
-				Min = 354;
-				Max = 355;
-			}
+				YourPed = AnimalsPeds[LessRandomInt("RandAnPed_" + std::to_string(iSubType), 27, (int)AnimalsPeds.size() - 1)];
 		}       //animals
 		else if (iPedtype == 24)
-		{
-			Min = 356;
-			Max = 361;
-		}       //Yankton
+			YourPed = YankoPPeds[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)YankoPPeds.size() - 1)];		//Yankton
 		else
 		{
 			if (iSubType == 1)
-			{
-				Min = 362;
-				Max = 362;
-			}       //A_C_Panther
+				YourPed = CayoPercPeds[0]; //A_C_Panther  
 			else if (iSubType == 2)
-			{
-				Min = 363;
-				Max = 367;
-			}       //A_F_Y_Beach_02
+				YourPed = PrePed_01[LessRandomInt("RandCpPed_0" + std::to_string(iSubType), 0, (int)PrePed_01.size() - 1)];		 //A_F_Y_Beach_02
 			else if (iSubType == 3)
-			{
-				Min = 368;
-				Max = 370;
-			}       //Guard
+				YourPed = CayoPercPeds[LessRandomInt("RandCpPed_0" + std::to_string(iSubType), 1, 3)]; //Guard
 			else if (iSubType == 4)
-			{
-				Min = 371;
-				Max = 371;
-			}       //Bar
+				YourPed = CayoPercPeds[4];  //Bar
 			else if (iSubType == 5)
-			{
-				Min = 372;
-				Max = 373;
-			}       //worker
+				YourPed = CayoPercPeds[LessRandomInt("RandCpPed_0" + std::to_string(iSubType), 5, 6)]; //worker
 			else if (iSubType == 6)
-			{
-				Min = 374;
-				Max = 374;
-			}       //pilot
+				YourPed = CayoPercPeds[LessRandomInt("RandCpPed_0" + std::to_string(iSubType), 7, (int)CayoPercPeds.size() - 2)];  //pilot
 			else
-			{
-				Min = 375;
-			}
-
-			//"S_F_Y_ClubBar_02",
-			//"S_M_M_Bouncer_02",
+				YourPed = CayoPercPeds[(int)CayoPercPeds.size() - 1];
 
 		}     //Cayo Perico
 
-		int iPick = 0;
-		if (Min == Max)
-			iPick = Min;
-		else
-			iPick = LessRandomInt("RandoPed_" + std::to_string(iPedtype) + "_" + std::to_string(iSubType), Min, Max);
 
-		return PedPicks[iPick];
+		return YourPed;
 	}
-	Mod_Class::ClothBank NewClothBank(std::string PedTitle)
+	Mod_Class::ClothBank NewClothBank(const std::string& PedTitle)
 	{
 		bool Male = true;
 		std::string Model = PedTitle;
 		Mod_Class::HairSets MyHair = MHairsets[0];
-		return Mod_Class::ClothBank("", Model, 0, false, AddFace(Male), Male, false, MyHair, 0, 0, 0, 0, {}, {}, {}, {}, "");
+		return Mod_Class::ClothBank("", Model, 0, false, AddFace(Male), Male, false, MyHair, 0, 0, 0, 0, {}, {}, {}, {}, "", "", "");
 	}
 	Mod_Class::ClothBank NewClothBank(int iPedtype, int iSubType)
 	{
@@ -5814,32 +6493,42 @@ namespace EntityActions
 
 	void ApplyTats(Ped Pedx, Mod_Class::ClothBank* GetTats)
 	{
-		for (int i = 0; i < GetTats->MyTattoo.size(); i++)
-			PED::_APPLY_PED_OVERLAY(Pedx, MyHashKey(GetTats->MyTattoo[i].BaseName), MyHashKey(GetTats->MyTattoo[i].TatName));
+		if (GetTats != nullptr)
+		{
+			for (int i = 0; i < GetTats->MyTattoo.size(); i++)
+				PED::_APPLY_PED_OVERLAY(Pedx, MyHashKey(GetTats->MyTattoo[i].BaseName), MyHashKey(GetTats->MyTattoo[i].TatName));
+		}
 	}
 	void OnlineDress(Ped Pedx, Mod_Class::ClothX* MyCloths)
 	{
 		PED::CLEAR_ALL_PED_PROPS(Pedx);
-
-		for (int i = 0; i < MyCloths->ClothA.size(); i++)
+		if (MyCloths != nullptr)
 		{
-			if (MyCloths->ClothA[i] != -10)
-				PED::SET_PED_COMPONENT_VARIATION(Pedx, i, MyCloths->ClothA[i], MyCloths->ClothB[i], 2);
-		}
 
-		for (int i = 0; i < MyCloths->ExtraA.size(); i++)
-		{
-			if (MyCloths->ExtraA[i] != -10)
-				PED::SET_PED_PROP_INDEX(Pedx, i, MyCloths->ExtraA[i], MyCloths->ExtraB[i], false);
+			for (int i = 0; i < MyCloths->ClothA.size(); i++)
+			{
+				if (MyCloths->ClothA[i] != -10)
+					PED::SET_PED_COMPONENT_VARIATION(Pedx, i, MyCloths->ClothA[i], MyCloths->ClothB[i], 2);
+			}
+
+			for (int i = 0; i < MyCloths->ExtraA.size(); i++)
+			{
+				if (MyCloths->ExtraA[i] != -10)
+					PED::SET_PED_PROP_INDEX(Pedx, i, MyCloths->ExtraA[i], MyCloths->ExtraB[i], false);
+			}
 		}
 
 	}
 	void SetingtheHair(Ped Pedx, Mod_Class::HairSets* Hair)
 	{
-		PED::SET_PED_COMPONENT_VARIATION(Pedx, 2, Hair->Comp, Hair->Text, 2);
+		if (Hair != nullptr)
+		{
 
-		if (Hair->Over != -1)
-			PED::_APPLY_PED_OVERLAY(Pedx, Hair->OverLib, Hair->Over);
+			PED::SET_PED_COMPONENT_VARIATION(Pedx, 2, Hair->Comp, Hair->Text, 2);
+
+			if (Hair->Over != -1)
+				PED::_APPLY_PED_OVERLAY(Pedx, Hair->OverLib, Hair->Over);
+		}
 
 	}
 	void OnlineFaces(Ped Pedx, Mod_Class::ClothBank* pFixtures)
@@ -5933,76 +6622,81 @@ namespace EntityActions
 	}
 	Ped PlayerPedGen(Mod_Class::Vector4 vLocal, Mod_Class::ClothBank* thisBrain, bool onFoot, bool bfriend)
 	{
-		WAIT(100);//Can overload and cause CTD if run multiple times.
-
-		LoggerLight("PlayerPedGen == " + thisBrain->Model);
-
-		Ped thisPed = NULL;
-		Hash model = MyHashKey(thisBrain->Model);
-
-		if (thisBrain->Model == "mp_m_freemode_01" || thisBrain->Model == "mp_f_freemode_01")
-			thisBrain->FreeMode = true;
-		else
-			thisBrain->FreeMode = false;
-
-		if (!STREAMING::IS_MODEL_VALID(model))
-			model = MyHashKey("cs_chrisformage");
-
-		STREAMING::REQUEST_MODEL(model);// Check if the model is valid
-		if ((bool)STREAMING::IS_MODEL_IN_CDIMAGE(model) && (bool)STREAMING::IS_MODEL_VALID(model))
+		if (thisBrain != nullptr)
 		{
-			while (!STREAMING::HAS_MODEL_LOADED(model))
-				WAIT(10);
+			WAIT(100);//Can overload and cause CTD if run multiple times.
 
-			thisPed = PED::CREATE_PED(4, model, vLocal.X, vLocal.Y, vLocal.Z, vLocal.R, true, false);
+			LoggerLight("PlayerPedGen == " + thisBrain->Model);
 
-			int iAccuracy = RandomInt(50, 75);
-			PED::SET_PED_ACCURACY(thisPed, iAccuracy);
-			PED::SET_PED_MAX_HEALTH(thisPed, 200);
-			ENTITY::SET_ENTITY_HEALTH(thisPed, 200);
+			Ped thisPed = NULL;
+			Hash model = MyHashKey(thisBrain->Model);
 
-			AI::SET_PED_PATH_PREFER_TO_AVOID_WATER(thisPed, false);
-			ENTITY::SET_ENTITY_AS_MISSION_ENTITY(thisPed, 1, 1);
-
-			if (onFoot)
-			{
-				PED::SET_PED_CAN_SWITCH_WEAPON(thisPed, true);
-				PED::SET_PED_COMBAT_MOVEMENT(thisPed, 2);
-				AI::SET_PED_PATH_CAN_USE_CLIMBOVERS(thisPed, true);
-				AI::SET_PED_PATH_CAN_USE_LADDERS(thisPed, true);
-				AI::SET_PED_PATH_CAN_DROP_FROM_HEIGHT(thisPed, true);
-				AI::SET_PED_PATH_PREFER_TO_AVOID_WATER(thisPed, false);
-				PED::SET_PED_COMBAT_ATTRIBUTES(thisPed, 0, true);
-				PED::SET_PED_COMBAT_ATTRIBUTES(thisPed, 1, true);
-				PED::SET_PED_COMBAT_ATTRIBUTES(thisPed, 2, true);
-				PED::SET_PED_COMBAT_ATTRIBUTES(thisPed, 3, true);
-				PED::SET_PED_COMBAT_ABILITY(thisPed, 100);
-			}
-
-			if (bfriend)
-				RelGroupMember(thisPed, Gp_Follow);
+			if (thisBrain->Model == "mp_m_freemode_01" || thisBrain->Model == "mp_f_freemode_01")
+				thisBrain->FreeMode = true;
 			else
-				RelGroupMember(thisPed, GP_Attack);
+				thisBrain->FreeMode = false;
 
-			if (thisBrain->FreeMode)
-				OnlineFaces(thisPed, thisBrain);
+			if (!STREAMING::IS_MODEL_VALID(model))
+				model = MyHashKey("cs_chrisformage");
 
-			GunningIt(thisPed, -1);
+			STREAMING::REQUEST_MODEL(model);// Check if the model is valid
+			if ((bool)STREAMING::IS_MODEL_IN_CDIMAGE(model) && (bool)STREAMING::IS_MODEL_VALID(model))
+			{
+				while (!STREAMING::HAS_MODEL_LOADED(model))
+					WAIT(10);
 
-			Ped_List.push_back(thisPed);
-			STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				thisPed = PED::CREATE_PED(4, model, vLocal.X, vLocal.Y, vLocal.Z, vLocal.R, true, false);
+
+				int iAccuracy = RandomInt(50, 75);
+				PED::SET_PED_ACCURACY(thisPed, iAccuracy);
+				PED::SET_PED_MAX_HEALTH(thisPed, 200);
+				ENTITY::SET_ENTITY_HEALTH(thisPed, 200);
+
+				AI::SET_PED_PATH_PREFER_TO_AVOID_WATER(thisPed, false);
+				ENTITY::SET_ENTITY_AS_MISSION_ENTITY(thisPed, 1, 1);
+
+				PED::SET_PED_COMBAT_ABILITY(thisPed, 100);
+				if (onFoot)
+				{
+					PED::SET_PED_CAN_SWITCH_WEAPON(thisPed, true);
+					PED::SET_PED_COMBAT_MOVEMENT(thisPed, 2);
+					AI::SET_PED_PATH_CAN_USE_CLIMBOVERS(thisPed, true);
+					AI::SET_PED_PATH_CAN_USE_LADDERS(thisPed, true);
+					AI::SET_PED_PATH_CAN_DROP_FROM_HEIGHT(thisPed, true);
+					AI::SET_PED_PATH_PREFER_TO_AVOID_WATER(thisPed, false);
+					PED::SET_PED_COMBAT_ATTRIBUTES(thisPed, 0, true);
+					PED::SET_PED_COMBAT_ATTRIBUTES(thisPed, 1, true);
+					PED::SET_PED_COMBAT_ATTRIBUTES(thisPed, 2, true);
+					PED::SET_PED_COMBAT_ATTRIBUTES(thisPed, 3, true);
+				}
+
+				if (bfriend)
+					RelGroupMember(thisPed, Gp_Follow);
+				else
+					RelGroupMember(thisPed, GP_Attack);
+
+				if (thisBrain->FreeMode)
+					OnlineFaces(thisPed, thisBrain);
+
+				GunningIt(thisPed, -1);
+
+				Ped_List.push_back(thisPed);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+			}
+			else
+				thisPed = NULL;
+
+			return thisPed;
 		}
 		else
-			thisPed = NULL;
-
-		return thisPed;
+			return NULL;
 	}
 	Ped PlayerPedGen(Mod_Class::Vector4 vLocal, int Set, int Subset, bool onFoot, bool bfriend)
 	{
 		Mod_Class::ClothBank PedBank = NewClothBank(Set, Subset);
 		return PlayerPedGen(vLocal, &PedBank, onFoot, bfriend);;
 	}
-	Ped PlayerPedGen(Mod_Class::Vector4 vLocal, std::string sPed, bool onFoot, bool bfriend)
+	Ped PlayerPedGen(Mod_Class::Vector4 vLocal, const std::string& sPed, bool onFoot, bool bfriend)
 	{
 		Mod_Class::ClothBank PedBank = NewClothBank(sPed);
 		return PlayerPedGen(vLocal, &PedBank, onFoot, bfriend);;
@@ -6053,457 +6747,42 @@ namespace EntityActions
 	}
 	void ChangePlayer(int iSelect, int iSubset, int iWeap)
 	{
+		WAIT(1000);
 		ChangePlayer(MyHashKey(RandomPed(iSelect, iSubset)), iWeap);
+		PED::SET_PED_RANDOM_COMPONENT_VARIATION(PLAYER::PLAYER_PED_ID(), false);
 	}
 	void SavedPlayer(Mod_Class::ClothBank* MyBank, int iWeap)
 	{
-		LoggerLight("SavedPlayer == " + MyBank->CharName);
+		if (MyBank != nullptr)
+		{
+			LoggerLight("SavedPlayer == " + MyBank->CharName);
 
-		if (MyBank->ModelHash == 0)
-			MyBank->ModelHash = MyHashKey(MyBank->Model);
+			if (MyBank->ModelHash == 0)
+				MyBank->ModelHash = MyHashKey(MyBank->Model);
 
-		ChangePlayer(MyBank->ModelHash, iWeap);
+			ChangePlayer(MyBank->ModelHash, iWeap);
 
-		if (MyBank->FreeMode)
-			OnlineFaces(PLAYER::PLAYER_PED_ID(), MyBank);
-		else
-			OnlineDress(PLAYER::PLAYER_PED_ID(), &MyBank->Cothing[MyBank->Cloth_Pick]);
+			if (MyBank->FreeMode)
+				OnlineFaces(PLAYER::PLAYER_PED_ID(), MyBank);
+			else
+				OnlineDress(PLAYER::PLAYER_PED_ID(), &MyBank->Cothing[MyBank->Cloth_Pick]);
 
-		if (MyBank->Cothing[MyBank->Cloth_Pick].Badge.TatName != "")
-			PED::_APPLY_PED_OVERLAY(PLAYER::PLAYER_PED_ID(), MyHashKey(MyBank->Cothing[MyBank->Cloth_Pick].Badge.BaseName), MyHashKey(MyBank->Cothing[MyBank->Cloth_Pick].Badge.TatName));
+			if (MyBank->Cothing[MyBank->Cloth_Pick].Badge.TatName != "")
+				PED::_APPLY_PED_OVERLAY(PLAYER::PLAYER_PED_ID(), MyHashKey(MyBank->Cothing[MyBank->Cloth_Pick].Badge.BaseName), MyHashKey(MyBank->Cothing[MyBank->Cloth_Pick].Badge.TatName));
 
-		//****************Tattoos****************
-		ApplyTats(PLAYER::PLAYER_PED_ID(), MyBank);
+			if (MyBank->Voice != "")
+				ThemVoices(MyBank->Voice);
+
+			if (MyBank->Walkies != "")
+				WalkingStyle(PLAYER::PLAYER_PED_ID(), MyBank->Walkies);
+
+			if (MyBank->Moods != "")
+				PullingFaces(MyBank->Moods);
+
+			//****************Tattoos****************
+			ApplyTats(PLAYER::PLAYER_PED_ID(), MyBank);
+		}
 	}
-
-	const inline std::vector<std::string> PreVeh_01 = {
-		"AVISA",//<!-- Kraken Avisa -->
-		"DINGHY",//
-		"DINGHY5",//<!-- Dinghy weaponized variant -->
-		"JETMAX",//
-		"LONGFIN",//<!-- Shitzu Longfin -->
-		"MARQUIS",//
-		"PREDATOR",//
-		"PATROLBOAT",//<!-- Kurtz 31 Patrol Boat -->
-		"SEASHARK",//
-		"SPEEDER",//
-		"SQUALO",//
-		"SUNTRAP",//
-		"TORO",//
-		"TROPIC",//
-	};
-	const inline std::vector<std::string> PreVeh_02 = {
-		"PFISTER811",  //<!-- 811 -->
-		"ADDER",  //
-		"AUTARCH",  //
-		"BANSHEE2",  //<!-- Banshee 900R -->
-		"BULLET",  //
-		"CHAMPION",  //
-		"CHEETAH",  //
-		"CYCLONE",  //
-		"DEVESTE",  //
-		"EMERUS",  //
-		"ENTITYXF",  //
-		"ENTITY3",  //<!-- Entity MT -->
-		"ENTITY2",  //<!-- Entity XXR -->
-		"SHEAVA",  //<!-- ETR1 -->
-		"FMJ",  //
-		"FURIA",  //
-		"GP1",  //
-		"IGNUS",  //
-		"INFERNUS",  //
-		"ITALIGTB",  //
-		"ITALIGTB2",  //<!-- Itali GTB Custom -->
-		"KRIEGER",  //
-		"LM87",  //
-		"OSIRIS",  //
-		"NERO",  //
-		"NERO2",  //<!-- Nero Custom -->
-		"PENETRATOR",  //
-		"LE7B",  //<!-- RE-7B -->
-		"REAPER",  //
-		"VOLTIC2",  //<!-- Rocket Voltic -->
-		"S80",  //
-		"SC1",  //
-		"SCRAMJET",  //
-		"SULTANRS",  //
-		"T20",  //
-		"TAIPAN",  //
-		"TEMPESTA",  //
-		"TEZERACT",  //
-		"THRAX",  //
-		"TIGON",  //
-		"TORERO2",  //<!-- Torero XO -->
-		"TURISMOR",  //
-		"TYRANT",  //
-		"TYRUS",  //
-		"VACCA",  //
-		"VAGNER",  //
-		"VIGILANTE",  //
-		"VIRTUE",  //
-		"VISIONE",  //
-		"VOLTIC",  //
-		"PROTOTIPO",  //<!-- X80 Proto -->
-		"XA21",  //
-		"ZENO",  //
-		"ZENTORNO",  //
-		"ZORRUSSO",  //
-		"R300",  //<!-- 300R -->
-		"DRAFTER",  //<!-- 8F Drafter -->
-		"NINEF",  //
-		"NINEF2",  //<!-- 9F Cabrio -->
-		"TENF",  //
-		"TENF2",  //<!-- 10F Widebody -->
-		"ALPHA",  //
-		"ZR380",  //<!-- Apocalypse ZR380 -->
-		"BANSHEE",  //
-		"BESTIAGTS",  //
-		"BLISTA2",  //<!-- Blista Compact -->
-		"BUFFALO",  //
-		"BUFFALO2",  //<!-- Buffalo S -->
-		"CALICO",  //<!-- Calico GTF -->
-		"CARBONIZZARE",  //
-		"COMET2",  //<!-- Comet -->
-		"COMET3",  //<!-- Comet Retro Custom -->
-		"COMET6",  //<!-- Comet S2 -->
-		"COMET7",  //<!-- Comet S2 Cabrio -->
-		"COMET4",  //<!-- Comet Safari -->
-		"COMET5",  //<!-- Comet SR -->
-		"COQUETTE",  //
-		"COQUETTE4",  //<!-- Coquette D10 -->
-		"CORSITA",  //
-		"CYPHER",  //
-		"TAMPA2",  //<!-- Drift Tampa -->
-		"ELEGY",  //<!-- Elegy Retro Custom -->
-		"ELEGY2",  //<!-- Elegy RH8 -->
-		"EUROS",  //
-		"FELTZER2",  //<!-- Feltzer -->
-		"FLASHGT",  //
-		"FUROREGT",  //
-		"FUSILADE",  //
-		"FUTO",  //
-		"FUTO2",  //<!-- Futo GTX -->
-		"ZR3802",  //<!-- Future Shock ZR380 -->
-		"GB200",  //
-		"BLISTA3",  //<!-- Go Go Monkey Blista -->
-		"GROWLER",  //
-		"EVERON2",  //<!-- Hotring Everon -->
-		"GAUNTLET6",  //<!-- Hotring Hellfire -->
-		"HOTRING",  //<!-- Hotring Sabre -->
-		"IMORGON",  //
-		"ISSI7",  //<!-- Issi Sport -->
-		"ITALIGTO",  //
-		"STINGERTT",  //<!-- Issi GTO Stinger TT -->
-		"ITALIRSX",  //
-		"JESTER",  //
-		"JESTER2",  //<!-- Jester (Racecar) -->
-		"JESTER3",  //<!-- Jester Classic -->
-		"JESTER4",  //<!-- Jester RR -->
-		"JUGULAR",  //
-		"KHAMELION",  //
-		"KOMODA",  //
-		"KURUMA",  //
-		"KURUMA2",  //<!-- Kuruma (Armored) -->
-		"COUREUR",  //<!-- La Coureuse -->
-		"LOCUST",  //
-		"LYNX",  //
-		"MASSACRO",  //
-		"MASSACRO2",  //<!-- Massacro (Racecar) -->
-		"NEO",  //
-		"NEON",  //
-		"ZR3803",  //<!-- Nightmare ZR380 -->
-		"OMNIS",  //
-		"OMNISEGT",  //
-		"PANTHERE",  //
-		"PARAGON",  //
-		"PARAGON2",  //<!-- Paragon R (Armored) -->
-		"PARIAH",  //
-		"PENUMBRA",  //
-		"PENUMBRA2",  //<!-- Penumbra FF -->
-		"RAIDEN",  //
-		"RAPIDGT",  //
-		"RAPIDGT2",  //<!-- Rapid GT Cabrio -->
-		"RAPTOR",  //
-		"REMUS",  //
-		"REVOLTER",  //
-		"RT3000",  //
-		"RUSTON",  //
-		"SCHAFTER4",  //<!-- Schafter LWB -->
-		"SCHAFTER3",  //<!-- Schafter V12 -->
-		"SCHLAGEN",  //
-		"SCHWARZER",  //
-		"SENTINEL3",  //<!-- Sentinel Classic -->
-		"SENTINEL4",  //<!-- Sentinel Classic Widebody -->
-		"SEVEN70",  //
-		"SM722",  //
-		"SPECTER",  //
-		"SPECTER2",  //<!-- Specter Custom -->
-		"BUFFALO3",  //<!-- Sprunk Buffalo -->
-		"STREITER",  //
-		"SUGOI",  //
-		"SULTAN",  //
-		"SULTAN2",  //<!-- Sultan Classic -->
-		"SULTAN3",  //<!-- Sultan RS Classic -->
-		"SURANO",  //
-		"TROPOS",  //
-		"VSTR",  //<!-- V-STR -->
-		"VECTRE",  //
-		"VERLIERER2",  //
-		"VETO",  //<!-- Veto Classic -->
-		"VETO2",  //<!-- Veto Modern -->
-		"ZR350",  //
-		"turismo3", // Super
-		"dominator9", // Muscle
-		"driftyosemite", // Muscle
-		"impaler6", // Muscle
-		"Vigero3" // Muscle
-	};
-	const inline std::vector<std::string> PreVeh_03 = {
-		"COGCABRIO",  //
-		"EXEMPLAR",  //
-		"F620",  //
-		"BRIGHAM",  //
-		"FELON",  //
-		"FELON2",  //<!-- Felon GT -->
-		"JACKAL",  //
-		"KANJOSJ",  //
-		"ORACLE",  //
-		"ORACLE2",  //<!-- Oracle XS -->
-		"POSTLUDE",  //
-		"PREVION",  //
-		"SENTINEL2",  //<!-- Sentinel -->
-		"SENTINEL",  //<!-- Sentinel XS -->
-		"WINDSOR",  //
-		"WINDSOR2",  //<!-- Windsor Drop -->
-		"ZION",  //
-		"ZION2",  //<!-- Zion Cabrio -->
-		"ASEA",  //
-		"ASEA2",  //<!-- Asea North Yankton variant -->
-		"ASTEROPE",  //
-		"CINQUEMILA",  //
-		"COGNOSCENTI",  //
-		"COGNOSCENTI2",  //<!-- Cognoscenti (Armored) -->
-		"COG55",  //<!-- Cognoscenti 55 -->
-		"COG552",  //<!-- Cognoscenti 55 (Armored) -->
-		"DEITY",  //
-		"FUGITIVE",  //
-		"GLENDALE2",  //<!-- Glendale Custom -->
-		"INTRUDER",  //
-		"PREMIER",  //
-		"PRIMO2",  //<!-- Primo Custom -->
-		"REGINA",  //
-		"RHINEHART",  //
-		"ROMERO",  //
-		"SCHAFTER2",  //
-		"SCHAFTER6",  //<!-- Schafter LWB (Armored) -->
-		"SCHAFTER5",  //<!-- Schafter V12 (Armored) -->
-		"STAFFORD",  //
-		"STANIER",  //
-		"STRATUM",  //
-		"STRETCH",  //
-		"SUPERD",  //
-		"SURGE",  //
-		"TAILGATER",  //
-		"TAILGATER2",  //<!-- Tailgater S -->
-		"LIMO2",  //<!-- Turreted Limo -->
-		"WARRENER2",  //<!-- Warrener HKR -->
-		"WASHINGTON",  //
-		"ASTRON",  //
-		"BALLER",  //
-		"BALLER2",  //<!-- Baller 2nd gen variant -->
-		"BALLER3",  //<!-- Baller LE -->
-		"BALLER5",  //<!-- Baller LE (Armored) -->
-		"BALLER4",  //<!-- Baller LE LWB -->
-		"BALLER6",  //<!-- Baller LE LWB (Armored) -->
-		"BALLER7",  //<!-- Baller ST -->
-		"BJXL",  //
-		"CAVALCADE",  //
-		"CAVALCADE2",  //<!-- Cavalcade 2nd gen variant -->
-		"CONTENDER",  //
-		"DUBSTA",  //
-		"DUBSTA2",  //<!-- Dubsta black variant -->
-		"FQ2",  //
-		"GRANGER",  //
-		"GRANGER2",  //<!-- Granger 3600LX -->
-		"GRESLEY",  //
-		"HUNTLEY",  //
-		"ISSI8",  //<!-- Issi Rally -->
-		"IWAGEN",  //
-		"JUBILEE",  //
-		"LANDSTALKER",  //
-		"LANDSTALKER2",  //<!-- Landstalker XL -->
-		"MESA",  //
-		"MESA2",  //<!-- Mesa North Yankton variant -->
-		"NOVAK",  //
-		"PATRIOT",  //
-		"PATRIOT2",  //<!-- Patriot Stretch -->
-		"RADI",  //
-		"REBLA",  //
-		"ROCOTO",  //
-		"SEMINOLE",  //
-		"SEMINOLE2",  //<!-- Seminole Frontier -->
-		"SERRANO",  //
-		"SQUADDIE",  //
-		"TOROS",  //
-		"XLS",  //
-		"XLS2",  //<!-- XLS (Armored) -->
-		"aleutian", // SUVs
-		"baller8", // SUVs
-		"cavalcade3", // SUVs
-		"dorado", // SUVs
-		"vivanite", // SUVs
-		"asterope2", // Sedans
-		"impaler5", // Sedans
-		"drifteuros", // Sports
-		"driftfuto", // Sports
-		"driftjester", // Sports
-		"driftremus", // Sports
-		"drifttampa", // Sports
-		"driftzr350", // Sports
-		"driftfr36", // Coupes
-		"fr36", // Coupes
-		"terminus" // Off-Road
-	};
-	const inline std::vector<std::string> PreVeh_04 = {
-		"GREENWOOD",  //
-		"MOONBEAM",  //
-		"DILETTANTE",  //
-		"PANTO",  //
-		"RHAPSODY",  //
-		"EMPEROR",  //
-		"EMPEROR2",  //<!-- Emperor beater variant -->
-		"GLENDALE",  //
-		"INGOT",  //
-		"PRIMO",  //
-		"WARRENER",  //
-		"HABANERO"  //
-	};
-	const inline std::vector<std::string> PreVeh_05 = {
-		"BULLDOZER",  //
-		"UTILLITRUCK",  //<!-- Utility Truck cherry picker variant -->
-		"UTILLITRUCK2",  //<!-- Utility Truck flatbed variant -->
-		"UTILLITRUCK3",  //<!-- Utility Truck pick-up variant -->
-		"RUBBLE",  //
-		"TIPTRUCK",  //<!-- Tipper 4-wheel variant -->
-		"TIPTRUCK2",  //<!-- Tipper 6-wheel variant -->
-		"MIXER",  //
-		"MIXER2"  //<!-- Mixer 8-wheel variant -->
-	};
-	const inline std::vector<std::string> PreVeh_06 = {
-		"BENSON",  //
-		"BIFF",  //
-		"FLATBED",  //
-		"HAULER",  //
-		"HAULER2",  //<!-- Hauler Custom -->
-		"MULE",  //
-		"MULE2",  //<!-- Mule ramp door variant -->
-		"PACKER",  //
-		"PHANTOM",  //
-		"POUNDER",  //
-		"POUNDER2",  //<!-- Pounder Custom -->
-		"benson2", //  Commercial
-		"phantom4", // Commercial
-		"towtruck3", // Utility
-		"towtruck4" // Utility
-	};
-	const inline std::vector<std::string> PreVeh_07 = {
-		"BF400",  //
-		"MANCHEZ",  //
-		"MANCHEZ2",  //<!-- Manchez Scout -->
-		"MANCHEZ3",  //<!-- Manchez Scout C -->
-		"SANCHEZ",  //<!-- Sanchez livery variant -->
-		"SANCHEZ2",  //
-		"BLAZER",  //
-		"BLAZER3",  //<!-- Hot Rod Blazer -->
-		"BLAZER4"  //<!-- Street Blazer -->
-	};
-	const inline std::vector<std::string> PreVeh_08 = {
-		"FBI",  //<!-- FIB Buffalo -->
-		"FBI2",  //<!-- FIB Granger -->
-		"POLICE4",  //<!-- Unmarked Cruiser -->
-		"FIRETRUK",  //
-		"POLICEB",  //<!-- Police Bike -->
-		"PRANGER",  //<!-- Park Ranger -->
-		"SHERIFF",  //<!-- Sheriff Cruiser -->
-		"SHERIFF2"  //<!-- Sheriff SUV -->
-		"POLICE2",  //<!-- Police Cruiser Buffalo -->
-		"POLICE",  //<!-- Police Cruiser Stanier -->
-		"POLICE3",  //<!-- Police Cruiser Interceptor -->
-		"POLICET",  //<!-- Police Transporter -->
-		"RIOT"  //<!-- Police Riot -->
-	};
-	const inline std::vector<std::string> PreVeh_09 = {
-		"APC",  //
-		"BARRACKS",  //
-		"BARRACKS2",  //<!-- Barracks Semi -->
-		"BARRAGE",  //
-		"CHERNOBOG",  //
-		"CRUSADER",  //
-		"HALFTRACK",  //
-		"RHINO",  //
-		"KHANJALI",  //<!-- TM-02 Khanjali -->
-		"VETIR"  //
-	};
-	const inline std::vector<std::string> PreVeh_10 = {
-		"ALPHAZ1",  //
-			"STRIKEFORCE",  //<!-- B-11 Strikeforce -->
-			"BESRA",  //
-			"RAIJU",  //<!-- F-160 Raiju -->
-			"HYDRA",  //
-			"STARLING",  //<!-- LF-22 Starling -->
-			"MAMMATUS",  //
-			"MOGUL",  //
-			"LAZER",  //<!-- P-996 LAZER -->
-			"PYRO",  //
-			"BOMBUSHKA",  //<!-- RM-10 Bombushka -->
-			"ROGUE",  //
-			"ALKONOST",  //<!-- RO-86 Alkonost -->
-			"TITAN",  //
-			"TULA",  //
-			"MOLOTOK",  //<!-- V-65 Molotok -->
-			"VOLATOL",  //
-			"CARGOPLANE",  //
-			"CARGOPLANE2",  //
-			"CUBAN800",  //
-			"DODO",  //
-			"JET",  //
-			"LUXOR",  //
-			"LUXOR2",  //<!-- Luxor Deluxe -->
-			"MILJET",  //
-			"NIMBUS",  //
-			"SHAMAL",  //
-			"STREAMER216",  //
-			"VELUM",  //
-			"VELUM2",  //<!-- Velum 5-Seater -->
-			"VESTRA"  //
-	};
-	const inline std::vector<std::string> PreVeh_11 = {
-		"CONADA",  //
-		"FROGGER",  //
-		"MAVERICK",  //
-		"SUPERVOLITO",  //
-		"SUPERVOLITO2",  //<!-- SuperVolito Carbon -->
-		"SWIFT",  //
-		"SWIFT2",  //<!-- Swift Deluxe -->
-		"VOLATUS"  //
-	};
-	const inline std::vector<std::string> PreVeh_12 = {
-		"ASEA2",  //<!-- Asea North Yankton variant -->
-		"EMPEROR3",  //<!-- Emperor North Yankton variant -->
-		"RANCHERXL2",  //<!-- Rancher XL North Yankton variant -->
-		"SADLER2",  //<!-- Sadler North Yankton variant -->
-	};
-	const inline std::vector<std::string> PreVeh_13 = {
-		"MANCHEZ2",  //<!-- Manchez Scout -->
-		"MANCHEZ3",  //<!-- Manchez Scout C -->
-		"VETIR",  //
-		"JUBILEE",  //
-		"WINKY",  //
-		"BRIOSO2",  //<!-- Brioso 300 -->
-		"WEEVIL",  //
-		"SQUADDIE",
-		"VERUS",  //
-	};
 
 	std::string RandVeh(int iVechList, int iSubSet)
 	{
@@ -6606,7 +6885,7 @@ namespace EntityActions
 
 		return sVeh;
 	}
-	bool IsItARealVehicle(std::string sVehName)
+	bool IsItARealVehicle(const std::string& sVehName)
 	{
 		LoggerLight("IsItARealVehicle, sVehName == " + sVehName);
 
@@ -6660,6 +6939,14 @@ namespace EntityActions
 
 			Ped DesDriver = NULL;
 
+			int iSeating = VEHICLE::GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(thisVeh);
+
+			if (!vehSet.PlayerDriver && vehSet.PlayerInVeh && iSeating == 0)
+			{
+				vehSet.PlayerDriver = true;
+				vehSet.FillVeh = false;
+			}
+
 			if (vehSet.PlayerDriver)
 			{
 				MoveEntity(PLAYER::PLAYER_PED_ID(), vehSet.SpawnPoint);
@@ -6670,10 +6957,9 @@ namespace EntityActions
 			if (vehSet.FillVeh)
 			{
 				int iStart = 0;
-				int iSeating = VEHICLE::GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(thisVeh);
 
 				if (!vehSet.PlayerDriver)
-				{					
+				{
 					DesDriver = PlayerPedGen(vehSet.SpawnPoint, vehSet.Select, vehSet.SubSet, false, vehSet.bFriend);
 					WarptoAnyVeh(thisVeh, DesDriver, -1);
 
@@ -6707,55 +6993,83 @@ namespace EntityActions
 		return thisVeh;
 	}
 
-	std::vector<Ped> CollectPeds(int noPedtype)
+	std::vector<Ped> CollectPeds()
 	{
-		LoggerLight("CollectPeds");
-		std::vector<Ped> output = {};
-		const int numElements = 160;
-		const int arrSize = numElements * 2 + 2;  //Start at index 2, and the odd elements are padding	
-		Ped peds[arrSize];	//0 index is the size of the array	
-		peds[0] = numElements;
+		const int PED_ARR_SIZE = 1024;
+		Ped Pedds[PED_ARR_SIZE];
+		int Pedcount = worldGetAllPeds(Pedds, PED_ARR_SIZE);
+		std::vector<Ped> NpcList = {};
 
-		int count = PED::GET_PED_NEARBY_PEDS(PLAYER::PLAYER_PED_ID(), peds, noPedtype);
-		if (peds != NULL)
+		for (int i = 0; i < Pedcount; i++)
 		{
-			for (int i = 0; i < count; i++)
+			Ped Pent = Pedds[i];
+			if (Pent != NULL && ENTITY::DOES_ENTITY_EXIST(Pent))
 			{
-				int offsettedID = i * 2 + 2;			//Make sure it exists	
-				if (peds[offsettedID] != NULL && ENTITY::DOES_ENTITY_EXIST(peds[offsettedID]))
-				{
-					if (!ENTITY::IS_ENTITY_A_MISSION_ENTITY((Ped)peds[offsettedID]))
-						output.push_back((Ped)peds[offsettedID]);
-				}
+				if (!ENTITY::IS_ENTITY_A_MISSION_ENTITY(Pent))
+					NpcList.push_back(Pent);
 			}
 		}
-		LoggerLight("CollectedPeds == " + std::to_string(output.size()));
-		return output;
+		return NpcList;
 	}
-	Ped NearByPed(Mod_Class::Vector4 vArea, bool incAnimals, float areaMin, float areaMax)
+	Ped NearByPed(Mod_Class::Vector4 vArea, float areaMin, float areaMax)
 	{
 		Ped Pedlass = NULL;
 
 		Ped PlayerPed = PLAYER::PLAYER_PED_ID();
-		int pedType = 28;
-		if (incAnimals)
-			pedType = -1;
-		std::vector<Ped> PedsInArea = CollectPeds(-1);
 
-		for (int i = 0; i < (int)PedsInArea.size(); i++)
+		const int PED_ARR_SIZE = 1024;
+		Ped Pedds[PED_ARR_SIZE];
+		int Pedcount = worldGetAllPeds(Pedds, PED_ARR_SIZE);
+		std::vector<Ped> NpcList = {};
+		std::vector<Ped> AnimalList = {};
+
+		for (int i = 0; i < Pedcount; i++)
 		{
-			Ped MadP = PedsInArea[i];
-			LoggerLight("NearByPed Dist == " + std::to_string(Locations::DistanceTo(MadP, vArea)));
-
-			if (Locations::DistanceTo(MadP, vArea) > areaMin && MadP != PlayerPed && !(bool)ENTITY::IS_ENTITY_DEAD(MadP) && !(bool)ENTITY::IS_ENTITY_A_MISSION_ENTITY(MadP))
+			Ped Pent = Pedds[i];
+			if (Pent != NULL && ENTITY::DOES_ENTITY_EXIST(Pent))
 			{
-				Pedlass = MadP;
-				ENTITY::SET_ENTITY_AS_MISSION_ENTITY(Pedlass, 1, 1);
-				break;
+				if (!ENTITY::IS_ENTITY_A_MISSION_ENTITY(Pent) && Mod_Maths::DistanceTo(vArea, Mod_Maths::EntPosition(Pent)) > areaMin && Mod_Maths::DistanceTo(vArea, Mod_Maths::EntPosition(Pent)) < areaMax)
+				{
+					if (PED::GET_PED_TYPE(Pent) == 28)
+						AnimalList.push_back(Pent);
+					else
+						NpcList.push_back(Pent);
+				}
 			}
-			WAIT(1);
 		}
 
+		for (int i = 0; i < (int)NpcList.size(); i++)
+		{
+			Ped MadP = NpcList[i];
+
+			if (ENTITY::DOES_ENTITY_EXIST(MadP))
+			{
+				if (MadP != PlayerPed && !(bool)ENTITY::IS_ENTITY_DEAD(MadP) && Mod_Maths::EntPosition(MadP).z > -10)
+				{
+					Pedlass = MadP;
+					ENTITY::SET_ENTITY_AS_MISSION_ENTITY(Pedlass, 1, 1);
+					break;
+				}
+			}
+		}
+
+		if (Pedlass == NULL)
+		{
+			for (int i = 0; i < (int)AnimalList.size(); i++)
+			{
+				Ped MadP = AnimalList[i];
+
+				if (ENTITY::DOES_ENTITY_EXIST(MadP))
+				{
+					if (MadP != PlayerPed && !(bool)ENTITY::IS_ENTITY_DEAD(MadP))
+					{
+						Pedlass = MadP;
+						ENTITY::SET_ENTITY_AS_MISSION_ENTITY(Pedlass, 1, 1);
+						break;
+					}
+				}
+			}
+		}
 		return Pedlass;
 	}
 
@@ -6769,8 +7083,12 @@ namespace EntityActions
 	{
 		LoggerLight("Reicarnations");
 
-		Locations::AnyPreActives(0, false);
-		Mod_Class::Vector4 DeathPlace = Locations::FindPedSpPoint(Locations::PlayerPosi());
+		Mod_Maths::AnyPreActives(0, false);
+		Mod_Class::Vector4 DeathPlace = Mod_Maths::FindPedSpPoint(Mod_Maths::PlayerPosi());
+		Ped Bob = NULL;
+
+		if (!Mod_Settings.ReCurr || !Mod_Settings.Saved_Ped)
+			Bob = NearByPed(DeathPlace, 35.0f, 500.0f);
 
 		while ((bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()))
 			WAIT(1);
@@ -6787,13 +7105,19 @@ namespace EntityActions
 		}
 		else
 		{
-			MoveEntity(PLAYER::PLAYER_PED_ID(), DeathPlace);
-			WAIT(2000);
-			Ped Bob = NULL;
-			Bob = NearByPed(DeathPlace, Mod_Settings.Random_Ped, 20.0f, 125.0f);
-
-			if (Bob != NULL)
+			if (Bob != NULL && !Yankton_Loaded)
 				RepoPedPlayer(Bob);
+			else 
+			{
+				if (Yankton_Loaded)
+					ChangePlayer(24, 0, 5);
+				else if (Cayo_Loaded)
+					ChangePlayer(25, 3, 4);
+				else
+					ChangePlayer(4, 0, 1);
+
+				MoveEntity(PLAYER::PLAYER_PED_ID(), DeathPlace);
+			}
 		}
 
 		RandomWeatherTime();
@@ -6801,15 +7125,15 @@ namespace EntityActions
 		CAM::DO_SCREEN_FADE_IN(1500);
 		SideAdviceNote();
 
-		Vector3 Campo = Locations::PlayerPosi();
-		Vector3 Camro = Locations::NewVector3(-90.00f, 0.00f, 0.00f);
+		Vector3 Campo = Mod_Maths::PlayerPosi();
+		Vector3 Camro = Mod_Maths::NewVector3(-90.00f, 0.00f, 0.00f);
 		UI::DISPLAY_RADAR(false);
 		Campo.z += 155.00f;
 		char* Cams = "DEFAULT_SCRIPTED_CAMERA";
 		Camera cCams = CAM::CREATE_CAM_WITH_PARAMS(Cams, Campo.x, Campo.y, Campo.z, Camro.x, Camro.y, Camro.z, 150.00f, true, 2);
 		CAM::RENDER_SCRIPT_CAMS(1, 1, cCams, 0, 0);
 		WAIT(3000);
-		while (CAM::GET_CAM_COORD(cCams).z > Locations::PlayerPosi().z + 2.00f)
+		while (CAM::GET_CAM_COORD(cCams).z > Mod_Maths::PlayerPosi().z + 2.00f)
 		{
 			Campo.z -= 1.00f;
 			CAM::SET_CAM_COORD((Any)cCams, Campo.x, Campo.y, Campo.z);
@@ -6830,7 +7154,7 @@ namespace EntityActions
 		WEAPON::GIVE_WEAPON_TO_PED(Vic, MyHashKey("WEAPON_pistol"), 100, false, true);
 		WEAPON::SET_CURRENT_PED_WEAPON(Vic, MyHashKey("WEAPON_pistol"), true);
 		WAIT(450);
-		ForceAnim(Vic, "mp_suicide", "pistol", Locations::GetPosV4(Vic));
+		ForceAnim(Vic, "mp_suicide", "pistol", Mod_Maths::GetPosV4(Vic));
 		AUDIO::PLAY_SOUND_FROM_ENTITY(-1, "GENERIC_CURSE_HIGH", Vic, 0, 0, 0);
 		WAIT(700);
 		int WaitHere = InGameTime() + 200;
@@ -6856,7 +7180,7 @@ namespace EntityActions
 
 			WAIT(1);
 		}
-		//AddDecals(Locations::FowardOf(WEAPON::GET_CURRENT_PED_WEAPON_ENTITY_INDEX(Vic), 0.01, true), 1017, 10.00f, 10.0f);
+		//AddDecals(Mod_Maths::FowardOf(WEAPON::GET_CURRENT_PED_WEAPON_ENTITY_INDEX(Vic), 0.01, true), 1017, 10.00f, 10.0f);
 		ENTITY::SET_ENTITY_HEALTH(Vic, 1);
 	}
 	void CayoAudio()
@@ -6913,7 +7237,7 @@ namespace EntityActions
 		int iRan = RandomInt(4, 7);
 		for (int i = 0; i < iRan; i++)
 		{
-			Mod_Class::Vector4 vDance = Locations::InAreaOf(CayoPartays[0], 2.0f, 5.0f);
+			Mod_Class::Vector4 vDance = Mod_Maths::InAreaOf(CayoPartays[0], 2.0f, 5.0f);
 			Ped Dancer = PlayerPedGen(vDance, 1, 0, true, true);
 			CayDancers.push_back(Dancer);
 			DanceDanceDance(Dancer);
@@ -6923,7 +7247,7 @@ namespace EntityActions
 
 		for (int i = 0; i < iRan; i++)
 		{
-			Mod_Class::Vector4 vDance = Locations::InAreaOf(CayoPartays[1], 2.0f, 8.0f);
+			Mod_Class::Vector4 vDance = Mod_Maths::InAreaOf(CayoPartays[1], 2.0f, 8.0f);
 			Ped Dancer = PlayerPedGen(vDance, 1, 0, true, true);
 			CayDancers.push_back(Dancer);
 			DanceDanceDance(Dancer);
@@ -6940,7 +7264,7 @@ namespace EntityActions
 			if (Chair != NULL)
 			{
 				ENTITY::FREEZE_ENTITY_POSITION(Chair, true);
-				Mod_Class::Vector4 SunPos = Locations::GetPosV4(Chair);
+				Mod_Class::Vector4 SunPos = Mod_Maths::GetPosV4(Chair);
 				Ped Sitter = PlayerPedGen(SunPos, 1, 0, true, true);
 				TakeAChair(Sitter, SunPos);
 			}
@@ -6961,7 +7285,7 @@ namespace EntityActions
 			}
 		}
 
-		Ped Dj = PlayerPedGen(Mod_Class::Vector4(4893.571f, -4905.296f, 3.481121f, 192.4766f),"IG_SSS", true, true);
+		Ped Dj = PlayerPedGen(Mod_Class::Vector4(4893.571f, -4905.296f, 3.481121f, 192.4766f), "IG_SSS", true, true);
 		DanceDanceDance(Dj);
 		Ped Bar = PlayerPedGen(Mod_Class::Vector4(4902.647f, -4943.707f, 3.392626f, 46.24336f), "S_F_Y_BeachBarStaff_01", true, true);
 		DanceDanceDance(Bar);
@@ -6970,9 +7294,9 @@ namespace EntityActions
 	}
 }
 
-namespace UiSystem
+namespace Mod_Ui
 {
-	int AddScreenText(int font, std::string caption, float textLeftScaled, float lineTopScaled, float lineHeightScaled, float text_scale, int text_col[4])
+	int AddScreenText(int font, const std::string& caption, float textLeftScaled, float lineTopScaled, float lineHeightScaled, float text_scale, int text_col[4])
 	{
 		// text upper part
 		UI::SET_TEXT_FONT(font);
@@ -6996,7 +7320,7 @@ namespace UiSystem
 		UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)caption.c_str());
 		return UI::_0x9040DFB09BE75706(textLeftScaled, (((lineTopScaled + 0.00278f) + lineHeightScaled) - 0.005f));
 	}
-	void AddSprite(std::string spriteLocation, std::string spriteName, float posX, float posY, float sizeX, float sizeY, float heading)
+	void AddSprite(const std::string& spriteLocation, const std::string& spriteName, float posX, float posY, float sizeX, float sizeY, float heading)
 	{
 		if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED((LPSTR)spriteLocation.c_str()))
 			GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT((LPSTR)spriteLocation.c_str(), true);
@@ -7021,7 +7345,7 @@ namespace UiSystem
 	{
 		GRAPHICS::DRAW_RECT((A_0 + (A_2 * 0.5f)), (A_1 + (A_3 * 0.5f)), A_2, A_3, A_4, A_5, A_6, A_7);
 	}
-	void DrawSessionList(std::string caption, std::string level, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, float textLeft2, bool active, bool title, int position)
+	void DrawSessionList(const std::string& caption, const std::string& level, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, float textLeft2, bool active, bool title, int position)
 	{
 		// default values
 		int text_col[4] = { 255, 255, 255, 255 },
@@ -7074,7 +7398,7 @@ namespace UiSystem
 			AddSprite("mpleaderboard", "leaderboard_globe_icon", PosX, PosY + (float)position * iTimes1, sizeX, sizeY + (float)position * iTimes2, 0.0);
 		}
 	}
-	void Draw_menu_line(std::string caption, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, bool active, bool title, bool rescaleText)
+	void Draw_menu_line(const std::string& caption, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, bool active, bool title, bool rescaleText)
 	{
 		// default values
 		int text_col[4] = { 255, 255, 255, 245 },
@@ -7125,7 +7449,7 @@ namespace UiSystem
 		Draw_rect(lineLeftScaled, lineTopScaled + (0.00278f), lineWidthScaled, ((((float)(num25)*UI::_0xDB88A37483346780(text_scale, 0)) + (lineHeightScaled * 2.0f)) + 0.005f),
 			rect_col[0], rect_col[1], rect_col[2], rect_col[3]);
 	}
-	void Draw_menu_line_Numbers(std::string caption,int number, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, float textLeft2, bool active, bool title, bool rescaleText)
+	void Draw_menu_line_Numbers(const std::string& caption, int number, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, float textLeft2, bool active, bool title, bool rescaleText)
 	{
 		// default values
 		int text_col[4] = { 255, 255, 255, 245 },
@@ -7133,7 +7457,7 @@ namespace UiSystem
 		float text_scale = 0.35;
 		int font = 0;
 
-		if (rescaleText) 
+		if (rescaleText)
 			text_scale = 0.20;
 		// correcting values for active line
 		if (active)
@@ -7180,7 +7504,7 @@ namespace UiSystem
 		Draw_rect(lineLeftScaled, lineTopScaled + (0.00278f), lineWidthScaled, ((((float)(num25)*UI::_0xDB88A37483346780(text_scale, 0)) + (lineHeightScaled * 2.0f)) + 0.005f),
 			rect_col[0], rect_col[1], rect_col[2], rect_col[3]);
 	}
-	int BottomRight(std::vector<int> iButtons, std::vector<std::string> sInstuctions)
+	int BottomRight(std::vector<int>& iButtons, std::vector<std::string>& sInstuctions)
 	{
 		std::string CharCon = "instructional_buttons";
 		int iScale = GRAPHICS::REQUEST_SCALEFORM_MOVIE((LPSTR)CharCon.c_str());
@@ -7246,7 +7570,7 @@ namespace UiSystem
 	}
 	bool CloseAll = false;
 
-	void ShowText(float x, float y, float scale, std::string text, int font, Mod_Class::RGBA rgba, bool outline)
+	void ShowText(float x, float y, float scale, const std::string& text, int font, Mod_Class::RGBA rgba, bool outline)
 	{
 		UI::SET_TEXT_FONT(font);
 		UI::SET_TEXT_SCALE(scale, scale);
@@ -7262,7 +7586,7 @@ namespace UiSystem
 	void ShowPlayerLabel(Vector3 location, float baseSize, const std::vector<std::string>& textLines)
 	{
 		Vector3 cameraPos = CAM::GET_GAMEPLAY_CAM_COORD();
-		float distance = Locations::DistanceTo(cameraPos, location);
+		float distance = Mod_Maths::DistanceTo(cameraPos, location);
 		float totalMult = baseSize / (distance * (CAM::GET_GAMEPLAY_CAM_FOV() / 60.0f));
 
 		float height = 0.0125f * totalMult;
@@ -7278,7 +7602,7 @@ namespace UiSystem
 
 		GRAPHICS::CLEAR_DRAW_ORIGIN();
 	}
-	void BigMessage(std::string message, std::string message2, int colour)
+	void BigMessage(const std::string& message, const std::string& message2, int colour)
 	{
 		int iScale = GRAPHICS::REQUEST_SCALEFORM_MOVIE("MIDSIZED_MESSAGE");
 
@@ -7307,19 +7631,19 @@ namespace UiSystem
 
 		GRAPHICS::SET_SCALEFORM_MOVIE_AS_NO_LONGER_NEEDED(&iScale);
 	}
-	void TopLeft(std::string sText)
+	void TopLeft(const std::string& sText)
 	{
 		UI::_SET_TEXT_COMPONENT_FORMAT("STRING");
 		UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)sText.c_str());
 		UI::_DISPLAY_HELP_TEXT_FROM_STRING_LABEL(0, 0, 1, 5000);
 	}
-	int BottomLeft(std::string sText)
+	int BottomLeft(const std::string& sText)
 	{
 		UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
 		UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)sText.c_str());
 		return UI::_DRAW_NOTIFICATION(1, 1);
 	}
-	int BottomLeftIcon(std::string sText1, std::string sText2, std::string subject, std::string badge, std::string clanTag)
+	int BottomLeftIcon(const std::string& sText1, const std::string& sText2, const std::string& subject, const std::string& badge, const std::string& clanTag)
 	{
 		//badge = "CHAR_SOCIAL_CLUB";
 		// clanTag = "__EXAMPLE"
@@ -7331,7 +7655,7 @@ namespace UiSystem
 		return UI::_DRAW_NOTIFICATION(1, 1);
 	}
 	std::vector<std::string> LastMessage = {};
-	void RightSide(std::string caption, int iPos)
+	void RightSide(const std::string& caption, int iPos)
 	{
 		int text_col[4] = { 255, 255, 255, 255 },
 			rect_col[4] = { 0, 0, 0, 120 };
@@ -7360,187 +7684,193 @@ namespace UiSystem
 		// text upper part
 		int num25 = AddScreenText(font, caption, textLeftScaled, lineTopScaled, lineHeightScaled, text_scale, text_col);
 	}
-	void AddGraphics(std::string graphics)
+	void AddGraphics(const std::string& graphics)
 	{
 		GRAPHICS::_SET_PTFX_ASSET_NEXT_CALL("scr_xm_orbital");
 	}
 
 	int Menu_interval = 150;
-	void MeunDescrition(Mod_Class::MeunSystem* myMenu, std::vector<std::string>* Descrip, bool reSize)
+	void MeunDescrition(Mod_Class::MeunSystem* myMenu, std::vector<std::string>& Descrip, bool reSize)
 	{
-		for (int i = 0; i < (int)Descrip->size(); i++)
-			Draw_menu_line(Descrip->at(i), myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i + myMenu->High - myMenu->Low + 0.1f) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, false, false, reSize);
+		if (myMenu != nullptr)
+		{
+			for (int i = 0; i < (int)Descrip.size(); i++)
+				Draw_menu_line(Descrip[i], myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i + myMenu->High - myMenu->Low + 0.1f) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, false, false, reSize);
+		}
 	}
 	void MenuDisplay(Mod_Class::MeunSystem* myMenu, float screenHeightScaleFactor)
 	{
-		myMenu->_Exit = false;
-		myMenu->_Activate = false;
-		myMenu->_Left = false;
-		myMenu->_Right = false;
-		std::vector<std::string> Descrip = Space38(myMenu->Menu_Form[myMenu->Index].Description);
-
-		if (myMenu->Menu_Form.size() > 0)
+		if (myMenu != nullptr)
 		{
-			drawTexture(MyBannerPng, 1, 10, 100, myMenu->_Screen.sizeX, myMenu->_Screen.sizeY, myMenu->_Screen.centerX, myMenu->_Screen.centerY, myMenu->_Screen.posX, myMenu->_Screen.posY, myMenu->_Screen.rotation, screenHeightScaleFactor, myMenu->_Screen.red, myMenu->_Screen.green, myMenu->_Screen.blue, myMenu->_Screen.alfa);
-			for (int i = myMenu->Low; i < myMenu->High; i++)
+			myMenu->_Exit = false;
+			myMenu->_Activate = false;
+			myMenu->_Left = false;
+			myMenu->_Right = false;
+			std::vector<std::string> Descrip = Space38(myMenu->Menu_Form[myMenu->Index].Description);
+
+			if (myMenu->Menu_Form.size() > 0)
 			{
-				if (i != myMenu->Index)
+				drawTexture(MyBannerPng, 1, 10, 100, myMenu->_Screen.sizeX, myMenu->_Screen.sizeY, myMenu->_Screen.centerX, myMenu->_Screen.centerY, myMenu->_Screen.posX, myMenu->_Screen.posY, myMenu->_Screen.rotation, screenHeightScaleFactor, myMenu->_Screen.red, myMenu->_Screen.green, myMenu->_Screen.blue, myMenu->_Screen.alfa);
+				for (int i = myMenu->Low; i < myMenu->High; i++)
 				{
-					if (myMenu->Menu_Form[i].TickBox)
+					if (i != myMenu->Index)
 					{
-						Draw_menu_line(myMenu->Menu_Form[i].Title, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, false, false, false);
-						if (myMenu->Menu_Form[i].Current == 1)
-							AddSprite("commonmenu", "shop_box_tick", myMenu->_Screen.tickSizeX, myMenu->_Screen.tickSizeY, myMenu->_Screen.tickX, (myMenu->_Screen.tickY + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
+						if (myMenu->Menu_Form[i].TickBox)
+						{
+							Draw_menu_line(myMenu->Menu_Form[i].Title, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, false, false, false);
+							if (myMenu->Menu_Form[i].Current == 1)
+								AddSprite("commonmenu", "shop_box_tick", myMenu->_Screen.tickSizeX, myMenu->_Screen.tickSizeY, myMenu->_Screen.tickX, (myMenu->_Screen.tickY + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
+							else
+								AddSprite("commonmenu", "shop_box_blank", myMenu->_Screen.tickSizeX, myMenu->_Screen.tickSizeY, myMenu->_Screen.tickX, (myMenu->_Screen.tickY + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
+						}
+						else if (myMenu->Menu_Form[i].Numbers)
+						{
+							Draw_menu_line_Numbers(myMenu->Menu_Form[i].Title, myMenu->Menu_Form[i].Current, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, myMenu->_Screen.Numberlr, false, false, false);
+							AddSprite("commonmenu", "arrowleft", myMenu->_Screen.ArrowtickSizeX, myMenu->_Screen.ArrowtickSizeY, myMenu->_Screen.tickX + myMenu->_Screen.ArrowAlr, (myMenu->_Screen.ArrowH + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
+							AddSprite("commonmenu", "arrowright", myMenu->_Screen.ArrowtickSizeX, myMenu->_Screen.ArrowtickSizeY, myMenu->_Screen.tickX + myMenu->_Screen.ArrowBlr + (Get_Int_Length(myMenu->Menu_Form[i].Current) * myMenu->_Screen.NumGap), (myMenu->_Screen.ArrowH + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
+						}
 						else
-							AddSprite("commonmenu", "shop_box_blank", myMenu->_Screen.tickSizeX, myMenu->_Screen.tickSizeY, myMenu->_Screen.tickX, (myMenu->_Screen.tickY + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
-					}
-					else if (myMenu->Menu_Form[i].Numbers)
-					{
-						Draw_menu_line_Numbers(myMenu->Menu_Form[i].Title, myMenu->Menu_Form[i].Current, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, myMenu->_Screen.Numberlr, false, false, false);
-						AddSprite("commonmenu", "arrowleft", myMenu->_Screen.ArrowtickSizeX, myMenu->_Screen.ArrowtickSizeY, myMenu->_Screen.tickX + myMenu->_Screen.ArrowAlr, (myMenu->_Screen.ArrowH + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
-						AddSprite("commonmenu", "arrowright", myMenu->_Screen.ArrowtickSizeX, myMenu->_Screen.ArrowtickSizeY, myMenu->_Screen.tickX + myMenu->_Screen.ArrowBlr + (Get_Int_Length(myMenu->Menu_Form[i].Current) * myMenu->_Screen.NumGap), (myMenu->_Screen.ArrowH + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
+							Draw_menu_line(myMenu->Menu_Form[i].Title, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, false, false, false);
 					}
 					else
-						Draw_menu_line(myMenu->Menu_Form[i].Title, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, false, false, false);
-				}
-				else
-				{
-					if (myMenu->Menu_Form[i].TickBox)
 					{
-						Draw_menu_line(myMenu->Menu_Form[i].Title, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, true, false, false);
-						if (myMenu->Menu_Form[i].Current == 1)
-							AddSprite("commonmenu", "shop_box_tickb", myMenu->_Screen.tickSizeX, myMenu->_Screen.tickSizeY, myMenu->_Screen.tickX, (myMenu->_Screen.tickY + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
+						if (myMenu->Menu_Form[i].TickBox)
+						{
+							Draw_menu_line(myMenu->Menu_Form[i].Title, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, true, false, false);
+							if (myMenu->Menu_Form[i].Current == 1)
+								AddSprite("commonmenu", "shop_box_tickb", myMenu->_Screen.tickSizeX, myMenu->_Screen.tickSizeY, myMenu->_Screen.tickX, (myMenu->_Screen.tickY + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
+							else
+								AddSprite("commonmenu", "shop_box_blankb", myMenu->_Screen.tickSizeX, myMenu->_Screen.tickSizeY, myMenu->_Screen.tickX, (myMenu->_Screen.tickY + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
+						}
+						else if (myMenu->Menu_Form[i].Numbers)
+						{
+							Draw_menu_line_Numbers(myMenu->Menu_Form[i].Title, myMenu->Menu_Form[i].Current, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, myMenu->_Screen.Numberlr, true, false, false);
+							AddSprite("commonmenu", "arrowleft", myMenu->_Screen.ArrowtickSizeX, myMenu->_Screen.ArrowtickSizeY, myMenu->_Screen.tickX + myMenu->_Screen.ArrowAlr, (myMenu->_Screen.ArrowH + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
+							AddSprite("commonmenu", "arrowright", myMenu->_Screen.ArrowtickSizeX, myMenu->_Screen.ArrowtickSizeY, myMenu->_Screen.tickX + myMenu->_Screen.ArrowBlr + (Get_Int_Length(myMenu->Menu_Form[i].Current) * myMenu->_Screen.NumGap), (myMenu->_Screen.ArrowH + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
+						}
 						else
-							AddSprite("commonmenu", "shop_box_blankb", myMenu->_Screen.tickSizeX, myMenu->_Screen.tickSizeY, myMenu->_Screen.tickX, (myMenu->_Screen.tickY + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
+							Draw_menu_line(myMenu->Menu_Form[i].Title, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, true, false, false);
 					}
-					else if (myMenu->Menu_Form[i].Numbers)
-					{
-						Draw_menu_line_Numbers(myMenu->Menu_Form[i].Title, myMenu->Menu_Form[i].Current, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, myMenu->_Screen.Numberlr, true, false, false);
-						AddSprite("commonmenu", "arrowleft", myMenu->_Screen.ArrowtickSizeX, myMenu->_Screen.ArrowtickSizeY, myMenu->_Screen.tickX + myMenu->_Screen.ArrowAlr, (myMenu->_Screen.ArrowH + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
-						AddSprite("commonmenu", "arrowright", myMenu->_Screen.ArrowtickSizeX, myMenu->_Screen.ArrowtickSizeY, myMenu->_Screen.tickX + myMenu->_Screen.ArrowBlr + (Get_Int_Length(myMenu->Menu_Form[i].Current) * myMenu->_Screen.NumGap), (myMenu->_Screen.ArrowH + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
-					}
-					else
-						Draw_menu_line(myMenu->Menu_Form[i].Title, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, true, false, false);
 				}
-			}
-			
-			MeunDescrition(myMenu, &Descrip, false);
-		}
 
-		if (myMenu->waitTime < InGameTime())
-		{
-			bool bEnt, bDel, bUp, bDown, bLeft, bRight, bShutDown;
-			get_button_state(&bEnt, &bDel, &bUp, &bDown, &bLeft, &bRight, &bShutDown);
+				MeunDescrition(myMenu, Descrip, false);
+			}
 
-			if (bShutDown || ButtonDown(199, false))
+			if (myMenu->waitTime < InGameTime())
 			{
-				Menu_Index = 0;
-				Close_Menu = true;
-			}
-			else if (ButtonDown(199, false))
-				Close_Menu = true;
-			else if (bDel || ButtonDown(45, true))
-			{
-				menu_beep();
-				myMenu->_Exit = true;
-			}
-			else
-			{
-				if (bEnt || ButtonDown(21, true))
+				bool bEnt, bDel, bUp, bDown, bLeft, bRight, bShutDown;
+				get_button_state(&bEnt, &bDel, &bUp, &bDown, &bLeft, &bRight, &bShutDown);
+
+				if (bShutDown || ButtonDown(199, true))
+				{
+					Menu_Index = 0;
+					Close_Menu = true;
+				}
+				else if (ButtonDown(199, true))
+					Close_Menu = true;
+				else if (bDel || ButtonDown(45, true))
 				{
 					menu_beep();
-					myMenu->_Activate = true;
-					myMenu->waitTime = InGameTime() + 150;
+					myMenu->_Exit = true;
 				}
 				else
 				{
-					if (bUp || ButtonDown(27, true))
+					if (bEnt || ButtonDown(21, true))
 					{
-						if (myMenu->Scroling)
-						{
-							if (myMenu->Low > 0)
-							{
-								myMenu->Low--;
-								myMenu->High--;
-							}
-
-							if (myMenu->Index == 0)
-							{
-								myMenu->Index = (int)myMenu->Menu_Form.size();
-								if (myMenu->Index > 6)
-								{
-									myMenu->High = myMenu->Index;
-									myMenu->Low = myMenu->High - 7;
-								}
-							}
-							myMenu->Index--;
-						}
-						else
-						{
-							if (myMenu->Index == 0)
-								myMenu->Index = (int)myMenu->Menu_Form.size();
-							myMenu->Index--;
-						}
+						menu_beep();
+						myMenu->_Activate = true;
 						myMenu->waitTime = InGameTime() + 150;
-					}
-					else if (bDown || ButtonDown(19, true))
-					{
-						myMenu->Index++;
-						if (myMenu->Scroling)
-						{
-							if (myMenu->Index == (int)myMenu->Menu_Form.size())
-							{
-								myMenu->Index = 0;
-								myMenu->High = 7;
-								myMenu->Low = 0;
-							}
-							else if (myMenu->Index == myMenu->High && myMenu->High < (int)myMenu->Menu_Form.size())
-							{
-								myMenu->Low++;
-								myMenu->High++;
-							}
-						}
-						else
-						{
-							if (myMenu->Index == (int)myMenu->Menu_Form.size())
-								myMenu->Index = 0;
-						}
-						myMenu->waitTime = InGameTime() + 150;
-					}
-					else if (bLeft || ButtonDown(47, true))
-					{
-						myMenu->_Left = true;
-						myMenu->Menu_Form[myMenu->Index].Current--;
-						if (myMenu->Menu_Form[myMenu->Index].Current < myMenu->Menu_Form[myMenu->Index].Min)
-							myMenu->Menu_Form[myMenu->Index].Current = myMenu->Menu_Form[myMenu->Index].Max;
-
-						if (Menu_interval > 0)
-							Menu_interval--;
-						myMenu->waitTime = InGameTime() + Menu_interval;
-					}
-					else if (bRight || ButtonDown(46, true))
-					{
-						myMenu->_Right = true;
-						myMenu->Menu_Form[myMenu->Index].Current++;
-						if (myMenu->Menu_Form[myMenu->Index].Current > myMenu->Menu_Form[myMenu->Index].Max)
-							myMenu->Menu_Form[myMenu->Index].Current = myMenu->Menu_Form[myMenu->Index].Min;
-
-						if (Menu_interval > 0)
-							Menu_interval--;
-						myMenu->waitTime = InGameTime() + Menu_interval;
 					}
 					else
-						Menu_interval = 150;
+					{
+						if (bUp || ButtonDown(27, true))
+						{
+							if (myMenu->Scroling)
+							{
+								if (myMenu->Low > 0)
+								{
+									myMenu->Low--;
+									myMenu->High--;
+								}
+
+								if (myMenu->Index == 0)
+								{
+									myMenu->Index = (int)myMenu->Menu_Form.size();
+									if (myMenu->Index > 6)
+									{
+										myMenu->High = myMenu->Index;
+										myMenu->Low = myMenu->High - 7;
+									}
+								}
+								myMenu->Index--;
+							}
+							else
+							{
+								if (myMenu->Index == 0)
+									myMenu->Index = (int)myMenu->Menu_Form.size();
+								myMenu->Index--;
+							}
+							myMenu->waitTime = InGameTime() + 150;
+						}
+						else if (bDown || ButtonDown(19, true))
+						{
+							myMenu->Index++;
+							if (myMenu->Scroling)
+							{
+								if (myMenu->Index == (int)myMenu->Menu_Form.size())
+								{
+									myMenu->Index = 0;
+									myMenu->High = 7;
+									myMenu->Low = 0;
+								}
+								else if (myMenu->Index == myMenu->High && myMenu->High < (int)myMenu->Menu_Form.size())
+								{
+									myMenu->Low++;
+									myMenu->High++;
+								}
+							}
+							else
+							{
+								if (myMenu->Index == (int)myMenu->Menu_Form.size())
+									myMenu->Index = 0;
+							}
+							myMenu->waitTime = InGameTime() + 150;
+						}
+						else if (bLeft || ButtonDown(47, true))
+						{
+							myMenu->_Left = true;
+							myMenu->Menu_Form[myMenu->Index].Current--;
+							if (myMenu->Menu_Form[myMenu->Index].Current < myMenu->Menu_Form[myMenu->Index].Min)
+								myMenu->Menu_Form[myMenu->Index].Current = myMenu->Menu_Form[myMenu->Index].Max;
+
+							if (Menu_interval > 0)
+								Menu_interval--;
+							myMenu->waitTime = InGameTime() + Menu_interval;
+						}
+						else if (bRight || ButtonDown(46, true))
+						{
+							myMenu->_Right = true;
+							myMenu->Menu_Form[myMenu->Index].Current++;
+							if (myMenu->Menu_Form[myMenu->Index].Current > myMenu->Menu_Form[myMenu->Index].Max)
+								myMenu->Menu_Form[myMenu->Index].Current = myMenu->Menu_Form[myMenu->Index].Min;
+
+							if (Menu_interval > 0)
+								Menu_interval--;
+							myMenu->waitTime = InGameTime() + Menu_interval;
+						}
+						else
+							Menu_interval = 150;
+					}
 				}
 			}
 		}
 	}
 
 	std::string CaptureScreenText()
-	{	
+	{
 		std::string output = "";
 		GAMEPLAY::DISPLAY_ONSCREEN_KEYBOARD(0, "FMMC_KEY_TIP8", "", "", "", "", "", 64);
-		while (GAMEPLAY::UPDATE_ONSCREEN_KEYBOARD() == 0) 
+		while (GAMEPLAY::UPDATE_ONSCREEN_KEYBOARD() == 0)
 			WAIT(1);
 		if (GAMEPLAY::GET_ONSCREEN_KEYBOARD_RESULT())
 		{
