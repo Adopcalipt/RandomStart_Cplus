@@ -1,16 +1,15 @@
-﻿/*
-            Random Start++ Systems
-        --Created By Adoppocalipt 2023--
-*/
-
 #pragma once
 
+#include "..\inc\main.h"
 #include "..\inc\types.h"
 #include "..\inc\natives.h"
+#include "filesystem.hpp"
+#include <Windows.h>
 
-#include <fstream>
+#include <fstream>		//ofstream read/write text documents
 #include <string>
 #include <vector>
+#include <array>
 
 namespace Mod_Class
 {
@@ -31,7 +30,7 @@ namespace Mod_Class
         bool Dec;
     public:
         SnowDates()
-        : Jan(true), Feb(true), Mar(false), Apr(false), May(false), Jun(false), Jul(false), Aug(false), Sep(false), Oct(false), Nov(false), Dec(true) {}
+            : Jan(true), Feb(true), Mar(false), Apr(false), May(false), Jun(false), Jul(false), Aug(false), Sep(false), Oct(false), Nov(false), Dec(true) {}
     };
     class Settings_Ini
     {
@@ -86,7 +85,7 @@ namespace Mod_Class
 
     public:
         Settings_Ini()
-            : MenuKey(76), Auto_Run(true), Random_Ped(true), Saved_Ped(false), Disable_Record_Key(true), Random_Weapons(true), Funeral(true), Prison(true), BeachPart(false), Reincarnate(false), ReCurr(false), ControlSupport(false), ControlA(0), ControlB(0), Lang_Set(-1), BeachPed(true), Tramps(true), Highclass(true), Midclass(true), Lowclass(true), Business(true), Bodybuilder(true), GangStars(true), Epsilon(true), Jogger(true), Golfer(true), Hiker(true), Methaddict(true), Rural(true), Cyclist(true), LGBTWXYZ(true), PoolPeds(true), Workers(true), Jetski(true), BikeATV(true), Services(true), Pilot(true), Animals(true), Yankton(true), Cayo(true), Loging(true), SnowMonths(SnowDates()){}
+            : MenuKey(76), Auto_Run(true), Random_Ped(true), Saved_Ped(false), Disable_Record_Key(true), Random_Weapons(true), Funeral(true), Prison(true), BeachPart(false), Reincarnate(false), ReCurr(false), ControlSupport(false), ControlA(0), ControlB(0), Lang_Set(-1), BeachPed(true), Tramps(true), Highclass(true), Midclass(true), Lowclass(true), Business(true), Bodybuilder(true), GangStars(true), Epsilon(true), Jogger(true), Golfer(true), Hiker(true), Methaddict(true), Rural(true), Cyclist(true), LGBTWXYZ(true), PoolPeds(true), Workers(true), Jetski(true), BikeATV(true), Services(true), Pilot(true), Animals(true), Yankton(true), Cayo(true), Loging(true), SnowMonths(SnowDates()) {}
     };
 
     struct Vector4
@@ -118,7 +117,7 @@ namespace Mod_Class
         Size(int width, int height)
             : Width(width), Height(height) {}
     };
-    struct RGBA 
+    struct RGBA
     {
     public:
         int R;
@@ -130,7 +129,7 @@ namespace Mod_Class
             : R(r), G(g), B(b), A(a) {}
     };
 
-    class FubarVectors 
+    class FubarVectors
     {
     public:
         int Area;
@@ -172,8 +171,8 @@ namespace Mod_Class
     public:
         int Comp;
         int Text;
-		std::string HandName;
-		std::string Name;
+        std::string HandName;
+        std::string Name;
         int OverLib;
         int Over;
 
@@ -184,9 +183,9 @@ namespace Mod_Class
     class Tattoo
     {
     public:
-		std::string BaseName;
-		std::string TatName;
-		std::string Name;
+        std::string BaseName;
+        std::string TatName;
+        std::string Name;
 
     public:
         Tattoo(std::string baseName, std::string tatName, std::string name)
@@ -223,25 +222,25 @@ namespace Mod_Class
     class ClothX
     {
     public:
-		std::string Title;
+        std::string Title;
 
         Tattoo Badge;
 
-		std::vector<int> ClothA;
-		std::vector<int> ClothB;
+        std::vector<int> ClothA;
+        std::vector<int> ClothB;
 
-		std::vector<int> ExtraA;
-		std::vector<int> ExtraB;
+        std::vector<int> ExtraA;
+        std::vector<int> ExtraB;
 
     public:
         ClothX(std::string title, std::vector<int> clothA, std::vector<int> clothB, std::vector<int> extraA, std::vector<int> extraB)
-            : Title(title), Badge(Tattoo("","","")), ClothA(clothA), ClothB(clothB), ExtraA(extraA), ExtraB(extraB) {}
+            : Title(title), Badge(Tattoo("", "", "")), ClothA(clothA), ClothB(clothB), ExtraA(extraA), ExtraB(extraB) {}
     };
     class ClothBank
     {
     public:
-		std::string CharName;
-		std::string Model;
+        std::string CharName;
+        std::string Model;
         Hash ModelHash;
         bool FreeMode;
         int Cloth_Pick;
@@ -249,20 +248,20 @@ namespace Mod_Class
         FaceBank MyFaces;
         bool Male;
         bool Animal_Farm;
-		HairSets MyHair;
+        HairSets MyHair;
         int HairColour;
         int HairStreaks;
         int EyeColour;
-		std::vector<FreeOverLay> MyOverlay;
-		std::vector<Tattoo> MyTattoo;
+        std::vector<FreeOverLay> MyOverlay;
+        std::vector<Tattoo> MyTattoo;
         std::vector<float> FaceScale;
         std::string Voice;
-        AnimatedActions Walkies;
-        AnimatedActions RunAlong;
+        std::string Walkies;
+        std::string Moods;
 
     public:
-        ClothBank(std::string name, std::string model, Hash mdelHash, bool freeMode, FaceBank myFaces, bool male, bool animal_Farm, HairSets myHair, int hairColour, int hairStreaks, int eyeColour, int cloth_Pick, std::vector<FreeOverLay> myOverlay, std::vector<Tattoo> myTattoo, std::vector<ClothX> cothing, std::vector<float> faceScale, std::string voice)
-            : CharName(name), Model(model), ModelHash(mdelHash), FreeMode(freeMode), MyFaces(myFaces), Animal_Farm(animal_Farm), Male(male), MyHair(myHair), HairColour(hairColour), HairStreaks(hairStreaks), EyeColour(eyeColour), MyOverlay(myOverlay), MyTattoo(myTattoo), Cothing(cothing), Cloth_Pick(cloth_Pick), FaceScale(faceScale), Voice(voice), Walkies(AnimatedActions("","")), RunAlong(AnimatedActions("", "")) {}
+        ClothBank(std::string name, std::string model, Hash mdelHash, bool freeMode, FaceBank myFaces, bool male, bool animal_Farm, HairSets myHair, int hairColour, int hairStreaks, int eyeColour, int cloth_Pick, std::vector<FreeOverLay> myOverlay, std::vector<Tattoo> myTattoo, std::vector<ClothX> cothing, std::vector<float> faceScale, std::string voice, std::string walkies, std::string moods)
+            : CharName(name), Model(model), ModelHash(mdelHash), FreeMode(freeMode), MyFaces(myFaces), Animal_Farm(animal_Farm), Male(male), MyHair(myHair), HairColour(hairColour), HairStreaks(hairStreaks), EyeColour(eyeColour), MyOverlay(myOverlay), MyTattoo(myTattoo), Cothing(cothing), Cloth_Pick(cloth_Pick), FaceScale(faceScale), Voice(voice), Walkies(walkies), Moods(moods){}
     };
 
     class Veh_Set
@@ -290,7 +289,7 @@ namespace Mod_Class
     class VehBlips
     {
     public:
-		std::string VehicleKey;
+        std::string VehicleKey;
         int BlipNo;
 
     public:
@@ -349,7 +348,7 @@ namespace Mod_Class
             : lineWidth(288.5f), lineHeight(5.5f), lineTop(104.5f), lineTobSpace(28.0f), lineLeft(19.5f), textLeft(6.0f), tickSizeX(64.0f), tickSizeY(64.0f), tickX(383.5f), tickY(3.6f), tickMulti(41.4f), sizeX(0.227f), sizeY(0.062f), centerX(0.5f), centerY(0.5f), posX(0.128f), posY(0.092f), rotation(0.0f), red(1.0f), green(1.0f), blue(1.0f), alfa(1.0f), ArrowAlr(-25.0f), ArrowBlr(13.0f), ArrowH(3.85f), Numberlr(260.0f), ArrowtickSizeX(32.0f), ArrowtickSizeY(32.0f), NumGap(9.0f) {}
     };
 
-    class MeunFields 
+    class MeunFields
     {
     public:
         std::string Title;
@@ -359,12 +358,12 @@ namespace Mod_Class
         int Min;
         int Max;
         int Current;
-        
+
     public:
         MeunFields(std::string title, std::string description, bool tickBox, bool numbers, int min, int max, int current)
             : Title(title), Description(description), TickBox(tickBox), Numbers(numbers), Min(min), Max(max), Current(current) {}
     };
-    class MeunSystem 
+    class MeunSystem
     {
     public:
         bool _Activate;
@@ -381,7 +380,7 @@ namespace Mod_Class
 
     public:
         MeunSystem(int low, int high, bool scroling, std::vector<MeunFields> menu_Form)
-         : _Activate(false), _Exit(false), _Left(false), _Right(false), waitTime(150), Low(low), High(high), Index(0), Scroling(scroling), _Screen(Mod_Class::MenuRatioSettings()), Menu_Form(menu_Form) {}
+            : _Activate(false), _Exit(false), _Left(false), _Right(false), waitTime(150), Low(low), High(high), Index(0), Scroling(scroling), _Screen(Mod_Class::MenuRatioSettings()), Menu_Form(menu_Form) {}
     };
 
     class WeaponSaver
@@ -398,72 +397,74 @@ namespace Mod_Class
 
 namespace Mod_Systems
 {
-	std::string GetExeFileName();
-	std::string GetDir();
-	std::string TimeDate();
-	bool FileExists(std::string filename);
+    std::string GetExeFileName();
+    std::string GetDir();
+    std::string TimeDate();
+    bool FileExists(const std::string& filename);
 
-    void Play_Wav(std::string soundFile);
+    void Play_Wav(const std::string& soundFile);
 
-    bool FileRemoval(std::string filename);
-    bool ListContains(std::vector<int>* List, int item);
-    std::vector<std::string> Space38(std::string myLine);
-	void LoggerLight(std::string text);
-	void WriteFile(std::string file, std::vector<std::string> text);
-	std::vector<std::string> IntoString(std::vector<int> text);
-	std::vector<std::string> ReadFile(std::string fileName);
-	bool StringContains(std::string line, std::string wholeString);
-	bool StringContains(char line, std::string wholeString);
-	int FindCharicter(char chars, std::string wholeString);
-	int FindCharicter(std::string chars, std::string wholeString);
-	int StingNumbersInt(std::string line);
-	std::string AfterEqual(std::string tag);
-	float StingNumbersFloat(std::string line);
-	bool StringBool(std::string line);
-	float TwoDecimal(std::string Number);
-	int DayOfWeek();
+    bool FileRemoval(const std::string& filename);
+    bool ListContains(std::vector<int>& List, int item);
+    std::vector<std::string> Space38(const std::string& myLine);
+    void LoggerLight(const std::string& text);
+    void WriteFile(const std::string& file, std::vector<std::string>& text);
+    std::vector<std::string> IntoString(std::vector<int>& text);
+    std::vector<std::string> ReadSetFile(const std::string& fileName);
+    bool StringContains(const std::string& line, const std::string& wholeString);
+    bool StringContains(char line, const std::string& wholeString);
+    int FindCharicter(char chars, const std::string& wholeString);
+    int FindCharicter(const std::string& chars, const std::string& wholeString);
+    int StingNumbersInt(const std::string& line);
+    std::string AfterEqual(const std::string& tag);
+    float StingNumbersFloat(const std::string& line);
+    bool StringBool(const std::string& line);
+    float TwoDecimal(const std::string& Number);
+    int DayOfWeek();
 
     float RandomFloat(float min, float max);
     int RandomInt(int min, int max);
     std::vector<int> NewNums(int min, int max);
-    int LessRandomInt(std::string sName, int min, int max);
+    int LessRandomInt(const std::string& sName, int min, int max);
+    int LessRandomInt(const std::string& sName, std::vector<int>& ranNum);
 
-	void StartScript(std::string scriptName, int buffer);
+    void StartScript(const std::string& scriptName, int buffer);
 
     void ReBuildIni(Mod_Class::Settings_Ini* PSet);
     void FindSettings(Mod_Class::Settings_Ini* mySets);
 
     void SaveMyWeaps();
+    std::vector<Mod_Class::WeaponSaver> LoadSavedWeapons();
 
     void LoadLang();
 
-    Hash MyHashKey(std::string name);
+    Hash MyHashKey(const std::string& name);
 
-	void menu_beep();
-	void ButtonDisabler(int LButt);
-	bool WhileButtonDown(int CButt, bool bDisable);
-	bool ButtonDown(int CButt, bool bDisable);
+    void menu_beep();
+    void ButtonDisabler(int LButt);
+    bool WhileButtonDown(int CButt, bool bDisable);
+    bool ButtonDown(int CButt, bool bDisable);
 
-	void get_button_state(bool* a, bool* b, bool* up, bool* down, bool* l, bool* r, bool* shutDown);
+    void get_button_state(bool* a, bool* b, bool* up, bool* down, bool* l, bool* r, bool* shutDown);
     void Menu_Button_state(bool* Mb);
 
-	int FindKeyBinds(bool Control);
+    int FindKeyBinds(bool Control);
 
-	int InGameTime();
-	bool IsIsSafe(int Key);
+    int InGameTime();
+    bool IsIsSafe(int Key);
 
     void LoadSavedPeds();
-    void SaveClothBank(Mod_Class::ClothBank* bank);
+    void SaveClothBank(Mod_Class::ClothBank& bank);
 
     void AddMonies(int iAmount);
 
-    bool CanRandondomizeStart();
-
+    void FindAddCars();
+    void FindAddPeds();
     void WeatherReport(int iWet);
     void RandomWeatherTime();
 }
 
-namespace Locations
+namespace Mod_Maths
 {
     Vector3 NewVector3(float X, float Y, float Z);
     Vector3 NewVector3(Mod_Class::Vector4 Vpos);
@@ -504,11 +505,11 @@ namespace Locations
     void AnyPreActives(int iSelect, bool MainLand);
 }
 
-namespace EntityActions
+namespace Mod_Entitys
 {
-    int AddRelationship(std::string name);
+    int AddRelationship(const std::string& name);
     Hash GetRelationship();
-    void SetRelBetween_Gp(Hash* Group1, Hash* Group2, int Rel);
+    void SetRelBetween_Gp(Hash Group1, Hash Group2, int Rel);
     void SetRelationType(bool friendly);
 
     void MoveEntity(Entity MyEnt, Vector3 position);
@@ -519,8 +520,8 @@ namespace EntityActions
     int GetPedOverlay(Ped peddy, int overlay);
 
     std::vector<int> RandVehModsist();
-    Prop BuildProps(std::string sObject, Vector3 vPos, Vector3 vRot, bool bPush, bool Frozen);
-    Prop BuildProps(std::string sObject, Mod_Class::Vector4 vPos, bool bPush, bool Frozen);
+    Prop BuildProps(const std::string& sObject, Vector3 vPos, Vector3 vRot, bool bPush, bool Frozen);
+    Prop BuildProps(const std::string& sObject, Mod_Class::Vector4 vPos, bool bPush, bool Frozen);
 
     void EraseBlip(Blip MyBlip);
     void ClearAllPeds();
@@ -528,8 +529,8 @@ namespace EntityActions
 
     int OhMyBlip(Vehicle MyVehic);
 
-    Prop FindingProps(Vector3 Area, float radius, std::string modelHash);
-    Prop FindingProps(Mod_Class::Vector4 Area, float radius, std::string modelHash);
+    Prop FindingProps(Vector3 Area, float radius, const std::string& modelHash);
+    Prop FindingProps(Mod_Class::Vector4 Area, float radius, const std::string& modelHash);
 
     int FindUSeat(Vehicle vMe);
     void WarptoAnyVeh(Vehicle Vhic, Ped Peddy, int iSeat);
@@ -537,18 +538,18 @@ namespace EntityActions
     void EmptyVeh(Vehicle Vhic);
     bool InSameVeh(Ped Peddy);
 
-    void BlipFiler(Blip MyBlip, int iBlippy, std::string sName, int iColour);
-    Blip PedBlimp(Blip CurBlip, Ped pEdd, int iBlippy, std::string sName, int iColour, bool heading);
-    Blip LocalBlip(Blip CurBlip, Mod_Class::Vector4 Vlocal, int iBlippy, std::string sName, int iColour);
+    void BlipFiler(Blip MyBlip, int iBlippy, const std::string& sName, int iColour);
+    Blip PedBlimp(Blip CurBlip, Ped pEdd, int iBlippy, const std::string& sName, int iColour, bool heading);
+    Blip LocalBlip(Blip CurBlip, Mod_Class::Vector4 Vlocal, int iBlippy, const std::string& sName, int iColour);
 
     void ReturnPlayerWeapons();
 
     void GetInVehicle(Ped Peddy, Vehicle Vhick, int Seat, bool clearSeat);
     void PlayerEnterVeh(Vehicle Vhick);
-
-    void ForceAnim(Ped peddy, std::string sAnimDict, std::string sAnimName, Vector3 AnPos, Vector3 AnRot);
-    void ForceAnim(Ped peddy, std::string sAnimDict, std::string sAnimName, Mod_Class::Vector4 AnPos);
-    void ForceSenario(std::string senareo, Mod_Class::Vector4 vpos, bool sitting);
+    void WalkingStyle(Ped myPEd, const std::string& Anim);
+    void ForceAnim(Ped peddy, const std::string& sAnimDict, const std::string& sAnimName, Vector3 AnPos, Vector3 AnRot);
+    void ForceAnim(Ped peddy, const std::string& sAnimDict, const std::string& sAnimName, Mod_Class::Vector4 AnPos);
+    void ForceSenario(const std::string& senareo, Mod_Class::Vector4 vpos, bool sitting);
     void RunAnimSeq(Mod_Class::AnimList myAnim, Mod_Class::Vector4 pos);
     void DanceDanceDance(Ped Dancer);
     void SunningIt(Ped Sitter, Mod_Class::Vector4 ChairPos);
@@ -559,149 +560,90 @@ namespace EntityActions
     void LandNearPlane(Ped Peddy, Vehicle vHick, Vector3 vStart, Vector3 vFinish);
 
     void DriveToooPed(Ped Peddy, Ped Target, bool bRunOver);
-
     void DriveBye(Ped Peddy, Ped Target, int iVeh);
-
     void FlyHeli(Ped Pedd, Vehicle Vhick, Vector3 vHeliDest, float fSpeed, float flanding);
-
     void FlyPlane(Ped Pedd, Vehicle Vhick, Vector3 vPlaneDest);
-
     void ChangePlayer(Hash modelHash, int iWeap);
 
     Ped PlayerPedGen(Mod_Class::Vector4 vLocal, Mod_Class::ClothBank* thisBrain, bool onFoot, bool bfriend);
-
-    Ped PlayerPedGen(Mod_Class::Vector4 vLocal, std::string sPed, bool onFoot, bool bfriend);
-
+    Ped PlayerPedGen(Mod_Class::Vector4 vLocal, const std::string& sPed, bool onFoot, bool bfriend);
     Ped PlayerPedGen(Mod_Class::Vector4 vLocal, int Set, int Subset, bool onFoot, bool bfriend);
 
     void ChangePlayer(int iSelect, int iSubset, int iWeap);
-
     void SavedPlayer(Mod_Class::ClothBank* MyBank, int iWeap);
-
     void RepoPedPlayer(Ped Victim);
-
     Mod_Class::FaceBank AddFace(bool male);
-
     void PoliceAcadamy(bool togg);
-
     void MethEdd(bool Act);
-
     int SizeUpHairList(bool bMale);
-
     Mod_Class::HairSets PickAStyle(int Style, bool bMale);
-
     Mod_Class::HairSets PickAStyle(bool bMale);
-
     std::vector<Mod_Class::FreeOverLay> AddOverLay(bool male, bool freeMode);
-
     void SetingtheHair(Ped Pedx, Mod_Class::HairSets* Hair);
 
     std::string RandVeh(int iVechList, int iSubSet);
+    bool IsItARealVehicle(const std::string& sVehName);
 
-    bool IsItARealVehicle(std::string sVehName);
-
-    std::vector<Ped> CollectPeds(int noPedtype);
-
-    Ped NearByPed(Mod_Class::Vector4, bool incAnimals, float areaMin, float areaMax);
+    std::vector<Ped> CollectPeds();
+    Ped NearByPed(Mod_Class::Vector4, float areaMin, float areaMax);
 
     bool HasASeat(Vehicle vMe);
-
     Vehicle VehicleSpawn(Mod_Class::Veh_Set vehSet);
-
     void DriveAround(Ped Peddy);
-
     void MaxOutAllModsNoWheels(Vehicle Vehic, int cT);
-
-    void MakeModsNotWar(Vehicle Vehic, std::vector<int> MyMods);
-
+    void MakeModsNotWar(Vehicle Vehic, std::vector<int>& MyMods);
     void GreefWar(Ped Peddy, Ped Victim);
-
     void GunningIt(Ped Peddy, int iGun);
-
-    void PedDoGetIn(Vehicle GetV, Ped Peddy, std::string sId);
-
+    void PedDoGetIn(Vehicle GetV, Ped Peddy, const std::string& sId);
     void FightPlayer(Ped Peddy, bool bInVeh, int PrefVeh);
-
     void DriveToooDest(Ped Peddy, Vector3 Vme, float fSpeed);
-
     void DriveDirect(Ped Peddy, Vector3 Vme, float fSpeed);
 
     std::string RandomPed(int iPedtype, int iSubType);
-
     void ApplyTats(Ped Pedx, Mod_Class::ClothBank* GetTats);
-
-    Mod_Class::ClothBank NewClothBank(std::string PedTitle);
-
+    Mod_Class::ClothBank NewClothBank(const std::string& PedTitle);
     Mod_Class::ClothBank NewClothBank(int iPedtype, int iSubType);
-
     Mod_Class::ClothBank NewFreeModePed();
-
+    void ThemVoices(const std::string& voip);
+    void PullingFaces(const std::string& aniName);
     std::vector<std::string> FindCloths(bool male);
-
-    Mod_Class::ClothX LoadCloths(std::string file);
-
+    Mod_Class::ClothX LoadCloths(const std::string& file);
     void OnlineDress(Ped Pedx, Mod_Class::ClothX* MyCloths);
-
     void OnlineFaces(Ped Pedx, Mod_Class::ClothBank* pFixtures);
-
     void WalkHere(Ped Peddy, Mod_Class::Vector4 Dest);
-
     void RunHere(Ped Peddy, Vector3 Dest);
-
-    void JogOn(std::vector<Mod_Class::Vector4> Route, int start);
-
+    void JogOn(std::vector<Mod_Class::Vector4>& Route, int start);
     void SideAdviceNote();
-    
     void Reicarnations();
-
     void EasyWayOut(Ped Vic);
 
     void CayoAudio();
-
     void CayoPartay();
 }
 
-namespace UiSystem
+namespace Mod_Ui
 {
-    int AddScreenText(int font, std::string caption, float textLeftScaled, float lineTopScaled, float lineHeightScaled, float text_scale, int text_col[4]);
-
-    void AddSprite(std::string spriteLocation, std::string spriteName, float posX, float posY, float sizeX, float sizeY, float heading);
-
+    int AddScreenText(int font, const std::string& caption, float textLeftScaled, float lineTopScaled, float lineHeightScaled, float text_scale, int text_col[4]);
+    void AddSprite(const std::string& spriteLocation, const std::string& spriteName, float posX, float posY, float sizeX, float sizeY, float heading);
     void Draw_rect(float A_0, float A_1, float A_2, float A_3, int A_4, int A_5, int A_6, int A_7);
-
-    void Draw_menu_line(std::string caption, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, bool active, bool title, bool rescaleText);
-
-    void Draw_menu_line_Numbers(std::string caption, int number, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, float textLeft2, bool active, bool title, bool rescaleText);
-
-    void DrawSessionList(std::string caption, std::string level, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, float textLeft2, bool active, bool title, int position);
-
-    int BottomRight(std::vector<int> iButtons, std::vector<std::string> sInstuctions);
-
+    void Draw_menu_line(const std::string& caption, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, bool active, bool title, bool rescaleText);
+    void Draw_menu_line_Numbers(const std::string& caption, int number, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, float textLeft2, bool active, bool title, bool rescaleText);
+    void DrawSessionList(const std::string& caption, const std::string& level, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, float textLeft2, bool active, bool title, int position);
+    int BottomRight(std::vector<int>& iButtons, std::vector<std::string>& sInstuctions);
     void CloseBaseHelpBar(int CloseMe);
-
-    void ShowText(float x, float y, float scale, std::string text, int font, Mod_Class::RGBA rgba, bool outline);
-
+    
+    void ShowText(float x, float y, float scale, const std::string& text, int font, Mod_Class::RGBA rgba, bool outline);
     void ShowPlayerLabel(Vector3 location, float baseSize, const std::vector<std::string>& textLines);
-
-    void BigMessage(std::string message, std::string message2, int colour);
-
-    void TopLeft(std::string sText);
-
-    int BottomLeft(std::string sText);
-
-    int BottomLeftIcon(std::string sText1, std::string sText2, std::string subject, std::string badge, std::string clanTag);
-
-    void RightSide(std::string caption, int iPos);
-
-    void MeunDescrition(Mod_Class::MeunSystem* myMenu, std::vector<std::string>* Descrip, bool reSize);
-
+    void BigMessage(const std::string& message, const std::string& message2, int colour);
+    void TopLeft(const std::string& sText);
+    int BottomLeft(const std::string& sText);
+    int BottomLeftIcon(const std::string& sText1, const std::string& sText2, const std::string& subject, const std::string& badge, const std::string& clanTag);
+    void RightSide(const std::string& caption, int iPos);
+    
+    void MeunDescrition(Mod_Class::MeunSystem* myMenu, std::vector<std::string>& Descrip, bool reSize);
     void MenuDisplay(Mod_Class::MeunSystem* myMenu, float screenHeightScaleFactor);
-
     std::string CaptureScreenText();
-
-    void AddGraphics(std::string graphics);
-
-    int PhoneFreeking();
+    void AddGraphics(const std::string& graphics);
 }
 
 namespace Mod_Data
@@ -714,7 +656,6 @@ namespace Mod_Data
     inline Hash GP_Mental;
 
     inline bool Meth_Act = false;
-    inline bool Disable_RL = false;
     inline bool First_Load = false;
     inline bool NSPM_Include = false;
     inline bool Yankton_Loaded = false;
@@ -732,20 +673,125 @@ namespace Mod_Data
     inline bool PlayerIsDead = false;
     inline bool ShowMobile = false;
 
-    inline int MyBannerPng;   
+    inline int MyBannerPng;
     inline int Side_Add_Time = 0;
     inline int Menu_Index = 0;
-    
+
     inline Mod_Class::Settings_Ini Mod_Settings = Mod_Class::Settings_Ini();
     inline std::vector<Prop> Prop_List = {};
     inline std::vector<Vehicle> Vehicle_List = {};
     inline std::vector<Ped> Ped_List = {};
     inline std::vector<Mod_Class::Ped_Label> PedLabels = {};
     inline std::vector<Mod_Class::ClothBank> SavedPeds = {};
-    inline std::vector<int> Avalable_Scenarios = {};
     inline std::vector<Mod_Class::WeaponSaver> Player_Weaps = {};
     inline std::vector<std::string> Disp_Pick;
     inline std::vector<Ped> CayDancers = {};
+
+    inline std::vector<std::string> PrePed_01 = {};
+    inline std::vector<std::string> PrePed_02 = {};
+    inline std::vector<std::string> PrePed_03 = {};
+    inline std::vector<std::string> PrePed_04 = {};
+    inline std::vector<std::string> PrePed_05 = {};
+    inline std::vector<std::string> PrePed_06 = {};
+    inline std::vector<std::string> PrePed_07 = {};
+    inline std::vector<std::string> PrePed_08 = {};
+    inline std::vector<std::string> PrePed_09 = {};
+    inline std::vector<std::string> PrePed_10 = {};
+    inline std::vector<std::string> PrePed_11 = {};
+    inline std::vector<std::string> PrePed_12 = {};
+    inline std::vector<std::string> PrePed_13 = {};
+    inline std::vector<std::string> PrePed_14 = {};
+    inline std::vector<std::string> PrePed_15 = {};
+
+    inline std::vector<std::string> PreVeh_01 = {};
+    inline std::vector<std::string> PreVeh_02 = {};
+    inline std::vector<std::string> PreVeh_03 = {};
+    inline std::vector<std::string> PreVeh_04 = {};
+    const inline std::vector<std::string> PreVeh_05 = {
+        "BULLDOZER",  //
+        "UTILLITRUCK",  //<!-- Utility Truck cherry picker variant -->
+        "UTILLITRUCK2",  //<!-- Utility Truck flatbed variant -->
+        "UTILLITRUCK3",  //<!-- Utility Truck pick-up variant -->
+        "RUBBLE",  //
+        "TIPTRUCK",  //<!-- Tipper 4-wheel variant -->
+        "TIPTRUCK2",  //<!-- Tipper 6-wheel variant -->
+        "MIXER",  //
+        "MIXER2"  //<!-- Mixer 8-wheel variant -->
+    };
+    const inline std::vector<std::string> PreVeh_06 = {
+        "BENSON",  //
+        "BIFF",  //
+        "FLATBED",  //
+        "HAULER",  //
+        "HAULER2",  //<!-- Hauler Custom -->
+        "MULE",  //
+        "MULE2",  //<!-- Mule ramp door variant -->
+        "PACKER",  //
+        "PHANTOM",  //
+        "POUNDER",  //
+        "POUNDER2",  //<!-- Pounder Custom -->
+        "benson2", //  Commercial
+        "phantom4", // Commercial
+        "towtruck3", // Utility
+        "towtruck4" // Utility
+    };
+    const inline std::vector<std::string> PreVeh_07 = {
+        "BF400",  //
+        "MANCHEZ",  //
+        "MANCHEZ2",  //<!-- Manchez Scout -->
+        "MANCHEZ3",  //<!-- Manchez Scout C -->
+        "SANCHEZ",  //<!-- Sanchez livery variant -->
+        "SANCHEZ2",  //
+        "BLAZER",  //
+        "BLAZER3",  //<!-- Hot Rod Blazer -->
+        "BLAZER4"  //<!-- Street Blazer -->
+    };
+    const inline std::vector<std::string> PreVeh_08 = {
+        "FBI",  //<!-- FIB Buffalo -->
+        "FBI2",  //<!-- FIB Granger -->
+        "POLICE4",  //<!-- Unmarked Cruiser -->
+        "FIRETRUK",  //
+        "POLICEB",  //<!-- Police Bike -->
+        "PRANGER",  //<!-- Park Ranger -->
+        "SHERIFF",  //<!-- Sheriff Cruiser -->
+        "SHERIFF2"  //<!-- Sheriff SUV -->
+        "POLICE2",  //<!-- Police Cruiser Buffalo -->
+        "POLICE",  //<!-- Police Cruiser Stanier -->
+        "POLICE3",  //<!-- Police Cruiser Interceptor -->
+        "POLICET",  //<!-- Police Transporter -->
+        "RIOT"  //<!-- Police Riot -->
+    };
+    const inline std::vector<std::string> PreVeh_09 = {
+        "APC",  //
+        "BARRACKS",  //
+        "BARRACKS2",  //<!-- Barracks Semi -->
+        "BARRAGE",  //
+        "CHERNOBOG",  //
+        "CRUSADER",  //
+        "HALFTRACK",  //
+        "RHINO",  //
+        "KHANJALI",  //<!-- TM-02 Khanjali -->
+        "VETIR"  //
+    };
+    inline std::vector<std::string> PreVeh_10 = {};
+    inline std::vector<std::string> PreVeh_11 = {};
+    const inline std::vector<std::string> PreVeh_12 = {
+        "ASEA2",  //<!-- Asea North Yankton variant -->
+        "EMPEROR3",  //<!-- Emperor North Yankton variant -->
+        "RANCHERXL2",  //<!-- Rancher XL North Yankton variant -->
+        "SADLER2",  //<!-- Sadler North Yankton variant -->
+    };
+    const inline std::vector<std::string> PreVeh_13 = {
+        "MANCHEZ2",  //<!-- Manchez Scout -->
+        "MANCHEZ3",  //<!-- Manchez Scout C -->
+        "VETIR",  //
+        "JUBILEE",  //
+        "WINKY",  //
+        "BRIOSO2",  //<!-- Brioso 300 -->
+        "WEEVIL",  //
+        "SQUADDIE",
+        "VERUS",  //
+    };
 
     inline const std::vector<Mod_Class::Vector4> BeachLounger = {
         Mod_Class::Vector4(-1901.387f, 601.9302f, 122.747f, 101.2703f),
@@ -1547,7 +1593,7 @@ namespace Mod_Data
     Mod_Class::Vector4(-672.0215f, 88.88709f, 55.85543f, 210.2695f)
     };
 
-    inline const std::vector<Mod_Class::Vector4> Jogger01 = {
+    inline std::vector<Mod_Class::Vector4> Jogger01 = {
         Mod_Class::Vector4(228.6289f, -1394.52f, 30.494f,0.0f),
         Mod_Class::Vector4(252.5324f, -1400.599f, 30.53424f,0.0f),
         Mod_Class::Vector4(273.3281f, -1378.727f, 31.95101f,0.0f),
@@ -1556,7 +1602,7 @@ namespace Mod_Data
         Mod_Class::Vector4(235.2781f, -1346.481f, 30.5051f,0.0f),
         Mod_Class::Vector4(219.2509f, -1365.954f, 30.56017f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger02 = {
+    inline std::vector<Mod_Class::Vector4> Jogger02 = {
         Mod_Class::Vector4(-227.1508f, -2023.395f, 27.75543f,0.0f),
         Mod_Class::Vector4(-222.3802f, -2007.24f, 27.75543f,0.0f),
         Mod_Class::Vector4(-219.4253f, -1989.297f, 27.75542f,0.0f),
@@ -1573,7 +1619,7 @@ namespace Mod_Data
         Mod_Class::Vector4(-246.0456f, -2048.949f, 27.75543f,0.0f),
         Mod_Class::Vector4(-235.4299f, -2037.349f, 27.75543f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger03 = {
+    inline std::vector<Mod_Class::Vector4> Jogger03 = {
         Mod_Class::Vector4(-924.767f, -2571.403f, 13.97616f,0.0f),
         Mod_Class::Vector4(-943.3739f, -2565.557f, 13.93645f,0.0f),
         Mod_Class::Vector4(-961.3f, -2544.967f, 13.98062f,0.0f),
@@ -1593,13 +1639,13 @@ namespace Mod_Data
         Mod_Class::Vector4(-896.1907f, -2568.416f, 13.98074f,0.0f),
         Mod_Class::Vector4(-903.6213f, -2570.235f, 13.98074f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger04 = {
+    inline std::vector<Mod_Class::Vector4> Jogger04 = {
         Mod_Class::Vector4(-287.7649f, -1638.534f, 31.84882f,0.0f),
         Mod_Class::Vector4(-298.8279f, -1656.257f, 31.84881f,0.0f),
         Mod_Class::Vector4(-317.5655f, -1644.264f, 31.85344f,0.0f),
         Mod_Class::Vector4(-303.9065f, -1622.695f, 31.84882f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger05 = {
+    inline std::vector<Mod_Class::Vector4> Jogger05 = {
         Mod_Class::Vector4(1476.682f, -1984.691f, 70.69158f,0.0f),
         Mod_Class::Vector4(1453.445f, -1972.131f, 70.44451f,0.0f),
         Mod_Class::Vector4(1434.379f, -1986.595f, 65.75795f,0.0f),
@@ -1608,7 +1654,7 @@ namespace Mod_Data
         Mod_Class::Vector4(1469.974f, -2042.295f, 57.02632f,0.0f),
         Mod_Class::Vector4(1478.932f, -2002.187f, 68.38514f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger06 = {
+    inline std::vector<Mod_Class::Vector4> Jogger06 = {
         Mod_Class::Vector4(129.9129f, -988.9407f, 29.32248f,0.0f),
         Mod_Class::Vector4(169.9703f, -880.6992f, 30.55882f,0.0f),
         Mod_Class::Vector4(174.1833f, -881.5703f, 30.89416f,0.0f),
@@ -1617,14 +1663,14 @@ namespace Mod_Data
         Mod_Class::Vector4(263.498f, -872.455f, 29.17216f,0.0f),
         Mod_Class::Vector4(211.1392f, -1018.212f, 29.30549f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger07 = {
+    inline std::vector<Mod_Class::Vector4> Jogger07 = {
         Mod_Class::Vector4(356.3345f, 160.7301f, 103.0043f,0.0f),
         Mod_Class::Vector4(222.6689f, 208.8755f, 105.5123f,0.0f),
         Mod_Class::Vector4(266.2624f, 328.2007f, 105.5289f,0.0f),
         Mod_Class::Vector4(339.1058f, 311.9287f, 104.5361f,0.0f),
         Mod_Class::Vector4(404.6719f, 292.2426f, 102.9655f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger08 = {
+    inline std::vector<Mod_Class::Vector4> Jogger08 = {
         Mod_Class::Vector4(-68.89455f, -402.1517f, 37.29737f,0.0f),
         Mod_Class::Vector4(-103.1039f, -389.6021f, 36.63163f,0.0f),
         Mod_Class::Vector4(-108.889f, -409.1098f, 35.77497f,0.0f),
@@ -1641,7 +1687,7 @@ namespace Mod_Data
         Mod_Class::Vector4(-64.59761f, -437.8882f, 38.43552f,0.0f),
         Mod_Class::Vector4(-64.19228f, -419.8323f, 38.09665f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger09 = {
+    inline std::vector<Mod_Class::Vector4> Jogger09 = {
         Mod_Class::Vector4(-736.3101f, 90.46006f, 55.58132f,0.0f),
         Mod_Class::Vector4(-737.0633f, 69.59921f, 54.30896f,0.0f),
         Mod_Class::Vector4(-734.0124f, 47.01559f, 47.47584f,0.0f),
@@ -1656,7 +1702,7 @@ namespace Mod_Data
         Mod_Class::Vector4(-709.5087f, 98.95238f, 56.07108f,0.0f),
         Mod_Class::Vector4(-718.9947f, 95.15092f, 55.8739f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger10 = {
+    inline std::vector<Mod_Class::Vector4> Jogger10 = {
         Mod_Class::Vector4(-1765.645f, -1149.159f, 13.07916f,0.0f),
         Mod_Class::Vector4(-1837.407f, -1227.053f, 13.01728f,0.0f),
         Mod_Class::Vector4(-1869.622f, -1210.43f, 13.01711f,0.0f),
@@ -1670,7 +1716,7 @@ namespace Mod_Data
         Mod_Class::Vector4(-1709.898f, -1070.201f, 13.01735f,0.0f),
         Mod_Class::Vector4(-1709.359f, -1083.783f, 13.10089f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger11 = {
+    inline std::vector<Mod_Class::Vector4> Jogger11 = {
         Mod_Class::Vector4(-2891.325f, -8.690169f, 7.963134f,0.0f),
         Mod_Class::Vector4(-2910.282f, -37.03131f, 3.024998f,0.0f),
         Mod_Class::Vector4(-2999.717f, 0.8205602f, 4.733732f,0.0f),
@@ -1686,7 +1732,7 @@ namespace Mod_Data
         Mod_Class::Vector4(-2886.561f, 0.7008348f, 11.608f,0.0f),
         Mod_Class::Vector4(-2888.892f, -7.902122f, 7.959469f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger12 = {
+    inline std::vector<Mod_Class::Vector4> Jogger12 = {
         Mod_Class::Vector4(-1486.228f, 875.5378f, 182.6471f,0.0f),
         Mod_Class::Vector4(-1478.33f, 831.1494f, 181.7178f,0.0f),
         Mod_Class::Vector4(-1514.694f, 814.3276f, 181.9242f,0.0f),
@@ -1705,7 +1751,7 @@ namespace Mod_Data
         Mod_Class::Vector4(-1521.602f, 854.8638f, 181.5947f,0.0f),
         Mod_Class::Vector4(-1496.966f, 870.4911f, 181.9422f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger13 = {
+    inline std::vector<Mod_Class::Vector4> Jogger13 = {
         Mod_Class::Vector4(-1893.8f, 1974.631f, 143.1386f,0.0f),
         Mod_Class::Vector4(-1929.31f, 1969.096f, 148.8142f,0.0f),
         Mod_Class::Vector4(-1966.108f, 1968.237f, 154.9804f,0.0f),
@@ -1727,7 +1773,7 @@ namespace Mod_Data
         Mod_Class::Vector4(-1853.069f, 1930.572f, 150.2391f,0.0f),
         Mod_Class::Vector4(-1878.708f, 1956.751f, 145.8794f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger14 = {
+    inline std::vector<Mod_Class::Vector4> Jogger14 = {
         Mod_Class::Vector4(-319.6601f, 2786.814f, 59.43f,0.0f),
         Mod_Class::Vector4(-337.5543f, 2800.789f, 58.15808f,0.0f),
         Mod_Class::Vector4(-338.9051f, 2804.992f, 58.13386f,0.0f),
@@ -1742,7 +1788,7 @@ namespace Mod_Data
         Mod_Class::Vector4(-316.4038f, 2787.014f, 59.56699f,0.0f),
         Mod_Class::Vector4(-323.0881f, 2789.975f, 59.20899f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger15 = {
+    inline std::vector<Mod_Class::Vector4> Jogger15 = {
         Mod_Class::Vector4(-2768.271f, 2695.774f, 1.370201f,0.0f),
         Mod_Class::Vector4(-2755.266f, 2703.515f, 1.416718f,0.0f),
         Mod_Class::Vector4(-2735.553f, 2738.595f, 1.462122f,0.0f),
@@ -1762,7 +1808,7 @@ namespace Mod_Data
         Mod_Class::Vector4(-2769.536f, 2743.653f, 2.138904f,0.0f),
         Mod_Class::Vector4(-2776.014f, 2720.484f, 2.238141f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger16 = {
+    inline std::vector<Mod_Class::Vector4> Jogger16 = {
         Mod_Class::Vector4(1061.091f, -558.9828f, 59.28479f,0.0f),
         Mod_Class::Vector4(1066.203f, -597.2649f, 56.83318f,0.0f),
         Mod_Class::Vector4(1062.106f, -610.6114f, 56.76826f,0.0f),
@@ -1788,7 +1834,7 @@ namespace Mod_Data
         Mod_Class::Vector4(1100.362f, -527.494f, 63.07243f,0.0f),
         Mod_Class::Vector4(1073.51f, -530.7902f, 62.03668f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger17 = {
+    inline std::vector<Mod_Class::Vector4> Jogger17 = {
         Mod_Class::Vector4(1163.911f, 280.2455f, 82.19042f,0.0f),
         Mod_Class::Vector4(991.5728f, -11.44712f, 81.85177f,0.0f),
         Mod_Class::Vector4(993.7879f, -40.10574f, 81.92294f,0.0f),
@@ -1803,7 +1849,7 @@ namespace Mod_Data
         Mod_Class::Vector4(1235.155f, 278.5591f, 82.08091f,0.0f),
         Mod_Class::Vector4(1209.412f, 284.0538f, 82.0095f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger18 = {
+    inline std::vector<Mod_Class::Vector4> Jogger18 = {
         Mod_Class::Vector4(2493.767f, -317.9808f, 92.99265f,0.0f),
         Mod_Class::Vector4(2465.75f, -331.269f, 92.99268f,0.0f),
         Mod_Class::Vector4(2445.703f, -353.545f, 92.98891f,0.0f),
@@ -1818,7 +1864,7 @@ namespace Mod_Data
         Mod_Class::Vector4(2481.344f, -341.2011f, 93.00871f,0.0f),
         Mod_Class::Vector4(2480.642f, -324.369f, 92.99266f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger19 = {
+    inline std::vector<Mod_Class::Vector4> Jogger19 = {
         Mod_Class::Vector4(1443.998f, 1032.925f, 114.2406f,0.0f),
         Mod_Class::Vector4(1507.861f, 1033.247f, 114.2185f,0.0f),
         Mod_Class::Vector4(1514.412f, 1043.134f, 114.2258f,0.0f),
@@ -1828,7 +1874,7 @@ namespace Mod_Data
         Mod_Class::Vector4(1434.625f, 1186.282f, 114.1913f,0.0f),
         Mod_Class::Vector4(1433.847f, 1092.753f, 114.2267f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger20 = {
+    inline std::vector<Mod_Class::Vector4> Jogger20 = {
         Mod_Class::Vector4(2692.736f, 1705.75f, 24.68079f,0.0f),
         Mod_Class::Vector4(2806.105f, 1705.584f, 24.68113f,0.0f),
         Mod_Class::Vector4(2818.727f, 1704.424f, 24.69106f,0.0f),
@@ -1846,21 +1892,21 @@ namespace Mod_Data
         Mod_Class::Vector4(2696.989f, 1695.163f, 24.7006f,0.0f),
         Mod_Class::Vector4(2702.095f, 1696.548f, 24.66678f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger21 = {
+    inline std::vector<Mod_Class::Vector4> Jogger21 = {
         Mod_Class::Vector4(1623.121f, 3228.294f, 40.41154f,0.0f),
         Mod_Class::Vector4(1548.318f, 3147.528f, 40.53161f,0.0f),
         Mod_Class::Vector4(1099.019f, 3015.776f, 40.56151f,0.0f),
         Mod_Class::Vector4(1074.616f, 3035.108f, 41.24891f,0.0f),
         Mod_Class::Vector4(1085.017f, 3076.249f, 40.42923f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger22 = {
+    inline std::vector<Mod_Class::Vector4> Jogger22 = {
         Mod_Class::Vector4(1090.78f, 3566.191f, 34.09589f,0.0f),
         Mod_Class::Vector4(1091.477f, 3610.838f, 33.05823f,0.0f),
         Mod_Class::Vector4(1047.076f, 3610.903f, 33.11738f,0.0f),
         Mod_Class::Vector4(1012.615f, 3597.394f, 33.21322f,0.0f),
         Mod_Class::Vector4(1017.906f, 3568.242f, 33.92956f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger23 = {
+    inline std::vector<Mod_Class::Vector4> Jogger23 = {
         Mod_Class::Vector4(73.27388f, 3633.642f, 39.70792f,0.0f),
         Mod_Class::Vector4(27.01976f, 3700.822f, 39.70713f,0.0f),
         Mod_Class::Vector4(28.15174f, 3713.856f, 39.71289f,0.0f),
@@ -1872,7 +1918,7 @@ namespace Mod_Data
         Mod_Class::Vector4(82.71038f, 3679.274f, 39.71919f,0.0f),
         Mod_Class::Vector4(81.40222f, 3636.785f, 39.69534f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger24 = {
+    inline std::vector<Mod_Class::Vector4> Jogger24 = {
         Mod_Class::Vector4(1041.883f, 2191.695f, 44.96709f,0.0f),
         Mod_Class::Vector4(1066.888f, 2213.252f, 46.80863f,0.0f),
         Mod_Class::Vector4(1031.368f, 2213.759f, 51.05772f,0.0f),
@@ -1880,7 +1926,7 @@ namespace Mod_Data
         Mod_Class::Vector4(997.8649f, 2204.891f, 46.05443f,0.0f),
         Mod_Class::Vector4(1021.423f, 2190.472f, 45.28568f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger25 = {
+    inline std::vector<Mod_Class::Vector4> Jogger25 = {
         Mod_Class::Vector4(2440.191f, 4837.629f, 36.53263f,0.0f),
         Mod_Class::Vector4(2428.567f, 4921.247f, 43.66103f,0.0f),
         Mod_Class::Vector4(2472.179f, 4965.375f, 45.16649f,0.0f),
@@ -1893,7 +1939,7 @@ namespace Mod_Data
         Mod_Class::Vector4(2373.377f, 4895.569f, 41.92224f,0.0f),
         Mod_Class::Vector4(2394.373f, 4874.57f, 40.84945f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger26 = {
+    inline std::vector<Mod_Class::Vector4> Jogger26 = {
         Mod_Class::Vector4(234.6885f, 6418.486f, 30.96218f,0.0f),
         Mod_Class::Vector4(248.8196f, 6415.337f, 31.88116f,0.0f),
         Mod_Class::Vector4(269.739f, 6414.965f, 32.11745f,0.0f),
@@ -1905,7 +1951,7 @@ namespace Mod_Data
         Mod_Class::Vector4(171.8803f, 6482.01f, 31.94304f,0.0f),
         Mod_Class::Vector4(175.2863f, 6475.943f, 31.89293f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger27 = {
+    inline std::vector<Mod_Class::Vector4> Jogger27 = {
         Mod_Class::Vector4(157.3289f, 7044.97f, 1.865713f,0.0f),
         Mod_Class::Vector4(102.7529f, 7073.901f, 1.931986f,0.0f),
         Mod_Class::Vector4(52.24357f, 7079.25f, 2.17193f,0.0f),
@@ -1920,7 +1966,7 @@ namespace Mod_Data
         Mod_Class::Vector4(157.614f, 6990.637f, 4.969121f,0.0f),
         Mod_Class::Vector4(158.9223f, 7011.254f, 3.681879f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger28 = {
+    inline std::vector<Mod_Class::Vector4> Jogger28 = {
         Mod_Class::Vector4(-576.4569f, 5452.922f, 60.71923f,0.0f),
         Mod_Class::Vector4(-560.6669f, 5474.996f, 61.77381f,0.0f),
         Mod_Class::Vector4(-552.685f, 5494.2f, 59.80086f,0.0f),
@@ -1932,7 +1978,7 @@ namespace Mod_Data
         Mod_Class::Vector4(-637.6897f, 5453.631f, 52.85682f,0.0f),
         Mod_Class::Vector4(-595.5697f, 5458.982f, 59.10485f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger29 = {
+    inline std::vector<Mod_Class::Vector4> Jogger29 = {
         Mod_Class::Vector4(-334.3983f, 6183.464f, 31.42284f,0.0f),
         Mod_Class::Vector4(-305.0548f, 6212.236f, 31.45675f,0.0f),
         Mod_Class::Vector4(-302.0125f, 6213.075f, 31.39697f,0.0f),
@@ -1945,7 +1991,7 @@ namespace Mod_Data
         Mod_Class::Vector4(-322.5253f, 6227.77f, 31.46884f,0.0f),
         Mod_Class::Vector4(-360.4957f, 6191.922f, 31.48243f,0.0f)
     };
-    inline const std::vector<Mod_Class::Vector4> Jogger30 = {
+    inline std::vector<Mod_Class::Vector4> Jogger30 = {
         Mod_Class::Vector4(-1445.911f, 4228.153f, 49.88695f,0.0f),
         Mod_Class::Vector4(-1437.855f, 4232.769f, 48.72689f,0.0f),
         Mod_Class::Vector4(-1414.334f, 4225.317f, 42.9243f,0.0f),
@@ -3624,7 +3670,7 @@ namespace Mod_Data
         Mod_Class::Vector4(3262.463f, -4689.186f, 112.7509f, 103.9134f),
         Mod_Class::Vector4(3117.954f, -4829.271f, 111.5413f, 265.3655f)
     };
-  
+
     inline const std::vector<Mod_Class::Vector4> Cayo_Beach = {
         Mod_Class::Vector4(4893.338f, -4903.796f, 3.486674f, 179.7596f),
         Mod_Class::Vector4(4898.212f, -4913.461f, 3.362877f, 62.6438f),
@@ -3927,7 +3973,7 @@ namespace Mod_Data
         Mod_Class::Vector4(-20.35295f, 6366.861f, 30.94088f, 135.2917f)
     };
 
-    const std::vector<std::string> Weapons_List = {
+    inline const std::vector<std::string> Weapons_List = {
         //Meelee
         "WEAPON_unarmed",  //0xA2719263",---0
         "WEAPON_dagger",  //0x92A27487",
@@ -4051,7 +4097,7 @@ namespace Mod_Data
         "COMPONENT_SPECIALCARBINE_VARMOD_XMAS23",
         "COMPONENT_HEAVYSNIPER_VARMOD_XMAS23"
     };
-    const std::vector<std::string> WeapAdd_List = {
+    inline const std::vector<std::string> WeapAdd_List = {
         "COMPONENT_ADVANCEDRIFLE_CLIP_01",//0xFA8FA10F,
         "COMPONENT_ADVANCEDRIFLE_CLIP_02",//0x8EC1C979,
         "COMPONENT_ADVANCEDRIFLE_VARMOD_LUXE",//0x377CD377,
@@ -4471,7 +4517,7 @@ namespace Mod_Data
     inline const Mod_Class::AnimList SunbathefrontF = Mod_Class::AnimList(Mod_Class::AnimatedActions("amb@world_human_sunbathe@female@front@enter", "enter"), Mod_Class::AnimatedActions("amb@world_human_sunbathe@female@front@exit", "exit"), { Mod_Class::AnimatedActions("amb@world_human_sunbathe@female@front@base" , "base"),Mod_Class::AnimatedActions("amb@world_human_sunbathe@female@front@idle_a" , "idle_a"),Mod_Class::AnimatedActions("amb@world_human_sunbathe@female@front@idle_a" , "idle_b"),Mod_Class::AnimatedActions("amb@world_human_sunbathe@female@front@idle_a" , "idle_c") });
     inline const Mod_Class::AnimList SunbathebackM = Mod_Class::AnimList(Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@back@enter", "enter"), Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@back@exit", "exit"), { Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@back@base" , "base"),		Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@back@idle_a" , "idle_a"),	Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@back@idle_a" , "idle_b"),	Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@back@idle_a" , "idle_c") });
     inline const Mod_Class::AnimList SunbathefrontM = Mod_Class::AnimList(Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@front@enter", "enter"), Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@front@exit", "exit"), { Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@front@base" , "base"),	Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@front@idle_a" , "idle_a"),	Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@front@idle_a" , "idle_b"),	Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@front@idle_a" , "idle_c") });
-    
+
     inline const std::vector<Mod_Class::Tattoo> MaleTshirt = {
         Mod_Class::Tattoo("multiplayer_overlays", "FM_CREW_M_000_A", ""),
         Mod_Class::Tattoo("multiplayer_overlays", "FM_CREW_M_000_B", ""),
@@ -7903,632 +7949,633 @@ namespace Mod_Data
     };
 
     inline const std::vector<Mod_Class::Vector4> SpPoint = {
-		Mod_Class::Vector4(-1160.148f, -1607.229f, 4.282094f, 33.58816f),
-		Mod_Class::Vector4(-1246.173f, -1578.978f, 4.075636f, 88.40285f),
-		Mod_Class::Vector4(-1300.651f, -1693.796f, 2.652158f, 119.986f),
-		Mod_Class::Vector4(-1197.284f, -1673.913f, 4.368378f, 336.6819f),
-		Mod_Class::Vector4(-1231.23f, -1774.339f, 2.698436f, 307.819f),
-		Mod_Class::Vector4(-1081.606f, -1699.635f, 4.51774f, 341.5313f),
-		Mod_Class::Vector4(-1321.38f, -1803.161f, 0.5787229f, 338.6356f),
-		Mod_Class::Vector4(-1277.734f, -1796.447f, -100.0f, 190.3f),
-		Mod_Class::Vector4(-1329.865f, -1621.267f, 3.853039f, 125.3387f),
-		Mod_Class::Vector4(-1368.747f, -1588.793f, 2.370532f, 177.0662f),
-		Mod_Class::Vector4(-1380.893f, -1418.045f, 3.565593f, 323.6023f),
-		Mod_Class::Vector4(-1279.822f, -1427.41f, 4.510245f, 212.68f),
-		Mod_Class::Vector4(-1255.639f, -1592.376f, 4.094669f, 227.7035f),
-		Mod_Class::Vector4(-1224.641f, -1502.119f, 4.337264f, 236.9933f),
-		Mod_Class::Vector4(-1431.731f, -1508.598f, 3.715238f, 85.04395f),
-		Mod_Class::Vector4(-1308.609f, -1529.277f, 4.314957f, 74.17694f),
-		Mod_Class::Vector4(-1322.848f, -1734.16f, 1.786219f, 247.0966f),
-		Mod_Class::Vector4(-1427.198f, -1658.383f, -0.3996229f, 276.3645f),
-		Mod_Class::Vector4(-1270.877f, -1811.516f, 1.774477f, 192.7982f),
-		Mod_Class::Vector4(-1178.216f, -1781.372f, 4.050908f, 319.6324f),
-		Mod_Class::Vector4(-1153.027f, -1606.098f, 4.380119f, 56.83902f),
-		Mod_Class::Vector4(-1109.917f, -1688.4f, 4.375373f, 119.264f),
-		Mod_Class::Vector4(-1050.216f, -1619.146f, 4.389634f, 203.3658f),
-		Mod_Class::Vector4(-1108.875f, -1527.476f, 6.779634f, 211.7134f),
-		Mod_Class::Vector4(-1198.382f, -1673.201f, 4.36664f, 310.3611f),
-		Mod_Class::Vector4(-1170.423f, -1433.136f, 4.453862f, 216.7254f),
-		Mod_Class::Vector4(-1314.11f, -1352.265f, 4.469654f, 25.83949f),
-		Mod_Class::Vector4(-1346.334f, -1276.67f, 4.897387f, 190.3171f),
-		Mod_Class::Vector4(-1359.945f, -1193.812f, 4.450387f, 349.2703f),
-		Mod_Class::Vector4(-1241.474f, -1253.23f, 5.328512f, 105.528f),
-		Mod_Class::Vector4(-1369.884f, -1117.181f, 4.500574f, 260.4205f),
-		Mod_Class::Vector4(-1290.337f, -1108.623f, 6.826903f, 50.96396f),
-		Mod_Class::Vector4(-1423.398f, -1023.807f, 4.997945f, 239.7593f),
-		Mod_Class::Vector4(-1332.74f, -1028.393f, 7.703401f, 32.42556f),
-		Mod_Class::Vector4(-1484.517f, -960.1639f, 7.692502f, 45.27397f),
-		Mod_Class::Vector4(-1384.187f, -944.0807f, 10.06455f, 333.1175f),
-		Mod_Class::Vector4(-1577.719f, -970.7444f, 17.41236f, 134.7335f),
-		Mod_Class::Vector4(-1589.911f, -1069.783f, 13.01727f, 66.19942f),
-		Mod_Class::Vector4(-1526.156f, -1224.26f, 2.271887f, 198.1657f),
-		Mod_Class::Vector4(-1647.783f, -1125.91f, 18.34311f, 226.7262f),
-		Mod_Class::Vector4(-1817.684f, -1200.282f, 19.16987f, 272.2027f),
-		Mod_Class::Vector4(-1722.691f, -1102.711f, 13.10247f, 232.1385f),
-		Mod_Class::Vector4(-1741.421f, -1000.758f, 4.251456f, 283.4004f),
-		Mod_Class::Vector4(-1656.441f, -1023.758f, 13.01742f, 134.6409f),
-		Mod_Class::Vector4(-1789.288f, -867.3212f, 7.367817f, 26.9756f),
-		Mod_Class::Vector4(-1766.264f, -710.6727f, 14.04142f, 128.1337f),
-		Mod_Class::Vector4(-1840.649f, -786.7416f, 6.942594f, 209.3775f),
-		Mod_Class::Vector4(-1928.198f, -787.6534f, 1.400905f, 124.8805f),
-		Mod_Class::Vector4(-1853.948f, -643.4832f, 10.74218f, 51.13507f),
-		Mod_Class::Vector4(-1693.429f, -782.542f, 10.15547f, 31.77343f),
-		Mod_Class::Vector4(-2019.225f, -671.4921f, 1.732529f, 35.30247f),
-		Mod_Class::Vector4(-2073.122f, -556.3633f, 4.322869f, 112.1614f),
-		Mod_Class::Vector4(-1918.171f, -581.4932f, 11.82719f, 74.45322f),
-		Mod_Class::Vector4(-1941.187f, -683.3286f, 6.042047f, 317.4851f),
-		Mod_Class::Vector4(-2017.408f, -403.2584f, 10.99738f, 102.571f),
-		Mod_Class::Vector4(-2073.494f, -322.6716f, 13.31618f, 110.8201f),
-		Mod_Class::Vector4(-1920.867f, -395.7564f, 48.28661f, 144.3688f),
-		Mod_Class::Vector4(-1932.222f, -256.2742f, 39.38351f, 163.2952f),
-		Mod_Class::Vector4(-2006.573f, -292.1909f, 31.14633f, 32.56577f),
-		Mod_Class::Vector4(-1830.16f, -393.1055f, 57.13855f, 341.9896f),
-		Mod_Class::Vector4(-1812.373f, -487.2023f, 40.97498f, 99.4837f),
-		Mod_Class::Vector4(-1801.349f, -284.9655f, 42.74314f, 49.44889f),
-		Mod_Class::Vector4(-1750.369f, -388.2991f, 49.33112f, 306.9421f),
-		Mod_Class::Vector4(-1733.029f, -542.143f, 37.22449f, 46.17191f),
-		Mod_Class::Vector4(-1652.144f, -473.3973f, 38.76246f, 156.1328f),
-		Mod_Class::Vector4(-1582.329f, -541.8163f, 35.48005f, 318.3726f),
-		Mod_Class::Vector4(-1688.893f, -614.0651f, 32.71557f, 160.953f),
-		Mod_Class::Vector4(-1590.418f, -652.4891f, 29.94338f, 234.872f),
-		Mod_Class::Vector4(-1516.227f, -630.6576f, 29.60688f, 124.8291f),
-		Mod_Class::Vector4(-1514.848f, -720.5037f, 27.28335f, 44.38182f),
-		Mod_Class::Vector4(-1467.341f, -779.6733f, 23.88621f, 141.6295f),
-		Mod_Class::Vector4(-1426.177f, -608.0167f, 30.68489f, 216.1941f),
-		Mod_Class::Vector4(-1429.254f, -685.5729f, 30.09999f, 351.6236f),
-		Mod_Class::Vector4(-1370.448f, -786.2045f, 19.34618f, 46.06882f),
-		Mod_Class::Vector4(-1509.341f, -849.4481f, 23.72846f, 146.3204f),
-		Mod_Class::Vector4(-1338.667f, -684.4074f, 25.90955f, 337.9835f),
-		Mod_Class::Vector4(-1267.564f, -887.0582f, 11.46313f, 312.6759f),
-		Mod_Class::Vector4(-1291.891f, -963.3849f, 10.90977f, 17.93775f),
-		Mod_Class::Vector4(-1243.466f, -1037.107f, 8.533915f, 24.88162f),
-		Mod_Class::Vector4(-1205.129f, -946.3865f, 8.115028f, 78.52157f),
-		Mod_Class::Vector4(-1209.501f, -1145.148f, 7.699383f, 246.5961f),
-		Mod_Class::Vector4(-1152.507f, -1092.617f, 2.150213f, 78.05627f),
-		Mod_Class::Vector4(-1176.931f, -1326.262f, 5.043202f, 91.40005f),
-		Mod_Class::Vector4(-1278.753f, -1280.306f, -100.0f, 286.1835f),
-		Mod_Class::Vector4(-280.1419f, -2078.309f, 27.75568f, 120.8461f),
-		Mod_Class::Vector4(-362.931f, -2096.714f, -100.0f, 249.8338f),
-		Mod_Class::Vector4(-1233.953f, -2060.108f, 14.38426f, 322.4592f),
-		Mod_Class::Vector4(-1177.911f, -1969.751f, 12.2126f, 245.5379f),
-		Mod_Class::Vector4(-958.8653f, -2038.964f, 9.571634f, 275.1023f),
-		Mod_Class::Vector4(-1065.295f, -2082.96f, 13.29153f, 124.204f),
-		Mod_Class::Vector4(-1158.608f, -2165.972f, 13.38066f, 105.9783f),
-		Mod_Class::Vector4(-990.8157f, -2278.67f, 8.95359f, 230.7598f),
-		Mod_Class::Vector4(-878.8334f, -2183.131f, 8.937191f, 216.7394f),
-		Mod_Class::Vector4(-891.5108f, -2402.83f, 14.02515f, 147.8056f),
-		Mod_Class::Vector4(-893.0229f, -2317.104f, -3.507768f, 8.885142f),
-		Mod_Class::Vector4(-978.1707f, -2465.764f, 13.75622f, 149.0023f),
-		Mod_Class::Vector4(-900.1584f, -2491.51f, 14.54965f, 27.85674f),
-		Mod_Class::Vector4(-1033.629f, -2381.482f, 14.0936f, 173.6633f),
-		Mod_Class::Vector4(-955.9147f, -2386.496f, -100.0f, 149.8728f),
-		Mod_Class::Vector4(1450.433f, -1731.397f, 68.03314f, 41.98439f),
-		Mod_Class::Vector4(1600.253f, -1712.9f, 88.12589f, 185.5337f),
-		Mod_Class::Vector4(1568.778f, -1595.55f, 90.31343f, 334.3277f),
-		Mod_Class::Vector4(1715.997f, -1560.912f, 112.6362f, 265.2239f),
-		Mod_Class::Vector4(1729.931f, -1664.9f, 112.5535f, 55.15057f),
-		Mod_Class::Vector4(1677.571f, -1857.563f, 108.353f, 227.1044f),
-		Mod_Class::Vector4(1544.524f, -2091.144f, 77.13461f, 115.2182f),
-		Mod_Class::Vector4(1397.054f, -2203.803f, 61.26979f, 11.66307f),
-		Mod_Class::Vector4(1432.708f, -2318.181f, 66.93765f, 0.1958369f),
-		Mod_Class::Vector4(1090.301f, -2258.336f, 30.16828f, 154.4966f),
-		Mod_Class::Vector4(1050.76f, -2359.522f, 30.58618f, 359.6519f),
-		Mod_Class::Vector4(1257.031f, -2301.23f, 50.42583f, 297.5381f),
-		Mod_Class::Vector4(1213.246f, -2201.788f, 41.42298f, 174.4906f),
-		Mod_Class::Vector4(1181.73f, -2088.975f, 42.835f, 108.8092f),
-		Mod_Class::Vector4(1075.413f, -2130.978f, 32.65754f, 356.5745f),
-		Mod_Class::Vector4(1069.265f, -2051.669f, 30.54184f, 328.8749f),
-		Mod_Class::Vector4(1253.046f, -1965.152f, 43.31088f, 277.0399f),
-		Mod_Class::Vector4(1162.939f, -1835.688f, 37.32333f, 309.8178f),
-		Mod_Class::Vector4(1253.974f, -1801.581f, 41.43707f, 101.9945f),
-		Mod_Class::Vector4(1165.914f, -1757.395f, 36.09859f, 5.626177f),
-		Mod_Class::Vector4(1211.297f, -1635.897f, 46.98957f, 15.0685f),
-		Mod_Class::Vector4(1339.797f, -1769.144f, 58.84056f, 110.8002f),
-		Mod_Class::Vector4(1299.746f, -1624.184f, 52.31812f, 219.0709f),
-		Mod_Class::Vector4(1370.415f, -1683.915f, 59.39519f, 28.85051f),
-		Mod_Class::Vector4(1338.409f, -1524.272f, 54.58279f, 175.8651f),
-		Mod_Class::Vector4(1264.839f, -1511.525f, 40.75233f, 196.139f),
-		Mod_Class::Vector4(1162.592f, -1484.728f, 34.84315f, 45.85416f),
-		Mod_Class::Vector4(1215.056f, -1389.57f, 35.3749f, 298.4576f),
-		Mod_Class::Vector4(1064.018f, -1447.581f, 36.74253f, 272.2317f),
-		Mod_Class::Vector4(962.9564f, -1491.263f, 31.03523f, 283.0984f),
-		Mod_Class::Vector4(811.0013f, -1355.856f, 26.39643f, 139.9369f),
-		Mod_Class::Vector4(852.3708f, -1452.39f, 28.46454f, 153.5606f),
-		Mod_Class::Vector4(782.0834f, -1276.112f, 26.38883f, 245.5533f),
-		Mod_Class::Vector4(708.6996f, -1387.042f, 26.28415f, 95.50644f),
-		Mod_Class::Vector4(729.1082f, -1202.147f, 27.59183f, 314.4826f),
-		Mod_Class::Vector4(866.4579f, -1218.872f, 25.93666f, 150.9242f),
-		Mod_Class::Vector4(812.4778f, -1108.296f, 22.87424f, 358.1263f),
-		Mod_Class::Vector4(805.5677f, -992.9066f, 26.17185f, 93.29649f),
-		Mod_Class::Vector4(719.1799f, -1068.157f, 22.22762f, 76.04496f),
-		Mod_Class::Vector4(867.8777f, -949.1575f, 26.28246f, 284.0382f),
-		Mod_Class::Vector4(799.3265f, -910.1976f, 25.25154f, 64.5854f),
-		Mod_Class::Vector4(788.2667f, -779.5413f, 26.43379f, 76.76219f),
-		Mod_Class::Vector4(676.5705f, -893.8166f, 23.46652f, 48.36354f),
-		Mod_Class::Vector4(792.6351f, -680.9716f, 28.78763f, 182.0778f),
-		Mod_Class::Vector4(712.2411f, -718.2731f, 26.09179f, 222.572f),
-		Mod_Class::Vector4(871.4885f, -477.5969f, 57.6135f, 27.29279f),
-		Mod_Class::Vector4(802.2733f, -487.6502f, 29.98962f, 66.31482f),
-		Mod_Class::Vector4(762.3665f, -605.8344f, 29.01363f, 289.0056f),
-		Mod_Class::Vector4(647.2089f, -405.4547f, 25.90333f, 141.224f),
-		Mod_Class::Vector4(793.6388f, -251.5794f, 66.11258f, 262.0274f),
-		Mod_Class::Vector4(740.2285f, -348.7549f, 44.64523f, 102.3112f),
-		Mod_Class::Vector4(842.9829f, -326.1672f, 58.63135f, 78.39604f),
-		Mod_Class::Vector4(774.1849f, -157.5243f, 74.47166f, 194.3f),
-		Mod_Class::Vector4(717.7997f, -231.8359f, 66.49796f, 145.0598f),
-		Mod_Class::Vector4(879.2205f, -133.0256f, 78.19176f, 321.4662f),
-		Mod_Class::Vector4(954.9133f, -139.376f, 74.48351f, 261.024f),
-		Mod_Class::Vector4(770.9991f, -20.69291f, 81.40639f, 55.6139f),
-		Mod_Class::Vector4(918.6093f, -299.0002f, 65.7274f, 89.47182f),
-		Mod_Class::Vector4(1075.878f, -221.7357f, 57.22911f, 100.7295f),
-		Mod_Class::Vector4(1167.627f, -326.1849f, 69.27177f, 253.1378f),
-		Mod_Class::Vector4(1182.85f, -419.4162f, 67.44855f, 160.1736f),
-		Mod_Class::Vector4(1095.917f, -363.7542f, 67.05442f, 154.2719f),
-		Mod_Class::Vector4(1241.207f, -370.6926f, 69.08267f, 357.5793f),
-		Mod_Class::Vector4(1295.678f, -450.1477f, 69.11702f, 39.42892f),
-		Mod_Class::Vector4(1196.354f, -500.0268f, 65.35512f, 239.1896f),
-		Mod_Class::Vector4(1244.402f, -565.6254f, 69.36629f, 327.5226f),
-		Mod_Class::Vector4(1358.867f, -507.7113f, 74.07481f, 238.6464f),
-		Mod_Class::Vector4(1271.949f, -679.5294f, 65.78483f, 221.1033f),
-		Mod_Class::Vector4(1170.739f, -673.777f, 60.85263f, 8.802817f),
-		Mod_Class::Vector4(1157.536f, -826.6323f, 55.04485f, 261.9964f),
-		Mod_Class::Vector4(1229.198f, -774.131f, 59.95905f, 111.6313f),
-		Mod_Class::Vector4(1065.049f, -721.359f, 56.7688f, 251.442f),
-		Mod_Class::Vector4(961.0184f, -668.5934f, 58.42073f, 252.7814f),
-		Mod_Class::Vector4(944.5909f, -590.6015f, 57.93015f, 263.7933f),
-		Mod_Class::Vector4(1065.475f, -587.393f, 56.98307f, 176.1875f),
-		Mod_Class::Vector4(1087.19f, -483.9626f, 65.1468f, 43.63801f),
-		Mod_Class::Vector4(990.569f, -528.5084f, 60.1135f, 187.5177f),
-		Mod_Class::Vector4(1029.239f, -420.6697f, 65.71067f, 103.3361f),
-		Mod_Class::Vector4(878.2419f, 536.1291f, 125.7603f, 256.0516f),
-		Mod_Class::Vector4(780.4013f, 569.2122f, 127.5153f, 308.715f),
-		Mod_Class::Vector4(-1652.492f, -268.9684f, 53.03486f, 238.35f),
-		Mod_Class::Vector4(-1796.219f, -262.315f, 44.68269f, 225.691f),
-		Mod_Class::Vector4(-1862.262f, -346.5329f, 49.84129f, 207.6463f),
-		Mod_Class::Vector4(-1746.119f, -373.1069f, 46.04745f, 348.238f),
-		Mod_Class::Vector4(-1758.126f, -177.5893f, 59.93489f, 53.74375f),
-		Mod_Class::Vector4(-1851.886f, -211.0984f, 39.37838f, 30.06215f),
-		Mod_Class::Vector4(-1647.251f, -157.372f, 57.61746f, 114.5786f),
-		Mod_Class::Vector4(-1657.056f, -12.40816f, 61.96356f, 225.4638f),
-		Mod_Class::Vector4(-1855.837f, 87.75642f, 79.74529f, 317.2931f),
-		Mod_Class::Vector4(-2227.431f, 177.6394f, 174.6018f, 246.6147f),
-		Mod_Class::Vector4(-2183.896f, 284.1322f, 169.6021f, 263.2045f),
-		Mod_Class::Vector4(-2266.481f, 266.8381f, 184.6013f, 236.3674f),
-		Mod_Class::Vector4(-2340.92f, 224.7503f, 169.6533f, 147.9599f),
-		Mod_Class::Vector4(-2291.11f, 419.6725f, 174.6017f, 269.9671f),
-		Mod_Class::Vector4(-2351.723f, 354.5746f, 174.5702f, 316.094f),
-		Mod_Class::Vector4(-1992.776f, 597.1656f, 117.9074f, 244.9395f),
-		Mod_Class::Vector4(-1918.98f, 427.659f, 102.579f, 288.3187f),
-		Mod_Class::Vector4(-1942.294f, 537.5837f, 119.4511f, 71.42182f),
-		Mod_Class::Vector4(-1863.526f, 663.243f, 129.1108f, 47.40017f),
-		Mod_Class::Vector4(-1950.522f, 671.437f, 126.8631f, 49.11973f),
-		Mod_Class::Vector4(-1821.452f, 805.2283f, 138.6922f, 350.8116f),
-		Mod_Class::Vector4(-1596.12f, 763.6357f, 188.776f, 67.02236f),
-		Mod_Class::Vector4(-1537.647f, 824.0611f, 181.5576f, 132.0971f),
-		Mod_Class::Vector4(-1390.973f, 604.0109f, 130.5611f, 103.6059f),
-		Mod_Class::Vector4(-1380.87f, 733.273f, 182.4565f, 346.0296f),
-		Mod_Class::Vector4(-1273.141f, 606.6987f, 139.2841f, 177.0211f),
-		Mod_Class::Vector4(-1208.797f, 648.6027f, 144.6223f, 184.7298f),
-		Mod_Class::Vector4(-1187.657f, 561.1202f, 100.0236f, 282.7813f),
-		Mod_Class::Vector4(-1061.68f, 732.2233f, 165.4498f, 328.4958f),
-		Mod_Class::Vector4(-1123.518f, 796.3937f, 167.7469f, 256.4597f),
-		Mod_Class::Vector4(-974.0649f, 689.8514f, 158.0351f, 36.62312f),
-		Mod_Class::Vector4(-952.0835f, 799.6948f, 178.4169f, 358.3044f),
-		Mod_Class::Vector4(-854.5779f, 790.907f, 191.7423f, 343.4804f),
-		Mod_Class::Vector4(-800.5696f, 886.0236f, 203.1893f, 150.7404f),
-		Mod_Class::Vector4(-757.3545f, 774.8885f, 212.2914f, 21.35574f),
-		Mod_Class::Vector4(-679.4247f, 798.2404f, 198.0051f, 179.3822f),
-		Mod_Class::Vector4(-668.9477f, 906.9561f, 230.1238f, 229.8917f),
-		Mod_Class::Vector4(-538.2089f, 785.8329f, 196.6117f, 117.694f),
-		Mod_Class::Vector4(-398.9189f, 666.7883f, 163.8354f, 90.2931f),
-		Mod_Class::Vector4(-510.514f, 671.3224f, 150.273f, 163.8439f),
-		Mod_Class::Vector4(-472.1857f, 537.1354f, 124.354f, 0.0f),
-		Mod_Class::Vector4(-385.3415f, 515.0933f, 120.8225f, 227.8424f),
-		Mod_Class::Vector4(-355.368f, 423.3936f, 110.8382f, 345.9255f),
-		Mod_Class::Vector4(-506.4408f, 454.185f, 96.69381f, 276.8076f),
-		Mod_Class::Vector4(-245.8695f, 393.0556f, 112.4406f, 260.9666f),
-		Mod_Class::Vector4(-60.18164f, 494.9249f, 144.5688f, 247.2409f),
-		Mod_Class::Vector4(-88.42611f, 889.886f, 236.1728f, 212.5896f),
-		Mod_Class::Vector4(56.37422f, 1050.121f, 218.6296f, 295.7127f),
-		Mod_Class::Vector4(-449.0672f, 1062.479f, 327.6815f, 175.8242f),
-		Mod_Class::Vector4(-399.2907f, 1148.496f, 325.853f, 200.4087f),
-		Mod_Class::Vector4(-480.5667f, 1133.815f, 320.0966f, 190.5652f),
-		Mod_Class::Vector4(-294.9129f, 1429.549f, 339.3169f, 336.8831f),
-		Mod_Class::Vector4(-407.2495f, 1581.665f, 353.7131f, 73.89459f),
-		Mod_Class::Vector4(-149.5202f, 1453.246f, 292.8072f, 199.7669f),
-		Mod_Class::Vector4(-266.3375f, 1547.674f, 336.4588f, 141.5186f),
-		Mod_Class::Vector4(779.201f, 1187.419f, 325.5869f, 66.41692f),
-		Mod_Class::Vector4(307.273f, 1108.102f, 216.9276f, 75.9652f),
-		Mod_Class::Vector4(276.0082f, 1187.72f, 226.0305f, 14.18411f),
-		Mod_Class::Vector4(191.0497f, 1224.417f, 225.5948f, 106.2378f),
-		Mod_Class::Vector4(294.2169f, 953.3748f, 208.6888f, 254.3083f),
-		Mod_Class::Vector4(229.4137f, 675.6113f, 189.6827f, 210.8005f),
-		Mod_Class::Vector4(221.4684f, 513.708f, 140.7564f, 359.1328f),
-		Mod_Class::Vector4(218.7429f, 302.6817f, 105.5856f, 248.4243f),
-		Mod_Class::Vector4(336.653f, 312.7571f, 104.6787f, 170.513f),
-		Mod_Class::Vector4(127.0963f, 341.097f, 111.944f, 32.08784f),
-		Mod_Class::Vector4(2824.941f, -743.6797f, 1.471339f, 16.6061f),
-		Mod_Class::Vector4(2835.425f, -626.2703f, 1.730462f, 227.3414f),
-		Mod_Class::Vector4(2575.149f, -289.9889f, 93.07821f, 324.0676f),
-		Mod_Class::Vector4(2521.409f, -414.0672f, 94.12376f, 222.7773f),
-		Mod_Class::Vector4(2571.536f, 304.6294f, 108.6065f, 20.04023f),
-		Mod_Class::Vector4(2572.306f, 478.2309f, 108.6772f, 91.36018f),
-		Mod_Class::Vector4(2746.039f, 1453.321f, 24.48774f, 299.1059f),
-		Mod_Class::Vector4(2757.865f, 1528.199f, 32.49879f, 87.19512f),
-		Mod_Class::Vector4(2666.189f, 1508.934f, 24.50084f, 299.6714f),
-		Mod_Class::Vector4(2853.234f, 1474.861f, 24.61952f, 107.3717f),
-		Mod_Class::Vector4(2720.579f, 1647.611f, 24.57493f, 269.4894f),
-		Mod_Class::Vector4(2473.841f, 1572.31f, 32.72038f, 354.3351f),
-		Mod_Class::Vector4(2357.949f, 1845.58f, 101.2663f, 166.731f),
-		Mod_Class::Vector4(2319.202f, 2551.041f, 47.69345f, 227.7995f),
-		Mod_Class::Vector4(2526.939f, 2584.094f, 37.94465f, 8.938714f),
-		Mod_Class::Vector4(2595.807f, 2801.963f, 34.00152f, 323.103f),
-		Mod_Class::Vector4(2739.255f, 2782.027f, 35.73802f, 303.735f),
-		Mod_Class::Vector4(2570.977f, 2720.95f, 42.9959f, 209.3307f),
-		Mod_Class::Vector4(-2956.631f, 11.69463f, 6.931808f, 156.18f),
-		Mod_Class::Vector4(-2876.279f, 21.03024f, 11.60808f, 41.72112f),
-		Mod_Class::Vector4(-3012.55f, -51.12709f, 0.310649f, 38.1624f),
-		Mod_Class::Vector4(-3038.164f, 38.733f, 8.971894f, 41.44547f),
-		Mod_Class::Vector4(-3096.169f, 119.0552f, 6.728017f, 87.99979f),
-		Mod_Class::Vector4(-3091.035f, 352.2566f, 7.519391f, 67.82193f),
-		Mod_Class::Vector4(-3075.979f, 447.3828f, 6.362554f, 50.79964f),
-		Mod_Class::Vector4(-2964.959f, 452.5694f, 15.30891f, 148.5125f),
-		Mod_Class::Vector4(-3057.164f, 532.517f, 7.604911f, 255.576f),
-		Mod_Class::Vector4(-3047.145f, 614.4224f, 7.323409f, 264.085f),
-		Mod_Class::Vector4(-2982.056f, 719.5752f, 28.49753f, 22.28972f),
-		Mod_Class::Vector4(-3165.79f, 762.5814f, 3.421354f, 180.3855f),
-		Mod_Class::Vector4(-3237.243f, 914.8962f, 16.88076f, 110.9341f),
-		Mod_Class::Vector4(-3295.146f, 984.6699f, 2.889409f, 0.8584108f),
-		Mod_Class::Vector4(-3353.275f, 1037.395f, -0.4267793f, 0.1203664f),
-		Mod_Class::Vector4(-3270.502f, 1210.821f, 2.343407f, 180.0034f),
-		Mod_Class::Vector4(-3264.688f, 1110.545f, 2.304754f, 320.7578f),
-		Mod_Class::Vector4(-3187.552f, 1221.516f, 9.986886f, 167.8331f),
-		Mod_Class::Vector4(-2542.358f, 2317.119f, 33.21531f, 63.28617f),
-		Mod_Class::Vector4(-1955.376f, 2367.43f, 32.54905f, 161.8323f),
-		Mod_Class::Vector4(-1841.089f, 2195.876f, 97.38118f, 304.6146f),
-		Mod_Class::Vector4(-1837.205f, 2270.878f, 73.74523f, 312.3881f),
-		Mod_Class::Vector4(-1895.852f, 2143.426f, 121.225f, 65.59644f),
-		Mod_Class::Vector4(-1859.108f, 2072.094f, 140.9959f, 129.7641f),
-		Mod_Class::Vector4(-1790.499f, 2119.865f, 132.356f, 90.9618f),
-		Mod_Class::Vector4(-1916.931f, 1944.778f, 158.3994f, 296.9663f),
-		Mod_Class::Vector4(-1701.855f, 1957.936f, 131.0938f, 56.90914f),
-		Mod_Class::Vector4(-1721.216f, 2029.074f, 112.8439f, 156.9609f),
-		Mod_Class::Vector4(-1097.618f, 2700.906f, 18.90455f, 84.88656f),
-		Mod_Class::Vector4(-328.0197f, 2825.509f, 58.02246f, 111.1101f),
-		Mod_Class::Vector4(181.3483f, 2793.319f, 45.6552f, 24.21892f),
-		Mod_Class::Vector4(331.855f, 2873.202f, 43.45045f, 156.6868f),
-		Mod_Class::Vector4(361.1784f, 2976.71f, 40.4106f, 122.3371f),
-		Mod_Class::Vector4(282.1306f, 2568.33f, 45.2464f, 241.7109f),
-		Mod_Class::Vector4(203.8961f, 2702.276f, 42.54163f, 175.5621f),
-		Mod_Class::Vector4(391.2553f, 2633.707f, 44.6586f, 32.33579f),
-		Mod_Class::Vector4(470.7168f, 2610.214f, 42.72048f, 9.760907f),
-		Mod_Class::Vector4(586.6243f, 2742.652f, 42.07542f, 275.8898f),
-		Mod_Class::Vector4(754.2651f, 2783.679f, 66.97653f, 216.7942f),
-		Mod_Class::Vector4(848.8434f, 2382.375f, 54.18682f, 285.6466f),
-		Mod_Class::Vector4(914.1945f, 2294.065f, 48.86418f, 187.3512f),
-		Mod_Class::Vector4(980.6591f, 2667.654f, 40.06087f, 354.2927f),
-		Mod_Class::Vector4(1182.588f, 2701.389f, 38.15746f, 236.7878f),
-		Mod_Class::Vector4(1116.655f, 2641.605f, 38.14867f, 2.974739f),
-		Mod_Class::Vector4(1777.552f, 3325.553f, 41.43348f, 345.9209f),
-		Mod_Class::Vector4(1832.452f, 3443.146f, 41.04421f, 354.7577f),
-		Mod_Class::Vector4(1964.699f, 3257.751f, 45.65916f, 168.9078f),
-		Mod_Class::Vector4(1987.721f, 3047.302f, 46.74506f, 237.7831f),
-		Mod_Class::Vector4(2370.224f, 3156.767f, 48.20884f, 39.61424f),
-		Mod_Class::Vector4(2343.113f, 3046.043f, 48.15176f, 273.6578f),
-		Mod_Class::Vector4(2398.234f, 3315.428f, 47.70992f, 282.5903f),
-		Mod_Class::Vector4(2164.31f, 3396.292f, 45.43284f, 295.356f),
-		Mod_Class::Vector4(2259.422f, 3437.281f, 64.76982f, 128.1591f),
-		Mod_Class::Vector4(2179.717f, 3498.747f, 45.46162f, 354.1017f),
-		Mod_Class::Vector4(2062.606f, 3452.479f, 43.75446f, 37.58577f),
-		Mod_Class::Vector4(2486.352f, 3760.736f, 42.24755f, 176.6024f),
-		Mod_Class::Vector4(2616.738f, 3665.922f, 102.1075f, 62.15446f),
-		Mod_Class::Vector4(2418.972f, 4019.551f, 36.7912f, 209.7724f),
-		Mod_Class::Vector4(2483.769f, 4102.82f, 38.12365f, 182.0906f),
-		Mod_Class::Vector4(2565.83f, 4244.567f, 41.4447f, 328.7588f),
-		Mod_Class::Vector4(2702.66f, 4330.201f, 45.85205f, 10.36979f),
-		Mod_Class::Vector4(2904.14f, 4593.71f, 48.02999f, 80.57688f),
-		Mod_Class::Vector4(2859.294f, 4663.227f, 47.93969f, 195.7032f),
-		Mod_Class::Vector4(2227.497f, 4790.701f, 40.40303f, 345.2054f),
-		Mod_Class::Vector4(1684.557f, 4817.428f, 42.01131f, 117.5796f),
-		Mod_Class::Vector4(1668.184f, 4897.533f, 42.05532f, 203.0841f),
-		Mod_Class::Vector4(1717.725f, 4677.343f, 43.65575f, 290.9685f),
-		Mod_Class::Vector4(1428.173f, 4379.375f, 44.27631f, 216.4638f),
-		Mod_Class::Vector4(1370.321f, 4317.032f, 38.06339f, 42.11711f),
-		Mod_Class::Vector4(1240.904f, 4350.808f, 34.24231f, 94.9155f),
-		Mod_Class::Vector4(-271.7308f, 6400.089f, 31.30641f, 222.9104f),
-		Mod_Class::Vector4(-335.076f, 6493.833f, 2.34665f, 119.0187f),
-		Mod_Class::Vector4(-401.1573f, 6383.861f, 14.14575f, 136.2842f),
-		Mod_Class::Vector4(-640.2075f, 6236.555f, 2.976151f, 172.2602f),
-		Mod_Class::Vector4(-437.9801f, 6272.952f, 30.06834f, 249.4151f),
-		Mod_Class::Vector4(-661.4758f, 6157.757f, 2.040393f, 141.1119f),
-		Mod_Class::Vector4(-703.632f, 5802.625f, 17.31226f, 352.4189f),
-		Mod_Class::Vector4(-739.5485f, 5602.697f, 41.65934f, 180.9679f),
-		Mod_Class::Vector4(-594.1973f, 5364.056f, 70.43559f, 20.45568f),
-		Mod_Class::Vector4(-630.548f, 5208.631f, 83.00797f, 80.07411f),
-		Mod_Class::Vector4(-468.9976f, 5358.746f, 80.79279f, 4.032477f),
-		Mod_Class::Vector4(-514.1689f, 5266.845f, 80.48373f, 212.6361f),
-		Mod_Class::Vector4(-455.2321f, 6008.505f, 31.48877f, 260.9404f),
-		Mod_Class::Vector4(-379.7126f, 6033.835f, 31.49892f, 100.5203f),
-		Mod_Class::Vector4(-321.3374f, 6232.379f, 31.52865f, 281.4824f),
-		Mod_Class::Vector4(-416.6474f, 6137.146f, 31.53211f, 227.9525f),
-		Mod_Class::Vector4(-249.6663f, 6067.666f, 31.37034f, 140.0739f),
-		Mod_Class::Vector4(-246.1973f, 6155.588f, 31.42052f, 184.0397f),
-		Mod_Class::Vector4(-250.0735f, 6271.455f, 31.43178f, 146.0887f),
-		Mod_Class::Vector4(-182.6544f, 6334.627f, 31.4791f, 137.9106f),
-		Mod_Class::Vector4(-152.0446f, 6259.825f, 31.48942f, 321.7107f),
-		Mod_Class::Vector4(-68.66537f, 6270.102f, 31.33991f, 153.4193f),
-		Mod_Class::Vector4(-70.80379f, 6437.074f, 31.63992f, 149.3367f),
-		Mod_Class::Vector4(-168.8526f, 6436.67f, 31.9113f, 33.98012f),
-		Mod_Class::Vector4(-106.8976f, 6533.95f, 29.83228f, 22.53628f),
-		Mod_Class::Vector4(-17.19193f, 6502.194f, 31.50745f, 277.7401f),
-		Mod_Class::Vector4(107.219f, 6612.1f, 31.97963f, 176.6421f),
-		Mod_Class::Vector4(155.6443f, 6508.133f, 31.7202f, 50.47895f),
-		Mod_Class::Vector4(-97.19097f, 6350.258f, 31.58107f, 227.7804f),
-		Mod_Class::Vector4(291.5666f, 6515.816f, 29.77631f, 240.3053f),
-		Mod_Class::Vector4(381.5781f, 6526.341f, 28.18776f, 297.2371f),
-		Mod_Class::Vector4(509.6346f, 6512.681f, 29.83138f, 358.1497f),
-		Mod_Class::Vector4(1087.457f, 6511.739f, 20.55505f, 184.4623f),
-		Mod_Class::Vector4(1300.798f, 6609.131f, 2.210964f, 166.6302f),
-		Mod_Class::Vector4(1427.748f, 6551.687f, 15.48245f, 259.8033f),
-		Mod_Class::Vector4(1581.274f, 6453.915f, 25.31938f, 146.6987f),
-		Mod_Class::Vector4(1691.058f, 6427.246f, 32.54766f, 235.5572f),
-		Mod_Class::Vector4(488.016f, 5586.718f, 794.0623f, 207.1104f),
-		Mod_Class::Vector4(709.0751f, 4184.547f, 40.70778f, 34.69099f),
-		Mod_Class::Vector4(713.3973f, 4092.791f, 34.72971f, 183.6691f),
-		Mod_Class::Vector4(-18.10457f, 3768.18f, 31.31539f, 0.0f),
-		Mod_Class::Vector4(396.4519f, 3578.591f, 33.29235f, 292.9981f),
-		Mod_Class::Vector4(915.2141f, 3565.18f, 33.80116f, 296.1426f),
-		Mod_Class::Vector4(915.4491f, 3643.504f, 32.65174f, 224.7724f),
-		Mod_Class::Vector4(1361.951f, 3603.041f, 34.94891f, 248.2975f),
-		Mod_Class::Vector4(1261.829f, 3548.285f, 34.62054f, 191.3703f),
-		Mod_Class::Vector4(1229.425f, 3622.139f, 33.48791f, 194.691f),
-		Mod_Class::Vector4(1431.933f, 3669.91f, 39.73352f, 21.39104f),
-		Mod_Class::Vector4(1553.329f, 3801.798f, 34.25249f, 349.7805f),
-		Mod_Class::Vector4(1691.517f, 3866.717f, 34.91164f, 110.7219f),
-		Mod_Class::Vector4(1544.495f, 3722.99f, 34.59937f, 213.8932f),
-		Mod_Class::Vector4(1795.776f, 3949.233f, 33.90714f, 275.9398f),
-		Mod_Class::Vector4(1829.368f, 3833.267f, 33.35374f, 28.27547f),
-		Mod_Class::Vector4(1904.727f, 3708.882f, 32.73225f, 290.9872f),
-		Mod_Class::Vector4(1950.306f, 3845.622f, 32.18547f, 249.8298f),
-		Mod_Class::Vector4(1985.265f, 3705.139f, 32.3974f, 332.6318f),
-		Mod_Class::Vector4(2016.912f, 3773.148f, 32.20602f, 265.4035f),
-		Mod_Class::Vector4(1825.867f, 3656.211f, 34.08326f, 253.2209f),
-		Mod_Class::Vector4(1741.156f, 3710.271f, 34.1827f, 21.51038f),
-		Mod_Class::Vector4(1632.203f, 3597.311f, 35.43903f, 211.6864f)
-	};
+        Mod_Class::Vector4(-1160.148f, -1607.229f, 4.282094f, 33.58816f),
+        Mod_Class::Vector4(-1246.173f, -1578.978f, 4.075636f, 88.40285f),
+        Mod_Class::Vector4(-1300.651f, -1693.796f, 2.652158f, 119.986f),
+        Mod_Class::Vector4(-1197.284f, -1673.913f, 4.368378f, 336.6819f),
+        Mod_Class::Vector4(-1231.23f, -1774.339f, 2.698436f, 307.819f),
+        Mod_Class::Vector4(-1081.606f, -1699.635f, 4.51774f, 341.5313f),
+        Mod_Class::Vector4(-1321.38f, -1803.161f, 0.5787229f, 338.6356f),
+        Mod_Class::Vector4(-1277.734f, -1796.447f, -100.0f, 190.3f),
+        Mod_Class::Vector4(-1329.865f, -1621.267f, 3.853039f, 125.3387f),
+        Mod_Class::Vector4(-1368.747f, -1588.793f, 2.370532f, 177.0662f),
+        Mod_Class::Vector4(-1380.893f, -1418.045f, 3.565593f, 323.6023f),
+        Mod_Class::Vector4(-1279.822f, -1427.41f, 4.510245f, 212.68f),
+        Mod_Class::Vector4(-1255.639f, -1592.376f, 4.094669f, 227.7035f),
+        Mod_Class::Vector4(-1224.641f, -1502.119f, 4.337264f, 236.9933f),
+        Mod_Class::Vector4(-1431.731f, -1508.598f, 3.715238f, 85.04395f),
+        Mod_Class::Vector4(-1308.609f, -1529.277f, 4.314957f, 74.17694f),
+        Mod_Class::Vector4(-1322.848f, -1734.16f, 1.786219f, 247.0966f),
+        Mod_Class::Vector4(-1427.198f, -1658.383f, -0.3996229f, 276.3645f),
+        Mod_Class::Vector4(-1270.877f, -1811.516f, 1.774477f, 192.7982f),
+        Mod_Class::Vector4(-1178.216f, -1781.372f, 4.050908f, 319.6324f),
+        Mod_Class::Vector4(-1153.027f, -1606.098f, 4.380119f, 56.83902f),
+        Mod_Class::Vector4(-1109.917f, -1688.4f, 4.375373f, 119.264f),
+        Mod_Class::Vector4(-1050.216f, -1619.146f, 4.389634f, 203.3658f),
+        Mod_Class::Vector4(-1108.875f, -1527.476f, 6.779634f, 211.7134f),
+        Mod_Class::Vector4(-1198.382f, -1673.201f, 4.36664f, 310.3611f),
+        Mod_Class::Vector4(-1170.423f, -1433.136f, 4.453862f, 216.7254f),
+        Mod_Class::Vector4(-1314.11f, -1352.265f, 4.469654f, 25.83949f),
+        Mod_Class::Vector4(-1346.334f, -1276.67f, 4.897387f, 190.3171f),
+        Mod_Class::Vector4(-1359.945f, -1193.812f, 4.450387f, 349.2703f),
+        Mod_Class::Vector4(-1241.474f, -1253.23f, 5.328512f, 105.528f),
+        Mod_Class::Vector4(-1369.884f, -1117.181f, 4.500574f, 260.4205f),
+        Mod_Class::Vector4(-1290.337f, -1108.623f, 6.826903f, 50.96396f),
+        Mod_Class::Vector4(-1423.398f, -1023.807f, 4.997945f, 239.7593f),
+        Mod_Class::Vector4(-1332.74f, -1028.393f, 7.703401f, 32.42556f),
+        Mod_Class::Vector4(-1484.517f, -960.1639f, 7.692502f, 45.27397f),
+        Mod_Class::Vector4(-1384.187f, -944.0807f, 10.06455f, 333.1175f),
+        Mod_Class::Vector4(-1577.719f, -970.7444f, 17.41236f, 134.7335f),
+        Mod_Class::Vector4(-1589.911f, -1069.783f, 13.01727f, 66.19942f),
+        Mod_Class::Vector4(-1526.156f, -1224.26f, 2.271887f, 198.1657f),
+        Mod_Class::Vector4(-1647.783f, -1125.91f, 18.34311f, 226.7262f),
+        Mod_Class::Vector4(-1817.684f, -1200.282f, 19.16987f, 272.2027f),
+        Mod_Class::Vector4(-1722.691f, -1102.711f, 13.10247f, 232.1385f),
+        Mod_Class::Vector4(-1741.421f, -1000.758f, 4.251456f, 283.4004f),
+        Mod_Class::Vector4(-1656.441f, -1023.758f, 13.01742f, 134.6409f),
+        Mod_Class::Vector4(-1789.288f, -867.3212f, 7.367817f, 26.9756f),
+        Mod_Class::Vector4(-1766.264f, -710.6727f, 14.04142f, 128.1337f),
+        Mod_Class::Vector4(-1840.649f, -786.7416f, 6.942594f, 209.3775f),
+        Mod_Class::Vector4(-1928.198f, -787.6534f, 1.400905f, 124.8805f),
+        Mod_Class::Vector4(-1853.948f, -643.4832f, 10.74218f, 51.13507f),
+        Mod_Class::Vector4(-1693.429f, -782.542f, 10.15547f, 31.77343f),
+        Mod_Class::Vector4(-2019.225f, -671.4921f, 1.732529f, 35.30247f),
+        Mod_Class::Vector4(-2073.122f, -556.3633f, 4.322869f, 112.1614f),
+        Mod_Class::Vector4(-1918.171f, -581.4932f, 11.82719f, 74.45322f),
+        Mod_Class::Vector4(-1941.187f, -683.3286f, 6.042047f, 317.4851f),
+        Mod_Class::Vector4(-2017.408f, -403.2584f, 10.99738f, 102.571f),
+        Mod_Class::Vector4(-2073.494f, -322.6716f, 13.31618f, 110.8201f),
+        Mod_Class::Vector4(-1920.867f, -395.7564f, 48.28661f, 144.3688f),
+        Mod_Class::Vector4(-1932.222f, -256.2742f, 39.38351f, 163.2952f),
+        Mod_Class::Vector4(-2006.573f, -292.1909f, 31.14633f, 32.56577f),
+        Mod_Class::Vector4(-1830.16f, -393.1055f, 57.13855f, 341.9896f),
+        Mod_Class::Vector4(-1812.373f, -487.2023f, 40.97498f, 99.4837f),
+        Mod_Class::Vector4(-1801.349f, -284.9655f, 42.74314f, 49.44889f),
+        Mod_Class::Vector4(-1750.369f, -388.2991f, 49.33112f, 306.9421f),
+        Mod_Class::Vector4(-1733.029f, -542.143f, 37.22449f, 46.17191f),
+        Mod_Class::Vector4(-1652.144f, -473.3973f, 38.76246f, 156.1328f),
+        Mod_Class::Vector4(-1582.329f, -541.8163f, 35.48005f, 318.3726f),
+        Mod_Class::Vector4(-1688.893f, -614.0651f, 32.71557f, 160.953f),
+        Mod_Class::Vector4(-1590.418f, -652.4891f, 29.94338f, 234.872f),
+        Mod_Class::Vector4(-1516.227f, -630.6576f, 29.60688f, 124.8291f),
+        Mod_Class::Vector4(-1514.848f, -720.5037f, 27.28335f, 44.38182f),
+        Mod_Class::Vector4(-1467.341f, -779.6733f, 23.88621f, 141.6295f),
+        Mod_Class::Vector4(-1426.177f, -608.0167f, 30.68489f, 216.1941f),
+        Mod_Class::Vector4(-1429.254f, -685.5729f, 30.09999f, 351.6236f),
+        Mod_Class::Vector4(-1370.448f, -786.2045f, 19.34618f, 46.06882f),
+        Mod_Class::Vector4(-1509.341f, -849.4481f, 23.72846f, 146.3204f),
+        Mod_Class::Vector4(-1338.667f, -684.4074f, 25.90955f, 337.9835f),
+        Mod_Class::Vector4(-1267.564f, -887.0582f, 11.46313f, 312.6759f),
+        Mod_Class::Vector4(-1291.891f, -963.3849f, 10.90977f, 17.93775f),
+        Mod_Class::Vector4(-1243.466f, -1037.107f, 8.533915f, 24.88162f),
+        Mod_Class::Vector4(-1205.129f, -946.3865f, 8.115028f, 78.52157f),
+        Mod_Class::Vector4(-1209.501f, -1145.148f, 7.699383f, 246.5961f),
+        Mod_Class::Vector4(-1152.507f, -1092.617f, 2.150213f, 78.05627f),
+        Mod_Class::Vector4(-1176.931f, -1326.262f, 5.043202f, 91.40005f),
+        Mod_Class::Vector4(-1278.753f, -1280.306f, -100.0f, 286.1835f),
+        Mod_Class::Vector4(-280.1419f, -2078.309f, 27.75568f, 120.8461f),
+        Mod_Class::Vector4(-362.931f, -2096.714f, -100.0f, 249.8338f),
+        Mod_Class::Vector4(-1233.953f, -2060.108f, 14.38426f, 322.4592f),
+        Mod_Class::Vector4(-1177.911f, -1969.751f, 12.2126f, 245.5379f),
+        Mod_Class::Vector4(-958.8653f, -2038.964f, 9.571634f, 275.1023f),
+        Mod_Class::Vector4(-1065.295f, -2082.96f, 13.29153f, 124.204f),
+        Mod_Class::Vector4(-1158.608f, -2165.972f, 13.38066f, 105.9783f),
+        Mod_Class::Vector4(-990.8157f, -2278.67f, 8.95359f, 230.7598f),
+        Mod_Class::Vector4(-878.8334f, -2183.131f, 8.937191f, 216.7394f),
+        Mod_Class::Vector4(-891.5108f, -2402.83f, 14.02515f, 147.8056f),
+        Mod_Class::Vector4(-893.0229f, -2317.104f, -3.507768f, 8.885142f),
+        Mod_Class::Vector4(-978.1707f, -2465.764f, 13.75622f, 149.0023f),
+        Mod_Class::Vector4(-900.1584f, -2491.51f, 14.54965f, 27.85674f),
+        Mod_Class::Vector4(-1033.629f, -2381.482f, 14.0936f, 173.6633f),
+        Mod_Class::Vector4(-955.9147f, -2386.496f, -100.0f, 149.8728f),
+        Mod_Class::Vector4(1450.433f, -1731.397f, 68.03314f, 41.98439f),
+        Mod_Class::Vector4(1600.253f, -1712.9f, 88.12589f, 185.5337f),
+        Mod_Class::Vector4(1568.778f, -1595.55f, 90.31343f, 334.3277f),
+        Mod_Class::Vector4(1715.997f, -1560.912f, 112.6362f, 265.2239f),
+        Mod_Class::Vector4(1729.931f, -1664.9f, 112.5535f, 55.15057f),
+        Mod_Class::Vector4(1677.571f, -1857.563f, 108.353f, 227.1044f),
+        Mod_Class::Vector4(1544.524f, -2091.144f, 77.13461f, 115.2182f),
+        Mod_Class::Vector4(1397.054f, -2203.803f, 61.26979f, 11.66307f),
+        Mod_Class::Vector4(1432.708f, -2318.181f, 66.93765f, 0.1958369f),
+        Mod_Class::Vector4(1090.301f, -2258.336f, 30.16828f, 154.4966f),
+        Mod_Class::Vector4(1050.76f, -2359.522f, 30.58618f, 359.6519f),
+        Mod_Class::Vector4(1257.031f, -2301.23f, 50.42583f, 297.5381f),
+        Mod_Class::Vector4(1213.246f, -2201.788f, 41.42298f, 174.4906f),
+        Mod_Class::Vector4(1181.73f, -2088.975f, 42.835f, 108.8092f),
+        Mod_Class::Vector4(1075.413f, -2130.978f, 32.65754f, 356.5745f),
+        Mod_Class::Vector4(1069.265f, -2051.669f, 30.54184f, 328.8749f),
+        Mod_Class::Vector4(1253.046f, -1965.152f, 43.31088f, 277.0399f),
+        Mod_Class::Vector4(1162.939f, -1835.688f, 37.32333f, 309.8178f),
+        Mod_Class::Vector4(1253.974f, -1801.581f, 41.43707f, 101.9945f),
+        Mod_Class::Vector4(1165.914f, -1757.395f, 36.09859f, 5.626177f),
+        Mod_Class::Vector4(1211.297f, -1635.897f, 46.98957f, 15.0685f),
+        Mod_Class::Vector4(1339.797f, -1769.144f, 58.84056f, 110.8002f),
+        Mod_Class::Vector4(1299.746f, -1624.184f, 52.31812f, 219.0709f),
+        Mod_Class::Vector4(1370.415f, -1683.915f, 59.39519f, 28.85051f),
+        Mod_Class::Vector4(1338.409f, -1524.272f, 54.58279f, 175.8651f),
+        Mod_Class::Vector4(1264.839f, -1511.525f, 40.75233f, 196.139f),
+        Mod_Class::Vector4(1162.592f, -1484.728f, 34.84315f, 45.85416f),
+        Mod_Class::Vector4(1215.056f, -1389.57f, 35.3749f, 298.4576f),
+        Mod_Class::Vector4(1064.018f, -1447.581f, 36.74253f, 272.2317f),
+        Mod_Class::Vector4(962.9564f, -1491.263f, 31.03523f, 283.0984f),
+        Mod_Class::Vector4(811.0013f, -1355.856f, 26.39643f, 139.9369f),
+        Mod_Class::Vector4(852.3708f, -1452.39f, 28.46454f, 153.5606f),
+        Mod_Class::Vector4(782.0834f, -1276.112f, 26.38883f, 245.5533f),
+        Mod_Class::Vector4(708.6996f, -1387.042f, 26.28415f, 95.50644f),
+        Mod_Class::Vector4(729.1082f, -1202.147f, 27.59183f, 314.4826f),
+        Mod_Class::Vector4(866.4579f, -1218.872f, 25.93666f, 150.9242f),
+        Mod_Class::Vector4(812.4778f, -1108.296f, 22.87424f, 358.1263f),
+        Mod_Class::Vector4(805.5677f, -992.9066f, 26.17185f, 93.29649f),
+        Mod_Class::Vector4(719.1799f, -1068.157f, 22.22762f, 76.04496f),
+        Mod_Class::Vector4(867.8777f, -949.1575f, 26.28246f, 284.0382f),
+        Mod_Class::Vector4(799.3265f, -910.1976f, 25.25154f, 64.5854f),
+        Mod_Class::Vector4(788.2667f, -779.5413f, 26.43379f, 76.76219f),
+        Mod_Class::Vector4(676.5705f, -893.8166f, 23.46652f, 48.36354f),
+        Mod_Class::Vector4(792.6351f, -680.9716f, 28.78763f, 182.0778f),
+        Mod_Class::Vector4(712.2411f, -718.2731f, 26.09179f, 222.572f),
+        Mod_Class::Vector4(871.4885f, -477.5969f, 57.6135f, 27.29279f),
+        Mod_Class::Vector4(802.2733f, -487.6502f, 29.98962f, 66.31482f),
+        Mod_Class::Vector4(762.3665f, -605.8344f, 29.01363f, 289.0056f),
+        Mod_Class::Vector4(647.2089f, -405.4547f, 25.90333f, 141.224f),
+        Mod_Class::Vector4(793.6388f, -251.5794f, 66.11258f, 262.0274f),
+        Mod_Class::Vector4(740.2285f, -348.7549f, 44.64523f, 102.3112f),
+        Mod_Class::Vector4(842.9829f, -326.1672f, 58.63135f, 78.39604f),
+        Mod_Class::Vector4(774.1849f, -157.5243f, 74.47166f, 194.3f),
+        Mod_Class::Vector4(717.7997f, -231.8359f, 66.49796f, 145.0598f),
+        Mod_Class::Vector4(879.2205f, -133.0256f, 78.19176f, 321.4662f),
+        Mod_Class::Vector4(954.9133f, -139.376f, 74.48351f, 261.024f),
+        Mod_Class::Vector4(770.9991f, -20.69291f, 81.40639f, 55.6139f),
+        Mod_Class::Vector4(918.6093f, -299.0002f, 65.7274f, 89.47182f),
+        Mod_Class::Vector4(1075.878f, -221.7357f, 57.22911f, 100.7295f),
+        Mod_Class::Vector4(1167.627f, -326.1849f, 69.27177f, 253.1378f),
+        Mod_Class::Vector4(1182.85f, -419.4162f, 67.44855f, 160.1736f),
+        Mod_Class::Vector4(1095.917f, -363.7542f, 67.05442f, 154.2719f),
+        Mod_Class::Vector4(1241.207f, -370.6926f, 69.08267f, 357.5793f),
+        Mod_Class::Vector4(1295.678f, -450.1477f, 69.11702f, 39.42892f),
+        Mod_Class::Vector4(1196.354f, -500.0268f, 65.35512f, 239.1896f),
+        Mod_Class::Vector4(1244.402f, -565.6254f, 69.36629f, 327.5226f),
+        Mod_Class::Vector4(1358.867f, -507.7113f, 74.07481f, 238.6464f),
+        Mod_Class::Vector4(1271.949f, -679.5294f, 65.78483f, 221.1033f),
+        Mod_Class::Vector4(1170.739f, -673.777f, 60.85263f, 8.802817f),
+        Mod_Class::Vector4(1157.536f, -826.6323f, 55.04485f, 261.9964f),
+        Mod_Class::Vector4(1229.198f, -774.131f, 59.95905f, 111.6313f),
+        Mod_Class::Vector4(1065.049f, -721.359f, 56.7688f, 251.442f),
+        Mod_Class::Vector4(961.0184f, -668.5934f, 58.42073f, 252.7814f),
+        Mod_Class::Vector4(944.5909f, -590.6015f, 57.93015f, 263.7933f),
+        Mod_Class::Vector4(1065.475f, -587.393f, 56.98307f, 176.1875f),
+        Mod_Class::Vector4(1087.19f, -483.9626f, 65.1468f, 43.63801f),
+        Mod_Class::Vector4(990.569f, -528.5084f, 60.1135f, 187.5177f),
+        Mod_Class::Vector4(1029.239f, -420.6697f, 65.71067f, 103.3361f),
+        Mod_Class::Vector4(878.2419f, 536.1291f, 125.7603f, 256.0516f),
+        Mod_Class::Vector4(780.4013f, 569.2122f, 127.5153f, 308.715f),
+        Mod_Class::Vector4(-1652.492f, -268.9684f, 53.03486f, 238.35f),
+        Mod_Class::Vector4(-1796.219f, -262.315f, 44.68269f, 225.691f),
+        Mod_Class::Vector4(-1862.262f, -346.5329f, 49.84129f, 207.6463f),
+        Mod_Class::Vector4(-1746.119f, -373.1069f, 46.04745f, 348.238f),
+        Mod_Class::Vector4(-1758.126f, -177.5893f, 59.93489f, 53.74375f),
+        Mod_Class::Vector4(-1851.886f, -211.0984f, 39.37838f, 30.06215f),
+        Mod_Class::Vector4(-1647.251f, -157.372f, 57.61746f, 114.5786f),
+        Mod_Class::Vector4(-1657.056f, -12.40816f, 61.96356f, 225.4638f),
+        Mod_Class::Vector4(-1855.837f, 87.75642f, 79.74529f, 317.2931f),
+        Mod_Class::Vector4(-2227.431f, 177.6394f, 174.6018f, 246.6147f),
+        Mod_Class::Vector4(-2183.896f, 284.1322f, 169.6021f, 263.2045f),
+        Mod_Class::Vector4(-2266.481f, 266.8381f, 184.6013f, 236.3674f),
+        Mod_Class::Vector4(-2340.92f, 224.7503f, 169.6533f, 147.9599f),
+        Mod_Class::Vector4(-2291.11f, 419.6725f, 174.6017f, 269.9671f),
+        Mod_Class::Vector4(-2351.723f, 354.5746f, 174.5702f, 316.094f),
+        Mod_Class::Vector4(-1992.776f, 597.1656f, 117.9074f, 244.9395f),
+        Mod_Class::Vector4(-1918.98f, 427.659f, 102.579f, 288.3187f),
+        Mod_Class::Vector4(-1942.294f, 537.5837f, 119.4511f, 71.42182f),
+        Mod_Class::Vector4(-1863.526f, 663.243f, 129.1108f, 47.40017f),
+        Mod_Class::Vector4(-1950.522f, 671.437f, 126.8631f, 49.11973f),
+        Mod_Class::Vector4(-1821.452f, 805.2283f, 138.6922f, 350.8116f),
+        Mod_Class::Vector4(-1596.12f, 763.6357f, 188.776f, 67.02236f),
+        Mod_Class::Vector4(-1537.647f, 824.0611f, 181.5576f, 132.0971f),
+        Mod_Class::Vector4(-1390.973f, 604.0109f, 130.5611f, 103.6059f),
+        Mod_Class::Vector4(-1380.87f, 733.273f, 182.4565f, 346.0296f),
+        Mod_Class::Vector4(-1273.141f, 606.6987f, 139.2841f, 177.0211f),
+        Mod_Class::Vector4(-1208.797f, 648.6027f, 144.6223f, 184.7298f),
+        Mod_Class::Vector4(-1187.657f, 561.1202f, 100.0236f, 282.7813f),
+        Mod_Class::Vector4(-1061.68f, 732.2233f, 165.4498f, 328.4958f),
+        Mod_Class::Vector4(-1123.518f, 796.3937f, 167.7469f, 256.4597f),
+        Mod_Class::Vector4(-974.0649f, 689.8514f, 158.0351f, 36.62312f),
+        Mod_Class::Vector4(-952.0835f, 799.6948f, 178.4169f, 358.3044f),
+        Mod_Class::Vector4(-854.5779f, 790.907f, 191.7423f, 343.4804f),
+        Mod_Class::Vector4(-800.5696f, 886.0236f, 203.1893f, 150.7404f),
+        Mod_Class::Vector4(-757.3545f, 774.8885f, 212.2914f, 21.35574f),
+        Mod_Class::Vector4(-679.4247f, 798.2404f, 198.0051f, 179.3822f),
+        Mod_Class::Vector4(-668.9477f, 906.9561f, 230.1238f, 229.8917f),
+        Mod_Class::Vector4(-538.2089f, 785.8329f, 196.6117f, 117.694f),
+        Mod_Class::Vector4(-398.9189f, 666.7883f, 163.8354f, 90.2931f),
+        Mod_Class::Vector4(-510.514f, 671.3224f, 150.273f, 163.8439f),
+        Mod_Class::Vector4(-472.1857f, 537.1354f, 124.354f, 0.0f),
+        Mod_Class::Vector4(-385.3415f, 515.0933f, 120.8225f, 227.8424f),
+        Mod_Class::Vector4(-355.368f, 423.3936f, 110.8382f, 345.9255f),
+        Mod_Class::Vector4(-506.4408f, 454.185f, 96.69381f, 276.8076f),
+        Mod_Class::Vector4(-245.8695f, 393.0556f, 112.4406f, 260.9666f),
+        Mod_Class::Vector4(-60.18164f, 494.9249f, 144.5688f, 247.2409f),
+        Mod_Class::Vector4(-88.42611f, 889.886f, 236.1728f, 212.5896f),
+        Mod_Class::Vector4(56.37422f, 1050.121f, 218.6296f, 295.7127f),
+        Mod_Class::Vector4(-449.0672f, 1062.479f, 327.6815f, 175.8242f),
+        Mod_Class::Vector4(-399.2907f, 1148.496f, 325.853f, 200.4087f),
+        Mod_Class::Vector4(-480.5667f, 1133.815f, 320.0966f, 190.5652f),
+        Mod_Class::Vector4(-294.9129f, 1429.549f, 339.3169f, 336.8831f),
+        Mod_Class::Vector4(-407.2495f, 1581.665f, 353.7131f, 73.89459f),
+        Mod_Class::Vector4(-149.5202f, 1453.246f, 292.8072f, 199.7669f),
+        Mod_Class::Vector4(-266.3375f, 1547.674f, 336.4588f, 141.5186f),
+        Mod_Class::Vector4(779.201f, 1187.419f, 325.5869f, 66.41692f),
+        Mod_Class::Vector4(307.273f, 1108.102f, 216.9276f, 75.9652f),
+        Mod_Class::Vector4(276.0082f, 1187.72f, 226.0305f, 14.18411f),
+        Mod_Class::Vector4(191.0497f, 1224.417f, 225.5948f, 106.2378f),
+        Mod_Class::Vector4(294.2169f, 953.3748f, 208.6888f, 254.3083f),
+        Mod_Class::Vector4(229.4137f, 675.6113f, 189.6827f, 210.8005f),
+        Mod_Class::Vector4(221.4684f, 513.708f, 140.7564f, 359.1328f),
+        Mod_Class::Vector4(218.7429f, 302.6817f, 105.5856f, 248.4243f),
+        Mod_Class::Vector4(336.653f, 312.7571f, 104.6787f, 170.513f),
+        Mod_Class::Vector4(127.0963f, 341.097f, 111.944f, 32.08784f),
+        Mod_Class::Vector4(2824.941f, -743.6797f, 1.471339f, 16.6061f),
+        Mod_Class::Vector4(2835.425f, -626.2703f, 1.730462f, 227.3414f),
+        Mod_Class::Vector4(2575.149f, -289.9889f, 93.07821f, 324.0676f),
+        Mod_Class::Vector4(2521.409f, -414.0672f, 94.12376f, 222.7773f),
+        Mod_Class::Vector4(2571.536f, 304.6294f, 108.6065f, 20.04023f),
+        Mod_Class::Vector4(2572.306f, 478.2309f, 108.6772f, 91.36018f),
+        Mod_Class::Vector4(2746.039f, 1453.321f, 24.48774f, 299.1059f),
+        Mod_Class::Vector4(2757.865f, 1528.199f, 32.49879f, 87.19512f),
+        Mod_Class::Vector4(2666.189f, 1508.934f, 24.50084f, 299.6714f),
+        Mod_Class::Vector4(2853.234f, 1474.861f, 24.61952f, 107.3717f),
+        Mod_Class::Vector4(2720.579f, 1647.611f, 24.57493f, 269.4894f),
+        Mod_Class::Vector4(2473.841f, 1572.31f, 32.72038f, 354.3351f),
+        Mod_Class::Vector4(2357.949f, 1845.58f, 101.2663f, 166.731f),
+        Mod_Class::Vector4(2319.202f, 2551.041f, 47.69345f, 227.7995f),
+        Mod_Class::Vector4(2526.939f, 2584.094f, 37.94465f, 8.938714f),
+        Mod_Class::Vector4(2595.807f, 2801.963f, 34.00152f, 323.103f),
+        Mod_Class::Vector4(2739.255f, 2782.027f, 35.73802f, 303.735f),
+        Mod_Class::Vector4(2570.977f, 2720.95f, 42.9959f, 209.3307f),
+        Mod_Class::Vector4(-2956.631f, 11.69463f, 6.931808f, 156.18f),
+        Mod_Class::Vector4(-2876.279f, 21.03024f, 11.60808f, 41.72112f),
+        Mod_Class::Vector4(-3012.55f, -51.12709f, 0.310649f, 38.1624f),
+        Mod_Class::Vector4(-3038.164f, 38.733f, 8.971894f, 41.44547f),
+        Mod_Class::Vector4(-3096.169f, 119.0552f, 6.728017f, 87.99979f),
+        Mod_Class::Vector4(-3091.035f, 352.2566f, 7.519391f, 67.82193f),
+        Mod_Class::Vector4(-3075.979f, 447.3828f, 6.362554f, 50.79964f),
+        Mod_Class::Vector4(-2964.959f, 452.5694f, 15.30891f, 148.5125f),
+        Mod_Class::Vector4(-3057.164f, 532.517f, 7.604911f, 255.576f),
+        Mod_Class::Vector4(-3047.145f, 614.4224f, 7.323409f, 264.085f),
+        Mod_Class::Vector4(-2982.056f, 719.5752f, 28.49753f, 22.28972f),
+        Mod_Class::Vector4(-3165.79f, 762.5814f, 3.421354f, 180.3855f),
+        Mod_Class::Vector4(-3237.243f, 914.8962f, 16.88076f, 110.9341f),
+        Mod_Class::Vector4(-3295.146f, 984.6699f, 2.889409f, 0.8584108f),
+        Mod_Class::Vector4(-3353.275f, 1037.395f, -0.4267793f, 0.1203664f),
+        Mod_Class::Vector4(-3270.502f, 1210.821f, 2.343407f, 180.0034f),
+        Mod_Class::Vector4(-3264.688f, 1110.545f, 2.304754f, 320.7578f),
+        Mod_Class::Vector4(-3187.552f, 1221.516f, 9.986886f, 167.8331f),
+        Mod_Class::Vector4(-2542.358f, 2317.119f, 33.21531f, 63.28617f),
+        Mod_Class::Vector4(-1955.376f, 2367.43f, 32.54905f, 161.8323f),
+        Mod_Class::Vector4(-1841.089f, 2195.876f, 97.38118f, 304.6146f),
+        Mod_Class::Vector4(-1837.205f, 2270.878f, 73.74523f, 312.3881f),
+        Mod_Class::Vector4(-1895.852f, 2143.426f, 121.225f, 65.59644f),
+        Mod_Class::Vector4(-1859.108f, 2072.094f, 140.9959f, 129.7641f),
+        Mod_Class::Vector4(-1790.499f, 2119.865f, 132.356f, 90.9618f),
+        Mod_Class::Vector4(-1916.931f, 1944.778f, 158.3994f, 296.9663f),
+        Mod_Class::Vector4(-1701.855f, 1957.936f, 131.0938f, 56.90914f),
+        Mod_Class::Vector4(-1721.216f, 2029.074f, 112.8439f, 156.9609f),
+        Mod_Class::Vector4(-1097.618f, 2700.906f, 18.90455f, 84.88656f),
+        Mod_Class::Vector4(-328.0197f, 2825.509f, 58.02246f, 111.1101f),
+        Mod_Class::Vector4(181.3483f, 2793.319f, 45.6552f, 24.21892f),
+        Mod_Class::Vector4(331.855f, 2873.202f, 43.45045f, 156.6868f),
+        Mod_Class::Vector4(361.1784f, 2976.71f, 40.4106f, 122.3371f),
+        Mod_Class::Vector4(282.1306f, 2568.33f, 45.2464f, 241.7109f),
+        Mod_Class::Vector4(203.8961f, 2702.276f, 42.54163f, 175.5621f),
+        Mod_Class::Vector4(391.2553f, 2633.707f, 44.6586f, 32.33579f),
+        Mod_Class::Vector4(470.7168f, 2610.214f, 42.72048f, 9.760907f),
+        Mod_Class::Vector4(586.6243f, 2742.652f, 42.07542f, 275.8898f),
+        Mod_Class::Vector4(754.2651f, 2783.679f, 66.97653f, 216.7942f),
+        Mod_Class::Vector4(848.8434f, 2382.375f, 54.18682f, 285.6466f),
+        Mod_Class::Vector4(914.1945f, 2294.065f, 48.86418f, 187.3512f),
+        Mod_Class::Vector4(980.6591f, 2667.654f, 40.06087f, 354.2927f),
+        Mod_Class::Vector4(1182.588f, 2701.389f, 38.15746f, 236.7878f),
+        Mod_Class::Vector4(1116.655f, 2641.605f, 38.14867f, 2.974739f),
+        Mod_Class::Vector4(1777.552f, 3325.553f, 41.43348f, 345.9209f),
+        Mod_Class::Vector4(1832.452f, 3443.146f, 41.04421f, 354.7577f),
+        Mod_Class::Vector4(1964.699f, 3257.751f, 45.65916f, 168.9078f),
+        Mod_Class::Vector4(1987.721f, 3047.302f, 46.74506f, 237.7831f),
+        Mod_Class::Vector4(2370.224f, 3156.767f, 48.20884f, 39.61424f),
+        Mod_Class::Vector4(2343.113f, 3046.043f, 48.15176f, 273.6578f),
+        Mod_Class::Vector4(2398.234f, 3315.428f, 47.70992f, 282.5903f),
+        Mod_Class::Vector4(2164.31f, 3396.292f, 45.43284f, 295.356f),
+        Mod_Class::Vector4(2259.422f, 3437.281f, 64.76982f, 128.1591f),
+        Mod_Class::Vector4(2179.717f, 3498.747f, 45.46162f, 354.1017f),
+        Mod_Class::Vector4(2062.606f, 3452.479f, 43.75446f, 37.58577f),
+        Mod_Class::Vector4(2486.352f, 3760.736f, 42.24755f, 176.6024f),
+        Mod_Class::Vector4(2616.738f, 3665.922f, 102.1075f, 62.15446f),
+        Mod_Class::Vector4(2418.972f, 4019.551f, 36.7912f, 209.7724f),
+        Mod_Class::Vector4(2483.769f, 4102.82f, 38.12365f, 182.0906f),
+        Mod_Class::Vector4(2565.83f, 4244.567f, 41.4447f, 328.7588f),
+        Mod_Class::Vector4(2702.66f, 4330.201f, 45.85205f, 10.36979f),
+        Mod_Class::Vector4(2904.14f, 4593.71f, 48.02999f, 80.57688f),
+        Mod_Class::Vector4(2859.294f, 4663.227f, 47.93969f, 195.7032f),
+        Mod_Class::Vector4(2227.497f, 4790.701f, 40.40303f, 345.2054f),
+        Mod_Class::Vector4(1684.557f, 4817.428f, 42.01131f, 117.5796f),
+        Mod_Class::Vector4(1668.184f, 4897.533f, 42.05532f, 203.0841f),
+        Mod_Class::Vector4(1717.725f, 4677.343f, 43.65575f, 290.9685f),
+        Mod_Class::Vector4(1428.173f, 4379.375f, 44.27631f, 216.4638f),
+        Mod_Class::Vector4(1370.321f, 4317.032f, 38.06339f, 42.11711f),
+        Mod_Class::Vector4(1240.904f, 4350.808f, 34.24231f, 94.9155f),
+        Mod_Class::Vector4(-271.7308f, 6400.089f, 31.30641f, 222.9104f),
+        Mod_Class::Vector4(-335.076f, 6493.833f, 2.34665f, 119.0187f),
+        Mod_Class::Vector4(-401.1573f, 6383.861f, 14.14575f, 136.2842f),
+        Mod_Class::Vector4(-640.2075f, 6236.555f, 2.976151f, 172.2602f),
+        Mod_Class::Vector4(-437.9801f, 6272.952f, 30.06834f, 249.4151f),
+        Mod_Class::Vector4(-661.4758f, 6157.757f, 2.040393f, 141.1119f),
+        Mod_Class::Vector4(-703.632f, 5802.625f, 17.31226f, 352.4189f),
+        Mod_Class::Vector4(-739.5485f, 5602.697f, 41.65934f, 180.9679f),
+        Mod_Class::Vector4(-594.1973f, 5364.056f, 70.43559f, 20.45568f),
+        Mod_Class::Vector4(-630.548f, 5208.631f, 83.00797f, 80.07411f),
+        Mod_Class::Vector4(-468.9976f, 5358.746f, 80.79279f, 4.032477f),
+        Mod_Class::Vector4(-514.1689f, 5266.845f, 80.48373f, 212.6361f),
+        Mod_Class::Vector4(-455.2321f, 6008.505f, 31.48877f, 260.9404f),
+        Mod_Class::Vector4(-379.7126f, 6033.835f, 31.49892f, 100.5203f),
+        Mod_Class::Vector4(-321.3374f, 6232.379f, 31.52865f, 281.4824f),
+        Mod_Class::Vector4(-416.6474f, 6137.146f, 31.53211f, 227.9525f),
+        Mod_Class::Vector4(-249.6663f, 6067.666f, 31.37034f, 140.0739f),
+        Mod_Class::Vector4(-246.1973f, 6155.588f, 31.42052f, 184.0397f),
+        Mod_Class::Vector4(-250.0735f, 6271.455f, 31.43178f, 146.0887f),
+        Mod_Class::Vector4(-182.6544f, 6334.627f, 31.4791f, 137.9106f),
+        Mod_Class::Vector4(-152.0446f, 6259.825f, 31.48942f, 321.7107f),
+        Mod_Class::Vector4(-68.66537f, 6270.102f, 31.33991f, 153.4193f),
+        Mod_Class::Vector4(-70.80379f, 6437.074f, 31.63992f, 149.3367f),
+        Mod_Class::Vector4(-168.8526f, 6436.67f, 31.9113f, 33.98012f),
+        Mod_Class::Vector4(-106.8976f, 6533.95f, 29.83228f, 22.53628f),
+        Mod_Class::Vector4(-17.19193f, 6502.194f, 31.50745f, 277.7401f),
+        Mod_Class::Vector4(107.219f, 6612.1f, 31.97963f, 176.6421f),
+        Mod_Class::Vector4(155.6443f, 6508.133f, 31.7202f, 50.47895f),
+        Mod_Class::Vector4(-97.19097f, 6350.258f, 31.58107f, 227.7804f),
+        Mod_Class::Vector4(291.5666f, 6515.816f, 29.77631f, 240.3053f),
+        Mod_Class::Vector4(381.5781f, 6526.341f, 28.18776f, 297.2371f),
+        Mod_Class::Vector4(509.6346f, 6512.681f, 29.83138f, 358.1497f),
+        Mod_Class::Vector4(1087.457f, 6511.739f, 20.55505f, 184.4623f),
+        Mod_Class::Vector4(1300.798f, 6609.131f, 2.210964f, 166.6302f),
+        Mod_Class::Vector4(1427.748f, 6551.687f, 15.48245f, 259.8033f),
+        Mod_Class::Vector4(1581.274f, 6453.915f, 25.31938f, 146.6987f),
+        Mod_Class::Vector4(1691.058f, 6427.246f, 32.54766f, 235.5572f),
+        Mod_Class::Vector4(488.016f, 5586.718f, 794.0623f, 207.1104f),
+        Mod_Class::Vector4(709.0751f, 4184.547f, 40.70778f, 34.69099f),
+        Mod_Class::Vector4(713.3973f, 4092.791f, 34.72971f, 183.6691f),
+        Mod_Class::Vector4(-18.10457f, 3768.18f, 31.31539f, 0.0f),
+        Mod_Class::Vector4(396.4519f, 3578.591f, 33.29235f, 292.9981f),
+        Mod_Class::Vector4(915.2141f, 3565.18f, 33.80116f, 296.1426f),
+        Mod_Class::Vector4(915.4491f, 3643.504f, 32.65174f, 224.7724f),
+        Mod_Class::Vector4(1361.951f, 3603.041f, 34.94891f, 248.2975f),
+        Mod_Class::Vector4(1261.829f, 3548.285f, 34.62054f, 191.3703f),
+        Mod_Class::Vector4(1229.425f, 3622.139f, 33.48791f, 194.691f),
+        Mod_Class::Vector4(1431.933f, 3669.91f, 39.73352f, 21.39104f),
+        Mod_Class::Vector4(1553.329f, 3801.798f, 34.25249f, 349.7805f),
+        Mod_Class::Vector4(1691.517f, 3866.717f, 34.91164f, 110.7219f),
+        Mod_Class::Vector4(1544.495f, 3722.99f, 34.59937f, 213.8932f),
+        Mod_Class::Vector4(1795.776f, 3949.233f, 33.90714f, 275.9398f),
+        Mod_Class::Vector4(1829.368f, 3833.267f, 33.35374f, 28.27547f),
+        Mod_Class::Vector4(1904.727f, 3708.882f, 32.73225f, 290.9872f),
+        Mod_Class::Vector4(1950.306f, 3845.622f, 32.18547f, 249.8298f),
+        Mod_Class::Vector4(1985.265f, 3705.139f, 32.3974f, 332.6318f),
+        Mod_Class::Vector4(2016.912f, 3773.148f, 32.20602f, 265.4035f),
+        Mod_Class::Vector4(1825.867f, 3656.211f, 34.08326f, 253.2209f),
+        Mod_Class::Vector4(1741.156f, 3710.271f, 34.1827f, 21.51038f),
+        Mod_Class::Vector4(1632.203f, 3597.311f, 35.43903f, 211.6864f)
+    };
 
     inline std::vector<std::string> RSLangMenu = {
-        "Enter",                                                                                    //0
-        "Back",                                                                                     //1
-        "Left",                                                                                     //2
-        "Right",                                                                                    //3
-        "Random Scenarios",                                                                         //4
-        "Select available or launch a random scenario.",                                            //5
-        "Save Ped Menu",                                                                            //6
-        "Change customize and save characters.",                                                    //7
-        "Random Start",                                                                             //8
-        "Select a random scenario when game loads.",                                                //9
-        "Random Ped",                                                                               //10
-        "Load as or re-spawn as a random ped (includes animals).",                                  //11
-        "Saved Ped",                                                                                //12
-        "Load as or re-spawn as a saved ped.",                                                      //13
-        "Reincarnation",                                                                            //14
-        "Life after death?",                                                                        //15
-        "Re-spawn",                                                                                 //16
-        "Return as your current character in the area you died in.",                                //17
-        "Funeral",                                                                                  //18
-        "If you are using a random or non main character have a funeral service on death.",         //19
-        "Prison",                                                                                   //20
-        "Go straight to Bolingbroke do not pass go do not collect 200.",                            //21
-        "Random Weapons",                                                                           //22
-        "Get a random weapon selection or keep your current weapons.",                              //23
-        "Capture Weapon Load-out",                                                                  //24
-        "Save you current weapon selection.",                                                       //25
-        "Change Key-bindings",                                                                      //26
-        "Select menu load key.",                                                                    //27
-        "Beach Ped",                                                                                //28
-        "Sun bathing and motor boating.",                                                           //29
-        "Tramps",                                                                                   //30
-        "Down and out in Los Santos.",                                                              //31
-        "High class",                                                                               //32
-        "Nice house, nice car, nice weather.",                                                      //33
-        "Mid class",                                                                                //34
-        "Reasonable house, reasonable car, reasonable weather.",                                    //35
-        "Low class",                                                                                //36
-        "Rubbish house, trash car, crap weather.",                                                  //37
-        "Business",                                                                                 //38
-        "The high flying Los Santos elite.",                                                        //39
-        "Body builder",                                                                             //40
-        "Use the facilities at muscle beach.",                                                      //41
-        "Gangsters",                                                                                //42
-        "Defend your turf in the Los Santos war zones.",                                            //43
-        "Epsilon ",                                                                                 //44
-        "Join a cult and look down on the non-believers.",                                          //45
-        "Jogger",                                                                                   //46
-        "Take a run in some random location.",                                                      //47
-        "Golfer",                                                                                   //48
-        "Play a round or just burn up the turf in your caddy.",                                     //49
-        "Hiker",                                                                                    //50
-        "Explore the wilderness of Los Santos.",                                                    //51
-        "Meth addict",                                                                              //52
-        "Strawberry fields for ever.",                                                              //53
-        "Rural",                                                                                    //54
-        "Down on the farm.",                                                                        //55
-        "Cyclist",                                                                                  //56
-        "Put on the lycra and start peddling.",                                                     //57
-        "LGBTWXYZ",                                                                                 //58
-        "I am the very model of a modern Major-General I've information vegetable, animal, and mineral.",//59
-        "Pool Peds",                                                                                //60
-        "Take a swim or just chill by the pool.",                                                   //61
-        "Workers",                                                                                  //62
-        "The many trades and occupations in Los Santos.",                                           //63
-        "Jet ski",                                                                                  //64
-        "Race your jet-ski or just ride around for fun.",                                           //65
-        "Bike/ATV",                                                                                 //66
-        "Do some off-roading around Los Santos.",                                                   //67
-        "Services",                                                                                 //68
-        "Do your civic duty with fire, police, ambulance or military.",                             //69
-        "Pilot",                                                                                    //70
-        "Earn your wings gallivanting above Los Santos.",                                           //71
-        "Animals",                                                                                  //72
-        "Soar like a bird, strut like a deer, swim like a fish.",                                   //73
-        "Yankton",                                                                                  //74
-        "Visit snowy Yankton.",                                                                     //75
-        "Cayo Piero",                                                                               //76
-        "Visit sunny Cayo Piero.",                                                                  //77
-        "Saved Peds",                                                                               //78
-        "Select and edit your ped collection.",                                                     //79
-        "Save current ped",                                                                         //80
-        "save your current character.",                                                             //81
-        "Freemode Ped",                                                                             //82
-        "Generate a random freemode ped.",                                                          //83
-        "Reposes Ped",                                                                              //84
-        "Become a nearby ped.",                                                                     //85
-        "Select a Ped",                                                                             //86
-        "Rename Ped",                                                                               //87
-        "Change the name of your ped.",                                                             //88
-        "Change Outfit",                                                                            //89
-        "Change your outfit.",                                                                      //90
-        "Tattoo Pallor",                                                                            //91
-        "Add Tattoos to your character.",                                                           //92
-        "Set Hair Style",                                                                           //93
-        "Eye Colour",                                                                               //94
-        "Pick the colour of your eyes .",                                                           //95
-        "Pick Hair Colour",                                                                         //96
-        "Pick Hair Streaks",                                                                        //97
-        "Set Overlays",                                                                             //98
-        "Ped decals like age blush facial hair and make-up.",                                       //99
-        "Alter Face Shape",                                                                         //100
-        "Change position of chin, mouth, nose.",                                                    //101
-        "Change Parents",                                                                           //102
-        "Alter the base parents of your freemode character.",                                       //103
-        "Set Voice",                                                                                //104
-        "Save Changes",                                                                             //105
-        "Create or update saved peds ini.",                                                         //106
-        "Delete Ped",                                                                               //107
-        "Remove this ped from saved peds directory.",                                               //108
-        "Select outfit",                                                                            //109  
-        "Create New Outfit",                                                                        //110
-        "Save a new outfit on your character.",                                                     //111
-        "Edit Outfits",                                                                             //112
-        "edit the components on current outfit.",                                                   //113
-        "Edit Props",                                                                               //114
-        "Pick hats and glasses.",                                                                   //115
-        "Pre-made outfits",                                                                         //116
-        "Base Component",                                                                           //117
-        "Texture",                                                                                  //118
-        "Select ",                                                                                  //119
-        "Opacity",                                                                                  //120
-        "Colour",                                                                                   //121
-        "First Parent",                                                                             //122
-        "Second Parent",                                                                            //123
-        "Shape Mix",                                                                                //124
-        "Skin Mix",                                                                                 //125
-        "Third Mix",                                                                                //126
-        "Face",                                                                                     //127
-        "Head",                                                                                     //128
-        "Hair",                                                                                     //129
-        "Torso",                                                                                    //130
-        "Legs",                                                                                     //131
-        "Back Packs",                                                                               //132
-        "Feet",                                                                                     //133
-        "Accessories",                                                                              //134
-        "Top Add-ons",                                                                              //135
-        "Armour",                                                                                   //136
-        "Textures",                                                                                 //137
-        "Coats",                                                                                    //138
-        "Hats",                                                                                     //139
-        "Glasses",                                                                                  //140
-        "Ears",                                                                                     //141
-        "Watches",                                                                                  //142
-        "Torso",                                                                                    //143
-        "Head",                                                                                     //144
-        "Left Arm",                                                                                 //145
-        "Right Arm",                                                                                //146
-        "Left Leg",                                                                                 //147
-        "Right Leg",                                                                                //148
-        "Back",                                                                                     //149
-        "Chest",                                                                                    //150
-        "Stomach",                                                                                  //151
-        "Nose Width",                                                                               //152
-        "Nose Peak Hight",                                                                          //153
-        "Nose Peak Length",                                                                         //154
-        "Nose Bone_High",                                                                           //155
-        "Nose Peak Lowering",                                                                       //156
-        "Nose Bone Twist",                                                                          //157
-        "Eye Brow High",                                                                            //158
-        "Eye Brow Forward",                                                                         //159
-        "Cheeks Bone High",                                                                         //160
-        "Cheeks Bone Width",                                                                        //161
-        "Cheeks Width",                                                                             //162
-        "Eyes Opening",                                                                             //163
-        "Lips Thickness",                                                                           //164
-        "Jaw Bone Width 'Bone size to sides",                                                       //165
-        "Jaw Bone Back Length 'Bone size to back",                                                  //166
-        "Chimp_Bone_Lowering 'Go Down",                                                             //167
-        "Chimp Bone Length 'Go forward",                                                            //168
-        "Chimp Bone Width", "Chimp Hole",                                                           //169
-        "Neck Thickness",                                                                           //170
-        "Blemishes",                                                                                //171
-        "Facial Hair",                                                                              //172
-        "Eyebrows",                                                                                 //173
-        "Ageing",                                                                                   //174
-        "Make-up",                                                                                  //175
-        "Blush",                                                                                    //176
-        "Complexion",                                                                               //177
-        "Sun Damage",                                                                               //178
-        "Lipstick",                                                                                 //179
-        "Moles & Freckles",                                                                         //180
-        "Chest Hair",                                                                               //181
-        "Body Blemishes",                                                                           //182
-        "Add Body Blemishes",                                                                       //183
-        "Select a Keyboard Key",                                                                    //184
-        "Sets the menu open key.",                                                                  //185
-        "Select a Controller Combo",                                                                //186
-        "Choose two controller keys to open menu.",                                                 //187
-        "Hold ~INPUT_VEH_EXIT~ to take control",                                                    //188
-        "Hold the key you would like to use.",                                                      //189
-        "Key Changed",                                                                              //190
-        "Hold ~INPUT_VEH_EXIT~ to hide under van",                                                  //191
-        "Hold ~INPUT_VEH_EXIT~ to hide in waste bin",                                               //192
-        "Top Decal",                                                                                //193
-        "Explore the World: GTA games often feature vast open worlds with a lot of hidden content, collectibles, and easter eggs. Take your time to explore and enjoy the scenery.",
-        "Follow the Story: While you can engage in random chaos, the main story missions provide structure and context for the game. Completing these missions often unlocks new content and areas.",
-        "Use Cover: In gunfights, always use cover to protect yourself. Pop out to shoot, then take cover again. This reduces the chances of getting shot.",
-        "Manage Your Health: Keep an eye on your health and armor levels. You can usually find health packs and armor scattered throughout the game world. Stock up before difficult missions.",
-        "Plan Your Getaways: After committing a crime, have an escape plan. Know where you're going and what you'll do to evade the police.",
-        "Invest in Properties: In some GTA games, you can buy properties. These can provide a passive income and sometimes even offer other benefits.",
-        "Experiment with Vehicles: GTA games have a wide variety of vehicles, from cars to planes to bicycles. Experiment with different vehicles to see which ones suit your style and mission needs.",
-        "Customize Your Character: Many GTA games allow you to customize your character's appearance. Experiment with clothing and accessories to create your own unique style.",
-        "Use the Internet: In later GTA games, characters have smartphones and access to the internet. You can use it to buy vehicles, properties, and more.",
-        "Save Your Game: Don't forget to save your progress regularly, especially after completing important missions. This will prevent you from losing a lot of progress in case you fail a mission or get busted.",
-        "Don't Ignore Side Missions: Side missions can offer fun and unique experiences, as well as rewards like weapons, money, and even character upgrades.",
-        "Respect Traffic Rules (or Not): Sometimes following traffic rules can help you blend in and avoid the attention of the police. On the other hand, reckless driving can be a lot of fun. It's up to you!",
-        "Be Mindful of Police: Committing crimes will get the attention of the police. Pay attention to wanted levels and use Pay 'n' Spray or other hiding spots to lose the cops.",
-        "Play with Friends: If the game supports it, playing GTA with friends can be a blast. You can complete missions together or engage in chaotic, open-world mayhem.",
-        "Have Fun: Ultimately, GTA games are meant to be enjoyed. Whether you prefer causing chaos, following the story, or just exploring, remember that it's a game, and the goal is to have fun.",
-        "Press ~INPUT_TALK~ to change dance, hold ~INPUT_VEH_EXIT~ to  stop Dancing",              //209
-        "Press ~INPUT_TALK~ to start dancing",                                                       //210
-        "press ~INPUT_DUCK~ to select a ped, press ~INPUT_SPRINT~ to  become this ped, Press ~INPUT_RELOAD~ to Close.",                                                       //211
-        "Press ~INPUT_TALK~ to change action, hold ~INPUT_VEH_EXIT~ to exit.",                                                       //212
-        "Winter is Coming",                                                       //213
-        "January",                                                       //214
-        "February",                                                       //215
-        "March",                                                       //216
-        "April",                                                       //217
-        "May",                                                       //218
-        "June",                                                       //219
-        "July",                                                       //220
-        "August",                                                     //221
-        "September",                                                     //222
-        "October",                                                     //223
-        "November",                                                     //224
-        "December",                                                     //225
-        "Set your winter months",                                    //226
-        "Blank",                                                       //227
-        "Blank",                                                       //228
-        "Blank",                                                       //229
-        "Blank"                                                       //230
+            "Enter",                                                                                    //0
+            "Back",                                                                                     //1
+            "Left",                                                                                     //2
+            "Right",                                                                                    //3
+            "Random Scenarios",                                                                         //4
+            "Select available or launch a random scenario.",                                            //5
+            "Save Ped Menu",                                                                            //6
+            "Change customize and save characters.",                                                    //7
+            "Random Start",                                                                             //8
+            "Select a random scenario when game loads.",                                                //9
+            "Random Ped",                                                                               //10
+            "Load as or re-spawn as a random ped (includes animals).",                                  //11
+            "Saved Ped",                                                                                //12
+            "Load as or re-spawn as a saved ped.",                                                      //13
+            "Reincarnation",                                                                            //14
+            "Life after death?",                                                                        //15
+            "Re-spawn",                                                                                 //16
+            "Return as your current character in the area you died in.",                                //17
+            "Funeral",                                                                                  //18
+            "If you are using a random or non main character have a funeral service on death.",         //19
+            "Prison",                                                                                   //20
+            "Go straight to Bolingbroke do not pass go do not collect 200.",                            //21
+            "Random Weapons",                                                                           //22
+            "Get a random weapon selection or keep your current weapons.",                              //23
+            "Capture Weapon Load-out",                                                                  //24
+            "Save you current weapon selection.",                                                       //25
+            "Change Key-bindings",                                                                      //26
+            "Select menu load key.",                                                                    //27
+            "Beach Ped",                                                                                //28
+            "Sun bathing and motor boating.",                                                           //29
+            "Tramps",                                                                                   //30
+            "Down and out in Los Santos.",                                                              //31
+            "High class",                                                                               //32
+            "Nice house, nice car, nice weather.",                                                      //33
+            "Mid class",                                                                                //34
+            "Reasonable house, reasonable car, reasonable weather.",                                    //35
+            "Low class",                                                                                //36
+            "Rubbish house, trash car, crap weather.",                                                  //37
+            "Business",                                                                                 //38
+            "The high flying Los Santos elite.",                                                        //39
+            "Body builder",                                                                             //40
+            "Use the facilities at muscle beach.",                                                      //41
+            "Gangsters",                                                                                //42
+            "Defend your turf in the Los Santos war zones.",                                            //43
+            "Epsilon ",                                                                                 //44
+            "Join a cult and look down on the non-believers.",                                          //45
+            "Jogger",                                                                                   //46
+            "Take a run in some random location.",                                                      //47
+            "Golfer",                                                                                   //48
+            "Play a round or just burn up the turf in your caddy.",                                     //49
+            "Hiker",                                                                                    //50
+            "Explore the wilderness of Los Santos.",                                                    //51
+            "Meth addict",                                                                              //52
+            "Strawberry fields for ever.",                                                              //53
+            "Rural",                                                                                    //54
+            "Down on the farm.",                                                                        //55
+            "Cyclist",                                                                                  //56
+            "Put on the lycra and start peddling.",                                                     //57
+            "LGBTWXYZ",                                                                                 //58
+            "I am the very model of a modern Major-General I've information vegetable, animal, and mineral.",//59
+            "Pool Peds",                                                                                //60
+            "Take a swim or just chill by the pool.",                                                   //61
+            "Workers",                                                                                  //62
+            "The many trades and occupations in Los Santos.",                                           //63
+            "Jet ski",                                                                                  //64
+            "Race your jet-ski or just ride around for fun.",                                           //65
+            "Bike/ATV",                                                                                 //66
+            "Do some off-roading around Los Santos.",                                                   //67
+            "Services",                                                                                 //68
+            "Do your civic duty with fire, police, ambulance or military.",                             //69
+            "Pilot",                                                                                    //70
+            "Earn your wings gallivanting above Los Santos.",                                           //71
+            "Animals",                                                                                  //72
+            "Soar like a bird, strut like a deer, swim like a fish.",                                   //73
+            "Yankton",                                                                                  //74
+            "Visit snowy Yankton.",                                                                     //75
+            "Cayo Piero",                                                                               //76
+            "Visit sunny Cayo Piero.",                                                                  //77
+            "Saved Peds",                                                                               //78
+            "Select and edit your ped collection.",                                                     //79
+            "Save current ped",                                                                         //80
+            "save your current character.",                                                             //81
+            "Freemode Ped",                                                                             //82
+            "Generate a random freemode ped.",                                                          //83
+            "Reposes Ped",                                                                              //84
+            "Become a nearby ped.",                                                                     //85
+            "Select a Ped",                                                                             //86
+            "Rename Ped",                                                                               //87
+            "Change the name of your ped.",                                                             //88
+            "Change Outfit",                                                                            //89
+            "Change your outfit.",                                                                      //90
+            "Tattoo Pallor",                                                                            //91
+            "Add Tattoos to your character.",                                                           //92
+            "Set Hair Style",                                                                           //93
+            "Eye Colour",                                                                               //94
+            "Pick the colour of your eyes .",                                                           //95
+            "Pick Hair Colour",                                                                         //96
+            "Pick Hair Streaks",                                                                        //97
+            "Set Overlays",                                                                             //98
+            "Ped decals like age blush facial hair and make-up.",                                       //99
+            "Alter Face Shape",                                                                         //100
+            "Change position of chin, mouth, nose.",                                                    //101
+            "Change Parents",                                                                           //102
+            "Alter the base parents of your freemode character.",                                       //103
+            "Set Voice",                                                                                //104
+            "Save Changes",                                                                             //105
+            "Create or update saved peds ini.",                                                         //106
+            "Delete Ped",                                                                               //107
+            "Remove this ped from saved peds directory.",                                               //108
+            "Select outfit",                                                                            //109  
+            "Create New Outfit",                                                                        //110
+            "Save a new outfit on your character.",                                                     //111
+            "Edit Outfits",                                                                             //112
+            "edit the components on current outfit.",                                                   //113
+            "Edit Props",                                                                               //114
+            "Pick hats and glasses.",                                                                   //115
+            "Pre-made outfits",                                                                         //116
+            "Base Component",                                                                           //117
+            "Texture",                                                                                  //118
+            "Select ",                                                                                  //119
+            "Opacity",                                                                                  //120
+            "Colour",                                                                                   //121
+            "First Parent",                                                                             //122
+            "Second Parent",                                                                            //123
+            "Shape Mix",                                                                                //124
+            "Skin Mix",                                                                                 //125
+            "Third Mix",                                                                                //126
+            "Face",                                                                                     //127
+            "Head",                                                                                     //128
+            "Hair",                                                                                     //129
+            "Torso",                                                                                    //130
+            "Legs",                                                                                     //131
+            "Back Packs",                                                                               //132
+            "Feet",                                                                                     //133
+            "Accessories",                                                                              //134
+            "Top Add-ons",                                                                              //135
+            "Armour",                                                                                   //136
+            "Textures",                                                                                 //137
+            "Coats",                                                                                    //138
+            "Hats",                                                                                     //139
+            "Glasses",                                                                                  //140
+            "Ears",                                                                                     //141
+            "Watches",                                                                                  //142
+            "Torso",                                                                                    //143
+            "Head",                                                                                     //144
+            "Left Arm",                                                                                 //145
+            "Right Arm",                                                                                //146
+            "Left Leg",                                                                                 //147
+            "Right Leg",                                                                                //148
+            "Back",                                                                                     //149
+            "Chest",                                                                                    //150
+            "Stomach",                                                                                  //151
+            "Nose Width",                                                                               //152
+            "Nose Peak Hight",                                                                          //153
+            "Nose Peak Length",                                                                         //154
+            "Nose Bone_High",                                                                           //155
+            "Nose Peak Lowering",                                                                       //156
+            "Nose Bone Twist",                                                                          //157
+            "Eye Brow High",                                                                            //158
+            "Eye Brow Forward",                                                                         //159
+            "Cheeks Bone High",                                                                         //160
+            "Cheeks Bone Width",                                                                        //161
+            "Cheeks Width",                                                                             //162
+            "Eyes Opening",                                                                             //163
+            "Lips Thickness",                                                                           //164
+            "Jaw Bone Width 'Bone size to sides",                                                       //165
+            "Jaw Bone Back Length 'Bone size to back",                                                  //166
+            "Chimp_Bone_Lowering 'Go Down",                                                             //167
+            "Chimp Bone Length 'Go forward",                                                            //168
+            "Chimp Bone Width", "Chimp Hole",                                                           //169
+            "Neck Thickness",                                                                           //170
+            "Blemishes",                                                                                //171
+            "Facial Hair",                                                                              //172
+            "Eyebrows",                                                                                 //173
+            "Ageing",                                                                                   //174
+            "Make-up",                                                                                  //175
+            "Blush",                                                                                    //176
+            "Complexion",                                                                               //177
+            "Sun Damage",                                                                               //178
+            "Lipstick",                                                                                 //179
+            "Moles & Freckles",                                                                         //180
+            "Chest Hair",                                                                               //181
+            "Body Blemishes",                                                                           //182
+            "Add Body Blemishes",                                                                       //183
+            "Select a Keyboard Key",                                                                    //184
+            "Sets the menu open key.",                                                                  //185
+            "Select a Controller Combo",                                                                //186
+            "Choose two controller keys to open menu.",                                                 //187
+            "Hold ~INPUT_VEH_EXIT~ to take control",                                                    //188
+            "Hold the key you would like to use.",                                                      //189
+            "Key Changed",                                                                              //190
+            "Hold ~INPUT_VEH_EXIT~ to hide under van",                                                  //191
+            "Hold ~INPUT_VEH_EXIT~ to hide in waste bin",                                               //192
+            "Top Decal",                                                                                //193
+            "Explore the World: GTA games often feature vast open worlds with a lot of hidden content, collectibles, and easter eggs. Take your time to explore and enjoy the scenery.",
+            "Follow the Story: While you can engage in random chaos, the main story missions provide structure and context for the game. Completing these missions often unlocks new content and areas.",
+            "Use Cover: In gunfights, always use cover to protect yourself. Pop out to shoot, then take cover again. This reduces the chances of getting shot.",
+            "Manage Your Health: Keep an eye on your health and armor levels. You can usually find health packs and armor scattered throughout the game world. Stock up before difficult missions.",
+            "Plan Your Getaways: After committing a crime, have an escape plan. Know where you're going and what you'll do to evade the police.",
+            "Invest in Properties: In some GTA games, you can buy properties. These can provide a passive income and sometimes even offer other benefits.",
+            "Experiment with Vehicles: GTA games have a wide variety of vehicles, from cars to planes to bicycles. Experiment with different vehicles to see which ones suit your style and mission needs.",
+            "Customize Your Character: Many GTA games allow you to customize your character's appearance. Experiment with clothing and accessories to create your own unique style.",
+            "Use the Internet: In later GTA games, characters have smartphones and access to the internet. You can use it to buy vehicles, properties, and more.",
+            "Save Your Game: Don't forget to save your progress regularly, especially after completing important missions. This will prevent you from losing a lot of progress in case you fail a mission or get busted.",
+            "Don't Ignore Side Missions: Side missions can offer fun and unique experiences, as well as rewards like weapons, money, and even character upgrades.",
+            "Respect Traffic Rules (or Not): Sometimes following traffic rules can help you blend in and avoid the attention of the police. On the other hand, reckless driving can be a lot of fun. It's up to you!",
+            "Be Mindful of Police: Committing crimes will get the attention of the police. Pay attention to wanted levels and use Pay 'n' Spray or other hiding spots to lose the cops.",
+            "Play with Friends: If the game supports it, playing GTA with friends can be a blast. You can complete missions together or engage in chaotic, open-world mayhem.",
+            "Have Fun: Ultimately, GTA games are meant to be enjoyed. Whether you prefer causing chaos, following the story, or just exploring, remember that it's a game, and the goal is to have fun.",
+            "Press ~INPUT_TALK~ to change dance, hold ~INPUT_VEH_EXIT~ to  stop Dancing",              //209
+            "Press ~INPUT_TALK~ to start dancing",                                                       //210
+            "press ~INPUT_DUCK~ to select a ped, press ~INPUT_SPRINT~ to  become this ped, Press ~INPUT_RELOAD~ to Close.",                                                       //211
+            "Press ~INPUT_TALK~ to change action, hold ~INPUT_VEH_EXIT~ to exit.",                                                       //212
+            "Winter is Coming",                                                       //213
+            "January",                                                       //214
+            "February",                                                       //215
+            "March",                                                       //216
+            "April",                                                       //217
+            "May",                                                       //218
+            "June",                                                       //219
+            "July",                                                       //220
+            "August",                                                     //221
+            "September",                                                     //222
+            "October",                                                     //223
+            "November",                                                     //224
+            "December",                                                     //225
+            "Set your winter months",                                    //226
+            "Edit",                                                       //227
+            "Blank",                                                       //228
+            "Blank",                                                       //229
+            "Blank"                                                       //230
+
     };
 
     inline const std::vector<DWORD> KeyFind = {
@@ -8648,6 +8695,6 @@ namespace Mod_Data
          VK_F23, //ImGuiKey_F23;
          VK_F24, //ImGuiKey_F24;
          VK_BROWSER_BACK, //ImGuiKey_AppBack;
-         VK_BROWSER_FORWARD, //ImGuiKey_AppForward;
+         VK_BROWSER_FORWARD //ImGuiKey_AppForward;
     };
 }
