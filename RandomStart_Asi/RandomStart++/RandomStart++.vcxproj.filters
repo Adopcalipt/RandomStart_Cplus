@@ -3,12 +3,9 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="script.cpp" />
-    <ClCompile Include="keyboard.cpp">
-      <Filter>SystemTools</Filter>
-    </ClCompile>
-    <ClCompile Include="ModSystems.cpp">
-      <Filter>SystemTools</Filter>
-    </ClCompile>
+    <ClCompile Include="keyboard.cpp" />
+    <ClCompile Include="ModSystems.cpp" />
+    <ClCompile Include="GtaVMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="script.h" />
@@ -21,28 +18,20 @@
     <ClInclude Include="..\inc\natives.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="keyboard.h" />
     <ClInclude Include="..\inc\main.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\nativeCaller.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="filesystem.hpp">
-      <Filter>SystemTools</Filter>
-    </ClInclude>
-    <ClInclude Include="keyboard.h">
-      <Filter>SystemTools</Filter>
-    </ClInclude>
-    <ClInclude Include="ModSystems.h">
-      <Filter>SystemTools</Filter>
-    </ClInclude>
+    <ClInclude Include="ModSystems.h" />
+    <ClInclude Include="filesystem.hpp" />
+    <ClInclude Include="GtaVMenu.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">
       <UniqueIdentifier>{fe82bd4a-2d14-486a-8be5-8bf6b50a2414}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SystemTools">
-      <UniqueIdentifier>{315d795a-f53a-4330-b303-a59b8a87bc5b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

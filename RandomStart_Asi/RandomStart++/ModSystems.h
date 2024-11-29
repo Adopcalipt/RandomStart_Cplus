@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "..\inc\main.h"
 #include "..\inc\types.h"
@@ -13,25 +13,6 @@
 
 namespace Mod_Class
 {
-    class SnowDates
-    {
-    public:
-        bool Jan;
-        bool Feb;
-        bool Mar;
-        bool Apr;
-        bool May;
-        bool Jun;
-        bool Jul;
-        bool Aug;
-        bool Sep;
-        bool Oct;
-        bool Nov;
-        bool Dec;
-    public:
-        SnowDates()
-            : Jan(true), Feb(true), Mar(false), Apr(false), May(false), Jun(false), Jul(false), Aug(false), Sep(false), Oct(false), Nov(false), Dec(true) {}
-    };
     class Settings_Ini
     {
     public:
@@ -46,6 +27,8 @@ namespace Mod_Class
         bool ReCurr;
         bool Random_Weapons;
         bool Disable_Record_Key;
+        bool Auto_Save;
+        bool Menu_Left_Side;
 
         bool ControlSupport;
         int ControlA;
@@ -81,11 +64,22 @@ namespace Mod_Class
 
         bool Loging;
 
-        SnowDates SnowMonths;
+        bool Jan;
+        bool Feb;
+        bool Mar;
+        bool Apr;
+        bool May;
+        bool Jun;
+        bool Jul;
+        bool Aug;
+        bool Sep;
+        bool Oct;
+        bool Nov;
+        bool Dec;
 
     public:
         Settings_Ini()
-            : MenuKey(76), Auto_Run(true), Random_Ped(true), Saved_Ped(false), Disable_Record_Key(true), Random_Weapons(true), Funeral(true), Prison(true), BeachPart(false), Reincarnate(false), ReCurr(false), ControlSupport(false), ControlA(0), ControlB(0), Lang_Set(-1), BeachPed(true), Tramps(true), Highclass(true), Midclass(true), Lowclass(true), Business(true), Bodybuilder(true), GangStars(true), Epsilon(true), Jogger(true), Golfer(true), Hiker(true), Methaddict(true), Rural(true), Cyclist(true), LGBTWXYZ(true), PoolPeds(true), Workers(true), Jetski(true), BikeATV(true), Services(true), Pilot(true), Animals(true), Yankton(true), Cayo(true), Loging(true), SnowMonths(SnowDates()) {}
+            : MenuKey(76), Auto_Run(true), Random_Ped(true), Saved_Ped(false), Disable_Record_Key(true), Random_Weapons(true), Funeral(true), Prison(true), BeachPart(false), Reincarnate(false), ReCurr(false), ControlSupport(false), Auto_Save(true), Menu_Left_Side(true), ControlA(0), ControlB(0), Lang_Set(-1), BeachPed(true), Tramps(true), Highclass(true), Midclass(true), Lowclass(true), Business(true), Bodybuilder(true), GangStars(true), Epsilon(true), Jogger(true), Golfer(true), Hiker(true), Methaddict(true), Rural(true), Cyclist(true), LGBTWXYZ(true), PoolPeds(true), Workers(true), Jetski(true), BikeATV(true), Services(true), Pilot(true), Animals(true), Yankton(true), Cayo(true), Loging(true), Jan(true), Feb(true), Mar(false), Apr(false), May(false), Jun(false), Jul(false), Aug(false), Sep(false), Oct(false), Nov(false), Dec(true) {}
     };
 
     struct Vector4
@@ -98,6 +92,8 @@ namespace Mod_Class
     public:
         Vector4(float x, float y, float z, float r)
             : X(x), Y(y), Z(z), R(r) {}
+        Vector4(Vector3 pos)
+            : X(pos.x), Y(pos.y), Z(pos.z), R(0.0f) {}
     };
     struct Point
     {
@@ -166,6 +162,39 @@ namespace Mod_Class
 
     };
 
+    class Weap_Read 
+    {
+    public:
+        std::string MyWeapon;
+        std::string MyDecription;
+        int Tint;
+        bool Addons;
+        bool Liverys;
+    public:
+        Weap_Read(std::string myWeapon, std::string myDecription, int tint, bool addons, bool liverys)
+            : MyWeapon(myWeapon), MyDecription(myDecription), Tint(tint), Addons(addons), Liverys(liverys) {}
+    };
+    class Weap_Addons 
+    {
+    public:
+        std::string MyComponent;
+        std::string MyDecription;
+    public:
+            Weap_Addons(std::string myComponent, std::string myDecription)
+            : MyComponent(myComponent), MyDecription(myDecription) {}
+    };
+    class WeaponSaver
+    {
+    public:
+        std::string MyWeapon;
+        std::vector<std::string> MyAddons;
+        int Ammo;
+        int TintSet;
+        int WeapTint;
+    public:
+        WeaponSaver(std::string myWeapon, std::vector<std::string> myAddons, int ammo, int tintSet, int weapTint)
+            : MyWeapon(myWeapon), MyAddons(myAddons), Ammo(ammo), TintSet(tintSet), WeapTint(weapTint) {}
+    };
     class HairSets
     {
     public:
@@ -179,6 +208,8 @@ namespace Mod_Class
     public:
         HairSets(int comp, int text, std::string handName, std::string name, int overLib, int over)
             : Comp(comp), Text(text), HandName(handName), Name(name), OverLib(overLib), Over(over) {}
+        HairSets()
+            : Comp(0), Text(0), HandName(""), Name(""), OverLib(0), Over(0) {}
     };
     class Tattoo
     {
@@ -194,13 +225,14 @@ namespace Mod_Class
     class FreeOverLay
     {
     public:
+        int Colour;
         int Overlay;
         int OverCol;
         float OverOpc;
 
     public:
-        FreeOverLay(int overlay, int overCol, float overOpc)
-            : Overlay(overlay), OverCol(overCol), OverOpc(overOpc) {}
+        FreeOverLay(int colour, int overlay, int overCol, float overOpc)
+            : Colour(colour), Overlay(overlay), OverCol(overCol), OverOpc(overOpc) {}
     };
     class FaceBank
     {
@@ -218,6 +250,8 @@ namespace Mod_Class
     public:
         FaceBank(int shapeFirstID, int shapeSecondID, float shapeMix, float skinMix, float thirdMix)
             : ShapeFirstID(shapeFirstID), ShapeSecondID(shapeSecondID), ShapeThirdID(shapeFirstID), SkinFirstID(shapeFirstID), SkinSecondID(shapeSecondID), SkinThirdID(shapeFirstID), ShapeMix(shapeMix), SkinMix(skinMix), ThirdMix(thirdMix), IsParent(0) {}
+        FaceBank()
+            : ShapeFirstID(0), ShapeSecondID(0), ShapeThirdID(0), SkinFirstID(0), SkinSecondID(0), SkinThirdID(0), ShapeMix(0.0f), SkinMix(0.0f), ThirdMix(0.0f), IsParent(0) {}
     };
     class ClothX
     {
@@ -252,16 +286,22 @@ namespace Mod_Class
         int HairColour;
         int HairStreaks;
         int EyeColour;
+        std::vector<WeaponSaver> MyWeapons;
         std::vector<FreeOverLay> MyOverlay;
         std::vector<Tattoo> MyTattoo;
         std::vector<float> FaceScale;
-        std::string Voice;
-        std::string Walkies;
-        std::string Moods;
+        int Voice;
+        int Walkies;
+        int Moods;
+        int PlHealth;
+        float PlRunSp;
+        float PlSwimSp;
 
     public:
-        ClothBank(std::string name, std::string model, Hash mdelHash, bool freeMode, FaceBank myFaces, bool male, bool animal_Farm, HairSets myHair, int hairColour, int hairStreaks, int eyeColour, int cloth_Pick, std::vector<FreeOverLay> myOverlay, std::vector<Tattoo> myTattoo, std::vector<ClothX> cothing, std::vector<float> faceScale, std::string voice, std::string walkies, std::string moods)
-            : CharName(name), Model(model), ModelHash(mdelHash), FreeMode(freeMode), MyFaces(myFaces), Animal_Farm(animal_Farm), Male(male), MyHair(myHair), HairColour(hairColour), HairStreaks(hairStreaks), EyeColour(eyeColour), MyOverlay(myOverlay), MyTattoo(myTattoo), Cothing(cothing), Cloth_Pick(cloth_Pick), FaceScale(faceScale), Voice(voice), Walkies(walkies), Moods(moods){}
+        ClothBank(std::string name, std::string model, Hash mdelHash, bool freeMode, FaceBank myFaces, bool male, bool animal_Farm, HairSets myHair, int hairColour, int hairStreaks, int eyeColour, int cloth_Pick, std::vector< WeaponSaver> myWeapons, std::vector<FreeOverLay> myOverlay, std::vector<Tattoo> myTattoo, std::vector<ClothX> cothing, std::vector<float> faceScale, int voice, int walkies, int moods, int plHealth, float PlRunSp, float PlSwimSp)
+            : CharName(name), Model(model), ModelHash(mdelHash), FreeMode(freeMode), MyFaces(myFaces), Animal_Farm(animal_Farm), Male(male), MyHair(myHair), HairColour(hairColour), HairStreaks(hairStreaks), EyeColour(eyeColour), MyWeapons(myWeapons), MyOverlay(myOverlay), MyTattoo(myTattoo), Cothing(cothing), Cloth_Pick(cloth_Pick), FaceScale(faceScale), Voice(voice), Walkies(walkies), Moods(moods), PlHealth(plHealth), PlRunSp(PlRunSp), PlSwimSp(PlSwimSp) {}
+        ClothBank()
+            : CharName(""), Model(""), ModelHash(0), FreeMode(false), MyFaces(FaceBank()), Animal_Farm(false), Male(false), MyHair(HairSets()), HairColour(0), HairStreaks(0), EyeColour(0), MyWeapons({}), MyOverlay({}), MyTattoo({}), Cothing({}), Cloth_Pick(0), FaceScale({}), Voice(0), Walkies(0), Moods(0), PlHealth(200), PlRunSp(1.0f), PlSwimSp(1.0f) {}
     };
 
     class Veh_Set
@@ -310,12 +350,12 @@ namespace Mod_Class
     class MenuRatioSettings
     {
     public:
-        float lineWidth;
+        float boxWidth;
         float lineHeight;
-        float lineTop;
-        float lineTobSpace;
-        float lineLeft;
-        float textLeft;
+        float boxTop;
+        float lineSpace;
+        float boxPosition;
+        float textPosition;
 
         float tickSizeX;
         float tickSizeY;
@@ -335,19 +375,18 @@ namespace Mod_Class
         float blue;
         float alfa;
 
-        float ArrowAlr;
-        float ArrowBlr;
-        float ArrowH;
-        float Numberlr;
+        float arrowLeft;
+        float arrowRight;
+        float arrowHeight;
+        float arrowNumberStart;
 
-        float ArrowtickSizeX;
-        float ArrowtickSizeY;
-        float NumGap;
+        float arrowTickSizeX;
+        float arrowTickSizeY;
+        float arrowNumberGap;
     public:
         MenuRatioSettings()
-            : lineWidth(288.5f), lineHeight(5.5f), lineTop(104.5f), lineTobSpace(28.0f), lineLeft(19.5f), textLeft(6.0f), tickSizeX(64.0f), tickSizeY(64.0f), tickX(383.5f), tickY(3.6f), tickMulti(41.4f), sizeX(0.227f), sizeY(0.062f), centerX(0.5f), centerY(0.5f), posX(0.128f), posY(0.092f), rotation(0.0f), red(1.0f), green(1.0f), blue(1.0f), alfa(1.0f), ArrowAlr(-25.0f), ArrowBlr(13.0f), ArrowH(3.85f), Numberlr(260.0f), ArrowtickSizeX(32.0f), ArrowtickSizeY(32.0f), NumGap(9.0f) {}
+            : boxWidth(288.5f), lineHeight(5.5f), boxTop(104.5f), lineSpace(28.0f), boxPosition(19.5f), textPosition(6.0f), tickSizeX(64.0f), tickSizeY(64.0f), tickX(383.5f), tickY(3.6f), tickMulti(41.4f), sizeX(0.227f), sizeY(0.062f), centerX(0.5f), centerY(0.5f), posX(0.128f), posY(0.092f), rotation(0.0f), red(1.0f), green(1.0f), blue(1.0f), alfa(1.0f), arrowLeft(-25.0f), arrowRight(13.0f), arrowHeight(3.85f), arrowNumberStart(260.0f), arrowTickSizeX(32.0f), arrowTickSizeY(32.0f), arrowNumberGap(9.0f) {}
     };
-
     class MeunFields
     {
     public:
@@ -375,99 +414,94 @@ namespace Mod_Class
         int High;
         int Index;
         bool Scroling;
-        Mod_Class::MenuRatioSettings _Screen;
+        Mod_Class::MenuRatioSettings Meun_Screen;
         std::vector<MeunFields> Menu_Form;
 
     public:
         MeunSystem(int low, int high, bool scroling, std::vector<MeunFields> menu_Form)
-            : _Activate(false), _Exit(false), _Left(false), _Right(false), waitTime(150), Low(low), High(high), Index(0), Scroling(scroling), _Screen(Mod_Class::MenuRatioSettings()), Menu_Form(menu_Form) {}
-    };
-
-    class WeaponSaver
-    {
-    public:
-        std::string MyWeapon;
-        std::vector<std::string> MyAddons;
-        int Ammo;
-    public:
-        WeaponSaver(std::string myWeapon, std::vector<std::string> myAddons, int ammo)
-            : MyWeapon(myWeapon), MyAddons(myAddons), Ammo(ammo) {}
+            : _Activate(false), _Exit(false), _Left(false), _Right(false), waitTime(150), Low(low), High(high), Index(0), Scroling(scroling), Meun_Screen(Mod_Class::MenuRatioSettings()), Menu_Form(menu_Form) {}
     };
 }
 
 namespace Mod_Systems
 {
+    Hash MyHashKey(const std::string& name);
+
     std::string GetExeFileName();
     std::string GetDir();
     std::string TimeDate();
-    bool FileExists(const std::string& filename);
+    void DirectoryTest();
+    bool File_exists(const std::string& filename);
+    void Write_ini(const std::string& file, const std::vector<std::string>& text);
+    void Delete_ini(const std::string& filename);
+    std::vector<std::string> Read_ini(const std::string& fileName);
 
-    void Play_Wav(const std::string& soundFile);
-
-    bool FileRemoval(const std::string& filename);
-    bool ListContains(std::vector<int>& List, int item);
-    std::vector<std::string> Space38(const std::string& myLine);
     void LoggerLight(const std::string& text);
-    void WriteFile(const std::string& file, std::vector<std::string>& text);
-    std::vector<std::string> IntoString(std::vector<int>& text);
-    std::vector<std::string> ReadSetFile(const std::string& fileName);
-    bool StringContains(const std::string& line, const std::string& wholeString);
-    bool StringContains(char line, const std::string& wholeString);
-    int FindCharicter(char chars, const std::string& wholeString);
-    int FindCharicter(const std::string& chars, const std::string& wholeString);
-    int StingNumbersInt(const std::string& line);
-    std::string AfterEqual(const std::string& tag);
-    float StingNumbersFloat(const std::string& line);
-    bool StringBool(const std::string& line);
-    float TwoDecimal(const std::string& Number);
+
+    void Play_wav(const std::string& soundFile);
+
+    std::vector<std::string> Convert_to_strings(const std::vector<int>& text);
+    int Find_String_Pos(const std::vector<std::string>& stringList, const std::string& item);
+
+    bool Contains_int(const std::vector<int>& intList, int item);
+    bool Contains_string(const std::string& line, const std::string& wholeString);
+    bool Contains_string(char line, const std::string& wholeString);
+    int Find_char_position(char chars, const std::string& wholeString);
+    int Find_char_position(const std::string& chars, const std::string& wholeString);
+    
+    int Convert_to_int(const std::string& line);
+    float Convert_to_float(const std::string& line);
+    bool Convert_to_bool(const std::string& line);
+    std::string Remove_char61(const std::string& line);
+    float Two_decimal(const std::string& num);
+
     int DayOfWeek();
 
     float RandomFloat(float min, float max);
     int RandomInt(int min, int max);
-    std::vector<int> NewNums(int min, int max);
-    int LessRandomInt(const std::string& sName, int min, int max);
-    int LessRandomInt(const std::string& sName, std::vector<int>& ranNum);
+    void NewNums(std::vector<int>* intList,int min, int max);
+    int LessRandomInt(const std::string& file, int min, int max);
+    int LessRandomInt(const std::string& file, const std::vector<int>& ranNum);
 
     void StartScript(const std::string& scriptName, int buffer);
 
-    void ReBuildIni(Mod_Class::Settings_Ini* PSet);
-    void FindSettings(Mod_Class::Settings_Ini* mySets);
+    void ReBuildIni(void* obj);
+    void FindSettings(Mod_Class::Settings_Ini* modSets);
+
+    void FindWeapons(std::vector<Mod_Class::Weap_Read>* myWeaps, const std::string& file);
+    void FindWeaponComponents(std::vector<Mod_Class::Weap_Addons>* myWeaps, const std::string& file, const std::string& weapon);
+    void FindWeaponTints(std::vector<std::string>* myWeaps, int list);
 
     void SaveMyWeaps();
     std::vector<Mod_Class::WeaponSaver> LoadSavedWeapons();
+    std::vector<Mod_Class::WeaponSaver> BuildWeaponList();
 
     void LoadLang();
 
-    Hash MyHashKey(const std::string& name);
-
     void menu_beep();
-    void ButtonDisabler(int LButt);
-    bool WhileButtonDown(int CButt, bool bDisable);
-    bool ButtonDown(int CButt, bool bDisable);
 
     void get_button_state(bool* a, bool* b, bool* up, bool* down, bool* l, bool* r, bool* shutDown);
-    void Menu_Button_state(bool* Mb);
-
-    int FindKeyBinds(bool Control);
+    void Menu_Button_state(bool* returnBool, DWORD myButton);
+    int FindKeyBinds(bool controler);
 
     int InGameTime();
-    bool IsIsSafe(int Key);
+    bool IsIsSafe(int key);
 
-    void LoadSavedPeds();
-    void SaveClothBank(Mod_Class::ClothBank& bank);
+    void LoadSavedPeds(Mod_Class::ClothBank& clothBank);
+    void SaveClothBank(const Mod_Class::ClothBank& clothBank);
 
-    void AddMonies(int iAmount);
+    void AddMonies(int amount);
 
     void FindAddCars();
     void FindAddPeds();
-    void WeatherReport(int iWet);
+    void WeatherReport(int wet);
     void RandomWeatherTime();
 }
 
 namespace Mod_Maths
 {
-    Vector3 NewVector3(float X, float Y, float Z);
-    Vector3 NewVector3(Mod_Class::Vector4 Vpos);
+    Vector3 NewVector3(float x, float y, float z);
+    Vector3 NewVector3(Mod_Class::Vector4 pos);
     float GetAngle(Vector3 postion1, Vector3 postion2);
     float DistanceTo(Vector3 postion1, Vector3 postion2);
     float DistanceTo(Entity entity1, Entity entity2);
@@ -476,13 +510,10 @@ namespace Mod_Maths
     float DistanceTo(Mod_Class::Vector4 postion1, Vector3 postion2);
     float DistanceTo(Mod_Class::Vector4 postion1, Mod_Class::Vector4 postion2);
 
-    std::string MyZone(Vector3 VPos);
-    std::string MyZone(Mod_Class::Vector4 VPos);
-
     Vector3 MyWayPoint();
-    Vector3 EntPosition(Entity Ent);
+    Vector3 EntPosition(Entity ent);
     Vector3 PlayerPosi();
-    Vector3 RightOfEntity(Entity Object);
+    Vector3 RightOfEntity(Entity ent);
     Vector3 FowardOf(Entity ent, float multi, bool inFront);
     Vector3 RightOf(Entity ent, float multi, bool inFront);
 
@@ -490,192 +521,530 @@ namespace Mod_Maths
     Mod_Class::Vector4 PlayerV4();
     Mod_Class::Vector4 InAreaOf(Mod_Class::Vector4  area, float minDist, float maxDist);
     Mod_Class::Vector4 InAreaOf(Vector3 area, float minDist, float maxDist);
-    Mod_Class::Vector4 NearByStreet(Mod_Class::Vector4 Area);
+    Mod_Class::Vector4 NearByStreet(Mod_Class::Vector4 area);
+
     Mod_Class::Vector4 FindPedSpPoint(Vector3 Pos);
 
-    bool NotTheSame(Mod_Class::Vector4 V1, Mod_Class::Vector4 V2);
+    bool NotTheSame(Mod_Class::Vector4 postion1, Mod_Class::Vector4 postion2);
     float GroundHight(Vector3 postion);
 
-    std::vector<Vector3> BuildFlightPath(Vector3 vStart);
+    std::vector<Vector3> BuildFlightPath(Vector3 start);
 
     bool YanktonIPL();
-    void LoadOnlineIps();
     bool CayoPericoIPL();
 
-    void AnyPreActives(int iSelect, bool MainLand);
+    void AnyPreActives(int select, bool mainLand);
 }
 
 namespace Mod_Entitys
 {
     int AddRelationship(const std::string& name);
     Hash GetRelationship();
-    void SetRelBetween_Gp(Hash Group1, Hash Group2, int Rel);
+    void SetRelBetween_Gp(Hash group1, Hash group2, int relation);
     void SetRelationType(bool friendly);
 
-    void MoveEntity(Entity MyEnt, Vector3 position);
-    void MoveEntity(Entity MyEnt, Mod_Class::Vector4 position);
-    void StayOnGround(Vehicle Vhick);
+    void MoveEntity(Entity ent, Vector3 position);
+    void MoveEntity(Entity ent, Mod_Class::Vector4 position);
+    void StayOnGround(Vehicle vic);
 
     int GetPedOverlayValues(int overlay);
     int GetPedOverlay(Ped peddy, int overlay);
 
     std::vector<int> RandVehModsist();
-    Prop BuildProps(const std::string& sObject, Vector3 vPos, Vector3 vRot, bool bPush, bool Frozen);
-    Prop BuildProps(const std::string& sObject, Mod_Class::Vector4 vPos, bool bPush, bool Frozen);
+    Prop BuildProps(const std::string& propName, Vector3 vPos, Vector3 vRot, bool bPush, bool Frozen);
+    Prop BuildProps(const std::string& propName, Mod_Class::Vector4 vPos, bool bPush, bool Frozen);
 
-    void EraseBlip(Blip MyBlip);
+    void EraseBlip(Blip blippy);
     void ClearAllPeds();
     void ClearAllEntitys(bool andPeds);
 
-    int OhMyBlip(Vehicle MyVehic);
+    int OhMyBlip(Vehicle vic);
 
-    Prop FindingProps(Vector3 Area, float radius, const std::string& modelHash);
-    Prop FindingProps(Mod_Class::Vector4 Area, float radius, const std::string& modelHash);
+    Prop FindingProps(Vector3 area, float radius, const std::string& modelHash);
+    Prop FindingProps(Mod_Class::Vector4 area, float radius, const std::string& modelHash);
 
-    int FindUSeat(Vehicle vMe);
-    void WarptoAnyVeh(Vehicle Vhic, Ped Peddy, int iSeat);
-    void GetOutVehicle(Ped Peddy);
-    void EmptyVeh(Vehicle Vhic);
-    bool InSameVeh(Ped Peddy);
+    int FindUSeat(Vehicle vic);
+    void WarptoAnyVeh(Vehicle vic, Ped peddy, int seat);
+    void GetOutVehicle(Ped peddy);
+    void EmptyVeh(Vehicle vic);
+    bool InSameVeh(Ped peddy);
 
-    void BlipFiler(Blip MyBlip, int iBlippy, const std::string& sName, int iColour);
-    Blip PedBlimp(Blip CurBlip, Ped pEdd, int iBlippy, const std::string& sName, int iColour, bool heading);
-    Blip LocalBlip(Blip CurBlip, Mod_Class::Vector4 Vlocal, int iBlippy, const std::string& sName, int iColour);
+    void BlipFiler(Blip blippy, int blipType, const std::string& name, int colour);
+    Blip PedBlimp(Blip blippy, Ped peddy, int blipType, const std::string& name, int colour, bool heading);
+    Blip LocalBlip(Blip blippy, Mod_Class::Vector4 local, int blipType, const std::string& name, int colour);
 
-    void ReturnPlayerWeapons();
+    void GetInVehicle(Ped peddy, Vehicle vic, int seat, bool clearSeat);
+    void PlayerEnterVeh(Vehicle vic);
 
-    void GetInVehicle(Ped Peddy, Vehicle Vhick, int Seat, bool clearSeat);
-    void PlayerEnterVeh(Vehicle Vhick);
-    void WalkingStyle(Ped myPEd, const std::string& Anim);
-    void ForceAnim(Ped peddy, const std::string& sAnimDict, const std::string& sAnimName, Vector3 AnPos, Vector3 AnRot);
-    void ForceAnim(Ped peddy, const std::string& sAnimDict, const std::string& sAnimName, Mod_Class::Vector4 AnPos);
-    void ForceSenario(const std::string& senareo, Mod_Class::Vector4 vpos, bool sitting);
-    void RunAnimSeq(Mod_Class::AnimList myAnim, Mod_Class::Vector4 pos);
-    void DanceDanceDance(Ped Dancer);
-    void SunningIt(Ped Sitter, Mod_Class::Vector4 ChairPos);
+    void WalkingStyle(Ped peddy, const std::string& anim);
+    void ForceAnim(Ped peddy, const std::string& animDict, const std::string& animName, Vector3 pos, Vector3 rot);
+    void ForceAnim(Ped peddy, const std::string& animDict, const std::string& animName, Mod_Class::Vector4 pos);
+    void ForceSenario(const std::string& senareo, Mod_Class::Vector4 pos, bool sitting);
+    void RunAnimSeq(Mod_Class::AnimList animList, Mod_Class::Vector4 pos);
+    void DanceDanceDance(Ped peddy);
+    void SunningIt(Ped peddy, Mod_Class::Vector4 pos);
 
-    void PlayHorn(Vehicle Vic, int duration);
-    int LandingGear(Vehicle Vic);
-    void LandNearHeli(Ped Peddy, Vehicle vHick, Vector3 vTarget);
-    void LandNearPlane(Ped Peddy, Vehicle vHick, Vector3 vStart, Vector3 vFinish);
+    void PlayHorn(Vehicle vic, int duration);
+    int LandingGear(Vehicle vic);
+    void LandNearHeli(Ped Peddy, Vehicle vic, Vector3 target);
+    void LandNearPlane(Ped Peddy, Vehicle vic, Vector3 start, Vector3 finish);
 
-    void DriveToooPed(Ped Peddy, Ped Target, bool bRunOver);
-    void DriveBye(Ped Peddy, Ped Target, int iVeh);
-    void FlyHeli(Ped Pedd, Vehicle Vhick, Vector3 vHeliDest, float fSpeed, float flanding);
-    void FlyPlane(Ped Pedd, Vehicle Vhick, Vector3 vPlaneDest);
-    void ChangePlayer(Hash modelHash, int iWeap);
+    void WalkHere(Ped peddy, Mod_Class::Vector4 dest);
+    void RunHere(Ped peddy, Vector3 dest);
+    void DriveAround(Ped peddy);
+    void DriveToooPed(Ped peddy, Ped target, bool runOver);
+    void DriveBye(Ped peddy, Ped target, int vehType);
+    void FlyHeli(Ped peddy, Vehicle vic, Vector3 dest, float speed, float landing);
+    void FlyPlane(Ped peddy, Vehicle vic, Vector3 dest);
+    void DriveToooDest(Ped peddy, Vector3 dest, float speed);
+    void DriveDirect(Ped peddy, Vector3 dest, float speed);
 
-    Ped PlayerPedGen(Mod_Class::Vector4 vLocal, Mod_Class::ClothBank* thisBrain, bool onFoot, bool bfriend);
-    Ped PlayerPedGen(Mod_Class::Vector4 vLocal, const std::string& sPed, bool onFoot, bool bfriend);
-    Ped PlayerPedGen(Mod_Class::Vector4 vLocal, int Set, int Subset, bool onFoot, bool bfriend);
+    void FightPlayer(Ped peddy, bool inVeh, int vehType);
+    void GreefWar(Ped peddy, Ped target);
+    void JogOn(const std::vector<Mod_Class::Vector4>& destList, int start);
+    void MethEdd(bool act);
 
-    void ChangePlayer(int iSelect, int iSubset, int iWeap);
-    void SavedPlayer(Mod_Class::ClothBank* MyBank, int iWeap);
-    void RepoPedPlayer(Ped Victim);
-    Mod_Class::FaceBank AddFace(bool male);
+    void GunningIt(Ped peddy, std::vector<Mod_Class::WeaponSaver>& gunList);
+    void GunningIt(Ped peddy, int gun);
+
+    void MaxOutAllModsNoWheels(Vehicle vic, int vehType);
+    void MakeModsNotWar(Vehicle vic, std::vector<int>* modsList);
+
     void PoliceAcadamy(bool togg);
-    void MethEdd(bool Act);
-    int SizeUpHairList(bool bMale);
-    Mod_Class::HairSets PickAStyle(int Style, bool bMale);
-    Mod_Class::HairSets PickAStyle(bool bMale);
-    std::vector<Mod_Class::FreeOverLay> AddOverLay(bool male, bool freeMode);
-    void SetingtheHair(Ped Pedx, Mod_Class::HairSets* Hair);
 
-    std::string RandVeh(int iVechList, int iSubSet);
-    bool IsItARealVehicle(const std::string& sVehName);
-
-    std::vector<Ped> CollectPeds();
-    Ped NearByPed(Mod_Class::Vector4, float areaMin, float areaMax);
-
-    bool HasASeat(Vehicle vMe);
-    Vehicle VehicleSpawn(Mod_Class::Veh_Set vehSet);
-    void DriveAround(Ped Peddy);
-    void MaxOutAllModsNoWheels(Vehicle Vehic, int cT);
-    void MakeModsNotWar(Vehicle Vehic, std::vector<int>& MyMods);
-    void GreefWar(Ped Peddy, Ped Victim);
-    void GunningIt(Ped Peddy, int iGun);
-    void PedDoGetIn(Vehicle GetV, Ped Peddy, const std::string& sId);
-    void FightPlayer(Ped Peddy, bool bInVeh, int PrefVeh);
-    void DriveToooDest(Ped Peddy, Vector3 Vme, float fSpeed);
-    void DriveDirect(Ped Peddy, Vector3 Vme, float fSpeed);
-
-    std::string RandomPed(int iPedtype, int iSubType);
-    void ApplyTats(Ped Pedx, Mod_Class::ClothBank* GetTats);
-    Mod_Class::ClothBank NewClothBank(const std::string& PedTitle);
-    Mod_Class::ClothBank NewClothBank(int iPedtype, int iSubType);
-    Mod_Class::ClothBank NewFreeModePed();
-    void ThemVoices(const std::string& voip);
-    void PullingFaces(const std::string& aniName);
-    std::vector<std::string> FindCloths(bool male);
+    std::vector<std::string> FindCloths(Hash UserName);
     Mod_Class::ClothX LoadCloths(const std::string& file);
-    void OnlineDress(Ped Pedx, Mod_Class::ClothX* MyCloths);
-    void OnlineFaces(Ped Pedx, Mod_Class::ClothBank* pFixtures);
-    void WalkHere(Ped Peddy, Mod_Class::Vector4 Dest);
-    void RunHere(Ped Peddy, Vector3 Dest);
-    void JogOn(std::vector<Mod_Class::Vector4>& Route, int start);
-    void SideAdviceNote();
+
+    int SizeUpHairList(bool male);
+    Mod_Class::HairSets PickAStyle(int style, bool male);
+    Mod_Class::HairSets PickAStyle(bool male);
+    Mod_Class::FaceBank AddFace(bool male);
+    std::vector<Mod_Class::FreeOverLay> AddOverLay(bool male, bool freeMode);
+    Mod_Class::ClothBank NewFreeModePed(int male);
+
+    void ThemVoices(const std::string& voice);
+    void PullingFaces(const std::string& aniName);
+
+    Mod_Class::ClothX GetYourTogs(Ped peddy);
+    Mod_Class::FaceBank FreeFaces(Ped peddy, bool free);
+    std::string RandomPed(int pedtype, int subType);
+    Mod_Class::ClothBank NewClothBank(const std::string& pedTitle);
+    Mod_Class::ClothBank NewClothBank(int pedtype, int subType);
+    Mod_Class::ClothBank PlayerClothBank();
+
+    void ApplyTats(Ped peddy, Mod_Class::ClothBank* getTats);
+    void OnlineDress(Ped peddy, Mod_Class::ClothX* cloths);
+    void SetingtheHair(Ped peddy, Mod_Class::HairSets* hair);
+    void OnlineFaces(Ped peddy, Mod_Class::ClothBank* feats);
+
+    Ped PlayerPedGen(Mod_Class::Vector4 pos, Mod_Class::ClothBank* clothBank, bool onFoot, bool isfriend);
+    Ped PlayerPedGen(Mod_Class::Vector4 pos, int set, int Subset, bool onFoot, bool isfriend);
+    Ped PlayerPedGen(Mod_Class::Vector4 pos, const std::string& pedModel, bool onFoot, bool isfriend);
+
+    void RepoPedPlayer(Ped target);
+    void ChangePlayer(Hash modelHash);
+    void ChangePlayer(int select, int subset, int weap);
+    void SavedPlayer(Mod_Class::ClothBank* clothBank, int weap);
+
+    std::string RandVeh(int vehList, int subSet);
+    bool IsItARealVehicle(const std::string& vehName);
+    bool HasASeat(Vehicle vic);
+
+    Vehicle VehicleSpawn(Mod_Class::Veh_Set vehSet);
+
+    void CollectPeds(std::vector<Ped>* pedList);
+    Ped NearByPed(Mod_Class::Vector4 area, float areaMin, float areaMax);
+
     void Reicarnations();
-    void EasyWayOut(Ped Vic);
 
     void CayoAudio();
     void CayoPartay();
 }
 
-namespace Mod_Ui
-{
-    int AddScreenText(int font, const std::string& caption, float textLeftScaled, float lineTopScaled, float lineHeightScaled, float text_scale, int text_col[4]);
-    void AddSprite(const std::string& spriteLocation, const std::string& spriteName, float posX, float posY, float sizeX, float sizeY, float heading);
-    void Draw_rect(float A_0, float A_1, float A_2, float A_3, int A_4, int A_5, int A_6, int A_7);
-    void Draw_menu_line(const std::string& caption, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, bool active, bool title, bool rescaleText);
-    void Draw_menu_line_Numbers(const std::string& caption, int number, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, float textLeft2, bool active, bool title, bool rescaleText);
-    void DrawSessionList(const std::string& caption, const std::string& level, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, float textLeft2, bool active, bool title, int position);
-    int BottomRight(std::vector<int>& iButtons, std::vector<std::string>& sInstuctions);
-    void CloseBaseHelpBar(int CloseMe);
-    
-    void ShowText(float x, float y, float scale, const std::string& text, int font, Mod_Class::RGBA rgba, bool outline);
-    void ShowPlayerLabel(Vector3 location, float baseSize, const std::vector<std::string>& textLines);
-    void BigMessage(const std::string& message, const std::string& message2, int colour);
-    void TopLeft(const std::string& sText);
-    int BottomLeft(const std::string& sText);
-    int BottomLeftIcon(const std::string& sText1, const std::string& sText2, const std::string& subject, const std::string& badge, const std::string& clanTag);
-    void RightSide(const std::string& caption, int iPos);
-    
-    void MeunDescrition(Mod_Class::MeunSystem* myMenu, std::vector<std::string>& Descrip, bool reSize);
-    void MenuDisplay(Mod_Class::MeunSystem* myMenu, float screenHeightScaleFactor);
-    std::string CaptureScreenText();
-    void AddGraphics(const std::string& graphics);
-}
-
 namespace Mod_Data
 {
-    inline int FollowMe;
-    inline Hash GP_Player;
-    inline Hash Gp_Friend;
-    inline Hash GP_Attack;
-    inline Hash Gp_Follow;
-    inline Hash GP_Mental;
+    inline int FollowMe = 0;
+    inline Hash GP_Player = 0;
+    inline Hash Gp_Friend = 0;
+    inline Hash GP_Attack = 0;
+    inline Hash Gp_Follow = 0;
+    inline Hash GP_Mental = 0;
+
+    inline std::vector<std::string> MainChar = { "player_zero", "player_one", "player_two", "mp_m_freemode_01", "mp_f_freemode_01" };
+    inline std::vector<Hash> MainProtags;
 
     inline bool Meth_Act = false;
     inline bool First_Load = false;
-    inline bool NSPM_Include = false;
     inline bool Yankton_Loaded = false;
     inline bool Cayo_Loaded = false;
-    inline bool Close_Menu = false;
     inline bool CallTheCops = false;
-    inline bool Disp_Advice = false;
     inline bool Deputize = false;
     inline bool BackStagePass = false;
     inline bool GotPlayZero = false;
     inline bool CanSnow = false;
+    inline bool MissingFilesNag = false;
+    inline bool Close_Menu = false;
 
-    inline std::string Ahhhh;
+    inline std::string Ahhhh = "";
 
     inline bool PlayerIsDead = false;
     inline bool ShowMobile = false;
 
-    inline int MyBannerPng;
     inline int Side_Add_Time = 0;
-    inline int Menu_Index = 0;
+
+    inline const std::string DirRandStart = Mod_Systems::GetDir() + "/RandomStart";
+    inline const std::string DirRandNumb = DirRandStart + "/Randoms";
+    inline const std::string DirSavedPed = DirRandStart + "/SavedPeds";
+    inline const std::string DirWeapons = DirRandStart + "/Weapons";
+    inline const std::string DirVehicles = DirRandStart + "/Vehicles";
+    inline const std::string DirTranslate = DirRandStart + "/Translate";
+    inline const std::string DirCustPeds = DirRandStart + "/Peds";
+    inline const std::string DirectOutfitFolder = Mod_Systems::GetDir() + "/Outfits";
+    inline const std::string DirectOutfitMale = DirectOutfitFolder + "/Male";
+    inline const std::string DirectOutfitFemale = DirectOutfitFolder + "/Female";
+    inline const std::string DirectOutfitMichael = DirectOutfitFolder + "/Michael";
+    inline const std::string DirectOutfitFranklin = DirectOutfitFolder + "/Franklin";
+    inline const std::string DirectOutfitTrevor = DirectOutfitFolder + "/Trevor";
+
+    inline const std::string BannerFile = DirRandStart + "/RandomStartBanner@256x64.png";
+    inline const std::string LoggingFile = DirRandStart + "/LoggerLight.txt";
+    inline const std::string SettingsFile = DirRandStart + "/Settings.ini";
+    inline const std::string SaveWeapsFile = DirRandStart + "/MyWeaps.ini";
+
+    inline const std::string ZeroYank = Mod_Systems::GetDir() + "/PlayerZero/Yankton.txt";
+    inline const std::string ZeroCayo = Mod_Systems::GetDir() + "/PlayerZero/Cayo.txt";
+
+    inline const std::string WeapCompon = DirWeapons + "/GROUP_COMPONENTS.ini";
+    inline const std::string WeapLiverys = DirWeapons + "/GROUP_LIVARY.ini";
+    inline const std::string WeapTints = DirWeapons + "/GROUP_TINTS.ini";
+
+    inline const std::vector<std::string> LangosPick = {
+        "English=",
+        "French=",
+        "German=",
+        "Italian=",
+        "Spanish=",
+        "Portuguese=",
+        "Polish=",
+        "Russian=",
+        "Korean=",
+        "TraditionalChinese=",
+        "Japanese=",
+        "Mexican=",
+        "SimplifiedChinese="
+    };
+    inline const std::vector<std::string> WeaponsDir = {
+        Mod_Systems::GetDir() + "/RandomStart/Weapons/GROUP_MELEE.ini",
+        Mod_Systems::GetDir() + "/RandomStart/Weapons/GROUP_THROWN.ini",
+        Mod_Systems::GetDir() + "/RandomStart/Weapons/GROUP_PISTOL.ini",
+        Mod_Systems::GetDir() + "/RandomStart/Weapons/GROUP_SMG.ini",
+        Mod_Systems::GetDir() + "/RandomStart/Weapons/GROUP_SHOTGUN.ini",
+        Mod_Systems::GetDir() + "/RandomStart/Weapons/GROUP_RIFLE.ini",
+        Mod_Systems::GetDir() + "/RandomStart/Weapons/GROUP_SNIPER.ini",
+        Mod_Systems::GetDir() + "/RandomStart/Weapons/GROUP_MG.ini",
+        Mod_Systems::GetDir() + "/RandomStart/Weapons/GROUP_HEAVY.ini"
+    };
+
+    inline const std::vector<std::string> TranlsteDir = {
+        Mod_Systems::GetDir() + "/RandomStart/Translate/English.txt",
+        Mod_Systems::GetDir() + "/RandomStart/Translate/French.txt",
+        Mod_Systems::GetDir() + "/RandomStart/Translate/German.txt",
+        Mod_Systems::GetDir() + "/RandomStart/Translate/Italian.txt",
+        Mod_Systems::GetDir() + "/RandomStart/Translate/Spanish.txt",
+        Mod_Systems::GetDir() + "/RandomStart/Translate/Portuguese.txt",
+        Mod_Systems::GetDir() + "/RandomStart/Translate/Polish.txt",
+        Mod_Systems::GetDir() + "/RandomStart/Translate/Russian.txt",
+        Mod_Systems::GetDir() + "/RandomStart/Translate/Korean.txt",
+        Mod_Systems::GetDir() + "/RandomStart/Translate/Chinese.txt",
+        Mod_Systems::GetDir() + "/RandomStart/Translate/Japanese.txt",
+        Mod_Systems::GetDir() + "/RandomStart/Translate/Spanish.txt",
+        Mod_Systems::GetDir() + "/RandomStart/Translate/ChineseSimplify.txt"
+    };
+    inline std::vector<std::string> RSLangMenu = {
+            "Enter",                                                                                    //0
+            "Back",                                                                                     //1
+            "Left",                                                                                     //2
+            "Right",                                                                                    //3
+            "Random Scenarios",                                                                         //4
+            "Select available or launch a random scenario.",                                            //5
+            "Save Ped Menu",                                                                            //6
+            "Change customize and save characters.",                                                    //7
+            "Random Start",                                                                             //8
+            "Select a random scenario when game loads.",                                                //9
+            "Random Ped",                                                                               //10
+            "Load as or re-spawn as a random ped (includes animals).",                                  //11
+            "Saved Ped",                                                                                //12
+            "Load as or re-spawn as a saved ped.",                                                      //13
+            "Reincarnation",                                                                            //14
+            "Life after death?",                                                                        //15
+            "Re-spawn",                                                                                 //16
+            "Return as your current character in the area you died in.",                                //17
+            "Funeral",                                                                                  //18
+            "If you are using a random or non main character have a funeral service on death.",         //19
+            "Prison",                                                                                   //20
+            "Go straight to Bolingbroke do not pass go do not collect 200.",                            //21
+            "Random Weapons",                                                                           //22
+            "Get a random weapon selection or keep your current weapons.",                              //23
+            "Capture Weapon Load-out",                                                                  //24
+            "Save you current weapon selection.",                                                       //25
+            "Change Key-bindings",                                                                      //26
+            "Select menu load key.",                                                                    //27
+            "Beach Ped",                                                                                //28
+            "Sun bathing and motor boating.",                                                           //29
+            "Tramps",                                                                                   //30
+            "Down and out in Los Santos.",                                                              //31
+            "High class",                                                                               //32
+            "Nice house, nice car, nice weather.",                                                      //33
+            "Mid class",                                                                                //34
+            "Reasonable house, reasonable car, reasonable weather.",                                    //35
+            "Low class",                                                                                //36
+            "Rubbish house, trash car, crap weather.",                                                  //37
+            "Business",                                                                                 //38
+            "The high flying Los Santos elite.",                                                        //39
+            "Body builder",                                                                             //40
+            "Use the facilities at muscle beach.",                                                      //41
+            "Gangsters",                                                                                //42
+            "Defend your turf in the Los Santos war zones.",                                            //43
+            "Epsilon ",                                                                                 //44
+            "Join a cult and look down on the non-believers.",                                          //45
+            "Jogger",                                                                                   //46
+            "Take a run in some random location.",                                                      //47
+            "Golfer",                                                                                   //48
+            "Play a round or just burn up the turf in your caddy.",                                     //49
+            "Hiker",                                                                                    //50
+            "Explore the wilderness of Los Santos.",                                                    //51
+            "Meth addict",                                                                              //52
+            "Strawberry fields for ever.",                                                              //53
+            "Rural",                                                                                    //54
+            "Down on the farm.",                                                                        //55
+            "Cyclist",                                                                                  //56
+            "Put on the lycra and start peddling.",                                                     //57
+            "LGBTWXYZ",                                                                                 //58
+            "I am the very model of a modern Major-General I've information vegetable, animal, and mineral.",//59
+            "Pool Peds",                                                                                //60
+            "Take a swim or just chill by the pool.",                                                   //61
+            "Workers",                                                                                  //62
+            "The many trades and occupations in Los Santos.",                                           //63
+            "Jet ski",                                                                                  //64
+            "Race your jet-ski or just ride around for fun.",                                           //65
+            "Bike/ATV",                                                                                 //66
+            "Do some off-roading around Los Santos.",                                                   //67
+            "Services",                                                                                 //68
+            "Do your civic duty with fire, police, ambulance or military.",                             //69
+            "Pilot",                                                                                    //70
+            "Earn your wings gallivanting above Los Santos.",                                           //71
+            "Animals",                                                                                  //72
+            "Soar like a bird, strut like a deer, swim like a fish.",                                   //73
+            "Yankton",                                                                                  //74
+            "Visit snowy Yankton.",                                                                     //75
+            "Cayo Piero",                                                                               //76
+            "Visit sunny Cayo Piero.",                                                                  //77
+            "Saved Peds",                                                                               //78
+            "Select and edit your ped collection.",                                                     //79
+            "Save current ped",                                                                         //80
+            "save your current character.",                                                             //81
+            "Freemode Ped",                                                                             //82
+            "Generate a random freemode ped.",                                                          //83
+            "Reposes Ped",                                                                              //84
+            "Become a nearby ped.",                                                                     //85
+            "Select a Ped",                                                                             //86
+            "Rename Ped",                                                                               //87
+            "Change the name of your ped.",                                                             //88
+            "Change Outfit",                                                                            //89
+            "Change your outfit.",                                                                      //90
+            "Tattoo Pallor",                                                                            //91
+            "Add Tattoos to your character.",                                                           //92
+            "Set Hair Style",                                                                           //93
+            "Eye Colour",                                                                               //94
+            "Pick the colour of your eyes .",                                                           //95
+            "Pick Hair Colour",                                                                         //96
+            "Pick Hair Streaks",                                                                        //97
+            "Set Overlays",                                                                             //98
+            "Ped decals like age blush facial hair and make-up.",                                       //99
+            "Alter Face Shape",                                                                         //100
+            "Change position of chin, mouth, nose.",                                                    //101
+            "Change Parents",                                                                           //102
+            "Alter the base parents of your freemode character.",                                       //103
+            "Set Voice",                                                                                //104
+            "Save Changes",                                                                             //105
+            "Create or update saved peds ini.",                                                         //106
+            "Delete Ped",                                                                               //107
+            "Remove this ped from saved peds directory.",                                               //108
+            "Select outfit",                                                                            //109  
+            "Create New Outfit",                                                                        //110
+            "Save a new outfit on your character.",                                                     //111
+            "Edit Outfits",                                                                             //112
+            "edit the components on current outfit.",                                                   //113
+            "Edit Props",                                                                               //114
+            "Pick hats and glasses.",                                                                   //115
+            "Pre-made outfits",                                                                         //116
+            "Base Component",                                                                           //117
+            "Texture",                                                                                  //118
+            "Select ",                                                                                  //119
+            "Opacity",                                                                                  //120
+            "Colour",                                                                                   //121
+            "First Parent",                                                                             //122
+            "Second Parent",                                                                            //123
+            "Shape Mix",                                                                                //124
+            "Skin Mix",                                                                                 //125
+            "Third Mix",                                                                                //126
+            "Face",                                                                                     //127
+            "Head",                                                                                     //128
+            "Hair",                                                                                     //129
+            "Torso",                                                                                    //130
+            "Legs",                                                                                     //131
+            "Back Packs",                                                                               //132
+            "Feet",                                                                                     //133
+            "Accessories",                                                                              //134
+            "Top Add-ons",                                                                              //135
+            "Armour",                                                                                   //136
+            "Textures",                                                                                 //137
+            "Coats",                                                                                    //138
+            "Hats",                                                                                     //139
+            "Glasses",                                                                                  //140
+            "Ears",                                                                                     //141
+            "Watches",                                                                                  //142
+            "Torso",                                                                                    //143
+            "Head",                                                                                     //144
+            "Left Arm",                                                                                 //145
+            "Right Arm",                                                                                //146
+            "Left Leg",                                                                                 //147
+            "Right Leg",                                                                                //148
+            "Back",                                                                                     //149
+            "Chest",                                                                                    //150
+            "Stomach",                                                                                  //151
+            "Nose Width",                                                                               //152
+            "Nose Peak Hight",                                                                          //153
+            "Nose Peak Length",                                                                         //154
+            "Nose Bone_High",                                                                           //155
+            "Nose Peak Lowering",                                                                       //156
+            "Nose Bone Twist",                                                                          //157
+            "Eye Brow High",                                                                            //158
+            "Eye Brow Forward",                                                                         //159
+            "Cheeks Bone High",                                                                         //160
+            "Cheeks Bone Width",                                                                        //161
+            "Cheeks Width",                                                                             //162
+            "Eyes Opening",                                                                             //163
+            "Lips Thickness",                                                                           //164
+            "Jaw Bone Width 'Bone size to sides",                                                       //165
+            "Jaw Bone Back Length 'Bone size to back",                                                  //166
+            "Chimp_Bone_Lowering 'Go Down",                                                             //167
+            "Chimp Bone Length 'Go forward",                                                            //168
+            "Chimp Bone Width", "Chimp Hole",                                                           //169
+            "Neck Thickness",                                                                           //170
+            "Blemishes",                                                                                //171
+            "Facial Hair",                                                                              //172
+            "Eyebrows",                                                                                 //173
+            "Ageing",                                                                                   //174
+            "Make-up",                                                                                  //175
+            "Blush",                                                                                    //176
+            "Complexion",                                                                               //177
+            "Sun Damage",                                                                               //178
+            "Lipstick",                                                                                 //179
+            "Moles & Freckles",                                                                         //180
+            "Chest Hair",                                                                               //181
+            "Body Blemishes",                                                                           //182
+            "Add Body Blemishes",                                                                       //183
+            "Select a Keyboard Key",                                                                    //184
+            "Sets the menu open key.",                                                                  //185
+            "Select a Controller Combo",                                                                //186
+            "Choose two controller keys to open menu.",                                                 //187
+            "Hold ~INPUT_VEH_EXIT~ to take control",                                                    //188
+            "Hold the key you would like to use.",                                                      //189
+            "Key Changed",                                                                              //190
+            "Hold ~INPUT_VEH_EXIT~ to hide under van",                                                  //191
+            "Hold ~INPUT_VEH_EXIT~ to hide in waste bin",                                               //192
+            "Top Decal",                                                                                //193
+            "Explore the World: GTA games often feature vast open worlds with a lot of hidden content, collectibles, and easter eggs. Take your time to explore and enjoy the scenery.",
+            "Follow the Story: While you can engage in random chaos, the main story missions provide structure and context for the game. Completing these missions often unlocks new content and areas.",
+            "Use Cover: In gunfights, always use cover to protect yourself. Pop out to shoot, then take cover again. This reduces the chances of getting shot.",
+            "Manage Your Health: Keep an eye on your health and armor levels. You can usually find health packs and armor scattered throughout the game world. Stock up before difficult missions.",
+            "Plan Your Getaways: After committing a crime, have an escape plan. Know where you're going and what you'll do to evade the police.",
+            "Invest in Properties: In some GTA games, you can buy properties. These can provide a passive income and sometimes even offer other benefits.",
+            "Experiment with Vehicles: GTA games have a wide variety of vehicles, from cars to planes to bicycles. Experiment with different vehicles to see which ones suit your style and mission needs.",
+            "Customize Your Character: Many GTA games allow you to customize your character's appearance. Experiment with clothing and accessories to create your own unique style.",
+            "Use the Internet: In later GTA games, characters have smartphones and access to the internet. You can use it to buy vehicles, properties, and more.",
+            "Save Your Game: Don't forget to save your progress regularly, especially after completing important missions. This will prevent you from losing a lot of progress in case you fail a mission or get busted.",
+            "Don't Ignore Side Missions: Side missions can offer fun and unique experiences, as well as rewards like weapons, money, and even character upgrades.",
+            "Respect Traffic Rules (or Not): Sometimes following traffic rules can help you blend in and avoid the attention of the police. On the other hand, reckless driving can be a lot of fun. It's up to you!",
+            "Be Mindful of Police: Committing crimes will get the attention of the police. Pay attention to wanted levels and use Pay 'n' Spray or other hiding spots to lose the cops.",
+            "Play with Friends: If the game supports it, playing GTA with friends can be a blast. You can complete missions together or engage in chaotic, open-world mayhem.",
+            "Have Fun: Ultimately, GTA games are meant to be enjoyed. Whether you prefer causing chaos, following the story, or just exploring, remember that it's a game, and the goal is to have fun.",
+            "Press ~INPUT_TALK~ to change dance, hold ~INPUT_VEH_EXIT~ to  stop Dancing",               //209
+            "Press ~INPUT_TALK~ to start dancing",                                                      //210
+            "press ~INPUT_DUCK~ to select a ped, press ~INPUT_SPRINT~ to  become this ped, Press ~INPUT_RELOAD~ to Close.",//211
+            "Press ~INPUT_TALK~ to change action, hold ~INPUT_VEH_EXIT~ to exit.",                      //212
+            "Winter is Coming",                                                                         //213
+            "January",                                                                                  //214
+            "February",                                                                                 //215
+            "March",                                                                                    //216
+            "April",                                                                                    //217
+            "May",                                                                                      //218
+            "June",                                                                                     //219
+            "July",                                                                                     //220
+            "August",                                                                                   //221
+            "September",                                                                                //222
+            "October",                                                                                  //223
+            "November",                                                                                 //224
+            "December",                                                                                 //225
+            "Set your winter months",                                                                   //226
+            "Edit",                                                                                     //227
+            "Male",                                                                                     //228
+            "Female",                                                                                   //229
+            "Options",                                                                                  //230
+            "Random Start Settings",                                                                    //231
+            "Auto Save-Peds",                                                                           //232
+            "Saved-ped changes are automaticly saved",                                                  //233
+            "Menu Orientation",                                                                         //234
+            "Change menu location",                                                                     //235
+            "Change mod language",                                                                      //236
+            "Toggle All",                                                                               //237
+            "Enter a name for your Saved-Ped",                                                          //238
+            "Enter a name for your outfit",                                                             //239
+            "Face Moods",                                                                               //240
+            "Walking Style",                                                                            //241
+            "Weapon Load-out",                                                                          //242
+            "Create a custom weapon load-out for your Save-Ped",                                        //243
+            "Remove all tattoos",                                                                       //244
+            "Melee",                                                                                    //245
+            "Thrown",                                                                                   //246
+            "Pistol",                                                                                   //247
+            "SMG",                                                                                      //248
+            "Shotgun",                                                                                  //249
+            "Rifle",                                                                                    //250
+            "Sniper",                                                                                   //251
+            "MG",                                                                                       //252
+            "Heavy",                                                                                    //253
+            "Clear Load-out",                                                                           //254
+            "No Tints Available",                                                                       //255
+            "Add-ons",                                                                                  //256
+            "Livery's",                                                                                 //257
+            "Tint",                                                                                     //258
+            "No Add-ons Available",                                                                     //259
+            "No Livery's Available",                                                                    //260
+            "Shirt Label",                                                                              //261
+            "Delete Outfit",                                                                            //262
+            "Delete your current outfit.",                                                              //263
+            "You are missing V_Functions.asi. please download this from here : https://www.gta5-mods.com/scripts/new-street-phone-missions",  //264
+            "Max Health",                                                                               //265
+            "Set your max health (110 - 1000)",                                                           //266
+            "Run Speed",                                                                                //267
+            "Set your run speed multiplier (0 - 1.49)",                                                 //268
+            "Swim Speed",                                                                               //269
+            "Set your swim speed multiplier (0 - 1.49)",                                                //270
+            "Blank",                                                                                    //280
+            "Blank",                                                                                    //281
+            "Blank",                                                                                    //282
+            "Blank",                                                                                    //283
+            "Blank",                                                                                    //284
+            "Blank",                                                                                    //285
+            "Blank",                                                                                    //286
+            "Blank",                                                                                    //287
+            "Blank",                                                                                    //288
+            "Blank",                                                                                    //289
+            "Blank"                                                                                     //290
+
+    };
 
     inline Mod_Class::Settings_Ini Mod_Settings = Mod_Class::Settings_Ini();
     inline std::vector<Prop> Prop_List = {};
@@ -684,113 +1053,10 @@ namespace Mod_Data
     inline std::vector<Mod_Class::Ped_Label> PedLabels = {};
     inline std::vector<Mod_Class::ClothBank> SavedPeds = {};
     inline std::vector<Mod_Class::WeaponSaver> Player_Weaps = {};
-    inline std::vector<std::string> Disp_Pick;
+    inline std::vector<std::string> Disp_Pick = {};
     inline std::vector<Ped> CayDancers = {};
-
-    inline std::vector<std::string> PrePed_01 = {};
-    inline std::vector<std::string> PrePed_02 = {};
-    inline std::vector<std::string> PrePed_03 = {};
-    inline std::vector<std::string> PrePed_04 = {};
-    inline std::vector<std::string> PrePed_05 = {};
-    inline std::vector<std::string> PrePed_06 = {};
-    inline std::vector<std::string> PrePed_07 = {};
-    inline std::vector<std::string> PrePed_08 = {};
-    inline std::vector<std::string> PrePed_09 = {};
-    inline std::vector<std::string> PrePed_10 = {};
-    inline std::vector<std::string> PrePed_11 = {};
-    inline std::vector<std::string> PrePed_12 = {};
-    inline std::vector<std::string> PrePed_13 = {};
-    inline std::vector<std::string> PrePed_14 = {};
-    inline std::vector<std::string> PrePed_15 = {};
-
-    inline std::vector<std::string> PreVeh_01 = {};
-    inline std::vector<std::string> PreVeh_02 = {};
-    inline std::vector<std::string> PreVeh_03 = {};
-    inline std::vector<std::string> PreVeh_04 = {};
-    const inline std::vector<std::string> PreVeh_05 = {
-        "BULLDOZER",  //
-        "UTILLITRUCK",  //<!-- Utility Truck cherry picker variant -->
-        "UTILLITRUCK2",  //<!-- Utility Truck flatbed variant -->
-        "UTILLITRUCK3",  //<!-- Utility Truck pick-up variant -->
-        "RUBBLE",  //
-        "TIPTRUCK",  //<!-- Tipper 4-wheel variant -->
-        "TIPTRUCK2",  //<!-- Tipper 6-wheel variant -->
-        "MIXER",  //
-        "MIXER2"  //<!-- Mixer 8-wheel variant -->
-    };
-    const inline std::vector<std::string> PreVeh_06 = {
-        "BENSON",  //
-        "BIFF",  //
-        "FLATBED",  //
-        "HAULER",  //
-        "HAULER2",  //<!-- Hauler Custom -->
-        "MULE",  //
-        "MULE2",  //<!-- Mule ramp door variant -->
-        "PACKER",  //
-        "PHANTOM",  //
-        "POUNDER",  //
-        "POUNDER2",  //<!-- Pounder Custom -->
-        "benson2", //  Commercial
-        "phantom4", // Commercial
-        "towtruck3", // Utility
-        "towtruck4" // Utility
-    };
-    const inline std::vector<std::string> PreVeh_07 = {
-        "BF400",  //
-        "MANCHEZ",  //
-        "MANCHEZ2",  //<!-- Manchez Scout -->
-        "MANCHEZ3",  //<!-- Manchez Scout C -->
-        "SANCHEZ",  //<!-- Sanchez livery variant -->
-        "SANCHEZ2",  //
-        "BLAZER",  //
-        "BLAZER3",  //<!-- Hot Rod Blazer -->
-        "BLAZER4"  //<!-- Street Blazer -->
-    };
-    const inline std::vector<std::string> PreVeh_08 = {
-        "FBI",  //<!-- FIB Buffalo -->
-        "FBI2",  //<!-- FIB Granger -->
-        "POLICE4",  //<!-- Unmarked Cruiser -->
-        "FIRETRUK",  //
-        "POLICEB",  //<!-- Police Bike -->
-        "PRANGER",  //<!-- Park Ranger -->
-        "SHERIFF",  //<!-- Sheriff Cruiser -->
-        "SHERIFF2"  //<!-- Sheriff SUV -->
-        "POLICE2",  //<!-- Police Cruiser Buffalo -->
-        "POLICE",  //<!-- Police Cruiser Stanier -->
-        "POLICE3",  //<!-- Police Cruiser Interceptor -->
-        "POLICET",  //<!-- Police Transporter -->
-        "RIOT"  //<!-- Police Riot -->
-    };
-    const inline std::vector<std::string> PreVeh_09 = {
-        "APC",  //
-        "BARRACKS",  //
-        "BARRACKS2",  //<!-- Barracks Semi -->
-        "BARRAGE",  //
-        "CHERNOBOG",  //
-        "CRUSADER",  //
-        "HALFTRACK",  //
-        "RHINO",  //
-        "KHANJALI",  //<!-- TM-02 Khanjali -->
-        "VETIR"  //
-    };
-    inline std::vector<std::string> PreVeh_10 = {};
-    inline std::vector<std::string> PreVeh_11 = {};
-    const inline std::vector<std::string> PreVeh_12 = {
-        "ASEA2",  //<!-- Asea North Yankton variant -->
-        "EMPEROR3",  //<!-- Emperor North Yankton variant -->
-        "RANCHERXL2",  //<!-- Rancher XL North Yankton variant -->
-        "SADLER2",  //<!-- Sadler North Yankton variant -->
-    };
-    const inline std::vector<std::string> PreVeh_13 = {
-        "MANCHEZ2",  //<!-- Manchez Scout -->
-        "MANCHEZ3",  //<!-- Manchez Scout C -->
-        "VETIR",  //
-        "JUBILEE",  //
-        "WINKY",  //
-        "BRIOSO2",  //<!-- Brioso 300 -->
-        "WEEVIL",  //
-        "SQUADDIE",
-        "VERUS",  //
+    inline const std::vector<std::string> TrampSigns = {
+    "prop_beggers_sign_01", "prop_beggers_sign_02", "prop_beggers_sign_03", "prop_beggers_sign_04"
     };
 
     inline const std::vector<Mod_Class::Vector4> BeachLounger = {
@@ -1537,39 +1803,52 @@ namespace Mod_Data
         Mod_Class::Vector4(-175.5412f, -759.5623f, 44.22504f, 235.1201f),
         Mod_Class::Vector4(6.524668f, -933.7928f, 29.90014f, 130.7768f)
     };
-    inline const std::vector<Mod_Class::Vector4> BuisnessHeli01 = {
-        Mod_Class::Vector4(142.9556f, -418.5663f, 357.813f, 146.1803f),
-        Mod_Class::Vector4(44.47088f, -588.145f, 394.3559f, 144.694f),
-        Mod_Class::Vector4(-25.96486f, -697.7151f, 377.8641f, 156.5938f),
-        Mod_Class::Vector4(-75.85501f, -815.7902f, 332.1805f, 235.7576f),
-        Mod_Class::Vector4(-75.94235f, -818.4665f, 326.8517f, 235.0135f)
-    };
-    inline const std::vector<Mod_Class::Vector4> BuisnessHeli02 = {
-        Mod_Class::Vector4(89.14077f, -349.5265f, 220.1292f, 95.45492f),
-        Mod_Class::Vector4(-16.09307f, -416.3289f, 237.257f, 140.269f),
-        Mod_Class::Vector4(-91.02924f, -495.4232f, 240.5292f, 172.6681f),
-        Mod_Class::Vector4(-150.6743f, -586.1757f, 221.0396f, 217.9597f),
-        Mod_Class::Vector4(-145.5026f, -593.9283f, 211.6755f, 208.2894f)
-    };
-    inline const std::vector<Mod_Class::Vector4> BuisnessHeli03 = {
-        Mod_Class::Vector4(-1244.733f, -556.331f, 121.6263f, 73.09602f),
-        Mod_Class::Vector4(-1314.872f, -510.2231f, 110.942f, 71.39652f),
-        Mod_Class::Vector4(-1376.537f, -482.3608f, 103.3186f, 59.46054f),
+    inline const std::vector<Mod_Class::Vector4> BuisnessHeli = {
+        Mod_Class::Vector4(-1161.642f, -2191.744f, 12.8148f,57.32962f), //"LSIA Vehicle Warehouse", 5),
+        Mod_Class::Vector4(-501.4268f, -2183.638f, 6.946587f,321.1457f), //"Big House Vehicle Warehouse", 5),
+        Mod_Class::Vector4(-636.5945f, -1790.944f, 23.62133f,66.77604f), //"La Puerta Vehicle Warehouse", 5),
+        Mod_Class::Vector4(-55.26973f, -1838.358f, 26.16808f,318.1885f), //"Davis Vehicle Warehouse", 5),
+        Mod_Class::Vector4(131.8759f, -2987.817f, 6.638521f,269.7666f), //"Elysian Island Vehicle Warehouse", 5),
+        Mod_Class::Vector4(823.5082f, -2126.997f, 28.91375f,84.27451f), //"Cypress Flats Vehicle Warehouse", 5),
+        Mod_Class::Vector4(1006.479f, -1865.767f, 30.50913f,85.25732f), //"La Messa Vehicle Warehouse", 5),
+        Mod_Class::Vector4(-1062.604f, -2021.664f, 12.78076f,132.728f), //"Xero Gas Factory", 3),
+        Mod_Class::Vector4(-891.0944f, -2734.081f, 13.44745f,150.3703f), //"Bilgeco Warehouse", 3),
+        Mod_Class::Vector4(98.10351f, -2193.174f, 5.653489f,89.89806f), //"Walker & Sons Warehouse", 3),
+        Mod_Class::Vector4(1004.175f, -2519.513f, 27.92308f,83.26608f), //"Cypress Warehouses Warehouse", 3),
+        Mod_Class::Vector4(1071.635f, -2171.634f, 31.53667f,353.9962f), //"Wholesale Furniture Warehouse", 3),
+        Mod_Class::Vector4(906.0683f, -1561.211f, 30.34963f,91.20412f), //"Logistics Depot Warehouse", 3),
+        Mod_Class::Vector4(766.0025f, -880.819f, 24.59484f,359.1105f), //"Darnel Bros Warehouse", 3),
+        Mod_Class::Vector4(-541.9368f, -1767.85f, 21.15111f,330.4702f), //"Fridgit Annexe", 2),
+        Mod_Class::Vector4(-344.285f, -1348.406f, 30.88845f,179.0238f), //"Disused Factory Outlet", 2),
+        Mod_Class::Vector4(-303.7468f, -2719.221f, 5.619645f,133.8696f), //"LS Marine Building 3", 2),
+        Mod_Class::Vector4(550.4014f, -1924.716f, 24.42177f,305.7132f), //"Old Power Station", 2),
+        Mod_Class::Vector4(512.8342f, -637.7836f, 24.37022f,178.8968f), //"Railyard Warehouse", 2),
+        Mod_Class::Vector4(898.0537f, -1020.824f, 34.58628f,57.24908f),// "Celltowa Unit", 1),
+        Mod_Class::Vector4(265.688f, -3004.435f, 5.353796f,358.4464f), // "Pier 400 Utility Building", 1)
+        Mod_Class::Vector4(-258.6324f, 194.7045f, 84.54053f,268.0275f), // "West Vinewood Backlot", 3),
+        Mod_Class::Vector4(350.2894f, 320.1672f, 103.7689f,75.94923f), // "Discount Retail Unit", 2),
+        Mod_Class::Vector4(-1283.439f, -812.7316f, 16.85418f,36.85705f), // "Derriere Lingerie Backlot", 2),
+        Mod_Class::Vector4(-1074.916f, -1253.214f, 5.177716f,212.0248f), // "White Widow Garage", 1),
+        Mod_Class::Vector4(144.6222f, 159.8517f, 104.2794f,335.4177f), // "Foreclosed Garage", 1)
+        Mod_Class::Vector4(-3112.512f, 1325.861f, 19.42356f,88.64252f), // "Chumash Bunker", 4),
+        Mod_Class::Vector4(-3016.994f, 3338.623f, 9.622828f,192.2166f), //"Zancuda Bunker", 4)
+        Mod_Class::Vector4(1209.959f, -1262.494f, 34.53808f,91.42775f), // "Murrieta Heights", 5),
+        Mod_Class::Vector4(1760.141f, -1650.94f, 111.9821f,185.9895f), // "El Burro Heights", 5),
+        Mod_Class::Vector4(1573.778f, 2205.523f, 78.27287f,91.86152f), // "Farmhouse Bunker", 4),
+        Mod_Class::Vector4(1555.701f, -2142.788f, 76.8575f,14.434f), // "GEE Warehouse", 4)
+        Mod_Class::Vector4(64.04389f, 2854.463f, 53.03243f,289.4287f), // "Route 68 Bunker", 4),
+        Mod_Class::Vector4(513.9001f, 3048.316f, 39.19131f,212.7776f), // "Oilfields Bunker", 4),
+        Mod_Class::Vector4(864.6389f, 3082.295f, 39.34605f,264.9445f), // "Desert Bunker", 4),
+        Mod_Class::Vector4(2054.58f, 3340.217f, 44.42887f,336.9905f), // "Smoke Bunker", 4),
+        Mod_Class::Vector4(2451.124f, 3111.103f, 47.08403f,277.6165f), // "Thomson Bunker", 4),
+        Mod_Class::Vector4(1762.311f, 4731.798f, 40.49058f,317.059f), //
+        Mod_Class::Vector4(-398.1481f, 4291.621f, 53.20945f,264.4828f),// "Canyon Bunker", 4),
+        Mod_Class::Vector4(-682.0676f, 5948.211f, 14.77343f,359.0253f), // "Paleto Bunker", 4)	
+        Mod_Class::Vector4(-75.94235f, -818.4665f, 326.8517f, 235.0135f),//offices
+        Mod_Class::Vector4(-145.5026f, -593.9283f, 211.6755f, 208.2894f),
+        Mod_Class::Vector4(-912.637f, -378.214f, 137.8069f, 170.1538f),
+        Mod_Class::Vector4(-1581.926f, -568.9014f, 116.2295f, 258.0362f),
         Mod_Class::Vector4(-1391.658f, -478.108f, 91.15266f, 92.62007f)
-    };
-    inline const std::vector<Mod_Class::Vector4> BuisnessHeli04 = {
-        Mod_Class::Vector4(-1635.331f, -427.2587f, 152.3197f, 205.1928f),
-        Mod_Class::Vector4(-1618.455f, -484.9288f, 142.6794f, 194.5483f),
-        Mod_Class::Vector4(-1606.263f, -525.6398f, 134.5537f, 212.709f),
-        Mod_Class::Vector4(-1593.082f, -555.8522f, 133.8456f, 235.4698f),
-        Mod_Class::Vector4(-1581.926f, -568.9014f, 116.2295f, 258.0362f)
-    };
-    inline const std::vector<Mod_Class::Vector4> BuisnessHeli05 = {
-        Mod_Class::Vector4(-1039.769f, -207.1729f, 178.472f, 248.8822f),
-        Mod_Class::Vector4(-1038.105f, -237.4486f, 182.4304f, 223.7983f),
-        Mod_Class::Vector4(-948.4437f, -340.3582f, 150.6296f, 232.3982f),
-        Mod_Class::Vector4(-924.1201f, -365.4526f, 149.5871f, 225.095f),
-        Mod_Class::Vector4(-912.637f, -378.214f, 137.8069f, 170.1538f)
     };
 
     inline const std::vector<Mod_Class::Vector4> BodyBeach = {
@@ -1591,450 +1870,6 @@ namespace Mod_Data
     Mod_Class::Vector4(-708.9506f, 70.23295f, 69.68565f, 154.9646f),
     Mod_Class::Vector4(-698.1004f, 46.26298f, 44.03382f, 217.7002f),
     Mod_Class::Vector4(-672.0215f, 88.88709f, 55.85543f, 210.2695f)
-    };
-
-    inline std::vector<Mod_Class::Vector4> Jogger01 = {
-        Mod_Class::Vector4(228.6289f, -1394.52f, 30.494f,0.0f),
-        Mod_Class::Vector4(252.5324f, -1400.599f, 30.53424f,0.0f),
-        Mod_Class::Vector4(273.3281f, -1378.727f, 31.95101f,0.0f),
-        Mod_Class::Vector4(273.2798f, -1359.458f, 31.93511f,0.0f),
-        Mod_Class::Vector4(250.2143f, -1339.669f, 31.92071f,0.0f),
-        Mod_Class::Vector4(235.2781f, -1346.481f, 30.5051f,0.0f),
-        Mod_Class::Vector4(219.2509f, -1365.954f, 30.56017f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger02 = {
-        Mod_Class::Vector4(-227.1508f, -2023.395f, 27.75543f,0.0f),
-        Mod_Class::Vector4(-222.3802f, -2007.24f, 27.75543f,0.0f),
-        Mod_Class::Vector4(-219.4253f, -1989.297f, 27.75542f,0.0f),
-        Mod_Class::Vector4(-221.2715f, -1971.702f, 27.75571f,0.0f),
-        Mod_Class::Vector4(-224.2942f, -1960.297f, 27.75689f,0.0f),
-        Mod_Class::Vector4(-240.3955f, -1966.939f, 29.94605f,0.0f),
-        Mod_Class::Vector4(-239.069f, -1973.878f, 29.94605f,0.0f),
-        Mod_Class::Vector4(-237.4634f, -1992.5f, 29.94605f,0.0f),
-        Mod_Class::Vector4(-240.9862f, -2009.94f, 29.94605f,0.0f),
-        Mod_Class::Vector4(-249.9569f, -2026.076f, 29.94605f,0.0f),
-        Mod_Class::Vector4(-263.3784f, -2040.735f, 29.94605f,0.0f),
-        Mod_Class::Vector4(-277.9292f, -2048.336f, 29.94605f,0.0f),
-        Mod_Class::Vector4(-273.3261f, -2064.927f, 27.75543f,0.0f),
-        Mod_Class::Vector4(-246.0456f, -2048.949f, 27.75543f,0.0f),
-        Mod_Class::Vector4(-235.4299f, -2037.349f, 27.75543f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger03 = {
-        Mod_Class::Vector4(-924.767f, -2571.403f, 13.97616f,0.0f),
-        Mod_Class::Vector4(-943.3739f, -2565.557f, 13.93645f,0.0f),
-        Mod_Class::Vector4(-961.3f, -2544.967f, 13.98062f,0.0f),
-        Mod_Class::Vector4(-967.3834f, -2523.3f, 13.98103f,0.0f),
-        Mod_Class::Vector4(-965.3172f, -2502.885f, 13.98098f,0.0f),
-        Mod_Class::Vector4(-960.5615f, -2492.263f, 13.98057f,0.0f),
-        Mod_Class::Vector4(-947.3313f, -2478.542f, 13.9807f,0.0f),
-        Mod_Class::Vector4(-932.3168f, -2470.56f, 13.9807f,0.0f),
-        Mod_Class::Vector4(-913.9728f, -2467.62f, 13.98073f,0.0f),
-        Mod_Class::Vector4(-889.0792f, -2472.986f, 13.98049f,0.0f),
-        Mod_Class::Vector4(-872.939f, -2489.196f, 13.98072f,0.0f),
-        Mod_Class::Vector4(-866.3092f, -2501.952f, 13.98075f,0.0f),
-        Mod_Class::Vector4(-863.3466f, -2512.478f, 13.98059f,0.0f),
-        Mod_Class::Vector4(-863.6301f, -2528.947f, 13.98072f,0.0f),
-        Mod_Class::Vector4(-869.4406f, -2546.69f, 13.97835f,0.0f),
-        Mod_Class::Vector4(-884.2811f, -2561.323f, 13.98074f,0.0f),
-        Mod_Class::Vector4(-896.1907f, -2568.416f, 13.98074f,0.0f),
-        Mod_Class::Vector4(-903.6213f, -2570.235f, 13.98074f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger04 = {
-        Mod_Class::Vector4(-287.7649f, -1638.534f, 31.84882f,0.0f),
-        Mod_Class::Vector4(-298.8279f, -1656.257f, 31.84881f,0.0f),
-        Mod_Class::Vector4(-317.5655f, -1644.264f, 31.85344f,0.0f),
-        Mod_Class::Vector4(-303.9065f, -1622.695f, 31.84882f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger05 = {
-        Mod_Class::Vector4(1476.682f, -1984.691f, 70.69158f,0.0f),
-        Mod_Class::Vector4(1453.445f, -1972.131f, 70.44451f,0.0f),
-        Mod_Class::Vector4(1434.379f, -1986.595f, 65.75795f,0.0f),
-        Mod_Class::Vector4(1423.388f, -2007.92f, 61.90174f,0.0f),
-        Mod_Class::Vector4(1433.237f, -2031.683f, 57.47531f,0.0f),
-        Mod_Class::Vector4(1469.974f, -2042.295f, 57.02632f,0.0f),
-        Mod_Class::Vector4(1478.932f, -2002.187f, 68.38514f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger06 = {
-        Mod_Class::Vector4(129.9129f, -988.9407f, 29.32248f,0.0f),
-        Mod_Class::Vector4(169.9703f, -880.6992f, 30.55882f,0.0f),
-        Mod_Class::Vector4(174.1833f, -881.5703f, 30.89416f,0.0f),
-        Mod_Class::Vector4(186.1561f, -849.1542f, 31.16665f,0.0f),
-        Mod_Class::Vector4(193.5296f, -847.7554f, 30.91245f,0.0f),
-        Mod_Class::Vector4(263.498f, -872.455f, 29.17216f,0.0f),
-        Mod_Class::Vector4(211.1392f, -1018.212f, 29.30549f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger07 = {
-        Mod_Class::Vector4(356.3345f, 160.7301f, 103.0043f,0.0f),
-        Mod_Class::Vector4(222.6689f, 208.8755f, 105.5123f,0.0f),
-        Mod_Class::Vector4(266.2624f, 328.2007f, 105.5289f,0.0f),
-        Mod_Class::Vector4(339.1058f, 311.9287f, 104.5361f,0.0f),
-        Mod_Class::Vector4(404.6719f, 292.2426f, 102.9655f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger08 = {
-        Mod_Class::Vector4(-68.89455f, -402.1517f, 37.29737f,0.0f),
-        Mod_Class::Vector4(-103.1039f, -389.6021f, 36.63163f,0.0f),
-        Mod_Class::Vector4(-108.889f, -409.1098f, 35.77497f,0.0f),
-        Mod_Class::Vector4(-127.2451f, -411.5541f, 34.58294f,0.0f),
-        Mod_Class::Vector4(-139.3882f, -421.2568f, 33.74562f,0.0f),
-        Mod_Class::Vector4(-148.7219f, -435.5255f, 33.47985f,0.0f),
-        Mod_Class::Vector4(-153.0547f, -451.4209f, 33.79173f,0.0f),
-        Mod_Class::Vector4(-145.8188f, -464.7188f, 33.17519f,0.0f),
-        Mod_Class::Vector4(-132.132f, -472.3099f, 33.07674f,0.0f),
-        Mod_Class::Vector4(-121.9619f, -474.8518f, 33.34896f,0.0f),
-        Mod_Class::Vector4(-89.17182f, -474.3718f, 34.96899f,0.0f),
-        Mod_Class::Vector4(-77.55576f, -466.7515f, 36.39326f,0.0f),
-        Mod_Class::Vector4(-67.24388f, -449.3546f, 38.11158f,0.0f),
-        Mod_Class::Vector4(-64.59761f, -437.8882f, 38.43552f,0.0f),
-        Mod_Class::Vector4(-64.19228f, -419.8323f, 38.09665f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger09 = {
-        Mod_Class::Vector4(-736.3101f, 90.46006f, 55.58132f,0.0f),
-        Mod_Class::Vector4(-737.0633f, 69.59921f, 54.30896f,0.0f),
-        Mod_Class::Vector4(-734.0124f, 47.01559f, 47.47584f,0.0f),
-        Mod_Class::Vector4(-728.4005f, 29.74567f, 42.26787f,0.0f),
-        Mod_Class::Vector4(-703.6444f, 36.59576f, 43.22058f,0.0f),
-        Mod_Class::Vector4(-681.6513f, 46.41314f, 43.09964f,0.0f),
-        Mod_Class::Vector4(-661.1816f, 46.04203f, 41.12265f,0.0f),
-        Mod_Class::Vector4(-658.776f, 85.53405f, 52.46266f,0.0f),
-        Mod_Class::Vector4(-662.4477f, 103.3301f, 56.80659f,0.0f),
-        Mod_Class::Vector4(-662.0488f, 119.3575f, 57.01698f,0.0f),
-        Mod_Class::Vector4(-675.6852f, 115.9964f, 56.75283f,0.0f),
-        Mod_Class::Vector4(-709.5087f, 98.95238f, 56.07108f,0.0f),
-        Mod_Class::Vector4(-718.9947f, 95.15092f, 55.8739f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger10 = {
-        Mod_Class::Vector4(-1765.645f, -1149.159f, 13.07916f,0.0f),
-        Mod_Class::Vector4(-1837.407f, -1227.053f, 13.01728f,0.0f),
-        Mod_Class::Vector4(-1869.622f, -1210.43f, 13.01711f,0.0f),
-        Mod_Class::Vector4(-1831.916f, -1162.537f, 13.01727f,0.0f),
-        Mod_Class::Vector4(-1806.807f, -1181.257f, 13.01744f,0.0f),
-        Mod_Class::Vector4(-1797.633f, -1177.67f, 13.01751f,0.0f),
-        Mod_Class::Vector4(-1786.751f, -1169.576f, 13.01768f,0.0f),
-        Mod_Class::Vector4(-1660.035f, -1023.637f, 13.01778f,0.0f),
-        Mod_Class::Vector4(-1652.489f, -1014.507f, 13.01739f,0.0f),
-        Mod_Class::Vector4(-1659.945f, -1009.417f, 13.01739f,0.0f),
-        Mod_Class::Vector4(-1709.898f, -1070.201f, 13.01735f,0.0f),
-        Mod_Class::Vector4(-1709.359f, -1083.783f, 13.10089f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger11 = {
-        Mod_Class::Vector4(-2891.325f, -8.690169f, 7.963134f,0.0f),
-        Mod_Class::Vector4(-2910.282f, -37.03131f, 3.024998f,0.0f),
-        Mod_Class::Vector4(-2999.717f, 0.8205602f, 4.733732f,0.0f),
-        Mod_Class::Vector4(-2997.566f, 30.52503f, 7.300454f,0.0f),
-        Mod_Class::Vector4(-2995.444f, 36.81783f, 7.95881f,0.0f),
-        Mod_Class::Vector4(-2992.152f, 35.16978f, 8.5967f,0.0f),
-        Mod_Class::Vector4(-2987.468f, 42.83352f, 11.6085f,0.0f),
-        Mod_Class::Vector4(-2939.735f, 20.68083f, 11.60792f,0.0f),
-        Mod_Class::Vector4(-2943.227f, 12.65156f, 11.60476f,0.0f),
-        Mod_Class::Vector4(-2918.954f, 1.69491f, 11.60532f,0.0f),
-        Mod_Class::Vector4(-2891.381f, -6.391256f, 11.60316f,0.0f),
-        Mod_Class::Vector4(-2888.387f, 2.114674f, 11.608f,0.0f),
-        Mod_Class::Vector4(-2886.561f, 0.7008348f, 11.608f,0.0f),
-        Mod_Class::Vector4(-2888.892f, -7.902122f, 7.959469f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger12 = {
-        Mod_Class::Vector4(-1486.228f, 875.5378f, 182.6471f,0.0f),
-        Mod_Class::Vector4(-1478.33f, 831.1494f, 181.7178f,0.0f),
-        Mod_Class::Vector4(-1514.694f, 814.3276f, 181.9242f,0.0f),
-        Mod_Class::Vector4(-1521.786f, 816.0013f, 181.8818f,0.0f),
-        Mod_Class::Vector4(-1532.458f, 826.3513f, 181.4863f,0.0f),
-        Mod_Class::Vector4(-1543.011f, 817.2687f, 182.2451f,0.0f),
-        Mod_Class::Vector4(-1549.201f, 782.2504f, 188.5506f,0.0f),
-        Mod_Class::Vector4(-1558.725f, 777.4117f, 189.1925f,0.0f),
-        Mod_Class::Vector4(-1584.688f, 765.293f, 189.1942f,0.0f),
-        Mod_Class::Vector4(-1592.872f, 784.2383f, 189.194f,0.0f),
-        Mod_Class::Vector4(-1578.12f, 790.5488f, 189.1929f,0.0f),
-        Mod_Class::Vector4(-1585.357f, 804.7038f, 185.9943f,0.0f),
-        Mod_Class::Vector4(-1575.385f, 809.5252f, 185.9944f,0.0f),
-        Mod_Class::Vector4(-1578.809f, 818.0173f, 185.9939f,0.0f),
-        Mod_Class::Vector4(-1534.582f, 848.1694f, 181.7705f,0.0f),
-        Mod_Class::Vector4(-1521.602f, 854.8638f, 181.5947f,0.0f),
-        Mod_Class::Vector4(-1496.966f, 870.4911f, 181.9422f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger13 = {
-        Mod_Class::Vector4(-1893.8f, 1974.631f, 143.1386f,0.0f),
-        Mod_Class::Vector4(-1929.31f, 1969.096f, 148.8142f,0.0f),
-        Mod_Class::Vector4(-1966.108f, 1968.237f, 154.9804f,0.0f),
-        Mod_Class::Vector4(-1982.965f, 1961.467f, 160.8532f,0.0f),
-        Mod_Class::Vector4(-1987.9f, 1950.067f, 167.1869f,0.0f),
-        Mod_Class::Vector4(-1982.987f, 1941.103f, 171.1532f,0.0f),
-        Mod_Class::Vector4(-1945.131f, 1917.294f, 173.789f,0.0f),
-        Mod_Class::Vector4(-1938.31f, 1890.808f, 179.907f,0.0f),
-        Mod_Class::Vector4(-1954.827f, 1842.859f, 180.2473f,0.0f),
-        Mod_Class::Vector4(-1957.488f, 1830.848f, 178.8064f,0.0f),
-        Mod_Class::Vector4(-1945.764f, 1820.129f, 172.0853f,0.0f),
-        Mod_Class::Vector4(-1937.965f, 1823.133f, 170.6982f,0.0f),
-        Mod_Class::Vector4(-1920.848f, 1840.997f, 166.5749f,0.0f),
-        Mod_Class::Vector4(-1899.503f, 1851.748f, 160.8903f,0.0f),
-        Mod_Class::Vector4(-1879.112f, 1865.361f, 156.9021f,0.0f),
-        Mod_Class::Vector4(-1841.115f, 1891.895f, 146.2764f,0.0f),
-        Mod_Class::Vector4(-1836.474f, 1901.321f, 145.8237f,0.0f),
-        Mod_Class::Vector4(-1839.368f, 1912.564f, 147.3022f,0.0f),
-        Mod_Class::Vector4(-1853.069f, 1930.572f, 150.2391f,0.0f),
-        Mod_Class::Vector4(-1878.708f, 1956.751f, 145.8794f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger14 = {
-        Mod_Class::Vector4(-319.6601f, 2786.814f, 59.43f,0.0f),
-        Mod_Class::Vector4(-337.5543f, 2800.789f, 58.15808f,0.0f),
-        Mod_Class::Vector4(-338.9051f, 2804.992f, 58.13386f,0.0f),
-        Mod_Class::Vector4(-327.3314f, 2822.454f, 58.19631f,0.0f),
-        Mod_Class::Vector4(-317.4219f, 2826.94f, 58.47928f,0.0f),
-        Mod_Class::Vector4(-312.7925f, 2831.25f, 58.25769f,0.0f),
-        Mod_Class::Vector4(-310.0566f, 2831.212f, 58.38048f,0.0f),
-        Mod_Class::Vector4(-297.7459f, 2823.444f, 59.15673f,0.0f),
-        Mod_Class::Vector4(-299.6138f, 2818.963f, 59.19112f,0.0f),
-        Mod_Class::Vector4(-295.6808f, 2811.254f, 58.98975f,0.0f),
-        Mod_Class::Vector4(-308.6064f, 2790.959f, 59.41709f,0.0f),
-        Mod_Class::Vector4(-316.4038f, 2787.014f, 59.56699f,0.0f),
-        Mod_Class::Vector4(-323.0881f, 2789.975f, 59.20899f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger15 = {
-        Mod_Class::Vector4(-2768.271f, 2695.774f, 1.370201f,0.0f),
-        Mod_Class::Vector4(-2755.266f, 2703.515f, 1.416718f,0.0f),
-        Mod_Class::Vector4(-2735.553f, 2738.595f, 1.462122f,0.0f),
-        Mod_Class::Vector4(-2730.177f, 2799.426f, 1.757612f,0.0f),
-        Mod_Class::Vector4(-2717.147f, 2824.657f, 1.186048f,0.0f),
-        Mod_Class::Vector4(-2730.011f, 2855.175f, 1.459975f,0.0f),
-        Mod_Class::Vector4(-2720.936f, 2897.158f, 1.232428f,0.0f),
-        Mod_Class::Vector4(-2723.055f, 2915.156f, 1.214248f,0.0f),
-        Mod_Class::Vector4(-2717.156f, 2934.323f, 1.675791f,0.0f),
-        Mod_Class::Vector4(-2736.917f, 2953.923f, 2.776649f,0.0f),
-        Mod_Class::Vector4(-2746.004f, 2954.125f, 2.354859f,0.0f),
-        Mod_Class::Vector4(-2751.835f, 2943.838f, 2.075438f,0.0f),
-        Mod_Class::Vector4(-2752.229f, 2914.945f, 1.281913f,0.0f),
-        Mod_Class::Vector4(-2752.62f, 2887.3f, 1.572614f,0.0f),
-        Mod_Class::Vector4(-2756.117f, 2854.283f, 1.468493f,0.0f),
-        Mod_Class::Vector4(-2764.645f, 2779.508f, 2.047434f,0.0f),
-        Mod_Class::Vector4(-2769.536f, 2743.653f, 2.138904f,0.0f),
-        Mod_Class::Vector4(-2776.014f, 2720.484f, 2.238141f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger16 = {
-        Mod_Class::Vector4(1061.091f, -558.9828f, 59.28479f,0.0f),
-        Mod_Class::Vector4(1066.203f, -597.2649f, 56.83318f,0.0f),
-        Mod_Class::Vector4(1062.106f, -610.6114f, 56.76826f,0.0f),
-        Mod_Class::Vector4(1022.904f, -655.5869f, 58.68858f,0.0f),
-        Mod_Class::Vector4(1020.39f, -657.876f, 58.61199f,0.0f),
-        Mod_Class::Vector4(1020.476f, -698.0944f, 56.81086f,0.0f),
-        Mod_Class::Vector4(1056.699f, -719.1822f, 56.815f,0.0f),
-        Mod_Class::Vector4(1088.558f, -738.0333f, 56.76314f,0.0f),
-        Mod_Class::Vector4(1132.372f, -738.0198f, 56.74362f,0.0f),
-        Mod_Class::Vector4(1143.484f, -710.3257f, 56.80364f,0.0f),
-        Mod_Class::Vector4(1127.766f, -660.5972f, 56.68017f,0.0f),
-        Mod_Class::Vector4(1126.506f, -644.8978f, 56.77164f,0.0f),
-        Mod_Class::Vector4(1119.372f, -633.5688f, 56.78326f,0.0f),
-        Mod_Class::Vector4(1118.719f, -612.4344f, 56.74827f,0.0f),
-        Mod_Class::Vector4(1124.979f, -604.9899f, 56.74682f,0.0f),
-        Mod_Class::Vector4(1139.324f, -591.7932f, 56.75398f,0.0f),
-        Mod_Class::Vector4(1142.248f, -582.8869f, 56.75351f,0.0f),
-        Mod_Class::Vector4(1133.203f, -563.3502f, 56.99999f,0.0f),
-        Mod_Class::Vector4(1125.851f, -551.4424f, 56.93082f,0.0f),
-        Mod_Class::Vector4(1105.572f, -540.5275f, 57.76503f,0.0f),
-        Mod_Class::Vector4(1105.599f, -540.5577f, 57.76052f,0.0f),
-        Mod_Class::Vector4(1100.637f, -540.5255f, 57.95548f,0.0f),
-        Mod_Class::Vector4(1100.362f, -527.494f, 63.07243f,0.0f),
-        Mod_Class::Vector4(1073.51f, -530.7902f, 62.03668f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger17 = {
-        Mod_Class::Vector4(1163.911f, 280.2455f, 82.19042f,0.0f),
-        Mod_Class::Vector4(991.5728f, -11.44712f, 81.85177f,0.0f),
-        Mod_Class::Vector4(993.7879f, -40.10574f, 81.92294f,0.0f),
-        Mod_Class::Vector4(1011.639f, -65.61469f, 82.19008f,0.0f),
-        Mod_Class::Vector4(1038.523f, -82.89301f, 82.19008f,0.0f),
-        Mod_Class::Vector4(1072.831f, -82.7739f, 82.16786f,0.0f),
-        Mod_Class::Vector4(1095.682f, -69.53146f, 82.08484f,0.0f),
-        Mod_Class::Vector4(1265.938f, 178.9096f, 81.98807f,0.0f),
-        Mod_Class::Vector4(1273.632f, 195.978f, 81.91003f,0.0f),
-        Mod_Class::Vector4(1274.658f, 222.6223f, 81.90385f,0.0f),
-        Mod_Class::Vector4(1261.318f, 257.1254f, 82.07339f,0.0f),
-        Mod_Class::Vector4(1235.155f, 278.5591f, 82.08091f,0.0f),
-        Mod_Class::Vector4(1209.412f, 284.0538f, 82.0095f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger18 = {
-        Mod_Class::Vector4(2493.767f, -317.9808f, 92.99265f,0.0f),
-        Mod_Class::Vector4(2465.75f, -331.269f, 92.99268f,0.0f),
-        Mod_Class::Vector4(2445.703f, -353.545f, 92.98891f,0.0f),
-        Mod_Class::Vector4(2446.853f, -417.4889f, 92.99274f,0.0f),
-        Mod_Class::Vector4(2474.773f, -444.7306f, 92.99303f,0.0f),
-        Mod_Class::Vector4(2480.923f, -437.5063f, 92.99287f,0.0f),
-        Mod_Class::Vector4(2479.751f, -420.7701f, 93.73516f,0.0f),
-        Mod_Class::Vector4(2481.842f, -406.8932f, 93.73528f,0.0f),
-        Mod_Class::Vector4(2494.202f, -390.2369f, 94.11994f,0.0f),
-        Mod_Class::Vector4(2493.491f, -374.688f, 94.11996f,0.0f),
-        Mod_Class::Vector4(2481.127f, -358.7106f, 93.73526f,0.0f),
-        Mod_Class::Vector4(2481.344f, -341.2011f, 93.00871f,0.0f),
-        Mod_Class::Vector4(2480.642f, -324.369f, 92.99266f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger19 = {
-        Mod_Class::Vector4(1443.998f, 1032.925f, 114.2406f,0.0f),
-        Mod_Class::Vector4(1507.861f, 1033.247f, 114.2185f,0.0f),
-        Mod_Class::Vector4(1514.412f, 1043.134f, 114.2258f,0.0f),
-        Mod_Class::Vector4(1514.912f, 1101.076f, 114.2287f,0.0f),
-        Mod_Class::Vector4(1502.632f, 1178.213f, 114.2156f,0.0f),
-        Mod_Class::Vector4(1484.8f, 1185.216f, 114.1505f,0.0f),
-        Mod_Class::Vector4(1434.625f, 1186.282f, 114.1913f,0.0f),
-        Mod_Class::Vector4(1433.847f, 1092.753f, 114.2267f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger20 = {
-        Mod_Class::Vector4(2692.736f, 1705.75f, 24.68079f,0.0f),
-        Mod_Class::Vector4(2806.105f, 1705.584f, 24.68113f,0.0f),
-        Mod_Class::Vector4(2818.727f, 1704.424f, 24.69106f,0.0f),
-        Mod_Class::Vector4(2823.846f, 1699.423f, 24.71452f,0.0f),
-        Mod_Class::Vector4(2824.438f, 1696.413f, 24.69556f,0.0f),
-        Mod_Class::Vector4(2824.696f, 1647.154f, 24.64242f,0.0f),
-        Mod_Class::Vector4(2782.65f, 1647.183f, 24.60208f,0.0f),
-        Mod_Class::Vector4(2780.294f, 1653.693f, 24.53028f,0.0f),
-        Mod_Class::Vector4(2711.461f, 1654.09f, 24.53372f,0.0f),
-        Mod_Class::Vector4(2711.587f, 1647.229f, 24.60396f,0.0f),
-        Mod_Class::Vector4(2698.269f, 1646.656f, 24.60472f,0.0f),
-        Mod_Class::Vector4(2695.426f, 1649.674f, 24.61012f,0.0f),
-        Mod_Class::Vector4(2694.013f, 1653.814f, 24.62069f,0.0f),
-        Mod_Class::Vector4(2694.363f, 1691.255f, 24.69635f,0.0f),
-        Mod_Class::Vector4(2696.989f, 1695.163f, 24.7006f,0.0f),
-        Mod_Class::Vector4(2702.095f, 1696.548f, 24.66678f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger21 = {
-        Mod_Class::Vector4(1623.121f, 3228.294f, 40.41154f,0.0f),
-        Mod_Class::Vector4(1548.318f, 3147.528f, 40.53161f,0.0f),
-        Mod_Class::Vector4(1099.019f, 3015.776f, 40.56151f,0.0f),
-        Mod_Class::Vector4(1074.616f, 3035.108f, 41.24891f,0.0f),
-        Mod_Class::Vector4(1085.017f, 3076.249f, 40.42923f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger22 = {
-        Mod_Class::Vector4(1090.78f, 3566.191f, 34.09589f,0.0f),
-        Mod_Class::Vector4(1091.477f, 3610.838f, 33.05823f,0.0f),
-        Mod_Class::Vector4(1047.076f, 3610.903f, 33.11738f,0.0f),
-        Mod_Class::Vector4(1012.615f, 3597.394f, 33.21322f,0.0f),
-        Mod_Class::Vector4(1017.906f, 3568.242f, 33.92956f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger23 = {
-        Mod_Class::Vector4(73.27388f, 3633.642f, 39.70792f,0.0f),
-        Mod_Class::Vector4(27.01976f, 3700.822f, 39.70713f,0.0f),
-        Mod_Class::Vector4(28.15174f, 3713.856f, 39.71289f,0.0f),
-        Mod_Class::Vector4(35.53751f, 3726.467f, 39.65743f,0.0f),
-        Mod_Class::Vector4(73.20634f, 3740.686f, 39.71008f,0.0f),
-        Mod_Class::Vector4(83.90422f, 3739.935f, 39.69468f,0.0f),
-        Mod_Class::Vector4(99.68319f, 3726.861f, 39.67576f,0.0f),
-        Mod_Class::Vector4(102.9181f, 3719.429f, 39.70041f,0.0f),
-        Mod_Class::Vector4(82.71038f, 3679.274f, 39.71919f,0.0f),
-        Mod_Class::Vector4(81.40222f, 3636.785f, 39.69534f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger24 = {
-        Mod_Class::Vector4(1041.883f, 2191.695f, 44.96709f,0.0f),
-        Mod_Class::Vector4(1066.888f, 2213.252f, 46.80863f,0.0f),
-        Mod_Class::Vector4(1031.368f, 2213.759f, 51.05772f,0.0f),
-        Mod_Class::Vector4(989.4823f, 2218.621f, 47.55013f,0.0f),
-        Mod_Class::Vector4(997.8649f, 2204.891f, 46.05443f,0.0f),
-        Mod_Class::Vector4(1021.423f, 2190.472f, 45.28568f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger25 = {
-        Mod_Class::Vector4(2440.191f, 4837.629f, 36.53263f,0.0f),
-        Mod_Class::Vector4(2428.567f, 4921.247f, 43.66103f,0.0f),
-        Mod_Class::Vector4(2472.179f, 4965.375f, 45.16649f,0.0f),
-        Mod_Class::Vector4(2480.896f, 4990.179f, 46.22219f,0.0f),
-        Mod_Class::Vector4(2478.137f, 5002.943f, 45.85592f,0.0f),
-        Mod_Class::Vector4(2466.199f, 5016.405f, 45.56878f,0.0f),
-        Mod_Class::Vector4(2416.468f, 4969.382f, 46.13856f,0.0f),
-        Mod_Class::Vector4(2386.791f, 4938.182f, 42.70732f,0.0f),
-        Mod_Class::Vector4(2363.594f, 4912.43f, 41.9899f,0.0f),
-        Mod_Class::Vector4(2373.377f, 4895.569f, 41.92224f,0.0f),
-        Mod_Class::Vector4(2394.373f, 4874.57f, 40.84945f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger26 = {
-        Mod_Class::Vector4(234.6885f, 6418.486f, 30.96218f,0.0f),
-        Mod_Class::Vector4(248.8196f, 6415.337f, 31.88116f,0.0f),
-        Mod_Class::Vector4(269.739f, 6414.965f, 32.11745f,0.0f),
-        Mod_Class::Vector4(288.8002f, 6420.939f, 31.35575f,0.0f),
-        Mod_Class::Vector4(298.797f, 6432.084f, 31.80929f,0.0f),
-        Mod_Class::Vector4(301.9339f, 6444.203f, 32.29673f,0.0f),
-        Mod_Class::Vector4(306.1744f, 6493.814f, 29.37009f,0.0f),
-        Mod_Class::Vector4(250.2143f, 6489.353f, 30.67807f,0.0f),
-        Mod_Class::Vector4(171.8803f, 6482.01f, 31.94304f,0.0f),
-        Mod_Class::Vector4(175.2863f, 6475.943f, 31.89293f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger27 = {
-        Mod_Class::Vector4(157.3289f, 7044.97f, 1.865713f,0.0f),
-        Mod_Class::Vector4(102.7529f, 7073.901f, 1.931986f,0.0f),
-        Mod_Class::Vector4(52.24357f, 7079.25f, 2.17193f,0.0f),
-        Mod_Class::Vector4(23.56722f, 7052.823f, 1.409035f,0.0f),
-        Mod_Class::Vector4(31.16364f, 7023.305f, 7.387625f,0.0f),
-        Mod_Class::Vector4(41.1493f, 7013.06f, 8.625368f,0.0f),
-        Mod_Class::Vector4(36.24067f, 6995.254f, 8.021345f,0.0f),
-        Mod_Class::Vector4(73.45621f, 6951.467f, 11.52127f,0.0f),
-        Mod_Class::Vector4(76.90339f, 6968.756f, 10.14844f,0.0f),
-        Mod_Class::Vector4(96.15324f, 6976.542f, 9.490364f,0.0f),
-        Mod_Class::Vector4(144.0458f, 6980.392f, 8.019959f,0.0f),
-        Mod_Class::Vector4(157.614f, 6990.637f, 4.969121f,0.0f),
-        Mod_Class::Vector4(158.9223f, 7011.254f, 3.681879f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger28 = {
-        Mod_Class::Vector4(-576.4569f, 5452.922f, 60.71923f,0.0f),
-        Mod_Class::Vector4(-560.6669f, 5474.996f, 61.77381f,0.0f),
-        Mod_Class::Vector4(-552.685f, 5494.2f, 59.80086f,0.0f),
-        Mod_Class::Vector4(-550.2758f, 5515.276f, 59.87648f,0.0f),
-        Mod_Class::Vector4(-572.0354f, 5544.016f, 52.74706f,0.0f),
-        Mod_Class::Vector4(-601.4049f, 5515.799f, 49.60851f,0.0f),
-        Mod_Class::Vector4(-620.7578f, 5506.275f, 51.13645f,0.0f),
-        Mod_Class::Vector4(-634.4025f, 5477.448f, 53.29848f,0.0f),
-        Mod_Class::Vector4(-637.6897f, 5453.631f, 52.85682f,0.0f),
-        Mod_Class::Vector4(-595.5697f, 5458.982f, 59.10485f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger29 = {
-        Mod_Class::Vector4(-334.3983f, 6183.464f, 31.42284f,0.0f),
-        Mod_Class::Vector4(-305.0548f, 6212.236f, 31.45675f,0.0f),
-        Mod_Class::Vector4(-302.0125f, 6213.075f, 31.39697f,0.0f),
-        Mod_Class::Vector4(-284.0596f, 6234.494f, 31.49339f,0.0f),
-        Mod_Class::Vector4(-237.9272f, 6281.979f, 31.45799f,0.0f),
-        Mod_Class::Vector4(-252.1601f, 6297.677f, 31.45717f,0.0f),
-        Mod_Class::Vector4(-301.6298f, 6251.044f, 31.51244f,0.0f),
-        Mod_Class::Vector4(-305.8697f, 6247.805f, 31.43438f,0.0f),
-        Mod_Class::Vector4(-318.1996f, 6232.045f, 31.48331f,0.0f),
-        Mod_Class::Vector4(-322.5253f, 6227.77f, 31.46884f,0.0f),
-        Mod_Class::Vector4(-360.4957f, 6191.922f, 31.48243f,0.0f)
-    };
-    inline std::vector<Mod_Class::Vector4> Jogger30 = {
-        Mod_Class::Vector4(-1445.911f, 4228.153f, 49.88695f,0.0f),
-        Mod_Class::Vector4(-1437.855f, 4232.769f, 48.72689f,0.0f),
-        Mod_Class::Vector4(-1414.334f, 4225.317f, 42.9243f,0.0f),
-        Mod_Class::Vector4(-1406.202f, 4234.257f, 39.57491f,0.0f),
-        Mod_Class::Vector4(-1398.107f, 4235.384f, 37.1693f,0.0f),
-        Mod_Class::Vector4(-1381.473f, 4242.933f, 32.96693f,0.0f),
-        Mod_Class::Vector4(-1379.1f, 4227.457f, 27.85471f,0.0f),
-        Mod_Class::Vector4(-1375.508f, 4221.704f, 26.20435f,0.0f),
-        Mod_Class::Vector4(-1371.023f, 4221.62f, 24.55573f,0.0f),
-        Mod_Class::Vector4(-1369.318f, 4234.283f, 21.74896f,0.0f),
-        Mod_Class::Vector4(-1365.844f, 4237.374f, 20.58922f,0.0f),
-        Mod_Class::Vector4(-1362.55f, 4222.789f, 18.0125f,0.0f),
-        Mod_Class::Vector4(-1357.766f, 4223.158f, 16.33216f,0.0f),
-        Mod_Class::Vector4(-1355.488f, 4230.613f, 14.08321f,0.0f),
-        Mod_Class::Vector4(-1349.775f, 4261.309f, 7.204568f,0.0f),
-        Mod_Class::Vector4(-1350.807f, 4280.167f, 3.489815f,0.0f),
-        Mod_Class::Vector4(-1366.992f, 4291.422f, 2.879005f,0.0f),
-        Mod_Class::Vector4(-1375.258f, 4295.798f, 2.808748f,0.0f),
-        Mod_Class::Vector4(-1409.907f, 4301.811f, 5.031199f,0.0f),
-        Mod_Class::Vector4(-1511.659f, 4307.015f, 5.628844f,0.0f),
-        Mod_Class::Vector4(-1585.516f, 4343.747f, 3.159351f,0.0f),
-        Mod_Class::Vector4(-1610.404f, 4373.366f, 2.441379f,0.0f),
-        Mod_Class::Vector4(-1644.269f, 4431.979f, 3.232418f,0.0f),
-        Mod_Class::Vector4(-1677.754f, 4452.332f, 2.484089f,0.0f),
-        Mod_Class::Vector4(-1734.826f, 4452.425f, 4.763266f,0.0f),
-        Mod_Class::Vector4(-1783.387f, 4475.105f, 11.17609f,0.0f),
-        Mod_Class::Vector4(-1815.323f, 4479.708f, 17.87292f,0.0f),
-        Mod_Class::Vector4(-1842.674f, 4500.0f, 22.1328f,0.0f),
-        Mod_Class::Vector4(-1855.061f, 4500.765f, 22.36915f,0.0f),
-        Mod_Class::Vector4(-1878.805f, 4481.325f, 26.10547f,0.0f),
-        Mod_Class::Vector4(-1912.77f, 4482.177f, 29.16429f,0.0f),
-        Mod_Class::Vector4(-1927.905f, 4460.231f, 34.65511f,0.0f),
-        Mod_Class::Vector4(-1905.194f, 4437.292f, 42.7122f,0.0f),
-        Mod_Class::Vector4(-1870.033f, 4417.005f, 48.25819f,0.0f),
-        Mod_Class::Vector4(-1739.497f, 4344.018f, 62.30252f,0.0f),
-        Mod_Class::Vector4(-1701.276f, 4303.689f, 69.18857f,0.0f),
-        Mod_Class::Vector4(-1659.563f, 4215.886f, 82.93988f,0.0f),
-        Mod_Class::Vector4(-1637.42f, 4205.126f, 84.06075f,0.0f),
-        Mod_Class::Vector4(-1587.657f, 4200.398f, 81.1502f,0.0f),
-        Mod_Class::Vector4(-1567.076f, 4205.095f, 78.5675f,0.0f),
-        Mod_Class::Vector4(-1566.948f, 4205.121f, 78.53695f,0.0f),
-        Mod_Class::Vector4(-1489.583f, 4226.147f, 57.02686f,0.0f),
-        Mod_Class::Vector4(-1461.699f, 4225.801f, 52.18763f,0.0f)
     };
 
     inline const std::vector<Mod_Class::Vector4> GolfCaddy = {
@@ -3601,41 +3436,6 @@ namespace Mod_Data
         Mod_Class::Vector4(-147.7463f, 6729.933f, 13.17056f, 153.3098f),
     };      //a_c_cormorant
 
-    inline const std::vector<Mod_Class::Vector4> Yankton = {
-        Mod_Class::Vector4(3117.137f, -4816.728f, 111.9227f, 212.9807f),
-        Mod_Class::Vector4(3131.799f, -4836.524f, 111.9058f, 198.7815f),
-        Mod_Class::Vector4(3148.702f, -4820.137f, 111.9146f, 249.9113f),
-        Mod_Class::Vector4(3178.172f, -4841.895f, 111.8646f, 299.6696f),
-        Mod_Class::Vector4(3200.373f, -4845.981f, 112.0913f, 247.4838f),
-        Mod_Class::Vector4(3223.586f, -4843.15f, 112.1707f, 354.5657f),
-        Mod_Class::Vector4(3181.008f, -4819.975f, 112.0145f, 190.3557f),
-        Mod_Class::Vector4(3222.215f, -4674.802f, 112.8715f, 197.025f),
-        Mod_Class::Vector4(3243.955f, -4668.963f, 115.2206f, 181.1275f),
-        Mod_Class::Vector4(3257.933f, -4610.864f, 115.9861f, 343.0366f),
-        Mod_Class::Vector4(3264.459f, -4588.892f, 117.5749f, 173.6842f),
-        Mod_Class::Vector4(3260.968f, -4558.606f, 117.9432f, 248.7276f),
-        Mod_Class::Vector4(3301.682f, -4618.307f, 115.9189f, 4.819291f),
-        Mod_Class::Vector4(3280.166f, -4648.12f, 114.2587f, 82.46803f),
-        Mod_Class::Vector4(3279.144f, -4831.918f, 111.9073f, 182.5369f),
-        Mod_Class::Vector4(3328.324f, -4854.863f, 112.1375f, 98.93055f),
-        Mod_Class::Vector4(3473.881f, -4887.713f, 111.4212f, 351.9137f),
-        Mod_Class::Vector4(3582.752f, -4877.548f, 111.9127f, 47.78808f),
-        Mod_Class::Vector4(3548.751f, -4651.457f, 114.1456f, 240.0113f),
-        Mod_Class::Vector4(3557.25f, -4684.192f, 114.5897f, 102.8192f),
-        Mod_Class::Vector4(3505.793f, -4675.259f, 114.1213f, 311.8708f),
-        Mod_Class::Vector4(3639.636f, -4895.301f, 112.0969f, 213.9055f),
-        Mod_Class::Vector4(3658.735f, -4887.635f, 112.0766f, 290.1415f),
-        Mod_Class::Vector4(5437.08f, -5181.434f, 78.71245f, 62.03126f),
-        Mod_Class::Vector4(5344.413f, -5225.215f, 82.7921f, 316.0345f),
-        Mod_Class::Vector4(5343.557f, -5199.927f, 83.26007f, 262.4173f),
-        Mod_Class::Vector4(5339.12f, -5215.233f, 82.6674f, 257.5849f),
-        Mod_Class::Vector4(5308.893f, -5221.452f, 83.51344f, 190.0524f),
-        Mod_Class::Vector4(5295.236f, -5211.909f, 82.74987f, 152.9725f),
-        Mod_Class::Vector4(5291.073f, -5192.674f, 83.51875f, 69.66159f),
-        Mod_Class::Vector4(5309.561f, -5172.745f, 83.5139f, 275.4609f),
-        Mod_Class::Vector4(5321.748f, -5176.215f, 83.23198f, 267.6423f),
-        Mod_Class::Vector4(5322.566f, -5195.457f, 83.51897f, 273.5714f)
-    };
     inline const std::vector<Mod_Class::Vector4> YanktonVeh = {
         Mod_Class::Vector4(5349.33f, -5199.588f, 82.53371f, 359.9582f),
         Mod_Class::Vector4(5342.033f, -5190.025f, 82.52918f, 279.9539f),
@@ -3757,126 +3557,6 @@ namespace Mod_Data
         Mod_Class::Vector4(4949.478f, -5319.582f, 8.065354f, 190.8848f),
         Mod_Class::Vector4(5310.973f, -5600.635f, 64.51008f, 298.4847f)
     };
-    inline const std::vector<Mod_Class::Vector4> CayoSpPoint = {
-        Mod_Class::Vector4(4877.928f, -4488.06f, 26.93383f, 7.88381f),
-        Mod_Class::Vector4(5032.213f, -4630.636f, 21.68462f, 75.61213f),
-        Mod_Class::Vector4(5153.693f, -4933.251f, 30.87342f, 142.8952f),
-        Mod_Class::Vector4(5148.306f, -5053.395f, 20.39156f, 85.7536f),
-        Mod_Class::Vector4(5465.802f, -5236.399f, 43.96178f, 184.7819f),
-        Mod_Class::Vector4(5360.864f, -5437.077f, 66.17649f, 221.3451f),
-        Mod_Class::Vector4(5125.446f, -5526.457f, 70.9704f, 199.5584f),
-        Mod_Class::Vector4(4887.5f, -5458.02f, 47.52377f, 182.3656f),
-        Mod_Class::Vector4(5042.819f, -5114.771f, 22.94463f, 88.81671f),
-        Mod_Class::Vector4(5140.625f, -5243.813f, 26.29192f, 253.1926f),
-        Mod_Class::Vector4(4494.132f, -4525.502f, 4.412366f, 282.329f),
-        Mod_Class::Vector4(4439.948f, -4454.131f, 4.328461f, 198.5052f),
-        Mod_Class::Vector4(4495.687f, -4732.734f, 10.90475f, 41.29239f),
-        Mod_Class::Vector4(4366.333f, -4573.288f, 4.207751f, 21.11482f),
-        Mod_Class::Vector4(4071.851f, -4673.698f, 4.223663f, 108.1717f),
-        Mod_Class::Vector4(3906.395f, -4702.547f, 4.345607f, 33.34339f),
-        Mod_Class::Vector4(4811.667f, -4303.64f, 5.325986f, 52.86508f),
-        Mod_Class::Vector4(4877.05f, -4484.966f, 10.15364f, 338.2997f),
-        Mod_Class::Vector4(5171.623f, -4591.228f, 3.701788f, 81.79738f),
-        Mod_Class::Vector4(5166.074f, -4653.924f, 2.689936f, 241.2462f),
-        Mod_Class::Vector4(5166.617f, -4710.746f, 2.160436f, 188.2125f),
-        Mod_Class::Vector4(5135.673f, -4606.935f, 2.663276f, 196.01f),
-        Mod_Class::Vector4(5064.55f, -4595.777f, 2.853349f, 353.9287f),
-        Mod_Class::Vector4(5091.98f, -4654.807f, 1.841831f, 249.8059f),
-        Mod_Class::Vector4(5087.485f, -4681.362f, 2.364768f, 222.4894f),
-        Mod_Class::Vector4(5031.378f, -4628.378f, 21.68462f, 84.22202f),
-        Mod_Class::Vector4(4874.386f, -4927.992f, 3.147279f, 90.48167f),
-        Mod_Class::Vector4(4902.145f, -4941.349f, 3.361645f, 209.0067f),
-        Mod_Class::Vector4(4891.903f, -4910.392f, 3.365285f, 325.3576f),
-        Mod_Class::Vector4(5088.147f, -4892.757f, 17.07693f, 141.0943f),
-        Mod_Class::Vector4(5147.582f, -4955.208f, 14.1842f, 306.4781f),
-        Mod_Class::Vector4(5191.797f, -5010.228f, 13.95532f, 309.4144f),
-        Mod_Class::Vector4(5441.739f, -5116.977f, 13.17772f, 114.4946f),
-        Mod_Class::Vector4(5587.902f, -5222.841f, 14.35066f, 227.1182f),
-        Mod_Class::Vector4(5468.49f, -5237.662f, 43.96177f, 286.5111f),
-        Mod_Class::Vector4(5402.339f, -5173.656f, 31.43869f, 250.9344f),
-        Mod_Class::Vector4(5330.212f, -5266.004f, 32.50994f, 146.6625f),
-        Mod_Class::Vector4(5263.13f, -5254.454f, 25.44569f, 169.5686f),
-        Mod_Class::Vector4(5264.313f, -5430.777f, 65.5978f, 252.7824f),
-        Mod_Class::Vector4(5221.144f, -5394.252f, 67.51835f, 9.77068f),
-        Mod_Class::Vector4(5311.626f, -5595.218f, 64.44119f, 167.3269f),
-        Mod_Class::Vector4(5484.578f, -5854.652f, 20.01427f, 203.205f),
-        Mod_Class::Vector4(5105.451f, -5523.863f, 54.20301f, 293.2558f),
-        Mod_Class::Vector4(5125.341f, -5526.231f, 70.97034f, 137.1469f),
-        Mod_Class::Vector4(5099.011f, -5722.109f, 15.77461f, 117.5884f),
-        Mod_Class::Vector4(4979.47f, -5708.737f, 19.88695f, 58.10868f),
-        Mod_Class::Vector4(4990.638f, -5883.896f, 20.55511f, 220.5347f),
-        Mod_Class::Vector4(4908.758f, -5833.568f, 28.21668f, 356.1158f),
-        Mod_Class::Vector4(4964.564f, -5603.83f, 23.72427f, 196.7985f),
-        Mod_Class::Vector4(4887.661f, -5460.129f, 30.74339f, 230.2796f),
-        Mod_Class::Vector4(4904.563f, -5342.741f, 20.43572f, 167.6105f),
-        Mod_Class::Vector4(4954.223f, -5320.233f, 8.177876f, 45.14056f),
-        Mod_Class::Vector4(4893.883f, -5287.493f, 8.498549f, 76.56836f),
-        Mod_Class::Vector4(4963.055f, -5282.41f, 6.153166f, 150.0025f),
-        Mod_Class::Vector4(4919.834f, -5236.972f, 2.522677f, 214.5785f),
-        Mod_Class::Vector4(4837.975f, -5177.048f, 2.194079f, 309.8742f),
-        Mod_Class::Vector4(4887.364f, -5170.045f, 2.462478f, 317.8425f),
-        Mod_Class::Vector4(4934.43f, -5176.531f, 2.460481f, 47.9263f),
-        Mod_Class::Vector4(4994.617f, -5166.621f, 2.692156f, 290.538f),
-        Mod_Class::Vector4(4959.891f, -5112.796f, 2.906743f, 325.6087f),
-        Mod_Class::Vector4(5046.526f, -5117.724f, 20.34463f, 242.2283f),
-        Mod_Class::Vector4(5111.161f, -5183.47f, 2.368666f, 190.5521f),
-        Mod_Class::Vector4(5134.058f, -5127.317f, 2.110643f, 175.9367f),
-        Mod_Class::Vector4(5185.667f, -5133.359f, 3.338254f, 261.6295f),
-        Mod_Class::Vector4(5214.341f, -5125.928f, 6.22332f, 138.2965f),
-        Mod_Class::Vector4(5145.925f, -5043.219f, 4.805843f, 294.0948f),
-        Mod_Class::Vector4(5170.325f, -4675.89f, 2.435122f, 66.67837f),
-        Mod_Class::Vector4(5179.303f, -4649.774f, 2.530395f, 64.63232f),
-        Mod_Class::Vector4(5127.161f, -4613.125f, 2.567649f, 134.3626f),
-        Mod_Class::Vector4(5403.269f, -5174.491f, 31.46002f, 30.90309f),
-        Mod_Class::Vector4(5408.926f, -5216.411f, 34.45446f, 232.4724f),
-        Mod_Class::Vector4(5382.5f, -5255.195f, 34.15533f, 168.2274f),
-        Mod_Class::Vector4(5327.994f, -5265.26f, 33.17245f, 216.49f),
-        Mod_Class::Vector4(5312.92f, -5200.948f, 31.73465f, 43.35777f),
-        Mod_Class::Vector4(5283.029f, -5239.302f, 30.83397f, 226.2264f),
-        Mod_Class::Vector4(5211.092f, -5125.889f, 6.214875f, 297.0678f),
-        Mod_Class::Vector4(5182.966f, -5148.639f, 3.549981f, 93.57137f),
-        Mod_Class::Vector4(5117.133f, -5172.37f, 2.296359f, 90.88295f),
-        Mod_Class::Vector4(5012.493f, -5201.086f, 2.517188f, 332.5578f),
-        Mod_Class::Vector4(4957.826f, -5133.129f, 2.44458f, 126.1573f),
-        Mod_Class::Vector4(4902.437f, -5180.579f, 2.445158f, 256.659f),
-        Mod_Class::Vector4(4949.478f, -5319.582f, 8.065354f, 190.8848f),
-        Mod_Class::Vector4(5310.973f, -5600.635f, 64.51008f, 298.4847f),
-        Mod_Class::Vector4(5018.089f, -5174.079f, 2.606125f, 207.4259f),
-        Mod_Class::Vector4(5041.188f, -5117.157f, 22.94859f, 133.7521f),
-        Mod_Class::Vector4(4961.709f, -5108.097f, 2.982063f, 336.7988f),
-        Mod_Class::Vector4(4873.991f, -5174.502f, 2.438294f, 309.3781f),
-        Mod_Class::Vector4(4834.461f, -5175.737f, 2.169081f, 108.4202f),
-        Mod_Class::Vector4(4864.909f, -5160.665f, 2.791046f, 272.405f),
-        Mod_Class::Vector4(4887.225f, -5181.831f, 2.438293f, 252.0248f),
-        Mod_Class::Vector4(4904.118f, -5187.469f, 2.43825f, 338.149f),
-        Mod_Class::Vector4(5012.132f, -5199.121f, 2.517245f, 303.1538f),
-        Mod_Class::Vector4(5137.046f, -5103.176f, 2.197638f, 165.8812f),
-        Mod_Class::Vector4(4996.087f, -5187.851f, 2.523123f, 121.5532f),
-        Mod_Class::Vector4(5147.148f, -5053.37f, 20.39559f, 89.6064f),
-        Mod_Class::Vector4(5117.839f, -5172.103f, 2.30431f, 57.59507f),
-        Mod_Class::Vector4(5133.637f, -5118.043f, 2.113857f, 166.755f),
-        Mod_Class::Vector4(4913.793f, -5200.564f, 2.469321f, 213.1365f),
-        Mod_Class::Vector4(5142.1f, -5241.874f, 26.29656f, 0.5f),
-        Mod_Class::Vector4(4983.042f, -5196.473f, 2.50345f, 123.4069f),
-        Mod_Class::Vector4(5133.731f, -5141.614f, 2.147834f, 181.026f),
-        Mod_Class::Vector4(5254.448f, -5258.097f, 25.31619f, 129.8113f),
-        Mod_Class::Vector4(5212.377f, -5225.483f, 17.39517f, 0.5f),
-        Mod_Class::Vector4(5179.297f, -5146.072f, 3.289174f, 86.07165f),
-        Mod_Class::Vector4(5213.439f, -5122.497f, 6.122335f, 129.5457f),
-        Mod_Class::Vector4(5117.228f, -5149.584f, 2.21032f, 91.92164f),
-        Mod_Class::Vector4(5299.635f, -5225.373f, 32.21928f, 100.7981f),
-        Mod_Class::Vector4(5217.679f, -5207.616f, 16.40578f, 352.9662f),
-        Mod_Class::Vector4(5324.687f, -5262.405f, 32.82066f, 0.5f),
-        Mod_Class::Vector4(5220.702f, -5191.855f, 14.355f, 352.4796f),
-        Mod_Class::Vector4(5322.195f, -5196.333f, 31.55055f, 230.9573f),
-        Mod_Class::Vector4(5401.839f, -5171.006f, 31.39126f, 134.3677f),
-        Mod_Class::Vector4(5465.827f, -5235.692f, 43.96646f, 0.5f),
-        Mod_Class::Vector4(5565.909f, -5185.084f, 10.92833f, 0.5f),
-        Mod_Class::Vector4(5589.67f, -5219.979f, 14.35063f, 286.0875f),
-        Mod_Class::Vector4(5596.038f, -5163.533f, -100.5f, 247.9607f),
-        Mod_Class::Vector4(4894.263f, -4913.141f, 3.36446f, 4.1f),
-        Mod_Class::Vector4(4890.318f, -4923.923f, 3.368097f, 71.5f)
-    };
 
     inline const std::vector<Mod_Class::Vector4> CopsOnPatrol = {
         Mod_Class::Vector4(-394.8712f, 5987.242f, 31.23644f, 137.743f),
@@ -3971,6 +3651,1106 @@ namespace Mod_Data
         Mod_Class::Vector4(1182.725f, -1068.627f, 41.19003f, 21.30373f),
         Mod_Class::Vector4(2497.474f, 4135.372f, 38.06038f, 237.9974f),
         Mod_Class::Vector4(-20.35295f, 6366.861f, 30.94088f, 135.2917f)
+    };
+
+    inline const std::vector<Mod_Class::Vector4> Jogger01 = {
+        Mod_Class::Vector4(228.6289f, -1394.52f, 30.494f,0.0f),
+        Mod_Class::Vector4(252.5324f, -1400.599f, 30.53424f,0.0f),
+        Mod_Class::Vector4(273.3281f, -1378.727f, 31.95101f,0.0f),
+        Mod_Class::Vector4(273.2798f, -1359.458f, 31.93511f,0.0f),
+        Mod_Class::Vector4(250.2143f, -1339.669f, 31.92071f,0.0f),
+        Mod_Class::Vector4(235.2781f, -1346.481f, 30.5051f,0.0f),
+        Mod_Class::Vector4(219.2509f, -1365.954f, 30.56017f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger02 = {
+        Mod_Class::Vector4(-227.1508f, -2023.395f, 27.75543f,0.0f),
+        Mod_Class::Vector4(-222.3802f, -2007.24f, 27.75543f,0.0f),
+        Mod_Class::Vector4(-219.4253f, -1989.297f, 27.75542f,0.0f),
+        Mod_Class::Vector4(-221.2715f, -1971.702f, 27.75571f,0.0f),
+        Mod_Class::Vector4(-224.2942f, -1960.297f, 27.75689f,0.0f),
+        Mod_Class::Vector4(-240.3955f, -1966.939f, 29.94605f,0.0f),
+        Mod_Class::Vector4(-239.069f, -1973.878f, 29.94605f,0.0f),
+        Mod_Class::Vector4(-237.4634f, -1992.5f, 29.94605f,0.0f),
+        Mod_Class::Vector4(-240.9862f, -2009.94f, 29.94605f,0.0f),
+        Mod_Class::Vector4(-249.9569f, -2026.076f, 29.94605f,0.0f),
+        Mod_Class::Vector4(-263.3784f, -2040.735f, 29.94605f,0.0f),
+        Mod_Class::Vector4(-277.9292f, -2048.336f, 29.94605f,0.0f),
+        Mod_Class::Vector4(-273.3261f, -2064.927f, 27.75543f,0.0f),
+        Mod_Class::Vector4(-246.0456f, -2048.949f, 27.75543f,0.0f),
+        Mod_Class::Vector4(-235.4299f, -2037.349f, 27.75543f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger03 = {
+        Mod_Class::Vector4(-924.767f, -2571.403f, 13.97616f,0.0f),
+        Mod_Class::Vector4(-943.3739f, -2565.557f, 13.93645f,0.0f),
+        Mod_Class::Vector4(-961.3f, -2544.967f, 13.98062f,0.0f),
+        Mod_Class::Vector4(-967.3834f, -2523.3f, 13.98103f,0.0f),
+        Mod_Class::Vector4(-965.3172f, -2502.885f, 13.98098f,0.0f),
+        Mod_Class::Vector4(-960.5615f, -2492.263f, 13.98057f,0.0f),
+        Mod_Class::Vector4(-947.3313f, -2478.542f, 13.9807f,0.0f),
+        Mod_Class::Vector4(-932.3168f, -2470.56f, 13.9807f,0.0f),
+        Mod_Class::Vector4(-913.9728f, -2467.62f, 13.98073f,0.0f),
+        Mod_Class::Vector4(-889.0792f, -2472.986f, 13.98049f,0.0f),
+        Mod_Class::Vector4(-872.939f, -2489.196f, 13.98072f,0.0f),
+        Mod_Class::Vector4(-866.3092f, -2501.952f, 13.98075f,0.0f),
+        Mod_Class::Vector4(-863.3466f, -2512.478f, 13.98059f,0.0f),
+        Mod_Class::Vector4(-863.6301f, -2528.947f, 13.98072f,0.0f),
+        Mod_Class::Vector4(-869.4406f, -2546.69f, 13.97835f,0.0f),
+        Mod_Class::Vector4(-884.2811f, -2561.323f, 13.98074f,0.0f),
+        Mod_Class::Vector4(-896.1907f, -2568.416f, 13.98074f,0.0f),
+        Mod_Class::Vector4(-903.6213f, -2570.235f, 13.98074f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger04 = {
+        Mod_Class::Vector4(-287.7649f, -1638.534f, 31.84882f,0.0f),
+        Mod_Class::Vector4(-298.8279f, -1656.257f, 31.84881f,0.0f),
+        Mod_Class::Vector4(-317.5655f, -1644.264f, 31.85344f,0.0f),
+        Mod_Class::Vector4(-303.9065f, -1622.695f, 31.84882f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger05 = {
+        Mod_Class::Vector4(1476.682f, -1984.691f, 70.69158f,0.0f),
+        Mod_Class::Vector4(1453.445f, -1972.131f, 70.44451f,0.0f),
+        Mod_Class::Vector4(1434.379f, -1986.595f, 65.75795f,0.0f),
+        Mod_Class::Vector4(1423.388f, -2007.92f, 61.90174f,0.0f),
+        Mod_Class::Vector4(1433.237f, -2031.683f, 57.47531f,0.0f),
+        Mod_Class::Vector4(1469.974f, -2042.295f, 57.02632f,0.0f),
+        Mod_Class::Vector4(1478.932f, -2002.187f, 68.38514f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger06 = {
+        Mod_Class::Vector4(129.9129f, -988.9407f, 29.32248f,0.0f),
+        Mod_Class::Vector4(169.9703f, -880.6992f, 30.55882f,0.0f),
+        Mod_Class::Vector4(174.1833f, -881.5703f, 30.89416f,0.0f),
+        Mod_Class::Vector4(186.1561f, -849.1542f, 31.16665f,0.0f),
+        Mod_Class::Vector4(193.5296f, -847.7554f, 30.91245f,0.0f),
+        Mod_Class::Vector4(263.498f, -872.455f, 29.17216f,0.0f),
+        Mod_Class::Vector4(211.1392f, -1018.212f, 29.30549f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger07 = {
+        Mod_Class::Vector4(356.3345f, 160.7301f, 103.0043f,0.0f),
+        Mod_Class::Vector4(222.6689f, 208.8755f, 105.5123f,0.0f),
+        Mod_Class::Vector4(266.2624f, 328.2007f, 105.5289f,0.0f),
+        Mod_Class::Vector4(339.1058f, 311.9287f, 104.5361f,0.0f),
+        Mod_Class::Vector4(404.6719f, 292.2426f, 102.9655f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger08 = {
+        Mod_Class::Vector4(-68.89455f, -402.1517f, 37.29737f,0.0f),
+        Mod_Class::Vector4(-103.1039f, -389.6021f, 36.63163f,0.0f),
+        Mod_Class::Vector4(-108.889f, -409.1098f, 35.77497f,0.0f),
+        Mod_Class::Vector4(-127.2451f, -411.5541f, 34.58294f,0.0f),
+        Mod_Class::Vector4(-139.3882f, -421.2568f, 33.74562f,0.0f),
+        Mod_Class::Vector4(-148.7219f, -435.5255f, 33.47985f,0.0f),
+        Mod_Class::Vector4(-153.0547f, -451.4209f, 33.79173f,0.0f),
+        Mod_Class::Vector4(-145.8188f, -464.7188f, 33.17519f,0.0f),
+        Mod_Class::Vector4(-132.132f, -472.3099f, 33.07674f,0.0f),
+        Mod_Class::Vector4(-121.9619f, -474.8518f, 33.34896f,0.0f),
+        Mod_Class::Vector4(-89.17182f, -474.3718f, 34.96899f,0.0f),
+        Mod_Class::Vector4(-77.55576f, -466.7515f, 36.39326f,0.0f),
+        Mod_Class::Vector4(-67.24388f, -449.3546f, 38.11158f,0.0f),
+        Mod_Class::Vector4(-64.59761f, -437.8882f, 38.43552f,0.0f),
+        Mod_Class::Vector4(-64.19228f, -419.8323f, 38.09665f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger09 = {
+        Mod_Class::Vector4(-736.3101f, 90.46006f, 55.58132f,0.0f),
+        Mod_Class::Vector4(-737.0633f, 69.59921f, 54.30896f,0.0f),
+        Mod_Class::Vector4(-734.0124f, 47.01559f, 47.47584f,0.0f),
+        Mod_Class::Vector4(-728.4005f, 29.74567f, 42.26787f,0.0f),
+        Mod_Class::Vector4(-703.6444f, 36.59576f, 43.22058f,0.0f),
+        Mod_Class::Vector4(-681.6513f, 46.41314f, 43.09964f,0.0f),
+        Mod_Class::Vector4(-661.1816f, 46.04203f, 41.12265f,0.0f),
+        Mod_Class::Vector4(-658.776f, 85.53405f, 52.46266f,0.0f),
+        Mod_Class::Vector4(-662.4477f, 103.3301f, 56.80659f,0.0f),
+        Mod_Class::Vector4(-662.0488f, 119.3575f, 57.01698f,0.0f),
+        Mod_Class::Vector4(-675.6852f, 115.9964f, 56.75283f,0.0f),
+        Mod_Class::Vector4(-709.5087f, 98.95238f, 56.07108f,0.0f),
+        Mod_Class::Vector4(-718.9947f, 95.15092f, 55.8739f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger10 = {
+        Mod_Class::Vector4(-1765.645f, -1149.159f, 13.07916f,0.0f),
+        Mod_Class::Vector4(-1837.407f, -1227.053f, 13.01728f,0.0f),
+        Mod_Class::Vector4(-1869.622f, -1210.43f, 13.01711f,0.0f),
+        Mod_Class::Vector4(-1831.916f, -1162.537f, 13.01727f,0.0f),
+        Mod_Class::Vector4(-1806.807f, -1181.257f, 13.01744f,0.0f),
+        Mod_Class::Vector4(-1797.633f, -1177.67f, 13.01751f,0.0f),
+        Mod_Class::Vector4(-1786.751f, -1169.576f, 13.01768f,0.0f),
+        Mod_Class::Vector4(-1660.035f, -1023.637f, 13.01778f,0.0f),
+        Mod_Class::Vector4(-1652.489f, -1014.507f, 13.01739f,0.0f),
+        Mod_Class::Vector4(-1659.945f, -1009.417f, 13.01739f,0.0f),
+        Mod_Class::Vector4(-1709.898f, -1070.201f, 13.01735f,0.0f),
+        Mod_Class::Vector4(-1709.359f, -1083.783f, 13.10089f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger11 = {
+        Mod_Class::Vector4(-2891.325f, -8.690169f, 7.963134f,0.0f),
+        Mod_Class::Vector4(-2910.282f, -37.03131f, 3.024998f,0.0f),
+        Mod_Class::Vector4(-2999.717f, 0.8205602f, 4.733732f,0.0f),
+        Mod_Class::Vector4(-2997.566f, 30.52503f, 7.300454f,0.0f),
+        Mod_Class::Vector4(-2995.444f, 36.81783f, 7.95881f,0.0f),
+        Mod_Class::Vector4(-2992.152f, 35.16978f, 8.5967f,0.0f),
+        Mod_Class::Vector4(-2987.468f, 42.83352f, 11.6085f,0.0f),
+        Mod_Class::Vector4(-2939.735f, 20.68083f, 11.60792f,0.0f),
+        Mod_Class::Vector4(-2943.227f, 12.65156f, 11.60476f,0.0f),
+        Mod_Class::Vector4(-2918.954f, 1.69491f, 11.60532f,0.0f),
+        Mod_Class::Vector4(-2891.381f, -6.391256f, 11.60316f,0.0f),
+        Mod_Class::Vector4(-2888.387f, 2.114674f, 11.608f,0.0f),
+        Mod_Class::Vector4(-2886.561f, 0.7008348f, 11.608f,0.0f),
+        Mod_Class::Vector4(-2888.892f, -7.902122f, 7.959469f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger12 = {
+        Mod_Class::Vector4(-1486.228f, 875.5378f, 182.6471f,0.0f),
+        Mod_Class::Vector4(-1478.33f, 831.1494f, 181.7178f,0.0f),
+        Mod_Class::Vector4(-1514.694f, 814.3276f, 181.9242f,0.0f),
+        Mod_Class::Vector4(-1521.786f, 816.0013f, 181.8818f,0.0f),
+        Mod_Class::Vector4(-1532.458f, 826.3513f, 181.4863f,0.0f),
+        Mod_Class::Vector4(-1543.011f, 817.2687f, 182.2451f,0.0f),
+        Mod_Class::Vector4(-1549.201f, 782.2504f, 188.5506f,0.0f),
+        Mod_Class::Vector4(-1558.725f, 777.4117f, 189.1925f,0.0f),
+        Mod_Class::Vector4(-1584.688f, 765.293f, 189.1942f,0.0f),
+        Mod_Class::Vector4(-1592.872f, 784.2383f, 189.194f,0.0f),
+        Mod_Class::Vector4(-1578.12f, 790.5488f, 189.1929f,0.0f),
+        Mod_Class::Vector4(-1585.357f, 804.7038f, 185.9943f,0.0f),
+        Mod_Class::Vector4(-1575.385f, 809.5252f, 185.9944f,0.0f),
+        Mod_Class::Vector4(-1578.809f, 818.0173f, 185.9939f,0.0f),
+        Mod_Class::Vector4(-1534.582f, 848.1694f, 181.7705f,0.0f),
+        Mod_Class::Vector4(-1521.602f, 854.8638f, 181.5947f,0.0f),
+        Mod_Class::Vector4(-1496.966f, 870.4911f, 181.9422f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger13 = {
+        Mod_Class::Vector4(-1893.8f, 1974.631f, 143.1386f,0.0f),
+        Mod_Class::Vector4(-1929.31f, 1969.096f, 148.8142f,0.0f),
+        Mod_Class::Vector4(-1966.108f, 1968.237f, 154.9804f,0.0f),
+        Mod_Class::Vector4(-1982.965f, 1961.467f, 160.8532f,0.0f),
+        Mod_Class::Vector4(-1987.9f, 1950.067f, 167.1869f,0.0f),
+        Mod_Class::Vector4(-1982.987f, 1941.103f, 171.1532f,0.0f),
+        Mod_Class::Vector4(-1945.131f, 1917.294f, 173.789f,0.0f),
+        Mod_Class::Vector4(-1938.31f, 1890.808f, 179.907f,0.0f),
+        Mod_Class::Vector4(-1954.827f, 1842.859f, 180.2473f,0.0f),
+        Mod_Class::Vector4(-1957.488f, 1830.848f, 178.8064f,0.0f),
+        Mod_Class::Vector4(-1945.764f, 1820.129f, 172.0853f,0.0f),
+        Mod_Class::Vector4(-1937.965f, 1823.133f, 170.6982f,0.0f),
+        Mod_Class::Vector4(-1920.848f, 1840.997f, 166.5749f,0.0f),
+        Mod_Class::Vector4(-1899.503f, 1851.748f, 160.8903f,0.0f),
+        Mod_Class::Vector4(-1879.112f, 1865.361f, 156.9021f,0.0f),
+        Mod_Class::Vector4(-1841.115f, 1891.895f, 146.2764f,0.0f),
+        Mod_Class::Vector4(-1836.474f, 1901.321f, 145.8237f,0.0f),
+        Mod_Class::Vector4(-1839.368f, 1912.564f, 147.3022f,0.0f),
+        Mod_Class::Vector4(-1853.069f, 1930.572f, 150.2391f,0.0f),
+        Mod_Class::Vector4(-1878.708f, 1956.751f, 145.8794f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger14 = {
+        Mod_Class::Vector4(-319.6601f, 2786.814f, 59.43f,0.0f),
+        Mod_Class::Vector4(-337.5543f, 2800.789f, 58.15808f,0.0f),
+        Mod_Class::Vector4(-338.9051f, 2804.992f, 58.13386f,0.0f),
+        Mod_Class::Vector4(-327.3314f, 2822.454f, 58.19631f,0.0f),
+        Mod_Class::Vector4(-317.4219f, 2826.94f, 58.47928f,0.0f),
+        Mod_Class::Vector4(-312.7925f, 2831.25f, 58.25769f,0.0f),
+        Mod_Class::Vector4(-310.0566f, 2831.212f, 58.38048f,0.0f),
+        Mod_Class::Vector4(-297.7459f, 2823.444f, 59.15673f,0.0f),
+        Mod_Class::Vector4(-299.6138f, 2818.963f, 59.19112f,0.0f),
+        Mod_Class::Vector4(-295.6808f, 2811.254f, 58.98975f,0.0f),
+        Mod_Class::Vector4(-308.6064f, 2790.959f, 59.41709f,0.0f),
+        Mod_Class::Vector4(-316.4038f, 2787.014f, 59.56699f,0.0f),
+        Mod_Class::Vector4(-323.0881f, 2789.975f, 59.20899f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger15 = {
+        Mod_Class::Vector4(-2768.271f, 2695.774f, 1.370201f,0.0f),
+        Mod_Class::Vector4(-2755.266f, 2703.515f, 1.416718f,0.0f),
+        Mod_Class::Vector4(-2735.553f, 2738.595f, 1.462122f,0.0f),
+        Mod_Class::Vector4(-2730.177f, 2799.426f, 1.757612f,0.0f),
+        Mod_Class::Vector4(-2717.147f, 2824.657f, 1.186048f,0.0f),
+        Mod_Class::Vector4(-2730.011f, 2855.175f, 1.459975f,0.0f),
+        Mod_Class::Vector4(-2720.936f, 2897.158f, 1.232428f,0.0f),
+        Mod_Class::Vector4(-2723.055f, 2915.156f, 1.214248f,0.0f),
+        Mod_Class::Vector4(-2717.156f, 2934.323f, 1.675791f,0.0f),
+        Mod_Class::Vector4(-2736.917f, 2953.923f, 2.776649f,0.0f),
+        Mod_Class::Vector4(-2746.004f, 2954.125f, 2.354859f,0.0f),
+        Mod_Class::Vector4(-2751.835f, 2943.838f, 2.075438f,0.0f),
+        Mod_Class::Vector4(-2752.229f, 2914.945f, 1.281913f,0.0f),
+        Mod_Class::Vector4(-2752.62f, 2887.3f, 1.572614f,0.0f),
+        Mod_Class::Vector4(-2756.117f, 2854.283f, 1.468493f,0.0f),
+        Mod_Class::Vector4(-2764.645f, 2779.508f, 2.047434f,0.0f),
+        Mod_Class::Vector4(-2769.536f, 2743.653f, 2.138904f,0.0f),
+        Mod_Class::Vector4(-2776.014f, 2720.484f, 2.238141f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger16 = {
+        Mod_Class::Vector4(1061.091f, -558.9828f, 59.28479f,0.0f),
+        Mod_Class::Vector4(1066.203f, -597.2649f, 56.83318f,0.0f),
+        Mod_Class::Vector4(1062.106f, -610.6114f, 56.76826f,0.0f),
+        Mod_Class::Vector4(1022.904f, -655.5869f, 58.68858f,0.0f),
+        Mod_Class::Vector4(1020.39f, -657.876f, 58.61199f,0.0f),
+        Mod_Class::Vector4(1020.476f, -698.0944f, 56.81086f,0.0f),
+        Mod_Class::Vector4(1056.699f, -719.1822f, 56.815f,0.0f),
+        Mod_Class::Vector4(1088.558f, -738.0333f, 56.76314f,0.0f),
+        Mod_Class::Vector4(1132.372f, -738.0198f, 56.74362f,0.0f),
+        Mod_Class::Vector4(1143.484f, -710.3257f, 56.80364f,0.0f),
+        Mod_Class::Vector4(1127.766f, -660.5972f, 56.68017f,0.0f),
+        Mod_Class::Vector4(1126.506f, -644.8978f, 56.77164f,0.0f),
+        Mod_Class::Vector4(1119.372f, -633.5688f, 56.78326f,0.0f),
+        Mod_Class::Vector4(1118.719f, -612.4344f, 56.74827f,0.0f),
+        Mod_Class::Vector4(1124.979f, -604.9899f, 56.74682f,0.0f),
+        Mod_Class::Vector4(1139.324f, -591.7932f, 56.75398f,0.0f),
+        Mod_Class::Vector4(1142.248f, -582.8869f, 56.75351f,0.0f),
+        Mod_Class::Vector4(1133.203f, -563.3502f, 56.99999f,0.0f),
+        Mod_Class::Vector4(1125.851f, -551.4424f, 56.93082f,0.0f),
+        Mod_Class::Vector4(1105.572f, -540.5275f, 57.76503f,0.0f),
+        Mod_Class::Vector4(1105.599f, -540.5577f, 57.76052f,0.0f),
+        Mod_Class::Vector4(1100.637f, -540.5255f, 57.95548f,0.0f),
+        Mod_Class::Vector4(1100.362f, -527.494f, 63.07243f,0.0f),
+        Mod_Class::Vector4(1073.51f, -530.7902f, 62.03668f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger17 = {
+        Mod_Class::Vector4(1163.911f, 280.2455f, 82.19042f,0.0f),
+        Mod_Class::Vector4(991.5728f, -11.44712f, 81.85177f,0.0f),
+        Mod_Class::Vector4(993.7879f, -40.10574f, 81.92294f,0.0f),
+        Mod_Class::Vector4(1011.639f, -65.61469f, 82.19008f,0.0f),
+        Mod_Class::Vector4(1038.523f, -82.89301f, 82.19008f,0.0f),
+        Mod_Class::Vector4(1072.831f, -82.7739f, 82.16786f,0.0f),
+        Mod_Class::Vector4(1095.682f, -69.53146f, 82.08484f,0.0f),
+        Mod_Class::Vector4(1265.938f, 178.9096f, 81.98807f,0.0f),
+        Mod_Class::Vector4(1273.632f, 195.978f, 81.91003f,0.0f),
+        Mod_Class::Vector4(1274.658f, 222.6223f, 81.90385f,0.0f),
+        Mod_Class::Vector4(1261.318f, 257.1254f, 82.07339f,0.0f),
+        Mod_Class::Vector4(1235.155f, 278.5591f, 82.08091f,0.0f),
+        Mod_Class::Vector4(1209.412f, 284.0538f, 82.0095f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger18 = {
+        Mod_Class::Vector4(2493.767f, -317.9808f, 92.99265f,0.0f),
+        Mod_Class::Vector4(2465.75f, -331.269f, 92.99268f,0.0f),
+        Mod_Class::Vector4(2445.703f, -353.545f, 92.98891f,0.0f),
+        Mod_Class::Vector4(2446.853f, -417.4889f, 92.99274f,0.0f),
+        Mod_Class::Vector4(2474.773f, -444.7306f, 92.99303f,0.0f),
+        Mod_Class::Vector4(2480.923f, -437.5063f, 92.99287f,0.0f),
+        Mod_Class::Vector4(2479.751f, -420.7701f, 93.73516f,0.0f),
+        Mod_Class::Vector4(2481.842f, -406.8932f, 93.73528f,0.0f),
+        Mod_Class::Vector4(2494.202f, -390.2369f, 94.11994f,0.0f),
+        Mod_Class::Vector4(2493.491f, -374.688f, 94.11996f,0.0f),
+        Mod_Class::Vector4(2481.127f, -358.7106f, 93.73526f,0.0f),
+        Mod_Class::Vector4(2481.344f, -341.2011f, 93.00871f,0.0f),
+        Mod_Class::Vector4(2480.642f, -324.369f, 92.99266f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger19 = {
+        Mod_Class::Vector4(1443.998f, 1032.925f, 114.2406f,0.0f),
+        Mod_Class::Vector4(1507.861f, 1033.247f, 114.2185f,0.0f),
+        Mod_Class::Vector4(1514.412f, 1043.134f, 114.2258f,0.0f),
+        Mod_Class::Vector4(1514.912f, 1101.076f, 114.2287f,0.0f),
+        Mod_Class::Vector4(1502.632f, 1178.213f, 114.2156f,0.0f),
+        Mod_Class::Vector4(1484.8f, 1185.216f, 114.1505f,0.0f),
+        Mod_Class::Vector4(1434.625f, 1186.282f, 114.1913f,0.0f),
+        Mod_Class::Vector4(1433.847f, 1092.753f, 114.2267f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger20 = {
+        Mod_Class::Vector4(2692.736f, 1705.75f, 24.68079f,0.0f),
+        Mod_Class::Vector4(2806.105f, 1705.584f, 24.68113f,0.0f),
+        Mod_Class::Vector4(2818.727f, 1704.424f, 24.69106f,0.0f),
+        Mod_Class::Vector4(2823.846f, 1699.423f, 24.71452f,0.0f),
+        Mod_Class::Vector4(2824.438f, 1696.413f, 24.69556f,0.0f),
+        Mod_Class::Vector4(2824.696f, 1647.154f, 24.64242f,0.0f),
+        Mod_Class::Vector4(2782.65f, 1647.183f, 24.60208f,0.0f),
+        Mod_Class::Vector4(2780.294f, 1653.693f, 24.53028f,0.0f),
+        Mod_Class::Vector4(2711.461f, 1654.09f, 24.53372f,0.0f),
+        Mod_Class::Vector4(2711.587f, 1647.229f, 24.60396f,0.0f),
+        Mod_Class::Vector4(2698.269f, 1646.656f, 24.60472f,0.0f),
+        Mod_Class::Vector4(2695.426f, 1649.674f, 24.61012f,0.0f),
+        Mod_Class::Vector4(2694.013f, 1653.814f, 24.62069f,0.0f),
+        Mod_Class::Vector4(2694.363f, 1691.255f, 24.69635f,0.0f),
+        Mod_Class::Vector4(2696.989f, 1695.163f, 24.7006f,0.0f),
+        Mod_Class::Vector4(2702.095f, 1696.548f, 24.66678f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger21 = {
+        Mod_Class::Vector4(1623.121f, 3228.294f, 40.41154f,0.0f),
+        Mod_Class::Vector4(1548.318f, 3147.528f, 40.53161f,0.0f),
+        Mod_Class::Vector4(1099.019f, 3015.776f, 40.56151f,0.0f),
+        Mod_Class::Vector4(1074.616f, 3035.108f, 41.24891f,0.0f),
+        Mod_Class::Vector4(1085.017f, 3076.249f, 40.42923f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger22 = {
+        Mod_Class::Vector4(1090.78f, 3566.191f, 34.09589f,0.0f),
+        Mod_Class::Vector4(1091.477f, 3610.838f, 33.05823f,0.0f),
+        Mod_Class::Vector4(1047.076f, 3610.903f, 33.11738f,0.0f),
+        Mod_Class::Vector4(1012.615f, 3597.394f, 33.21322f,0.0f),
+        Mod_Class::Vector4(1017.906f, 3568.242f, 33.92956f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger23 = {
+        Mod_Class::Vector4(73.27388f, 3633.642f, 39.70792f,0.0f),
+        Mod_Class::Vector4(27.01976f, 3700.822f, 39.70713f,0.0f),
+        Mod_Class::Vector4(28.15174f, 3713.856f, 39.71289f,0.0f),
+        Mod_Class::Vector4(35.53751f, 3726.467f, 39.65743f,0.0f),
+        Mod_Class::Vector4(73.20634f, 3740.686f, 39.71008f,0.0f),
+        Mod_Class::Vector4(83.90422f, 3739.935f, 39.69468f,0.0f),
+        Mod_Class::Vector4(99.68319f, 3726.861f, 39.67576f,0.0f),
+        Mod_Class::Vector4(102.9181f, 3719.429f, 39.70041f,0.0f),
+        Mod_Class::Vector4(82.71038f, 3679.274f, 39.71919f,0.0f),
+        Mod_Class::Vector4(81.40222f, 3636.785f, 39.69534f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger24 = {
+        Mod_Class::Vector4(1041.883f, 2191.695f, 44.96709f,0.0f),
+        Mod_Class::Vector4(1066.888f, 2213.252f, 46.80863f,0.0f),
+        Mod_Class::Vector4(1031.368f, 2213.759f, 51.05772f,0.0f),
+        Mod_Class::Vector4(989.4823f, 2218.621f, 47.55013f,0.0f),
+        Mod_Class::Vector4(997.8649f, 2204.891f, 46.05443f,0.0f),
+        Mod_Class::Vector4(1021.423f, 2190.472f, 45.28568f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger25 = {
+        Mod_Class::Vector4(2440.191f, 4837.629f, 36.53263f,0.0f),
+        Mod_Class::Vector4(2428.567f, 4921.247f, 43.66103f,0.0f),
+        Mod_Class::Vector4(2472.179f, 4965.375f, 45.16649f,0.0f),
+        Mod_Class::Vector4(2480.896f, 4990.179f, 46.22219f,0.0f),
+        Mod_Class::Vector4(2478.137f, 5002.943f, 45.85592f,0.0f),
+        Mod_Class::Vector4(2466.199f, 5016.405f, 45.56878f,0.0f),
+        Mod_Class::Vector4(2416.468f, 4969.382f, 46.13856f,0.0f),
+        Mod_Class::Vector4(2386.791f, 4938.182f, 42.70732f,0.0f),
+        Mod_Class::Vector4(2363.594f, 4912.43f, 41.9899f,0.0f),
+        Mod_Class::Vector4(2373.377f, 4895.569f, 41.92224f,0.0f),
+        Mod_Class::Vector4(2394.373f, 4874.57f, 40.84945f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger26 = {
+        Mod_Class::Vector4(234.6885f, 6418.486f, 30.96218f,0.0f),
+        Mod_Class::Vector4(248.8196f, 6415.337f, 31.88116f,0.0f),
+        Mod_Class::Vector4(269.739f, 6414.965f, 32.11745f,0.0f),
+        Mod_Class::Vector4(288.8002f, 6420.939f, 31.35575f,0.0f),
+        Mod_Class::Vector4(298.797f, 6432.084f, 31.80929f,0.0f),
+        Mod_Class::Vector4(301.9339f, 6444.203f, 32.29673f,0.0f),
+        Mod_Class::Vector4(306.1744f, 6493.814f, 29.37009f,0.0f),
+        Mod_Class::Vector4(250.2143f, 6489.353f, 30.67807f,0.0f),
+        Mod_Class::Vector4(171.8803f, 6482.01f, 31.94304f,0.0f),
+        Mod_Class::Vector4(175.2863f, 6475.943f, 31.89293f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger27 = {
+        Mod_Class::Vector4(157.3289f, 7044.97f, 1.865713f,0.0f),
+        Mod_Class::Vector4(102.7529f, 7073.901f, 1.931986f,0.0f),
+        Mod_Class::Vector4(52.24357f, 7079.25f, 2.17193f,0.0f),
+        Mod_Class::Vector4(23.56722f, 7052.823f, 1.409035f,0.0f),
+        Mod_Class::Vector4(31.16364f, 7023.305f, 7.387625f,0.0f),
+        Mod_Class::Vector4(41.1493f, 7013.06f, 8.625368f,0.0f),
+        Mod_Class::Vector4(36.24067f, 6995.254f, 8.021345f,0.0f),
+        Mod_Class::Vector4(73.45621f, 6951.467f, 11.52127f,0.0f),
+        Mod_Class::Vector4(76.90339f, 6968.756f, 10.14844f,0.0f),
+        Mod_Class::Vector4(96.15324f, 6976.542f, 9.490364f,0.0f),
+        Mod_Class::Vector4(144.0458f, 6980.392f, 8.019959f,0.0f),
+        Mod_Class::Vector4(157.614f, 6990.637f, 4.969121f,0.0f),
+        Mod_Class::Vector4(158.9223f, 7011.254f, 3.681879f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger28 = {
+        Mod_Class::Vector4(-576.4569f, 5452.922f, 60.71923f,0.0f),
+        Mod_Class::Vector4(-560.6669f, 5474.996f, 61.77381f,0.0f),
+        Mod_Class::Vector4(-552.685f, 5494.2f, 59.80086f,0.0f),
+        Mod_Class::Vector4(-550.2758f, 5515.276f, 59.87648f,0.0f),
+        Mod_Class::Vector4(-572.0354f, 5544.016f, 52.74706f,0.0f),
+        Mod_Class::Vector4(-601.4049f, 5515.799f, 49.60851f,0.0f),
+        Mod_Class::Vector4(-620.7578f, 5506.275f, 51.13645f,0.0f),
+        Mod_Class::Vector4(-634.4025f, 5477.448f, 53.29848f,0.0f),
+        Mod_Class::Vector4(-637.6897f, 5453.631f, 52.85682f,0.0f),
+        Mod_Class::Vector4(-595.5697f, 5458.982f, 59.10485f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger29 = {
+        Mod_Class::Vector4(-334.3983f, 6183.464f, 31.42284f,0.0f),
+        Mod_Class::Vector4(-305.0548f, 6212.236f, 31.45675f,0.0f),
+        Mod_Class::Vector4(-302.0125f, 6213.075f, 31.39697f,0.0f),
+        Mod_Class::Vector4(-284.0596f, 6234.494f, 31.49339f,0.0f),
+        Mod_Class::Vector4(-237.9272f, 6281.979f, 31.45799f,0.0f),
+        Mod_Class::Vector4(-252.1601f, 6297.677f, 31.45717f,0.0f),
+        Mod_Class::Vector4(-301.6298f, 6251.044f, 31.51244f,0.0f),
+        Mod_Class::Vector4(-305.8697f, 6247.805f, 31.43438f,0.0f),
+        Mod_Class::Vector4(-318.1996f, 6232.045f, 31.48331f,0.0f),
+        Mod_Class::Vector4(-322.5253f, 6227.77f, 31.46884f,0.0f),
+        Mod_Class::Vector4(-360.4957f, 6191.922f, 31.48243f,0.0f)
+    };
+    inline const std::vector<Mod_Class::Vector4> Jogger30 = {
+        Mod_Class::Vector4(-1445.911f, 4228.153f, 49.88695f,0.0f),
+        Mod_Class::Vector4(-1437.855f, 4232.769f, 48.72689f,0.0f),
+        Mod_Class::Vector4(-1414.334f, 4225.317f, 42.9243f,0.0f),
+        Mod_Class::Vector4(-1406.202f, 4234.257f, 39.57491f,0.0f),
+        Mod_Class::Vector4(-1398.107f, 4235.384f, 37.1693f,0.0f),
+        Mod_Class::Vector4(-1381.473f, 4242.933f, 32.96693f,0.0f),
+        Mod_Class::Vector4(-1379.1f, 4227.457f, 27.85471f,0.0f),
+        Mod_Class::Vector4(-1375.508f, 4221.704f, 26.20435f,0.0f),
+        Mod_Class::Vector4(-1371.023f, 4221.62f, 24.55573f,0.0f),
+        Mod_Class::Vector4(-1369.318f, 4234.283f, 21.74896f,0.0f),
+        Mod_Class::Vector4(-1365.844f, 4237.374f, 20.58922f,0.0f),
+        Mod_Class::Vector4(-1362.55f, 4222.789f, 18.0125f,0.0f),
+        Mod_Class::Vector4(-1357.766f, 4223.158f, 16.33216f,0.0f),
+        Mod_Class::Vector4(-1355.488f, 4230.613f, 14.08321f,0.0f),
+        Mod_Class::Vector4(-1349.775f, 4261.309f, 7.204568f,0.0f),
+        Mod_Class::Vector4(-1350.807f, 4280.167f, 3.489815f,0.0f),
+        Mod_Class::Vector4(-1366.992f, 4291.422f, 2.879005f,0.0f),
+        Mod_Class::Vector4(-1375.258f, 4295.798f, 2.808748f,0.0f),
+        Mod_Class::Vector4(-1409.907f, 4301.811f, 5.031199f,0.0f),
+        Mod_Class::Vector4(-1511.659f, 4307.015f, 5.628844f,0.0f),
+        Mod_Class::Vector4(-1585.516f, 4343.747f, 3.159351f,0.0f),
+        Mod_Class::Vector4(-1610.404f, 4373.366f, 2.441379f,0.0f),
+        Mod_Class::Vector4(-1644.269f, 4431.979f, 3.232418f,0.0f),
+        Mod_Class::Vector4(-1677.754f, 4452.332f, 2.484089f,0.0f),
+        Mod_Class::Vector4(-1734.826f, 4452.425f, 4.763266f,0.0f),
+        Mod_Class::Vector4(-1783.387f, 4475.105f, 11.17609f,0.0f),
+        Mod_Class::Vector4(-1815.323f, 4479.708f, 17.87292f,0.0f),
+        Mod_Class::Vector4(-1842.674f, 4500.0f, 22.1328f,0.0f),
+        Mod_Class::Vector4(-1855.061f, 4500.765f, 22.36915f,0.0f),
+        Mod_Class::Vector4(-1878.805f, 4481.325f, 26.10547f,0.0f),
+        Mod_Class::Vector4(-1912.77f, 4482.177f, 29.16429f,0.0f),
+        Mod_Class::Vector4(-1927.905f, 4460.231f, 34.65511f,0.0f),
+        Mod_Class::Vector4(-1905.194f, 4437.292f, 42.7122f,0.0f),
+        Mod_Class::Vector4(-1870.033f, 4417.005f, 48.25819f,0.0f),
+        Mod_Class::Vector4(-1739.497f, 4344.018f, 62.30252f,0.0f),
+        Mod_Class::Vector4(-1701.276f, 4303.689f, 69.18857f,0.0f),
+        Mod_Class::Vector4(-1659.563f, 4215.886f, 82.93988f,0.0f),
+        Mod_Class::Vector4(-1637.42f, 4205.126f, 84.06075f,0.0f),
+        Mod_Class::Vector4(-1587.657f, 4200.398f, 81.1502f,0.0f),
+        Mod_Class::Vector4(-1567.076f, 4205.095f, 78.5675f,0.0f),
+        Mod_Class::Vector4(-1566.948f, 4205.121f, 78.53695f,0.0f),
+        Mod_Class::Vector4(-1489.583f, 4226.147f, 57.02686f,0.0f),
+        Mod_Class::Vector4(-1461.699f, 4225.801f, 52.18763f,0.0f)
+    };
+
+    inline std::vector<std::string> PrePed_01 = {};
+    inline std::vector<std::string> PrePed_02 = {};
+    inline std::vector<std::string> PrePed_03 = {};
+    inline std::vector<std::string> PrePed_04 = {};
+    inline std::vector<std::string> PrePed_05 = {};
+    inline std::vector<std::string> PrePed_06 = {};
+    inline std::vector<std::string> PrePed_07 = {};
+    inline std::vector<std::string> PrePed_08 = {};
+    inline std::vector<std::string> PrePed_09 = {};
+    inline std::vector<std::string> PrePed_10 = {};
+    inline std::vector<std::string> PrePed_11 = {};
+    inline std::vector<std::string> PrePed_12 = {};
+    inline std::vector<std::string> PrePed_13 = {};
+    inline std::vector<std::string> PrePed_14 = {};
+    inline std::vector<std::string> PrePed_15 = {};
+
+    inline std::vector<std::string> PreVeh_01 = {};
+    inline std::vector<std::string> PreVeh_02 = {};
+    inline std::vector<std::string> PreVeh_03 = {};
+    inline std::vector<std::string> PreVeh_04 = {};
+    inline const std::vector<std::string> PreVeh_05 = {
+        "BULLDOZER",  //
+        "UTILLITRUCK",  //<!-- Utility Truck cherry picker variant -->
+        "UTILLITRUCK2",  //<!-- Utility Truck flatbed variant -->
+        "UTILLITRUCK3",  //<!-- Utility Truck pick-up variant -->
+        "RUBBLE",  //
+        "TIPTRUCK",  //<!-- Tipper 4-wheel variant -->
+        "TIPTRUCK2",  //<!-- Tipper 6-wheel variant -->
+        "MIXER",  //
+        "MIXER2"  //<!-- Mixer 8-wheel variant -->
+    };
+    inline const std::vector<std::string> PreVeh_06 = {
+        "BENSON",  //
+        "BIFF",  //
+        "FLATBED",  //
+        "HAULER",  //
+        "HAULER2",  //<!-- Hauler Custom -->
+        "MULE",  //
+        "MULE2",  //<!-- Mule ramp door variant -->
+        "PACKER",  //
+        "PHANTOM",  //
+        "POUNDER",  //
+        "POUNDER2",  //<!-- Pounder Custom -->
+        "benson2", //  Commercial
+        "phantom4", // Commercial
+        "towtruck3", // Utility
+        "towtruck4" // Utility
+    };
+    inline const std::vector<std::string> PreVeh_07 = {
+        "BF400",  //
+        "MANCHEZ",  //
+        "MANCHEZ2",  //<!-- Manchez Scout -->
+        "MANCHEZ3",  //<!-- Manchez Scout C -->
+        "SANCHEZ",  //<!-- Sanchez livery variant -->
+        "SANCHEZ2",  //
+        "BLAZER",  //
+        "BLAZER3",  //<!-- Hot Rod Blazer -->
+        "BLAZER4"  //<!-- Street Blazer -->
+    };
+    inline const std::vector<std::string> PreVeh_08 = {
+        "FBI",  //<!-- FIB Buffalo -->
+        "FBI2",  //<!-- FIB Granger -->
+        "POLICE4",  //<!-- Unmarked Cruiser -->
+        "FIRETRUK",  //
+        "POLICEB",  //<!-- Police Bike -->
+        "PRANGER",  //<!-- Park Ranger -->
+        "SHERIFF",  //<!-- Sheriff Cruiser -->
+        "SHERIFF2"  //<!-- Sheriff SUV -->
+        "POLICE2",  //<!-- Police Cruiser Buffalo -->
+        "POLICE",  //<!-- Police Cruiser Stanier -->
+        "POLICE3",  //<!-- Police Cruiser Interceptor -->
+        "POLICET",  //<!-- Police Transporter -->
+        "RIOT"  //<!-- Police Riot -->
+    };
+    inline const std::vector<std::string> PreVeh_09 = {
+        "APC",  //
+        "BARRACKS",  //
+        "BARRACKS2",  //<!-- Barracks Semi -->
+        "BARRAGE",  //
+        "CHERNOBOG",  //
+        "CRUSADER",  //
+        "HALFTRACK",  //
+        "RHINO",  //
+        "KHANJALI",  //<!-- TM-02 Khanjali -->
+        "VETIR"  //
+    };
+    inline std::vector<std::string> PreVeh_10 = {};
+    inline std::vector<std::string> PreVeh_11 = {};
+    inline const std::vector<std::string> PreVeh_12 = {
+        "ASEA2",  //<!-- Asea North Yankton variant -->
+        "EMPEROR3",  //<!-- Emperor North Yankton variant -->
+        "RANCHERXL2",  //<!-- Rancher XL North Yankton variant -->
+        "SADLER2",  //<!-- Sadler North Yankton variant -->
+    };
+    inline const std::vector<std::string> PreVeh_13 = {
+        "MANCHEZ2",  //<!-- Manchez Scout -->
+        "MANCHEZ3",  //<!-- Manchez Scout C -->
+        "VETIR",  //
+        "JUBILEE",  //
+        "WINKY",  //
+        "BRIOSO2",  //<!-- Brioso 300 -->
+        "WEEVIL",  //
+        "SQUADDIE",
+        "VERUS",  //
+    };
+
+    inline const std::vector<Mod_Class::Vector4> Yankton = {
+        Mod_Class::Vector4(3117.137f, -4816.728f, 111.9227f, 212.9807f),
+        Mod_Class::Vector4(3131.799f, -4836.524f, 111.9058f, 198.7815f),
+        Mod_Class::Vector4(3148.702f, -4820.137f, 111.9146f, 249.9113f),
+        Mod_Class::Vector4(3178.172f, -4841.895f, 111.8646f, 299.6696f),
+        Mod_Class::Vector4(3200.373f, -4845.981f, 112.0913f, 247.4838f),
+        Mod_Class::Vector4(3223.586f, -4843.15f, 112.1707f, 354.5657f),
+        Mod_Class::Vector4(3181.008f, -4819.975f, 112.0145f, 190.3557f),
+        Mod_Class::Vector4(3222.215f, -4674.802f, 112.8715f, 197.025f),
+        Mod_Class::Vector4(3243.955f, -4668.963f, 115.2206f, 181.1275f),
+        Mod_Class::Vector4(3257.933f, -4610.864f, 115.9861f, 343.0366f),
+        Mod_Class::Vector4(3264.459f, -4588.892f, 117.5749f, 173.6842f),
+        Mod_Class::Vector4(3260.968f, -4558.606f, 117.9432f, 248.7276f),
+        Mod_Class::Vector4(3301.682f, -4618.307f, 115.9189f, 4.819291f),
+        Mod_Class::Vector4(3280.166f, -4648.12f, 114.2587f, 82.46803f),
+        Mod_Class::Vector4(3279.144f, -4831.918f, 111.9073f, 182.5369f),
+        Mod_Class::Vector4(3328.324f, -4854.863f, 112.1375f, 98.93055f),
+        Mod_Class::Vector4(3473.881f, -4887.713f, 111.4212f, 351.9137f),
+        Mod_Class::Vector4(3582.752f, -4877.548f, 111.9127f, 47.78808f),
+        Mod_Class::Vector4(3548.751f, -4651.457f, 114.1456f, 240.0113f),
+        Mod_Class::Vector4(3557.25f, -4684.192f, 114.5897f, 102.8192f),
+        Mod_Class::Vector4(3505.793f, -4675.259f, 114.1213f, 311.8708f),
+        Mod_Class::Vector4(3639.636f, -4895.301f, 112.0969f, 213.9055f),
+        Mod_Class::Vector4(3658.735f, -4887.635f, 112.0766f, 290.1415f),
+        Mod_Class::Vector4(5437.08f, -5181.434f, 78.71245f, 62.03126f),
+        Mod_Class::Vector4(5344.413f, -5225.215f, 82.7921f, 316.0345f),
+        Mod_Class::Vector4(5343.557f, -5199.927f, 83.26007f, 262.4173f),
+        Mod_Class::Vector4(5339.12f, -5215.233f, 82.6674f, 257.5849f),
+        Mod_Class::Vector4(5308.893f, -5221.452f, 83.51344f, 190.0524f),
+        Mod_Class::Vector4(5295.236f, -5211.909f, 82.74987f, 152.9725f),
+        Mod_Class::Vector4(5291.073f, -5192.674f, 83.51875f, 69.66159f),
+        Mod_Class::Vector4(5309.561f, -5172.745f, 83.5139f, 275.4609f),
+        Mod_Class::Vector4(5321.748f, -5176.215f, 83.23198f, 267.6423f),
+        Mod_Class::Vector4(5322.566f, -5195.457f, 83.51897f, 273.5714f)
+    };
+    inline const std::vector<Mod_Class::Vector4> CayoSpPoint = {
+            Mod_Class::Vector4(4877.928f, -4488.06f, 26.93383f, 7.88381f),
+            Mod_Class::Vector4(5032.213f, -4630.636f, 21.68462f, 75.61213f),
+            Mod_Class::Vector4(5153.693f, -4933.251f, 30.87342f, 142.8952f),
+            Mod_Class::Vector4(5148.306f, -5053.395f, 20.39156f, 85.7536f),
+            Mod_Class::Vector4(5465.802f, -5236.399f, 43.96178f, 184.7819f),
+            Mod_Class::Vector4(5360.864f, -5437.077f, 66.17649f, 221.3451f),
+            Mod_Class::Vector4(5125.446f, -5526.457f, 70.9704f, 199.5584f),
+            Mod_Class::Vector4(4887.5f, -5458.02f, 47.52377f, 182.3656f),
+            Mod_Class::Vector4(5042.819f, -5114.771f, 22.94463f, 88.81671f),
+            Mod_Class::Vector4(5140.625f, -5243.813f, 26.29192f, 253.1926f),
+            Mod_Class::Vector4(4494.132f, -4525.502f, 4.412366f, 282.329f),
+            Mod_Class::Vector4(4439.948f, -4454.131f, 4.328461f, 198.5052f),
+            Mod_Class::Vector4(4495.687f, -4732.734f, 10.90475f, 41.29239f),
+            Mod_Class::Vector4(4366.333f, -4573.288f, 4.207751f, 21.11482f),
+            Mod_Class::Vector4(4071.851f, -4673.698f, 4.223663f, 108.1717f),
+            Mod_Class::Vector4(3906.395f, -4702.547f, 4.345607f, 33.34339f),
+            Mod_Class::Vector4(4811.667f, -4303.64f, 5.325986f, 52.86508f),
+            Mod_Class::Vector4(4877.05f, -4484.966f, 10.15364f, 338.2997f),
+            Mod_Class::Vector4(5171.623f, -4591.228f, 3.701788f, 81.79738f),
+            Mod_Class::Vector4(5166.074f, -4653.924f, 2.689936f, 241.2462f),
+            Mod_Class::Vector4(5166.617f, -4710.746f, 2.160436f, 188.2125f),
+            Mod_Class::Vector4(5135.673f, -4606.935f, 2.663276f, 196.01f),
+            Mod_Class::Vector4(5064.55f, -4595.777f, 2.853349f, 353.9287f),
+            Mod_Class::Vector4(5091.98f, -4654.807f, 1.841831f, 249.8059f),
+            Mod_Class::Vector4(5087.485f, -4681.362f, 2.364768f, 222.4894f),
+            Mod_Class::Vector4(5031.378f, -4628.378f, 21.68462f, 84.22202f),
+            Mod_Class::Vector4(4874.386f, -4927.992f, 3.147279f, 90.48167f),
+            Mod_Class::Vector4(4902.145f, -4941.349f, 3.361645f, 209.0067f),
+            Mod_Class::Vector4(4891.903f, -4910.392f, 3.365285f, 325.3576f),
+            Mod_Class::Vector4(5088.147f, -4892.757f, 17.07693f, 141.0943f),
+            Mod_Class::Vector4(5147.582f, -4955.208f, 14.1842f, 306.4781f),
+            Mod_Class::Vector4(5191.797f, -5010.228f, 13.95532f, 309.4144f),
+            Mod_Class::Vector4(5441.739f, -5116.977f, 13.17772f, 114.4946f),
+            Mod_Class::Vector4(5587.902f, -5222.841f, 14.35066f, 227.1182f),
+            Mod_Class::Vector4(5468.49f, -5237.662f, 43.96177f, 286.5111f),
+            Mod_Class::Vector4(5402.339f, -5173.656f, 31.43869f, 250.9344f),
+            Mod_Class::Vector4(5330.212f, -5266.004f, 32.50994f, 146.6625f),
+            Mod_Class::Vector4(5263.13f, -5254.454f, 25.44569f, 169.5686f),
+            Mod_Class::Vector4(5264.313f, -5430.777f, 65.5978f, 252.7824f),
+            Mod_Class::Vector4(5221.144f, -5394.252f, 67.51835f, 9.77068f),
+            Mod_Class::Vector4(5311.626f, -5595.218f, 64.44119f, 167.3269f),
+            Mod_Class::Vector4(5484.578f, -5854.652f, 20.01427f, 203.205f),
+            Mod_Class::Vector4(5105.451f, -5523.863f, 54.20301f, 293.2558f),
+            Mod_Class::Vector4(5125.341f, -5526.231f, 70.97034f, 137.1469f),
+            Mod_Class::Vector4(5099.011f, -5722.109f, 15.77461f, 117.5884f),
+            Mod_Class::Vector4(4979.47f, -5708.737f, 19.88695f, 58.10868f),
+            Mod_Class::Vector4(4990.638f, -5883.896f, 20.55511f, 220.5347f),
+            Mod_Class::Vector4(4908.758f, -5833.568f, 28.21668f, 356.1158f),
+            Mod_Class::Vector4(4964.564f, -5603.83f, 23.72427f, 196.7985f),
+            Mod_Class::Vector4(4887.661f, -5460.129f, 30.74339f, 230.2796f),
+            Mod_Class::Vector4(4904.563f, -5342.741f, 20.43572f, 167.6105f),
+            Mod_Class::Vector4(4954.223f, -5320.233f, 8.177876f, 45.14056f),
+            Mod_Class::Vector4(4893.883f, -5287.493f, 8.498549f, 76.56836f),
+            Mod_Class::Vector4(4963.055f, -5282.41f, 6.153166f, 150.0025f),
+            Mod_Class::Vector4(4919.834f, -5236.972f, 2.522677f, 214.5785f),
+            Mod_Class::Vector4(4837.975f, -5177.048f, 2.194079f, 309.8742f),
+            Mod_Class::Vector4(4887.364f, -5170.045f, 2.462478f, 317.8425f),
+            Mod_Class::Vector4(4934.43f, -5176.531f, 2.460481f, 47.9263f),
+            Mod_Class::Vector4(4994.617f, -5166.621f, 2.692156f, 290.538f),
+            Mod_Class::Vector4(4959.891f, -5112.796f, 2.906743f, 325.6087f),
+            Mod_Class::Vector4(5046.526f, -5117.724f, 20.34463f, 242.2283f),
+            Mod_Class::Vector4(5111.161f, -5183.47f, 2.368666f, 190.5521f),
+            Mod_Class::Vector4(5134.058f, -5127.317f, 2.110643f, 175.9367f),
+            Mod_Class::Vector4(5185.667f, -5133.359f, 3.338254f, 261.6295f),
+            Mod_Class::Vector4(5214.341f, -5125.928f, 6.22332f, 138.2965f),
+            Mod_Class::Vector4(5145.925f, -5043.219f, 4.805843f, 294.0948f),
+            Mod_Class::Vector4(5170.325f, -4675.89f, 2.435122f, 66.67837f),
+            Mod_Class::Vector4(5179.303f, -4649.774f, 2.530395f, 64.63232f),
+            Mod_Class::Vector4(5127.161f, -4613.125f, 2.567649f, 134.3626f),
+            Mod_Class::Vector4(5403.269f, -5174.491f, 31.46002f, 30.90309f),
+            Mod_Class::Vector4(5408.926f, -5216.411f, 34.45446f, 232.4724f),
+            Mod_Class::Vector4(5382.5f, -5255.195f, 34.15533f, 168.2274f),
+            Mod_Class::Vector4(5327.994f, -5265.26f, 33.17245f, 216.49f),
+            Mod_Class::Vector4(5312.92f, -5200.948f, 31.73465f, 43.35777f),
+            Mod_Class::Vector4(5283.029f, -5239.302f, 30.83397f, 226.2264f),
+            Mod_Class::Vector4(5211.092f, -5125.889f, 6.214875f, 297.0678f),
+            Mod_Class::Vector4(5182.966f, -5148.639f, 3.549981f, 93.57137f),
+            Mod_Class::Vector4(5117.133f, -5172.37f, 2.296359f, 90.88295f),
+            Mod_Class::Vector4(5012.493f, -5201.086f, 2.517188f, 332.5578f),
+            Mod_Class::Vector4(4957.826f, -5133.129f, 2.44458f, 126.1573f),
+            Mod_Class::Vector4(4902.437f, -5180.579f, 2.445158f, 256.659f),
+            Mod_Class::Vector4(4949.478f, -5319.582f, 8.065354f, 190.8848f),
+            Mod_Class::Vector4(5310.973f, -5600.635f, 64.51008f, 298.4847f),
+            Mod_Class::Vector4(5018.089f, -5174.079f, 2.606125f, 207.4259f),
+            Mod_Class::Vector4(5041.188f, -5117.157f, 22.94859f, 133.7521f),
+            Mod_Class::Vector4(4961.709f, -5108.097f, 2.982063f, 336.7988f),
+            Mod_Class::Vector4(4873.991f, -5174.502f, 2.438294f, 309.3781f),
+            Mod_Class::Vector4(4834.461f, -5175.737f, 2.169081f, 108.4202f),
+            Mod_Class::Vector4(4864.909f, -5160.665f, 2.791046f, 272.405f),
+            Mod_Class::Vector4(4887.225f, -5181.831f, 2.438293f, 252.0248f),
+            Mod_Class::Vector4(4904.118f, -5187.469f, 2.43825f, 338.149f),
+            Mod_Class::Vector4(5012.132f, -5199.121f, 2.517245f, 303.1538f),
+            Mod_Class::Vector4(5137.046f, -5103.176f, 2.197638f, 165.8812f),
+            Mod_Class::Vector4(4996.087f, -5187.851f, 2.523123f, 121.5532f),
+            Mod_Class::Vector4(5147.148f, -5053.37f, 20.39559f, 89.6064f),
+            Mod_Class::Vector4(5117.839f, -5172.103f, 2.30431f, 57.59507f),
+            Mod_Class::Vector4(5133.637f, -5118.043f, 2.113857f, 166.755f),
+            Mod_Class::Vector4(4913.793f, -5200.564f, 2.469321f, 213.1365f),
+            Mod_Class::Vector4(5142.1f, -5241.874f, 26.29656f, 0.5f),
+            Mod_Class::Vector4(4983.042f, -5196.473f, 2.50345f, 123.4069f),
+            Mod_Class::Vector4(5133.731f, -5141.614f, 2.147834f, 181.026f),
+            Mod_Class::Vector4(5254.448f, -5258.097f, 25.31619f, 129.8113f),
+            Mod_Class::Vector4(5212.377f, -5225.483f, 17.39517f, 0.5f),
+            Mod_Class::Vector4(5179.297f, -5146.072f, 3.289174f, 86.07165f),
+            Mod_Class::Vector4(5213.439f, -5122.497f, 6.122335f, 129.5457f),
+            Mod_Class::Vector4(5117.228f, -5149.584f, 2.21032f, 91.92164f),
+            Mod_Class::Vector4(5299.635f, -5225.373f, 32.21928f, 100.7981f),
+            Mod_Class::Vector4(5217.679f, -5207.616f, 16.40578f, 352.9662f),
+            Mod_Class::Vector4(5324.687f, -5262.405f, 32.82066f, 0.5f),
+            Mod_Class::Vector4(5220.702f, -5191.855f, 14.355f, 352.4796f),
+            Mod_Class::Vector4(5322.195f, -5196.333f, 31.55055f, 230.9573f),
+            Mod_Class::Vector4(5401.839f, -5171.006f, 31.39126f, 134.3677f),
+            Mod_Class::Vector4(5465.827f, -5235.692f, 43.96646f, 0.5f),
+            Mod_Class::Vector4(5565.909f, -5185.084f, 10.92833f, 0.5f),
+            Mod_Class::Vector4(5589.67f, -5219.979f, 14.35063f, 286.0875f),
+            Mod_Class::Vector4(5596.038f, -5163.533f, -100.5f, 247.9607f),
+            Mod_Class::Vector4(4894.263f, -4913.141f, 3.36446f, 4.1f),
+            Mod_Class::Vector4(4890.318f, -4923.923f, 3.368097f, 71.5f)
+    };
+    inline const std::vector<Mod_Class::Vector4> SpPoint = {
+        Mod_Class::Vector4(-1160.148f, -1607.229f, 4.282094f, 33.58816f),
+        Mod_Class::Vector4(-1246.173f, -1578.978f, 4.075636f, 88.40285f),
+        Mod_Class::Vector4(-1300.651f, -1693.796f, 2.652158f, 119.986f),
+        Mod_Class::Vector4(-1197.284f, -1673.913f, 4.368378f, 336.6819f),
+        Mod_Class::Vector4(-1231.23f, -1774.339f, 2.698436f, 307.819f),
+        Mod_Class::Vector4(-1081.606f, -1699.635f, 4.51774f, 341.5313f),
+        Mod_Class::Vector4(-1321.38f, -1803.161f, 0.5787229f, 338.6356f),
+        Mod_Class::Vector4(-1277.734f, -1796.447f, -100.0f, 190.3f),
+        Mod_Class::Vector4(-1329.865f, -1621.267f, 3.853039f, 125.3387f),
+        Mod_Class::Vector4(-1368.747f, -1588.793f, 2.370532f, 177.0662f),
+        Mod_Class::Vector4(-1380.893f, -1418.045f, 3.565593f, 323.6023f),
+        Mod_Class::Vector4(-1279.822f, -1427.41f, 4.510245f, 212.68f),
+        Mod_Class::Vector4(-1255.639f, -1592.376f, 4.094669f, 227.7035f),
+        Mod_Class::Vector4(-1224.641f, -1502.119f, 4.337264f, 236.9933f),
+        Mod_Class::Vector4(-1431.731f, -1508.598f, 3.715238f, 85.04395f),
+        Mod_Class::Vector4(-1308.609f, -1529.277f, 4.314957f, 74.17694f),
+        Mod_Class::Vector4(-1322.848f, -1734.16f, 1.786219f, 247.0966f),
+        Mod_Class::Vector4(-1427.198f, -1658.383f, -0.3996229f, 276.3645f),
+        Mod_Class::Vector4(-1270.877f, -1811.516f, 1.774477f, 192.7982f),
+        Mod_Class::Vector4(-1178.216f, -1781.372f, 4.050908f, 319.6324f),
+        Mod_Class::Vector4(-1153.027f, -1606.098f, 4.380119f, 56.83902f),
+        Mod_Class::Vector4(-1109.917f, -1688.4f, 4.375373f, 119.264f),
+        Mod_Class::Vector4(-1050.216f, -1619.146f, 4.389634f, 203.3658f),
+        Mod_Class::Vector4(-1108.875f, -1527.476f, 6.779634f, 211.7134f),
+        Mod_Class::Vector4(-1198.382f, -1673.201f, 4.36664f, 310.3611f),
+        Mod_Class::Vector4(-1170.423f, -1433.136f, 4.453862f, 216.7254f),
+        Mod_Class::Vector4(-1314.11f, -1352.265f, 4.469654f, 25.83949f),
+        Mod_Class::Vector4(-1346.334f, -1276.67f, 4.897387f, 190.3171f),
+        Mod_Class::Vector4(-1359.945f, -1193.812f, 4.450387f, 349.2703f),
+        Mod_Class::Vector4(-1241.474f, -1253.23f, 5.328512f, 105.528f),
+        Mod_Class::Vector4(-1369.884f, -1117.181f, 4.500574f, 260.4205f),
+        Mod_Class::Vector4(-1290.337f, -1108.623f, 6.826903f, 50.96396f),
+        Mod_Class::Vector4(-1423.398f, -1023.807f, 4.997945f, 239.7593f),
+        Mod_Class::Vector4(-1332.74f, -1028.393f, 7.703401f, 32.42556f),
+        Mod_Class::Vector4(-1484.517f, -960.1639f, 7.692502f, 45.27397f),
+        Mod_Class::Vector4(-1384.187f, -944.0807f, 10.06455f, 333.1175f),
+        Mod_Class::Vector4(-1577.719f, -970.7444f, 17.41236f, 134.7335f),
+        Mod_Class::Vector4(-1589.911f, -1069.783f, 13.01727f, 66.19942f),
+        Mod_Class::Vector4(-1526.156f, -1224.26f, 2.271887f, 198.1657f),
+        Mod_Class::Vector4(-1647.783f, -1125.91f, 18.34311f, 226.7262f),
+        Mod_Class::Vector4(-1817.684f, -1200.282f, 19.16987f, 272.2027f),
+        Mod_Class::Vector4(-1722.691f, -1102.711f, 13.10247f, 232.1385f),
+        Mod_Class::Vector4(-1741.421f, -1000.758f, 4.251456f, 283.4004f),
+        Mod_Class::Vector4(-1656.441f, -1023.758f, 13.01742f, 134.6409f),
+        Mod_Class::Vector4(-1789.288f, -867.3212f, 7.367817f, 26.9756f),
+        Mod_Class::Vector4(-1766.264f, -710.6727f, 14.04142f, 128.1337f),
+        Mod_Class::Vector4(-1840.649f, -786.7416f, 6.942594f, 209.3775f),
+        Mod_Class::Vector4(-1928.198f, -787.6534f, 1.400905f, 124.8805f),
+        Mod_Class::Vector4(-1853.948f, -643.4832f, 10.74218f, 51.13507f),
+        Mod_Class::Vector4(-1693.429f, -782.542f, 10.15547f, 31.77343f),
+        Mod_Class::Vector4(-2019.225f, -671.4921f, 1.732529f, 35.30247f),
+        Mod_Class::Vector4(-2073.122f, -556.3633f, 4.322869f, 112.1614f),
+        Mod_Class::Vector4(-1918.171f, -581.4932f, 11.82719f, 74.45322f),
+        Mod_Class::Vector4(-1941.187f, -683.3286f, 6.042047f, 317.4851f),
+        Mod_Class::Vector4(-2017.408f, -403.2584f, 10.99738f, 102.571f),
+        Mod_Class::Vector4(-2073.494f, -322.6716f, 13.31618f, 110.8201f),
+        Mod_Class::Vector4(-1920.867f, -395.7564f, 48.28661f, 144.3688f),
+        Mod_Class::Vector4(-1932.222f, -256.2742f, 39.38351f, 163.2952f),
+        Mod_Class::Vector4(-2006.573f, -292.1909f, 31.14633f, 32.56577f),
+        Mod_Class::Vector4(-1830.16f, -393.1055f, 57.13855f, 341.9896f),
+        Mod_Class::Vector4(-1812.373f, -487.2023f, 40.97498f, 99.4837f),
+        Mod_Class::Vector4(-1801.349f, -284.9655f, 42.74314f, 49.44889f),
+        Mod_Class::Vector4(-1750.369f, -388.2991f, 49.33112f, 306.9421f),
+        Mod_Class::Vector4(-1733.029f, -542.143f, 37.22449f, 46.17191f),
+        Mod_Class::Vector4(-1652.144f, -473.3973f, 38.76246f, 156.1328f),
+        Mod_Class::Vector4(-1582.329f, -541.8163f, 35.48005f, 318.3726f),
+        Mod_Class::Vector4(-1688.893f, -614.0651f, 32.71557f, 160.953f),
+        Mod_Class::Vector4(-1590.418f, -652.4891f, 29.94338f, 234.872f),
+        Mod_Class::Vector4(-1516.227f, -630.6576f, 29.60688f, 124.8291f),
+        Mod_Class::Vector4(-1514.848f, -720.5037f, 27.28335f, 44.38182f),
+        Mod_Class::Vector4(-1467.341f, -779.6733f, 23.88621f, 141.6295f),
+        Mod_Class::Vector4(-1426.177f, -608.0167f, 30.68489f, 216.1941f),
+        Mod_Class::Vector4(-1429.254f, -685.5729f, 30.09999f, 351.6236f),
+        Mod_Class::Vector4(-1370.448f, -786.2045f, 19.34618f, 46.06882f),
+        Mod_Class::Vector4(-1509.341f, -849.4481f, 23.72846f, 146.3204f),
+        Mod_Class::Vector4(-1338.667f, -684.4074f, 25.90955f, 337.9835f),
+        Mod_Class::Vector4(-1267.564f, -887.0582f, 11.46313f, 312.6759f),
+        Mod_Class::Vector4(-1291.891f, -963.3849f, 10.90977f, 17.93775f),
+        Mod_Class::Vector4(-1243.466f, -1037.107f, 8.533915f, 24.88162f),
+        Mod_Class::Vector4(-1205.129f, -946.3865f, 8.115028f, 78.52157f),
+        Mod_Class::Vector4(-1209.501f, -1145.148f, 7.699383f, 246.5961f),
+        Mod_Class::Vector4(-1152.507f, -1092.617f, 2.150213f, 78.05627f),
+        Mod_Class::Vector4(-1176.931f, -1326.262f, 5.043202f, 91.40005f),
+        Mod_Class::Vector4(-1278.753f, -1280.306f, -100.0f, 286.1835f),
+        Mod_Class::Vector4(-280.1419f, -2078.309f, 27.75568f, 120.8461f),
+        Mod_Class::Vector4(-362.931f, -2096.714f, -100.0f, 249.8338f),
+        Mod_Class::Vector4(-1233.953f, -2060.108f, 14.38426f, 322.4592f),
+        Mod_Class::Vector4(-1177.911f, -1969.751f, 12.2126f, 245.5379f),
+        Mod_Class::Vector4(-958.8653f, -2038.964f, 9.571634f, 275.1023f),
+        Mod_Class::Vector4(-1065.295f, -2082.96f, 13.29153f, 124.204f),
+        Mod_Class::Vector4(-1158.608f, -2165.972f, 13.38066f, 105.9783f),
+        Mod_Class::Vector4(-990.8157f, -2278.67f, 8.95359f, 230.7598f),
+        Mod_Class::Vector4(-878.8334f, -2183.131f, 8.937191f, 216.7394f),
+        Mod_Class::Vector4(-891.5108f, -2402.83f, 14.02515f, 147.8056f),
+        Mod_Class::Vector4(-893.0229f, -2317.104f, -3.507768f, 8.885142f),
+        Mod_Class::Vector4(-978.1707f, -2465.764f, 13.75622f, 149.0023f),
+        Mod_Class::Vector4(-900.1584f, -2491.51f, 14.54965f, 27.85674f),
+        Mod_Class::Vector4(-1033.629f, -2381.482f, 14.0936f, 173.6633f),
+        Mod_Class::Vector4(-955.9147f, -2386.496f, -100.0f, 149.8728f),
+        Mod_Class::Vector4(1450.433f, -1731.397f, 68.03314f, 41.98439f),
+        Mod_Class::Vector4(1600.253f, -1712.9f, 88.12589f, 185.5337f),
+        Mod_Class::Vector4(1568.778f, -1595.55f, 90.31343f, 334.3277f),
+        Mod_Class::Vector4(1715.997f, -1560.912f, 112.6362f, 265.2239f),
+        Mod_Class::Vector4(1729.931f, -1664.9f, 112.5535f, 55.15057f),
+        Mod_Class::Vector4(1677.571f, -1857.563f, 108.353f, 227.1044f),
+        Mod_Class::Vector4(1544.524f, -2091.144f, 77.13461f, 115.2182f),
+        Mod_Class::Vector4(1397.054f, -2203.803f, 61.26979f, 11.66307f),
+        Mod_Class::Vector4(1432.708f, -2318.181f, 66.93765f, 0.1958369f),
+        Mod_Class::Vector4(1090.301f, -2258.336f, 30.16828f, 154.4966f),
+        Mod_Class::Vector4(1050.76f, -2359.522f, 30.58618f, 359.6519f),
+        Mod_Class::Vector4(1257.031f, -2301.23f, 50.42583f, 297.5381f),
+        Mod_Class::Vector4(1213.246f, -2201.788f, 41.42298f, 174.4906f),
+        Mod_Class::Vector4(1181.73f, -2088.975f, 42.835f, 108.8092f),
+        Mod_Class::Vector4(1075.413f, -2130.978f, 32.65754f, 356.5745f),
+        Mod_Class::Vector4(1069.265f, -2051.669f, 30.54184f, 328.8749f),
+        Mod_Class::Vector4(1253.046f, -1965.152f, 43.31088f, 277.0399f),
+        Mod_Class::Vector4(1162.939f, -1835.688f, 37.32333f, 309.8178f),
+        Mod_Class::Vector4(1253.974f, -1801.581f, 41.43707f, 101.9945f),
+        Mod_Class::Vector4(1165.914f, -1757.395f, 36.09859f, 5.626177f),
+        Mod_Class::Vector4(1211.297f, -1635.897f, 46.98957f, 15.0685f),
+        Mod_Class::Vector4(1339.797f, -1769.144f, 58.84056f, 110.8002f),
+        Mod_Class::Vector4(1299.746f, -1624.184f, 52.31812f, 219.0709f),
+        Mod_Class::Vector4(1370.415f, -1683.915f, 59.39519f, 28.85051f),
+        Mod_Class::Vector4(1338.409f, -1524.272f, 54.58279f, 175.8651f),
+        Mod_Class::Vector4(1264.839f, -1511.525f, 40.75233f, 196.139f),
+        Mod_Class::Vector4(1162.592f, -1484.728f, 34.84315f, 45.85416f),
+        Mod_Class::Vector4(1215.056f, -1389.57f, 35.3749f, 298.4576f),
+        Mod_Class::Vector4(1064.018f, -1447.581f, 36.74253f, 272.2317f),
+        Mod_Class::Vector4(962.9564f, -1491.263f, 31.03523f, 283.0984f),
+        Mod_Class::Vector4(811.0013f, -1355.856f, 26.39643f, 139.9369f),
+        Mod_Class::Vector4(852.3708f, -1452.39f, 28.46454f, 153.5606f),
+        Mod_Class::Vector4(782.0834f, -1276.112f, 26.38883f, 245.5533f),
+        Mod_Class::Vector4(708.6996f, -1387.042f, 26.28415f, 95.50644f),
+        Mod_Class::Vector4(729.1082f, -1202.147f, 27.59183f, 314.4826f),
+        Mod_Class::Vector4(866.4579f, -1218.872f, 25.93666f, 150.9242f),
+        Mod_Class::Vector4(812.4778f, -1108.296f, 22.87424f, 358.1263f),
+        Mod_Class::Vector4(805.5677f, -992.9066f, 26.17185f, 93.29649f),
+        Mod_Class::Vector4(719.1799f, -1068.157f, 22.22762f, 76.04496f),
+        Mod_Class::Vector4(867.8777f, -949.1575f, 26.28246f, 284.0382f),
+        Mod_Class::Vector4(799.3265f, -910.1976f, 25.25154f, 64.5854f),
+        Mod_Class::Vector4(788.2667f, -779.5413f, 26.43379f, 76.76219f),
+        Mod_Class::Vector4(676.5705f, -893.8166f, 23.46652f, 48.36354f),
+        Mod_Class::Vector4(792.6351f, -680.9716f, 28.78763f, 182.0778f),
+        Mod_Class::Vector4(712.2411f, -718.2731f, 26.09179f, 222.572f),
+        Mod_Class::Vector4(871.4885f, -477.5969f, 57.6135f, 27.29279f),
+        Mod_Class::Vector4(802.2733f, -487.6502f, 29.98962f, 66.31482f),
+        Mod_Class::Vector4(762.3665f, -605.8344f, 29.01363f, 289.0056f),
+        Mod_Class::Vector4(647.2089f, -405.4547f, 25.90333f, 141.224f),
+        Mod_Class::Vector4(793.6388f, -251.5794f, 66.11258f, 262.0274f),
+        Mod_Class::Vector4(740.2285f, -348.7549f, 44.64523f, 102.3112f),
+        Mod_Class::Vector4(842.9829f, -326.1672f, 58.63135f, 78.39604f),
+        Mod_Class::Vector4(774.1849f, -157.5243f, 74.47166f, 194.3f),
+        Mod_Class::Vector4(717.7997f, -231.8359f, 66.49796f, 145.0598f),
+        Mod_Class::Vector4(879.2205f, -133.0256f, 78.19176f, 321.4662f),
+        Mod_Class::Vector4(954.9133f, -139.376f, 74.48351f, 261.024f),
+        Mod_Class::Vector4(770.9991f, -20.69291f, 81.40639f, 55.6139f),
+        Mod_Class::Vector4(918.6093f, -299.0002f, 65.7274f, 89.47182f),
+        Mod_Class::Vector4(1075.878f, -221.7357f, 57.22911f, 100.7295f),
+        Mod_Class::Vector4(1167.627f, -326.1849f, 69.27177f, 253.1378f),
+        Mod_Class::Vector4(1182.85f, -419.4162f, 67.44855f, 160.1736f),
+        Mod_Class::Vector4(1095.917f, -363.7542f, 67.05442f, 154.2719f),
+        Mod_Class::Vector4(1241.207f, -370.6926f, 69.08267f, 357.5793f),
+        Mod_Class::Vector4(1295.678f, -450.1477f, 69.11702f, 39.42892f),
+        Mod_Class::Vector4(1196.354f, -500.0268f, 65.35512f, 239.1896f),
+        Mod_Class::Vector4(1244.402f, -565.6254f, 69.36629f, 327.5226f),
+        Mod_Class::Vector4(1358.867f, -507.7113f, 74.07481f, 238.6464f),
+        Mod_Class::Vector4(1271.949f, -679.5294f, 65.78483f, 221.1033f),
+        Mod_Class::Vector4(1170.739f, -673.777f, 60.85263f, 8.802817f),
+        Mod_Class::Vector4(1157.536f, -826.6323f, 55.04485f, 261.9964f),
+        Mod_Class::Vector4(1229.198f, -774.131f, 59.95905f, 111.6313f),
+        Mod_Class::Vector4(1065.049f, -721.359f, 56.7688f, 251.442f),
+        Mod_Class::Vector4(961.0184f, -668.5934f, 58.42073f, 252.7814f),
+        Mod_Class::Vector4(944.5909f, -590.6015f, 57.93015f, 263.7933f),
+        Mod_Class::Vector4(1065.475f, -587.393f, 56.98307f, 176.1875f),
+        Mod_Class::Vector4(1087.19f, -483.9626f, 65.1468f, 43.63801f),
+        Mod_Class::Vector4(990.569f, -528.5084f, 60.1135f, 187.5177f),
+        Mod_Class::Vector4(1029.239f, -420.6697f, 65.71067f, 103.3361f),
+        Mod_Class::Vector4(878.2419f, 536.1291f, 125.7603f, 256.0516f),
+        Mod_Class::Vector4(780.4013f, 569.2122f, 127.5153f, 308.715f),
+        Mod_Class::Vector4(-1652.492f, -268.9684f, 53.03486f, 238.35f),
+        Mod_Class::Vector4(-1796.219f, -262.315f, 44.68269f, 225.691f),
+        Mod_Class::Vector4(-1862.262f, -346.5329f, 49.84129f, 207.6463f),
+        Mod_Class::Vector4(-1746.119f, -373.1069f, 46.04745f, 348.238f),
+        Mod_Class::Vector4(-1758.126f, -177.5893f, 59.93489f, 53.74375f),
+        Mod_Class::Vector4(-1851.886f, -211.0984f, 39.37838f, 30.06215f),
+        Mod_Class::Vector4(-1647.251f, -157.372f, 57.61746f, 114.5786f),
+        Mod_Class::Vector4(-1657.056f, -12.40816f, 61.96356f, 225.4638f),
+        Mod_Class::Vector4(-1855.837f, 87.75642f, 79.74529f, 317.2931f),
+        Mod_Class::Vector4(-2227.431f, 177.6394f, 174.6018f, 246.6147f),
+        Mod_Class::Vector4(-2183.896f, 284.1322f, 169.6021f, 263.2045f),
+        Mod_Class::Vector4(-2266.481f, 266.8381f, 184.6013f, 236.3674f),
+        Mod_Class::Vector4(-2340.92f, 224.7503f, 169.6533f, 147.9599f),
+        Mod_Class::Vector4(-2291.11f, 419.6725f, 174.6017f, 269.9671f),
+        Mod_Class::Vector4(-2351.723f, 354.5746f, 174.5702f, 316.094f),
+        Mod_Class::Vector4(-1992.776f, 597.1656f, 117.9074f, 244.9395f),
+        Mod_Class::Vector4(-1918.98f, 427.659f, 102.579f, 288.3187f),
+        Mod_Class::Vector4(-1942.294f, 537.5837f, 119.4511f, 71.42182f),
+        Mod_Class::Vector4(-1863.526f, 663.243f, 129.1108f, 47.40017f),
+        Mod_Class::Vector4(-1950.522f, 671.437f, 126.8631f, 49.11973f),
+        Mod_Class::Vector4(-1821.452f, 805.2283f, 138.6922f, 350.8116f),
+        Mod_Class::Vector4(-1596.12f, 763.6357f, 188.776f, 67.02236f),
+        Mod_Class::Vector4(-1537.647f, 824.0611f, 181.5576f, 132.0971f),
+        Mod_Class::Vector4(-1390.973f, 604.0109f, 130.5611f, 103.6059f),
+        Mod_Class::Vector4(-1380.87f, 733.273f, 182.4565f, 346.0296f),
+        Mod_Class::Vector4(-1273.141f, 606.6987f, 139.2841f, 177.0211f),
+        Mod_Class::Vector4(-1208.797f, 648.6027f, 144.6223f, 184.7298f),
+        Mod_Class::Vector4(-1187.657f, 561.1202f, 100.0236f, 282.7813f),
+        Mod_Class::Vector4(-1061.68f, 732.2233f, 165.4498f, 328.4958f),
+        Mod_Class::Vector4(-1123.518f, 796.3937f, 167.7469f, 256.4597f),
+        Mod_Class::Vector4(-974.0649f, 689.8514f, 158.0351f, 36.62312f),
+        Mod_Class::Vector4(-952.0835f, 799.6948f, 178.4169f, 358.3044f),
+        Mod_Class::Vector4(-854.5779f, 790.907f, 191.7423f, 343.4804f),
+        Mod_Class::Vector4(-800.5696f, 886.0236f, 203.1893f, 150.7404f),
+        Mod_Class::Vector4(-757.3545f, 774.8885f, 212.2914f, 21.35574f),
+        Mod_Class::Vector4(-679.4247f, 798.2404f, 198.0051f, 179.3822f),
+        Mod_Class::Vector4(-668.9477f, 906.9561f, 230.1238f, 229.8917f),
+        Mod_Class::Vector4(-538.2089f, 785.8329f, 196.6117f, 117.694f),
+        Mod_Class::Vector4(-398.9189f, 666.7883f, 163.8354f, 90.2931f),
+        Mod_Class::Vector4(-510.514f, 671.3224f, 150.273f, 163.8439f),
+        Mod_Class::Vector4(-472.1857f, 537.1354f, 124.354f, 0.0f),
+        Mod_Class::Vector4(-385.3415f, 515.0933f, 120.8225f, 227.8424f),
+        Mod_Class::Vector4(-355.368f, 423.3936f, 110.8382f, 345.9255f),
+        Mod_Class::Vector4(-506.4408f, 454.185f, 96.69381f, 276.8076f),
+        Mod_Class::Vector4(-245.8695f, 393.0556f, 112.4406f, 260.9666f),
+        Mod_Class::Vector4(-60.18164f, 494.9249f, 144.5688f, 247.2409f),
+        Mod_Class::Vector4(-88.42611f, 889.886f, 236.1728f, 212.5896f),
+        Mod_Class::Vector4(56.37422f, 1050.121f, 218.6296f, 295.7127f),
+        Mod_Class::Vector4(-449.0672f, 1062.479f, 327.6815f, 175.8242f),
+        Mod_Class::Vector4(-399.2907f, 1148.496f, 325.853f, 200.4087f),
+        Mod_Class::Vector4(-480.5667f, 1133.815f, 320.0966f, 190.5652f),
+        Mod_Class::Vector4(-294.9129f, 1429.549f, 339.3169f, 336.8831f),
+        Mod_Class::Vector4(-407.2495f, 1581.665f, 353.7131f, 73.89459f),
+        Mod_Class::Vector4(-149.5202f, 1453.246f, 292.8072f, 199.7669f),
+        Mod_Class::Vector4(-266.3375f, 1547.674f, 336.4588f, 141.5186f),
+        Mod_Class::Vector4(779.201f, 1187.419f, 325.5869f, 66.41692f),
+        Mod_Class::Vector4(307.273f, 1108.102f, 216.9276f, 75.9652f),
+        Mod_Class::Vector4(276.0082f, 1187.72f, 226.0305f, 14.18411f),
+        Mod_Class::Vector4(191.0497f, 1224.417f, 225.5948f, 106.2378f),
+        Mod_Class::Vector4(294.2169f, 953.3748f, 208.6888f, 254.3083f),
+        Mod_Class::Vector4(229.4137f, 675.6113f, 189.6827f, 210.8005f),
+        Mod_Class::Vector4(221.4684f, 513.708f, 140.7564f, 359.1328f),
+        Mod_Class::Vector4(218.7429f, 302.6817f, 105.5856f, 248.4243f),
+        Mod_Class::Vector4(336.653f, 312.7571f, 104.6787f, 170.513f),
+        Mod_Class::Vector4(127.0963f, 341.097f, 111.944f, 32.08784f),
+        Mod_Class::Vector4(2824.941f, -743.6797f, 1.471339f, 16.6061f),
+        Mod_Class::Vector4(2835.425f, -626.2703f, 1.730462f, 227.3414f),
+        Mod_Class::Vector4(2575.149f, -289.9889f, 93.07821f, 324.0676f),
+        Mod_Class::Vector4(2521.409f, -414.0672f, 94.12376f, 222.7773f),
+        Mod_Class::Vector4(2571.536f, 304.6294f, 108.6065f, 20.04023f),
+        Mod_Class::Vector4(2572.306f, 478.2309f, 108.6772f, 91.36018f),
+        Mod_Class::Vector4(2746.039f, 1453.321f, 24.48774f, 299.1059f),
+        Mod_Class::Vector4(2757.865f, 1528.199f, 32.49879f, 87.19512f),
+        Mod_Class::Vector4(2666.189f, 1508.934f, 24.50084f, 299.6714f),
+        Mod_Class::Vector4(2853.234f, 1474.861f, 24.61952f, 107.3717f),
+        Mod_Class::Vector4(2720.579f, 1647.611f, 24.57493f, 269.4894f),
+        Mod_Class::Vector4(2473.841f, 1572.31f, 32.72038f, 354.3351f),
+        Mod_Class::Vector4(2357.949f, 1845.58f, 101.2663f, 166.731f),
+        Mod_Class::Vector4(2319.202f, 2551.041f, 47.69345f, 227.7995f),
+        Mod_Class::Vector4(2526.939f, 2584.094f, 37.94465f, 8.938714f),
+        Mod_Class::Vector4(2595.807f, 2801.963f, 34.00152f, 323.103f),
+        Mod_Class::Vector4(2739.255f, 2782.027f, 35.73802f, 303.735f),
+        Mod_Class::Vector4(2570.977f, 2720.95f, 42.9959f, 209.3307f),
+        Mod_Class::Vector4(-2956.631f, 11.69463f, 6.931808f, 156.18f),
+        Mod_Class::Vector4(-2876.279f, 21.03024f, 11.60808f, 41.72112f),
+        Mod_Class::Vector4(-3012.55f, -51.12709f, 0.310649f, 38.1624f),
+        Mod_Class::Vector4(-3038.164f, 38.733f, 8.971894f, 41.44547f),
+        Mod_Class::Vector4(-3096.169f, 119.0552f, 6.728017f, 87.99979f),
+        Mod_Class::Vector4(-3091.035f, 352.2566f, 7.519391f, 67.82193f),
+        Mod_Class::Vector4(-3075.979f, 447.3828f, 6.362554f, 50.79964f),
+        Mod_Class::Vector4(-2964.959f, 452.5694f, 15.30891f, 148.5125f),
+        Mod_Class::Vector4(-3057.164f, 532.517f, 7.604911f, 255.576f),
+        Mod_Class::Vector4(-3047.145f, 614.4224f, 7.323409f, 264.085f),
+        Mod_Class::Vector4(-2982.056f, 719.5752f, 28.49753f, 22.28972f),
+        Mod_Class::Vector4(-3165.79f, 762.5814f, 3.421354f, 180.3855f),
+        Mod_Class::Vector4(-3237.243f, 914.8962f, 16.88076f, 110.9341f),
+        Mod_Class::Vector4(-3295.146f, 984.6699f, 2.889409f, 0.8584108f),
+        Mod_Class::Vector4(-3353.275f, 1037.395f, -0.4267793f, 0.1203664f),
+        Mod_Class::Vector4(-3270.502f, 1210.821f, 2.343407f, 180.0034f),
+        Mod_Class::Vector4(-3264.688f, 1110.545f, 2.304754f, 320.7578f),
+        Mod_Class::Vector4(-3187.552f, 1221.516f, 9.986886f, 167.8331f),
+        Mod_Class::Vector4(-2542.358f, 2317.119f, 33.21531f, 63.28617f),
+        Mod_Class::Vector4(-1955.376f, 2367.43f, 32.54905f, 161.8323f),
+        Mod_Class::Vector4(-1841.089f, 2195.876f, 97.38118f, 304.6146f),
+        Mod_Class::Vector4(-1837.205f, 2270.878f, 73.74523f, 312.3881f),
+        Mod_Class::Vector4(-1895.852f, 2143.426f, 121.225f, 65.59644f),
+        Mod_Class::Vector4(-1859.108f, 2072.094f, 140.9959f, 129.7641f),
+        Mod_Class::Vector4(-1790.499f, 2119.865f, 132.356f, 90.9618f),
+        Mod_Class::Vector4(-1916.931f, 1944.778f, 158.3994f, 296.9663f),
+        Mod_Class::Vector4(-1701.855f, 1957.936f, 131.0938f, 56.90914f),
+        Mod_Class::Vector4(-1721.216f, 2029.074f, 112.8439f, 156.9609f),
+        Mod_Class::Vector4(-1097.618f, 2700.906f, 18.90455f, 84.88656f),
+        Mod_Class::Vector4(-328.0197f, 2825.509f, 58.02246f, 111.1101f),
+        Mod_Class::Vector4(181.3483f, 2793.319f, 45.6552f, 24.21892f),
+        Mod_Class::Vector4(331.855f, 2873.202f, 43.45045f, 156.6868f),
+        Mod_Class::Vector4(361.1784f, 2976.71f, 40.4106f, 122.3371f),
+        Mod_Class::Vector4(282.1306f, 2568.33f, 45.2464f, 241.7109f),
+        Mod_Class::Vector4(203.8961f, 2702.276f, 42.54163f, 175.5621f),
+        Mod_Class::Vector4(391.2553f, 2633.707f, 44.6586f, 32.33579f),
+        Mod_Class::Vector4(470.7168f, 2610.214f, 42.72048f, 9.760907f),
+        Mod_Class::Vector4(586.6243f, 2742.652f, 42.07542f, 275.8898f),
+        Mod_Class::Vector4(754.2651f, 2783.679f, 66.97653f, 216.7942f),
+        Mod_Class::Vector4(848.8434f, 2382.375f, 54.18682f, 285.6466f),
+        Mod_Class::Vector4(914.1945f, 2294.065f, 48.86418f, 187.3512f),
+        Mod_Class::Vector4(980.6591f, 2667.654f, 40.06087f, 354.2927f),
+        Mod_Class::Vector4(1182.588f, 2701.389f, 38.15746f, 236.7878f),
+        Mod_Class::Vector4(1116.655f, 2641.605f, 38.14867f, 2.974739f),
+        Mod_Class::Vector4(1777.552f, 3325.553f, 41.43348f, 345.9209f),
+        Mod_Class::Vector4(1832.452f, 3443.146f, 41.04421f, 354.7577f),
+        Mod_Class::Vector4(1964.699f, 3257.751f, 45.65916f, 168.9078f),
+        Mod_Class::Vector4(1987.721f, 3047.302f, 46.74506f, 237.7831f),
+        Mod_Class::Vector4(2370.224f, 3156.767f, 48.20884f, 39.61424f),
+        Mod_Class::Vector4(2343.113f, 3046.043f, 48.15176f, 273.6578f),
+        Mod_Class::Vector4(2398.234f, 3315.428f, 47.70992f, 282.5903f),
+        Mod_Class::Vector4(2164.31f, 3396.292f, 45.43284f, 295.356f),
+        Mod_Class::Vector4(2259.422f, 3437.281f, 64.76982f, 128.1591f),
+        Mod_Class::Vector4(2179.717f, 3498.747f, 45.46162f, 354.1017f),
+        Mod_Class::Vector4(2062.606f, 3452.479f, 43.75446f, 37.58577f),
+        Mod_Class::Vector4(2486.352f, 3760.736f, 42.24755f, 176.6024f),
+        Mod_Class::Vector4(2616.738f, 3665.922f, 102.1075f, 62.15446f),
+        Mod_Class::Vector4(2418.972f, 4019.551f, 36.7912f, 209.7724f),
+        Mod_Class::Vector4(2483.769f, 4102.82f, 38.12365f, 182.0906f),
+        Mod_Class::Vector4(2565.83f, 4244.567f, 41.4447f, 328.7588f),
+        Mod_Class::Vector4(2702.66f, 4330.201f, 45.85205f, 10.36979f),
+        Mod_Class::Vector4(2904.14f, 4593.71f, 48.02999f, 80.57688f),
+        Mod_Class::Vector4(2859.294f, 4663.227f, 47.93969f, 195.7032f),
+        Mod_Class::Vector4(2227.497f, 4790.701f, 40.40303f, 345.2054f),
+        Mod_Class::Vector4(1684.557f, 4817.428f, 42.01131f, 117.5796f),
+        Mod_Class::Vector4(1668.184f, 4897.533f, 42.05532f, 203.0841f),
+        Mod_Class::Vector4(1717.725f, 4677.343f, 43.65575f, 290.9685f),
+        Mod_Class::Vector4(1428.173f, 4379.375f, 44.27631f, 216.4638f),
+        Mod_Class::Vector4(1370.321f, 4317.032f, 38.06339f, 42.11711f),
+        Mod_Class::Vector4(1240.904f, 4350.808f, 34.24231f, 94.9155f),
+        Mod_Class::Vector4(-271.7308f, 6400.089f, 31.30641f, 222.9104f),
+        Mod_Class::Vector4(-335.076f, 6493.833f, 2.34665f, 119.0187f),
+        Mod_Class::Vector4(-401.1573f, 6383.861f, 14.14575f, 136.2842f),
+        Mod_Class::Vector4(-640.2075f, 6236.555f, 2.976151f, 172.2602f),
+        Mod_Class::Vector4(-437.9801f, 6272.952f, 30.06834f, 249.4151f),
+        Mod_Class::Vector4(-661.4758f, 6157.757f, 2.040393f, 141.1119f),
+        Mod_Class::Vector4(-703.632f, 5802.625f, 17.31226f, 352.4189f),
+        Mod_Class::Vector4(-739.5485f, 5602.697f, 41.65934f, 180.9679f),
+        Mod_Class::Vector4(-594.1973f, 5364.056f, 70.43559f, 20.45568f),
+        Mod_Class::Vector4(-630.548f, 5208.631f, 83.00797f, 80.07411f),
+        Mod_Class::Vector4(-468.9976f, 5358.746f, 80.79279f, 4.032477f),
+        Mod_Class::Vector4(-514.1689f, 5266.845f, 80.48373f, 212.6361f),
+        Mod_Class::Vector4(-455.2321f, 6008.505f, 31.48877f, 260.9404f),
+        Mod_Class::Vector4(-379.7126f, 6033.835f, 31.49892f, 100.5203f),
+        Mod_Class::Vector4(-321.3374f, 6232.379f, 31.52865f, 281.4824f),
+        Mod_Class::Vector4(-416.6474f, 6137.146f, 31.53211f, 227.9525f),
+        Mod_Class::Vector4(-249.6663f, 6067.666f, 31.37034f, 140.0739f),
+        Mod_Class::Vector4(-246.1973f, 6155.588f, 31.42052f, 184.0397f),
+        Mod_Class::Vector4(-250.0735f, 6271.455f, 31.43178f, 146.0887f),
+        Mod_Class::Vector4(-182.6544f, 6334.627f, 31.4791f, 137.9106f),
+        Mod_Class::Vector4(-152.0446f, 6259.825f, 31.48942f, 321.7107f),
+        Mod_Class::Vector4(-68.66537f, 6270.102f, 31.33991f, 153.4193f),
+        Mod_Class::Vector4(-70.80379f, 6437.074f, 31.63992f, 149.3367f),
+        Mod_Class::Vector4(-168.8526f, 6436.67f, 31.9113f, 33.98012f),
+        Mod_Class::Vector4(-106.8976f, 6533.95f, 29.83228f, 22.53628f),
+        Mod_Class::Vector4(-17.19193f, 6502.194f, 31.50745f, 277.7401f),
+        Mod_Class::Vector4(107.219f, 6612.1f, 31.97963f, 176.6421f),
+        Mod_Class::Vector4(155.6443f, 6508.133f, 31.7202f, 50.47895f),
+        Mod_Class::Vector4(-97.19097f, 6350.258f, 31.58107f, 227.7804f),
+        Mod_Class::Vector4(291.5666f, 6515.816f, 29.77631f, 240.3053f),
+        Mod_Class::Vector4(381.5781f, 6526.341f, 28.18776f, 297.2371f),
+        Mod_Class::Vector4(509.6346f, 6512.681f, 29.83138f, 358.1497f),
+        Mod_Class::Vector4(1087.457f, 6511.739f, 20.55505f, 184.4623f),
+        Mod_Class::Vector4(1300.798f, 6609.131f, 2.210964f, 166.6302f),
+        Mod_Class::Vector4(1427.748f, 6551.687f, 15.48245f, 259.8033f),
+        Mod_Class::Vector4(1581.274f, 6453.915f, 25.31938f, 146.6987f),
+        Mod_Class::Vector4(1691.058f, 6427.246f, 32.54766f, 235.5572f),
+        Mod_Class::Vector4(488.016f, 5586.718f, 794.0623f, 207.1104f),
+        Mod_Class::Vector4(709.0751f, 4184.547f, 40.70778f, 34.69099f),
+        Mod_Class::Vector4(713.3973f, 4092.791f, 34.72971f, 183.6691f),
+        Mod_Class::Vector4(-18.10457f, 3768.18f, 31.31539f, 0.0f),
+        Mod_Class::Vector4(396.4519f, 3578.591f, 33.29235f, 292.9981f),
+        Mod_Class::Vector4(915.2141f, 3565.18f, 33.80116f, 296.1426f),
+        Mod_Class::Vector4(915.4491f, 3643.504f, 32.65174f, 224.7724f),
+        Mod_Class::Vector4(1361.951f, 3603.041f, 34.94891f, 248.2975f),
+        Mod_Class::Vector4(1261.829f, 3548.285f, 34.62054f, 191.3703f),
+        Mod_Class::Vector4(1229.425f, 3622.139f, 33.48791f, 194.691f),
+        Mod_Class::Vector4(1431.933f, 3669.91f, 39.73352f, 21.39104f),
+        Mod_Class::Vector4(1553.329f, 3801.798f, 34.25249f, 349.7805f),
+        Mod_Class::Vector4(1691.517f, 3866.717f, 34.91164f, 110.7219f),
+        Mod_Class::Vector4(1544.495f, 3722.99f, 34.59937f, 213.8932f),
+        Mod_Class::Vector4(1795.776f, 3949.233f, 33.90714f, 275.9398f),
+        Mod_Class::Vector4(1829.368f, 3833.267f, 33.35374f, 28.27547f),
+        Mod_Class::Vector4(1904.727f, 3708.882f, 32.73225f, 290.9872f),
+        Mod_Class::Vector4(1950.306f, 3845.622f, 32.18547f, 249.8298f),
+        Mod_Class::Vector4(1985.265f, 3705.139f, 32.3974f, 332.6318f),
+        Mod_Class::Vector4(2016.912f, 3773.148f, 32.20602f, 265.4035f),
+        Mod_Class::Vector4(1825.867f, 3656.211f, 34.08326f, 253.2209f),
+        Mod_Class::Vector4(1741.156f, 3710.271f, 34.1827f, 21.51038f),
+        Mod_Class::Vector4(1632.203f, 3597.311f, 35.43903f, 211.6864f)
     };
 
     inline const std::vector<std::string> Weapons_List = {
@@ -4510,6 +5290,1454 @@ namespace Mod_Data
         "COMPONENT_BATTLERIFLE_CLIP_02",
         "COMPONENT_AT_AR_SUPP"
     };
+    inline const std::vector<Mod_Class::HairSets> MHairsets = {
+    Mod_Class::HairSets(1, 0, "H_FMM_1_0", "Buzzcut Dark Brown", -1, -1),
+    Mod_Class::HairSets(1, 1, "H_FMM_1_1", "Buzzcut Light Brown", -1, -1),
+    Mod_Class::HairSets(1, 2, "H_FMM_1_2", "Buzzcut Auburn", -1, -1),
+    Mod_Class::HairSets(1, 3, "H_FMM_1_3", "Buzzcut Blond", -1, -1),
+    Mod_Class::HairSets(1, 4, "H_FMM_1_4", "Buzzcut Black", -1, -1),
+    Mod_Class::HairSets(2, 0, "H_FMM_2_0", "Faux Hawk Dark Brown", -1, -1),
+    Mod_Class::HairSets(2, 1, "H_FMM_2_1", "Faux Hawk Light Brown", -1, -1),
+    Mod_Class::HairSets(2, 2, "H_FMM_2_2", "Faux Hawk Auburn", -1, -1),
+    Mod_Class::HairSets(2, 3, "H_FMM_2_3", "Faux Hawk Blond", -1, -1),
+    Mod_Class::HairSets(2, 4, "H_FMM_2_4", "Faux Hawk Black", -1, -1),
+    Mod_Class::HairSets(2, 5, "H_FMM_2_5", "Faux Hawk Purple", -1, -1),
+    Mod_Class::HairSets(3, 0, "H_FMM_3_0", "Hipster Shaved Dark Brown", -1, -1),
+    Mod_Class::HairSets(3, 1, "H_FMM_3_1", "Hipster Shaved Light Brown", -1, -1),
+    Mod_Class::HairSets(3, 2, "H_FMM_3_2", "Hipster Shaved Auburn", -1, -1),
+    Mod_Class::HairSets(3, 3, "H_FMM_3_3", "Hipster Shaved Blond", -1, -1),
+    Mod_Class::HairSets(3, 4, "H_FMM_3_4", "Hipster Shaved Black", -1, -1),
+    Mod_Class::HairSets(3, 5, "H_FMM_3_5", "Hipster Shaved Red", -1, -1),
+    Mod_Class::HairSets(4, 0, "H_FMM_4_0", "Side Parting Spiked Dark Brown", -1, -1),
+    Mod_Class::HairSets(4, 1, "H_FMM_4_1", "Side Parting Spiked Light Brown", -1, -1),
+    Mod_Class::HairSets(4, 2, "H_FMM_4_2", "Side Parting Spiked Auburn", -1, -1),
+    Mod_Class::HairSets(4, 3, "H_FMM_4_3", "Side Parting Spiked Blond", -1, -1),
+    Mod_Class::HairSets(4, 4, "H_FMM_4_4", "Side Parting Spiked Black", -1, -1),
+    Mod_Class::HairSets(4, 6, "H_FMM_4_6", "Side Parting Spiked Blue", -1, -1),
+    Mod_Class::HairSets(5, 0, "H_FMM_5_0", "Shorter Cut Dark Brown", -1, -1),
+    Mod_Class::HairSets(5, 1, "H_FMM_5_1", "Shorter Cut Light Brown", -1, -1),
+    Mod_Class::HairSets(5, 2, "H_FMM_5_2", "Shorter Cut Auburn", -1, -1),
+    Mod_Class::HairSets(5, 3, "H_FMM_5_3", "Shorter Cut Blond", -1, -1),
+    Mod_Class::HairSets(5, 4, "H_FMM_5_4", "Shorter Cut Black", -1, -1),
+    Mod_Class::HairSets(5, 5, "H_FMM_5_5", "Shorter Cut Green", -1, -1),
+    Mod_Class::HairSets(6, 0, "H_FMM_6_0", "Biker Dark Brown", -1, -1),
+    Mod_Class::HairSets(6, 1, "H_FMM_6_1", "Biker Light Brown", -1, -1),
+    Mod_Class::HairSets(6, 2, "H_FMM_6_2", "Biker Auburn", -1, -1),
+    Mod_Class::HairSets(6, 3, "H_FMM_6_3", "Biker Blond", -1, -1),
+    Mod_Class::HairSets(6, 4, "H_FMM_6_4", "Biker Black", -1, -1),
+    Mod_Class::HairSets(6, 5, "H_FMM_6_5", "Biker Purple Fade", -1, -1),
+    Mod_Class::HairSets(7, 0, "H_FMM_7_0", "Ponytail Dark Brown", -1, -1),
+    Mod_Class::HairSets(7, 1, "H_FMM_7_1", "Ponytail Light Brown", -1, -1),
+    Mod_Class::HairSets(7, 2, "H_FMM_7_2", "Ponytail Auburn", -1, -1),
+    Mod_Class::HairSets(7, 3, "H_FMM_7_3", "Ponytail Blond", -1, -1),
+    Mod_Class::HairSets(7, 4, "H_FMM_7_4", "Ponytail Black", -1, -1),
+    Mod_Class::HairSets(7, 6, "H_FMM_7_6", "Ponytail Purple", -1, -1),
+    Mod_Class::HairSets(8, 0, "H_FMM_8_0", "Cornrows Dark Brown", -1, -1),
+    Mod_Class::HairSets(8, 1, "H_FMM_8_1", "Cornrows Light Brown", -1, -1),
+    Mod_Class::HairSets(8, 2, "H_FMM_8_2", "Cornrows Auburn", -1, -1),
+    Mod_Class::HairSets(8, 3, "H_FMM_8_3", "Cornrows Blond", -1, -1),
+    Mod_Class::HairSets(8, 4, "H_FMM_8_4", "Cornrows Black", -1, -1),
+    Mod_Class::HairSets(9, 0, "H_FMM_9_0", "Slicked Dark Brown", -1, -1),
+    Mod_Class::HairSets(9, 1, "H_FMM_9_1", "Slicked Light Brown", -1, -1),
+    Mod_Class::HairSets(9, 2, "H_FMM_9_2", "Slicked Auburn", -1, -1),
+    Mod_Class::HairSets(9, 3, "H_FMM_9_3", "Slicked Blond", -1, -1),
+    Mod_Class::HairSets(9, 4, "H_FMM_9_4", "Slicked Black", -1, -1),
+    Mod_Class::HairSets(9, 6, "H_FMM_9_6", "Slicked Red", -1, -1),
+    Mod_Class::HairSets(10, 0, "H_FMM_10_0", "Short Brushed Dark Brown", -1, -1),
+    Mod_Class::HairSets(10, 1, "H_FMM_10_1", "Short Brushed Light Brown", -1, -1),
+    Mod_Class::HairSets(10, 2, "H_FMM_10_2", "Short Brushed Auburn", -1, -1),
+    Mod_Class::HairSets(10, 3, "H_FMM_10_3", "Short Brushed Blond", -1, -1),
+    Mod_Class::HairSets(10, 4, "H_FMM_10_4", "Short Brushed Black", -1, -1),
+    Mod_Class::HairSets(11, 0, "H_FMM_11_0", "Spikey Dark Brown", -1, -1),
+    Mod_Class::HairSets(11, 1, "H_FMM_11_1", "Spikey Light Brown", -1, -1),
+    Mod_Class::HairSets(11, 2, "H_FMM_11_2", "Spikey Auburn", -1, -1),
+    Mod_Class::HairSets(11, 3, "H_FMM_11_3", "Spikey Blond", -1, -1),
+    Mod_Class::HairSets(11, 4, "H_FMM_11_4", "Spikey Black", -1, -1),
+    Mod_Class::HairSets(11, 5, "H_FMM_11_5", "Spikey Blue", -1, -1),
+    Mod_Class::HairSets(12, 0, "H_FMM_12_0", "Caesar Dark Brown", -1, -1),
+    Mod_Class::HairSets(12, 1, "H_FMM_12_1", "Caesar Light Brown", -1, -1),
+    Mod_Class::HairSets(12, 2, "H_FMM_12_2", "Caesar Auburn", -1, -1),
+    Mod_Class::HairSets(12, 3, "H_FMM_12_3", "Caesar Blond", -1, -1),
+    Mod_Class::HairSets(12, 4, "H_FMM_12_4", "Caesar Black", -1, -1),
+    Mod_Class::HairSets(13, 0, "H_FMM_13_0", "Chopped Dark Brown", -1, -1),
+    Mod_Class::HairSets(13, 1, "H_FMM_13_1", "Chopped Light Brown", -1, -1),
+    Mod_Class::HairSets(13, 2, "H_FMM_13_2", "Chopped Auburn", -1, -1),
+    Mod_Class::HairSets(13, 3, "H_FMM_13_3", "Chopped Blond", -1, -1),
+    Mod_Class::HairSets(13, 4, "H_FMM_13_4", "Chopped Black", -1, -1),
+    Mod_Class::HairSets(13, 5, "H_FMM_13_5", "Chopped Green", -1, -1),
+    Mod_Class::HairSets(14, 0, "H_FMM_14_0", "Dreads Dark Brown", -1, -1),
+    Mod_Class::HairSets(14, 1, "H_FMM_14_1", "Dreads Light Brown", -1, -1),
+    Mod_Class::HairSets(14, 2, "H_FMM_14_2", "Dreads Auburn", -1, -1),
+    Mod_Class::HairSets(14, 3, "H_FMM_14_3", "Dreads Blond", -1, -1),
+    Mod_Class::HairSets(14, 4, "H_FMM_14_4", "Dreads Black", -1, -1),
+    Mod_Class::HairSets(15, 0, "H_FMM_15_0", "Long Hair Dark Brown", -1, -1),
+    Mod_Class::HairSets(15, 1, "H_FMM_15_1", "Long Hair Light Brown", -1, -1),
+    Mod_Class::HairSets(15, 2, "H_FMM_15_2", "Long Hair Auburn", -1, -1),
+    Mod_Class::HairSets(15, 3, "H_FMM_15_3", "Long Hair Blond", -1, -1),
+    Mod_Class::HairSets(15, 4, "H_FMM_15_4", "Long Hair Black", -1, -1),
+    Mod_Class::HairSets(15, 5, "H_FMM_15_5", "Long Hair Purple Fade", -1, -1),
+    Mod_Class::HairSets(16, 0, "CLO_BBM_H_00", "Shaggy Curls Dark Brown", -1, -1),
+    Mod_Class::HairSets(16, 1, "CLO_BBM_H_01", "Shaggy Curls Light Brown", -1, -1),
+    Mod_Class::HairSets(16, 2, "CLO_BBM_H_02", "Shaggy Curls Auburn", -1, -1),
+    Mod_Class::HairSets(16, 3, "CLO_BBM_H_03", "Shaggy Curls Blonde", -1, -1),
+    Mod_Class::HairSets(16, 4, "CLO_BBM_H_04", "Shaggy Curls Black", -1, -1),
+    Mod_Class::HairSets(17, 0, "CLO_BBM_H_05", "Surfer Dude Dark Brown", -1, -1),
+    Mod_Class::HairSets(17, 1, "CLO_BBM_H_06", "Surfer Dude Light Brown", -1, -1),
+    Mod_Class::HairSets(17, 2, "CLO_BBM_H_07", "Surfer Dude Auburn", -1, -1),
+    Mod_Class::HairSets(17, 3, "CLO_BBM_H_08", "Surfer Dude Blonde", -1, -1),
+    Mod_Class::HairSets(17, 4, "CLO_BBM_H_09", "Surfer Dude Black", -1, -1),
+    Mod_Class::HairSets(18, 0, "CLO_BUS_H_0_0", "Short Side Part Dark Brown", -2086773, 224730392),
+    Mod_Class::HairSets(18, 1, "CLO_BUS_H_0_1", "Short Side Part Light Brown", -2086773, 1988816738),
+    Mod_Class::HairSets(18, 2, "CLO_BUS_H_0_2", "Short Side Part Auburn", -2086773, 736778786),
+    Mod_Class::HairSets(18, 3, "CLO_BUS_H_0_3", "Short Side Part Blonde", -2086773, 439629494),
+    Mod_Class::HairSets(18, 4, "CLO_BUS_H_0_4", "Short Side Part Black", -2086773, 1048444745),
+    Mod_Class::HairSets(19, 0, "CLO_BUS_H_1_0", "High Slicked Sides Dark Brown", -2086773, 2140603469),
+    Mod_Class::HairSets(19, 1, "CLO_BUS_H_1_1", "High Slicked Sides Light Brown", -2086773, -681528353),
+    Mod_Class::HairSets(19, 2, "CLO_BUS_H_1_2", "High Slicked Sides Auburn", -2086773, 1006238992),
+    Mod_Class::HairSets(19, 3, "CLO_BUS_H_1_3", "High Slicked Sides Blonde", -2086773, 214245031),
+    Mod_Class::HairSets(19, 4, "CLO_BUS_H_1_4", "High Slicked Sides Black", -2086773, 689952604),
+    Mod_Class::HairSets(20, 0, "CLO_HP_HR_0_0", "Long Slicked Dark Brown", -1398869298, 965649655),
+    Mod_Class::HairSets(20, 1, "CLO_HP_HR_0_1", "Long Slicked Light Brown", -1398869298, 718800778),
+    Mod_Class::HairSets(20, 2, "CLO_HP_HR_0_2", "Long Slicked Auburn", -1398869298, 1959959422),
+    Mod_Class::HairSets(20, 3, "CLO_HP_HR_0_3", "Long Slicked Blonde", -1398869298, 1200177388),
+    Mod_Class::HairSets(20, 4, "CLO_HP_HR_0_4", "Long Slicked Black", -1398869298, -1874439579),
+    Mod_Class::HairSets(21, 0, "CLO_HP_HR_1_0", "Hipster Youth Dark Brown", -1398869298, -1679505893),
+    Mod_Class::HairSets(21, 1, "CLO_HP_HR_1_1", "Hipster Youth Blonde", -1398869298, -1976229188),
+    Mod_Class::HairSets(21, 2, "CLO_HP_HR_1_2", "Hipster Youth Auburn", -1398869298, 2037875009),
+    Mod_Class::HairSets(21, 3, "CLO_HP_HR_1_3", "Hipster Youth Light Brown", -1398869298, -235146664),
+    Mod_Class::HairSets(21, 4, "CLO_HP_HR_1_4", "Hipster Youth Black", -1398869298, -441853516),
+    Mod_Class::HairSets(22, 0, "CLO_IND_H_0_0", "Mullet Dark Brown", -1, -1),
+    Mod_Class::HairSets(22, 1, "CLO_IND_H_0_1", "Mullet Light Brown", -1, -1),
+    Mod_Class::HairSets(22, 2, "CLO_IND_H_0_2", "Mullet Auburn", -1, -1),
+    Mod_Class::HairSets(22, 3, "CLO_IND_H_0_3", "Mullet Blonde", -1, -1),
+    Mod_Class::HairSets(22, 4, "CLO_IND_H_0_4", "Mullet Black", -1, -1),
+    Mod_Class::HairSets(24, 0, "CLO_S1M_H_0_0", "Classic Cornrows", 62137527, 534771589),
+    Mod_Class::HairSets(25, 0, "CLO_S1M_H_1_0", "Palm Cornrows", 62137527, -1340139519),
+    Mod_Class::HairSets(26, 0, "CLO_S1M_H_2_0", "Lightning Cornrows", 62137527, -849980761),
+    Mod_Class::HairSets(27, 0, "CLO_S1M_H_3_0", "Whipped Cornrows", 62137527, -551553478),
+    Mod_Class::HairSets(28, 0, "CLO_S2M_H_0_0", "Zig Zag Cornrows", 1529191571, -1431204514),
+    Mod_Class::HairSets(29, 0, "CLO_S2M_H_1_0", "Snail Cornrows", 1529191571, -1133334304),
+    Mod_Class::HairSets(30, 0, "CLO_S2M_H_2_0", "Hightop", 1529191571, -1809784771),
+    Mod_Class::HairSets(31, 0, "CLO_BIM_H_0_0", "Loose Swept Back", -240234547, 1431846777),
+    Mod_Class::HairSets(32, 0, "CLO_BIM_H_1_0", "Undercut Swept Back", -240234547, -460168116),
+    Mod_Class::HairSets(33, 0, "CLO_BIM_H_2_0", "Undercut Swept Side", -240234547, -311245907),
+    Mod_Class::HairSets(34, 0, "CLO_BIM_H_3_0", "Spiked Mohawk", -240234547, -942031335),
+    Mod_Class::HairSets(35, 0, "CLO_BIM_H_4_0", "Mod", -240234547, -644503216),
+    Mod_Class::HairSets(36, 0, "CLO_BIM_H_5_0", "Layered Mod", -240234547, 211198653),
+    Mod_Class::HairSets(37, 0, "CC_M_HS_1", "Buzzcut", 598190139, 739308497),
+    Mod_Class::HairSets(38, 0, "CC_M_HS_2", "Faux Hawk", 598190139, 495343292),
+    Mod_Class::HairSets(39, 0, "CC_M_HS_3", "Hipster", 598190139, -1686711653),
+    Mod_Class::HairSets(40, 0, "CC_M_HS_4", "Side Parting", 598190139, 1187457341),
+    Mod_Class::HairSets(41, 0, "CC_M_HS_5", "Shorter Cut", 598190139, 956403122),
+    Mod_Class::HairSets(42, 0, "CC_M_HS_6", "Biker", 598190139, 1647042566),
+    Mod_Class::HairSets(43, 0, "CC_M_HS_7", "Ponytail", 598190139, -461478743),
+    Mod_Class::HairSets(44, 0, "CC_M_HS_8", "Cornrows", 598190139, -1883325653),
+    Mod_Class::HairSets(45, 0, "CC_M_HS_9", "Slicked", 598190139, -2114248796),
+    Mod_Class::HairSets(46, 0, "CC_M_HS_10", "Short Brushed", 598190139, 314228205),
+    Mod_Class::HairSets(47, 0, "CC_M_HS_11", "Spikey", 598190139, 1503775674),
+    Mod_Class::HairSets(48, 0, "CC_M_HS_12", "Caesar", 598190139, 1862399610),
+    Mod_Class::HairSets(49, 0, "CC_M_HS_13", "Chopped", 598190139, 708472048),
+    Mod_Class::HairSets(50, 0, "CC_M_HS_14", "Dreads", 598190139, -1207367545),
+    Mod_Class::HairSets(51, 0, "CC_M_HS_15", "Long Hair", 598190139, 111650251),
+    Mod_Class::HairSets(52, 0, "CLO_BBM_H_00", "Shaggy Curls Dark Brown", -1, -1),
+    Mod_Class::HairSets(53, 0, "CLO_BBM_H_05", "Surfer Dude Dark Brown", -1, -1),
+    Mod_Class::HairSets(54, 0, "CLO_BUS_H_0_0", "Short Side Part Dark Brown", -2086773, 224730392),
+    Mod_Class::HairSets(55, 0, "CLO_BUS_H_1_0", "High Slicked Sides Dark Brown", -2086773, 2140603469),
+    Mod_Class::HairSets(56, 0, "CLO_HP_HR_0_0", "Long Slicked Dark Brown", -1398869298, 965649655),
+    Mod_Class::HairSets(57, 0, "CLO_HP_HR_1_0", "Hipster Youth Dark Brown", -1398869298, -1679505893),
+    Mod_Class::HairSets(58, 0, "CLO_IND_H_0_0", "Mullet Dark Brown", -1, -1),
+    Mod_Class::HairSets(59, 0, "CLO_S1M_H_0_0", "Classic Cornrows", 62137527, 534771589),
+    Mod_Class::HairSets(60, 0, "CLO_S1M_H_1_0", "Palm Cornrows", 62137527, -1340139519),
+    Mod_Class::HairSets(61, 0, "CLO_S1M_H_2_0", "Lightning Cornrows", 62137527, -849980761),
+    Mod_Class::HairSets(62, 0, "CLO_S1M_H_3_0", "Whipped Cornrows", 62137527, -551553478),
+    Mod_Class::HairSets(63, 0, "CLO_S2M_H_0_0", "Zig Zag Cornrows", 1529191571, -1431204514),
+    Mod_Class::HairSets(64, 0, "CLO_S2M_H_1_0", "Snail Cornrows", 1529191571, -1133334304),
+    Mod_Class::HairSets(65, 0, "CLO_S2M_H_2_0", "Hightop", 1529191571, -1809784771),
+    Mod_Class::HairSets(66, 0, "CLO_BIM_H_0_0", "Loose Swept Back", -240234547, 1431846777),
+    Mod_Class::HairSets(67, 0, "CLO_BIM_H_1_0", "Undercut Swept Back", -240234547, -460168116),
+    Mod_Class::HairSets(68, 0, "CLO_BIM_H_2_0", "Undercut Swept Side", -240234547, -311245907),
+    Mod_Class::HairSets(69, 0, "CLO_BIM_H_3_0", "Spiked Mohawk", -240234547, -942031335),
+    Mod_Class::HairSets(70, 0, "CLO_BIM_H_4_0", "Mod", -240234547, -644503216),
+    Mod_Class::HairSets(71, 0, "CLO_BIM_H_5_0", "Layered Mod", -240234547, 211198653),
+    Mod_Class::HairSets(72, 0, "CLO_GRM_H_0_0", "Flattop", 1616273011, -1119221482),
+    Mod_Class::HairSets(73, 0, "CLO_GRM_H_1_0", "Military Buzzcut", 1616273011, -1642199958),
+    Mod_Class::HairSets(74, 0, "CLO_VWM_H_0_0", "Impotent Rage", 1347816957, -599666460),
+    Mod_Class::HairSets(75, 0, "CLO_TRM_H_0_0", "Afro Faded", -1970774728, -416636904),
+    Mod_Class::HairSets(76, 0, "CLO_FXM_H_0_0", "Top Knot", 601646824, 1334100948),
+    Mod_Class::HairSets(77, 0, "CLO_SBM_H_0_0", "Two Block", 987639353, -1927370417),
+    Mod_Class::HairSets(78, 0, "CLO_SBM_H_1_0", "Shaggy Mullet", 987639353, -1088161005)
+    };
+    inline const std::vector<Mod_Class::HairSets> FHairsets = {
+        Mod_Class::HairSets(1, 0, "H_FMF_1_0","Short Chestnut", -1, -1),
+        Mod_Class::HairSets(1, 1, "H_FMF_1_1","Short Blonde", -1, -1),
+        Mod_Class::HairSets(1, 2, "H_FMF_1_2","Short Auburn", -1, -1),
+        Mod_Class::HairSets(1, 3, "H_FMF_1_3","Short Black", -1, -1),
+        Mod_Class::HairSets(1, 4, "H_FMF_1_4","Short Brown", -1, -1),
+        Mod_Class::HairSets(1, 5, "H_FMF_1_5","Short Purple", -1, -1),
+
+        Mod_Class::HairSets(2, 0, "H_FMF_2_0","Layered Bob Chestnut", -1, -1),
+        Mod_Class::HairSets(2, 1, "H_FMF_2_1","Layered Bob Blonde", -1, -1),
+        Mod_Class::HairSets(2, 2, "H_FMF_2_2","Layered Bob Auburn", -1, -1),
+        Mod_Class::HairSets(2, 3, "H_FMF_2_3","Layered Bob Black", -1, -1),
+        Mod_Class::HairSets(2, 4, "H_FMF_2_4","Layered Bob Brown", -1, -1),
+        Mod_Class::HairSets(2, 5, "H_FMF_2_5","Layered Bob Green", -1, -1),
+
+        Mod_Class::HairSets(3, 0, "H_FMF_3_0","Pigtails Chestnut", -1, -1),
+        Mod_Class::HairSets(3, 1, "H_FMF_3_1","Pigtails Blonde", -1, -1),
+        Mod_Class::HairSets(3, 2, "H_FMF_3_2","Pigtails Auburn", -1, -1),
+        Mod_Class::HairSets(3, 3, "H_FMF_3_3","Pigtails Black", -1, -1),
+        Mod_Class::HairSets(3, 4, "H_FMF_3_4","Pigtails Brown", -1, -1),
+
+        Mod_Class::HairSets(4, 0, "H_FMF_4_0","Ponytail Chestnut", -1, -1),
+        Mod_Class::HairSets(4, 1, "H_FMF_4_1","Ponytail Blonde", -1, -1),
+        Mod_Class::HairSets(4, 2, "H_FMF_4_2","Ponytail Auburn", -1, -1),
+        Mod_Class::HairSets(4, 3, "H_FMF_4_3","Ponytail Black", -1, -1),
+        Mod_Class::HairSets(4, 4, "H_FMF_4_4","Ponytail Brown", -1, -1),
+        Mod_Class::HairSets(4, 5, "H_FMF_4_5","Ponytail Blue", -1, -1),
+
+        Mod_Class::HairSets(5, 0, "H_FMF_5_0","Braided Mohawk Chestnut", -1, -1),
+        Mod_Class::HairSets(5, 1, "H_FMF_5_1","Braided Mohawk Blonde", -1, -1),
+        Mod_Class::HairSets(5, 2, "H_FMF_5_2","Braided Mohawk Auburn", -1, -1),
+        Mod_Class::HairSets(5, 3, "H_FMF_5_3","Braided Mohawk Black", -1, -1),
+        Mod_Class::HairSets(5, 4, "H_FMF_5_4","Braided Mohawk Brown", -1, -1),
+        Mod_Class::HairSets(5, 5, "H_FMF_5_5","Braided Mohawk Pink", -1, -1),
+
+        Mod_Class::HairSets(6, 0, "H_FMF_6_0","Braids Chestnut", -1, -1),
+        Mod_Class::HairSets(6, 1, "H_FMF_6_1","Braids Blonde", -1, -1),
+        Mod_Class::HairSets(6, 2, "H_FMF_6_2","Braids Auburn", -1, -1),
+        Mod_Class::HairSets(6, 3, "H_FMF_6_3","Braids Black", -1, -1),
+        Mod_Class::HairSets(6, 4, "H_FMF_6_4","Braids Brown", -1, -1),
+
+        Mod_Class::HairSets(7, 0, "H_FMF_7_0","Bob Chestnut", -1, -1),
+        //Mod_Class::HairSets(7, 1, "H_FMF_7_1","Bob Blonde", -1, -1),
+        //Mod_Class::HairSets(7, 2, "H_FMF_7_2","Bob Auburn", -1, -1),
+        //Mod_Class::HairSets(7, 3, "H_FMF_7_3","Bob Black", -1, -1),
+        //Mod_Class::HairSets(7, 4, "H_FMF_7_4","Bob Brown", -1, -1),
+        //Mod_Class::HairSets(7, 5, "H_FMF_7_5","Bob Purple Fade", -1, -1),
+
+        Mod_Class::HairSets(8, 0, "H_FMF_8_0","Faux Hawk Chestnut", -1, -1),
+        Mod_Class::HairSets(8, 1, "H_FMF_8_1","Faux Hawk Blonde", -1, -1),
+        Mod_Class::HairSets(8, 2, "H_FMF_8_2","Faux Hawk Auburn", -1, -1),
+        Mod_Class::HairSets(8, 3, "H_FMF_8_3","Faux Hawk Black", -1, -1),
+        Mod_Class::HairSets(8, 4, "H_FMF_8_4","Faux Hawk Brown", -1, -1),
+        Mod_Class::HairSets(8, 5, "H_FMF_8_5","Faux Hawk Pink", -1, -1),
+
+        Mod_Class::HairSets(9, 0, "H_FMF_9_0","French Twist Chestnut", -1, -1),
+        Mod_Class::HairSets(9, 1, "H_FMF_9_1","French Twist Blonde", -1, -1),
+        Mod_Class::HairSets(9, 2, "H_FMF_9_2","French Twist Auburn", -1, -1),
+        Mod_Class::HairSets(9, 3, "H_FMF_9_3","French Twist Black", -1, -1),
+        Mod_Class::HairSets(9, 4, "H_FMF_9_4","French Twist Brown", -1, -1),
+
+        Mod_Class::HairSets(10, 0, "H_FMF_10_0","Long Bob Chestnut", -1, -1),
+        Mod_Class::HairSets(10, 1, "H_FMF_10_1","Long Bob Blonde", -1, -1),
+        Mod_Class::HairSets(10, 2, "H_FMF_10_2","Long Bob Auburn", -1, -1),
+        Mod_Class::HairSets(10, 3, "H_FMF_10_3","Long Bob Black", -1, -1),
+        Mod_Class::HairSets(10, 4, "H_FMF_10_4","Long Bob Brown", -1, -1),
+        Mod_Class::HairSets(10, 6, "H_FMF_10_6","Long Bob Purple Fade", -1, -1),
+
+        Mod_Class::HairSets(11, 0, "H_FMF_11_0","Loose Tied Chestnut", -1, -1),
+        Mod_Class::HairSets(11, 1, "H_FMF_11_1","Loose Tied Blonde", -1, -1),
+        Mod_Class::HairSets(11, 2, "H_FMF_11_2","Loose Tied Auburn", -1, -1),
+        Mod_Class::HairSets(11, 3, "H_FMF_11_3","Loose Tied Black", -1, -1),
+        Mod_Class::HairSets(11, 4, "H_FMF_11_4","Loose Tied Brown", -1, -1),
+        Mod_Class::HairSets(11, 6, "H_FMF_11_6","Loose Tied Green", -1, -1),
+
+        Mod_Class::HairSets(12, 0, "H_FMF_12_0","Pixie Chestnut", -1, -1),
+        Mod_Class::HairSets(12, 1, "H_FMF_12_1","Pixie Blonde", -1, -1),
+        Mod_Class::HairSets(12, 2, "H_FMF_12_2","Pixie Auburn", -1, -1),
+        Mod_Class::HairSets(12, 3, "H_FMF_12_3","Pixie Black", -1, -1),
+        Mod_Class::HairSets(12, 4, "H_FMF_12_4","Pixie Brown", -1, -1),
+        Mod_Class::HairSets(12, 5, "H_FMF_12_5","Pixie Blue", -1, -1),
+
+        Mod_Class::HairSets(13, 0, "H_FMF_13_0","Shaved Bangs Chestnut", -1, -1),
+        Mod_Class::HairSets(13, 1, "H_FMF_13_1","Shaved Bangs Blonde", -1, -1),
+        Mod_Class::HairSets(13, 2, "H_FMF_13_2","Shaved Bangs Auburn", -1, -1),
+        Mod_Class::HairSets(13, 3, "H_FMF_13_3","Shaved Bangs Black", -1, -1),
+        Mod_Class::HairSets(13, 4, "H_FMF_13_4","Shaved Bangs Brown", -1, -1),
+        Mod_Class::HairSets(13, 5, "H_FMF_13_5","Shaved Bangs Blue Fade", -1, -1),
+
+        Mod_Class::HairSets(14, 0, "H_FMF_14_0","Top Knot Chestnut", -1, -1),
+        Mod_Class::HairSets(14, 1, "H_FMF_14_1","Top Knot Blonde", -1, -1),
+        Mod_Class::HairSets(14, 2, "H_FMF_14_2","Top Knot Auburn", -1, -1),
+        Mod_Class::HairSets(14, 3, "H_FMF_14_3","Top Knot Black", -1, -1),
+        Mod_Class::HairSets(14, 4, "H_FMF_14_4","Top Knot Brown", -1, -1),
+
+        Mod_Class::HairSets(15, 0, "H_FMF_15_0","Wavy Bob Chestnut", -1, -1),
+        Mod_Class::HairSets(15, 1, "H_FMF_15_1","Wavy Bob Blonde", -1, -1),
+        Mod_Class::HairSets(15, 2, "H_FMF_15_2","Wavy Bob Auburn", -1, -1),
+        Mod_Class::HairSets(15, 3, "H_FMF_15_3","Wavy Bob Black", -1, -1),
+        Mod_Class::HairSets(15, 4, "H_FMF_15_4","Wavy Bob Brown", -1, -1),
+        Mod_Class::HairSets(15, 6, "H_FMF_15_6","Wavy Bob Red Fade", -1, -1),
+
+        Mod_Class::HairSets(16, 0, "CLO_BBF_H_00","Pin Up Girl Chestnut", -1, -1),
+        Mod_Class::HairSets(16, 1, "CLO_BBF_H_01","Pin Up Girl Blonde", -1, -1),
+        Mod_Class::HairSets(16, 2, "CLO_BBF_H_02","Pin Up Girl Auburn", -1, -1),
+        Mod_Class::HairSets(16, 3, "CLO_BBF_H_03","Pin Up Girl Black", -1, -1),
+        Mod_Class::HairSets(16, 4, "CLO_BBF_H_04","Pin Up Girl Brown", -1, -1),
+
+        Mod_Class::HairSets(17, 0, "CLO_BBF_H_05","Messy Bun Chestnut", -1398869298, -811206225),
+        Mod_Class::HairSets(17, 1, "CLO_BBF_H_06","Messy Bun Blonde", -1398869298, -1586815686),
+        Mod_Class::HairSets(17, 2, "CLO_BBF_H_07","Messy Bun Auburn", -1398869298, -1423429452),
+        Mod_Class::HairSets(17, 3, "CLO_BBF_H_08","Messy Bun Black", -1398869298, -1697869815),
+        Mod_Class::HairSets(17, 4, "CLO_BBF_H_09","Messy Bun Brown", -1398869298, -1470846183),
+
+        Mod_Class::HairSets(18, 0, "CLO_VALF_H_0_0","Flapper Bob Chestnut", -1, -1),
+        Mod_Class::HairSets(18, 1, "CLO_VALF_H_0_1","Flapper Bob Blonde", -1, -1),
+        Mod_Class::HairSets(18, 2, "CLO_VALF_H_0_2","Flapper Bob Auburn", -1, -1),
+        Mod_Class::HairSets(18, 3, "CLO_VALF_H_0_3","Flapper Bob Black", -1, -1),
+        Mod_Class::HairSets(18, 4, "CLO_VALF_H_0_4","Flapper Bob Brown", -1, -1),
+        Mod_Class::HairSets(18, 5, "CLO_VALF_H_0_5","Flapper Bob Blue", -1, -1),
+
+        Mod_Class::HairSets(19, 0, "CLO_BUS_F_H_0_0","Tight Bun Black", -2086773, -1816086813),
+        Mod_Class::HairSets(19, 1, "CLO_BUS_F_H_0_1","Tight Bun Brown", -2086773, -2113006722),
+        Mod_Class::HairSets(19, 2, "CLO_BUS_F_H_0_2","Tight Bun Auburn", -2086773, -1398740829),
+        Mod_Class::HairSets(19, 3, "CLO_BUS_F_H_0_3","Tight Bun Chestnut", -2086773, -131530830),
+        Mod_Class::HairSets(19, 4, "CLO_BUS_F_H_0_4","Tight Bun Blonde", -2086773, -1101886458),
+
+        Mod_Class::HairSets(20, 0, "CLO_BUS_F_H_1_0","Twisted Bob Chestnut", -1398869298, 558694786),
+        Mod_Class::HairSets(20, 1, "CLO_BUS_F_H_1_1","Twisted Bob Black", -1398869298, 569279177),
+        Mod_Class::HairSets(20, 2, "CLO_BUS_F_H_1_2","Twisted Bob Auburn", -1398869298, 544309199),
+        Mod_Class::HairSets(20, 3, "CLO_BUS_F_H_1_3","Twisted Bob Brown", -1398869298, 1190448341),
+        Mod_Class::HairSets(20, 4, "CLO_BUS_F_H_1_4","Twisted Bob Blonde", -1398869298, 885139568),
+
+        Mod_Class::HairSets(21, 0, "CLO_HP_F_HR_0_0","Big Bangs Chestnut", -1, -1),
+        Mod_Class::HairSets(21, 1, "CLO_HP_F_HR_0_1","Big Bangs Blonde", -1, -1),
+        Mod_Class::HairSets(21, 2, "CLO_HP_F_HR_0_2","Big Bangs Auburn", -1, -1),
+        Mod_Class::HairSets(21, 3, "CLO_HP_F_HR_0_3","Big Bangs Black", -1, -1),
+        Mod_Class::HairSets(21, 4, "CLO_HP_F_HR_0_4","Big Bangs Brown", -1, -1),
+
+        Mod_Class::HairSets(22, 0, "CLO_HP_F_HR_1_0","Braided Top Knot Chestnut", -1398869298, -1845683606),
+        Mod_Class::HairSets(22, 1, "CLO_HP_F_HR_1_1","Braided Top Knot Blonde", -1398869298, -1555317497),
+        Mod_Class::HairSets(22, 2, "CLO_HP_F_HR_1_2","Braided Top Knot Auburn", -1398869298, 1704673699),
+        Mod_Class::HairSets(22, 3, "CLO_HP_F_HR_1_3","Braided Top Knot Black", -1398869298, 1993401358),
+        Mod_Class::HairSets(22, 4, "CLO_HP_F_HR_1_4","Braided Top Knot Brown", -1398869298, 1227065524),
+
+        Mod_Class::HairSets(23, 0, "CLO_INDF_H_0_0","Mullet Chestnut", -1, -1),
+        Mod_Class::HairSets(23, 1, "CLO_INDF_H_0_1","Mullet Blonde", -1, -1),
+        Mod_Class::HairSets(23, 2, "CLO_INDF_H_0_2","Mullet Auburn", -1, -1),
+        Mod_Class::HairSets(23, 3, "CLO_INDF_H_0_3","Mullet Black", -1, -1),
+        Mod_Class::HairSets(23, 4, "CLO_INDF_H_0_4","Mullet Brown", -1, -1),
+
+        Mod_Class::HairSets(25, 0, "CLO_S1F_H_0_0","Pinched Cornrows", 62137527, -1325458477),
+        Mod_Class::HairSets(26, 0, "CLO_S1F_H_1_0","Leaf Cornrows", 62137527, -566725051),
+        Mod_Class::HairSets(27, 0, "CLO_S1F_H_2_0","Zig Zag Cornrows", 62137527, -787850263),
+        Mod_Class::HairSets(28, 0, "CLO_S1F_H_3_0","Pigtail Bangs", 1529191571, 2039295216),
+        Mod_Class::HairSets(29, 0, "CLO_S2F_H_0_0","Wave Braids", 1529191571, 2039295216),
+        Mod_Class::HairSets(30, 0, "CLO_S2F_H_1_0","Coil Braids", 1529191571, 1800147054),
+        Mod_Class::HairSets(31, 0, "CLO_S2F_H_2_0","Rolled Quiff", 1529191571, -2019505897),
+        Mod_Class::HairSets(32, 0, "CLO_BIF_H_0_0","Loose Swept Back", -240234547, -328340062),
+        Mod_Class::HairSets(33, 0, "CLO_BIF_H_1_0","Undercut Swept Back", -240234547, 1657725123),
+        Mod_Class::HairSets(34, 0, "CLO_BIF_H_2_0","Undercut Swept Side", -240234547, -1517964336),
+        Mod_Class::HairSets(35, 0, "CLO_BIF_H_3_0","Spiked Mohawk", -240234547, 1677522529),
+        Mod_Class::HairSets(36, 0, "CLO_BIF_H_4_0","Bandana and Braid", 598190139, -1362677538),
+        Mod_Class::HairSets(37, 0, "CLO_BIF_H_6_0","Skinbyrd", -240234547, 1841934566),
+        Mod_Class::HairSets(38, 0, "CLO_BIF_H_5_0","Layered Mod", -240234547, 1742494019),
+        Mod_Class::HairSets(39, 0, "CC_F_HS_1","Short", 598190139, 104062694),
+        Mod_Class::HairSets(40, 0, "CC_F_HS_2","Layered Bob", 598190139, 869579299),
+        Mod_Class::HairSets(41, 0, "CC_F_HS_3","Pigtails", 598190139, 1201332655),
+        Mod_Class::HairSets(42, 0, "CC_F_HS_4","Ponytail", 598190139, 1028967715),
+        Mod_Class::HairSets(43, 0, "CC_F_HS_5","Braided Mohawk", 598190139, -1651634800),
+        Mod_Class::HairSets(44, 0, "CC_F_HS_6","Braids", 598190139, -892278763),
+        Mod_Class::HairSets(45, 0, "CC_F_HS_7","Bob", 598190139, -1032005779),
+        Mod_Class::HairSets(46, 0, "CC_F_HS_8","Faux Hawk", 598190139, -255675400),
+        Mod_Class::HairSets(47, 0, "CC_F_HS_9","French Twist", 598190139, 1890137027),
+        Mod_Class::HairSets(48, 0, "CC_F_HS_10","Long Bob", 598190139, -406805808),
+        Mod_Class::HairSets(49, 0, "CC_F_HS_11","Loose Tied", 598190139, -592540500),
+        Mod_Class::HairSets(50, 0, "CC_F_HS_12","Pixie", 598190139, 205417419),
+        Mod_Class::HairSets(51, 0, "CC_F_HS_13","Shaved Bangs", 598190139, -2127276619),
+        Mod_Class::HairSets(52, 0, "CC_F_HS_14","Top Knot", 598190139, -1362677538),
+        Mod_Class::HairSets(53, 0, "CC_F_HS_15","Wavy Bob", 598190139, -1549722990),
+        Mod_Class::HairSets(54, 0, "CLO_BBF_H_05","Messy Bun Chestnut", -1398869298, -811206225),
+        Mod_Class::HairSets(55, 0, "CLO_BBF_H_00","Pin Up Girl Chestnut", -1, -1),
+        Mod_Class::HairSets(56, 0, "CLO_BUS_F_H_0_0","Tight Bun Black", -2086773, -1816086813),
+        Mod_Class::HairSets(57, 0, "CLO_BUS_F_H_1_0","Twisted Bob Chestnut", -1398869298, 558694786),
+        Mod_Class::HairSets(58, 0, "CLO_VALF_H_0_0","Flapper Bob Chestnut", -1, -1),
+        Mod_Class::HairSets(59, 0, "CLO_HP_F_HR_0_0","Big Bangs Chestnut", -1, -1),
+        Mod_Class::HairSets(60, 0, "CLO_HP_F_HR_1_0","Braided Top Knot Chestnut", -1398869298, -1845683606),
+        Mod_Class::HairSets(61, 0, "CLO_INDF_H_0_0","Mullet Chestnut", -1, -1),
+        Mod_Class::HairSets(62, 0, "CLO_S1F_H_0_0","Pinched Cornrows", 62137527, -1325458477),
+        Mod_Class::HairSets(63, 0, "CLO_S1F_H_1_0","Leaf Cornrows", 62137527, -566725051),
+        Mod_Class::HairSets(64, 0, "CLO_S1F_H_2_0","Zig Zag Cornrows", 62137527, -787850263),
+        Mod_Class::HairSets(65, 0, "CLO_S1F_H_3_0","Pigtail Bangs", 1529191571, 2039295216),
+        Mod_Class::HairSets(66, 0, "CLO_S2F_H_0_0","Wave Braids", 1529191571, 2039295216),
+        Mod_Class::HairSets(67, 0, "CLO_S2F_H_1_0","Coil Braids", 1529191571, 1800147054),
+        Mod_Class::HairSets(68, 0, "CLO_S2F_H_2_0","Rolled Quiff", 1529191571, -2019505897),
+        Mod_Class::HairSets(69, 0, "CLO_BIF_H_0_0","Loose Swept Back", -240234547, -328340062),
+        Mod_Class::HairSets(70, 0, "CLO_BIF_H_1_0","Undercut Swept Back", -240234547, 1657725123),
+        Mod_Class::HairSets(71, 0, "CLO_BIF_H_2_0","Undercut Swept Side", -240234547, -1517964336),
+        Mod_Class::HairSets(72, 0, "CLO_BIF_H_3_0","Spiked Mohawk", -240234547, 1677522529),
+        Mod_Class::HairSets(73, 0, "CLO_BIF_H_4_0","Bandana and Braid", 598190139, -1362677538),
+        Mod_Class::HairSets(74, 0, "CLO_BIF_H_5_0","Layered Mod", -240234547, 1742494019),
+        Mod_Class::HairSets(75, 0, "CLO_BIF_H_6_0","Skinbyrd", -240234547, 1841934566),
+        Mod_Class::HairSets(76, 0, "CLO_GRF_H_0_0","Neat Bun", 1616273011, 687338866),
+        Mod_Class::HairSets(77, 0, "CLO_GRF_H_1_0","Short Bob", 1616273011, 1827923343),
+        Mod_Class::HairSets(78, 0, "CLO_VWF_H_0_0","Impotent Rage", 1347816957, 987747946),
+        Mod_Class::HairSets(79, 0, "CLO_TRF_H_0_0","Afro", -1970774728, -2025496493),
+        Mod_Class::HairSets(80, 0, "CLO_FXF_H_0_0","Pixie Wavy", 601646824, -974054285),
+        Mod_Class::HairSets(81, 0, "CLO_SBF_H_0_0","Short Tucked Bob", 987639353, -606892013),
+        Mod_Class::HairSets(82, 0, "CLO_SBF_H_1_0","Shaggy Mullet", 987639353, -1514684318),
+        Mod_Class::HairSets(83, 0, "CLO_X6F_H_0_0","Buzzcut", 1841427399, 606012624)
+    };
+
+    inline const std::vector<std::string> M_Walks = {
+        "Default",
+        "move_action@generic@core",
+        "move_f@arrogant@a",
+        "move_f@chubby@a",
+        "move_f@depressed@a",
+        "move_f@fat@a",
+        "move_f@generic",
+        "move_f@heels@c",
+        "move_f@heels@d",
+        "move_f@multiplayer",
+        "move_f@sad@a",
+        "move_f@sexy@a",
+        "move_injured_generic",
+        "move_m@business@a",
+        "move_m@business@b",
+        "move_m@business@c",
+        "move_m@casual@a",
+        "move_m@casual@b",
+        "move_m@casual@c",
+        "move_m@casual@d",
+        "move_m@casual@e",
+        "move_m@casual@f",
+        "move_m@confident",
+        "move_m@depressed@b",
+        "move_m@drunk@slightlydrunk",
+        "move_m@fat@a",
+        "move_m@gangster@generic",
+        "move_m@generic",
+        "move_m@hobo@b",
+        "move_m@injured",
+        "move_m@multiplayer",
+        "move_m@shadyped@a",
+        "move_m@swagger",
+        "move_m@swagger@b",
+        "move_m@tool_belt@a",
+        "move_p_m_one",
+        "move_p_m_two",
+        "move_p_m_zero"
+    };
+    inline const std::vector<std::string> F_Walks = {
+        "Default",
+        "move_action@generic@core",
+        "move_f@arrogant@a",
+        "move_f@chubby@a",
+        "move_f@depressed@a",
+        "move_f@fat@a",
+        "move_f@generic",
+        "move_f@heels@c",
+        "move_f@heels@d",
+        "move_f@multiplayer",
+        "move_f@sad@a",
+        "move_f@sexy@a",
+        "move_m@business@a",
+        "move_m@business@c",
+        "move_m@casual@a",
+        "move_m@casual@b",
+        "move_m@casual@c",
+        "move_m@casual@d",
+        "move_m@casual@f",
+        "move_m@confident",
+        "move_m@depressed@b",
+        "move_m@fat@a",
+        "move_m@gangster@generic",
+        "move_m@generic",
+        "move_m@multiplayer",
+        "move_m@shadyped@a",
+        "move_m@swagger",
+        "move_m@swagger@b",
+        "move_m@tool_belt@a",
+        "move_p_m_one",
+        "move_p_m_two",
+        "move_p_m_zero"
+    };
+    inline const std::vector<std::string> FaceAn = {
+        "Default",
+        "mood_aiming_1",
+        "mood_angry_1",
+        "mood_drivefast_1",
+        "mood_drunk_1",
+        "mood_happy_1",
+        "mood_injured_1",
+        "mood_knockout_1",
+        "mood_normal_1",
+        "mood_skydive_1",
+        "mood_sleeping_1",
+        "mood_smug_1",
+        "mood_stressed_1",
+        "mood_sulk_1",
+        "mood_excited_1",
+        "mood_frustrated_1",
+        "mood_talking_1"
+    };
+    inline const std::vector<std::string> VoicesMale = {
+            "Default",
+            "ANDY_MOON", //B51D1921", //3038583073", //"1256384223
+            "ANTON", //ED9B229C", //3986367132", //"308600164
+            "AVI", //EF7A6BDE", //4017777630", //"277189666
+            "AGENCYJANITOR", //5288D370", //1384698736", //1384698736
+            "AIRCRAFT_WARNING_MALE_01", //A65A6402", //2790941698", //"1504025598
+            "AIRDUMMER", //798D01B5", //2039284149", //2039284149
+            "AIRGUITARIST", //A1D7351A", //2715235610", //"1579731686
+            "AIRPIANIST", //B98B1513", //3112899859", //"1182067437
+            "AIRPORT_PA_MALE", //4BA3E2F7", //1269031671", //1269031671
+            "ALIENS", //EB86F769", //3951490921", //"343476375
+            "AMMUCITY", //D4503291", //3562025617", //"732941679
+            "APT_BEAST", //14F37BC9", //351501257", //351501257
+            "BALLASOG", //AAE4ECF8", //2867129592", //"1427837704
+            "BANK", //3A15DB98", //974511000", //974511000
+            "BANKWM1", //CED9042B", //3470328875", //"824638421
+            "BANKWM2", //9C9B9FB1", //2627444657", //"1667522639
+            "BAYGOR", //7BF7A5D6", //2079827414", //2079827414
+            "BENNY", //F1EB2693", //4058719891", //"236247405
+            "BEVERLY", //79D862EA", //2044224234", //2044224234
+            "BIKE_MECHANIC", //573287EB", //1462929387", //1462929387
+            "BILLBINDER", //4E43F344", //1313076036", //1313076036
+            "BJPILOT_CANAL", //B75951F4", //3076084212", //"1218883084
+            "BJPILOT_TRAIN", //0FACABE0", //262974432", //262974432
+            "BRAD", //57360243", //1463157315", //1463157315
+            "BREATHING_FRANKLIN_01", //777E9106", //2004783366", //2004783366
+            "BREATHING_MICHAEL_01", //CAB2CFFB", //3400716283", //"894251013
+            "BREATHING_TEST_01", //D75E8754", //3613296468", //"681670828
+            "BREATHING_TREVOR_01", //18092047", //403251271", //403251271
+            "BUSINESSMAN", //3ECBA7BD", //1053534141", //1053534141
+            "CASEY", //908C67DC", //2425120732", //"1869846564
+            "CHAR_INTRO_FRANKLIN_01", //420FF5A0", //1108342176", //1108342176
+            "CHAR_INTRO_MICHAEL_01", //E4A08B92", //3835726738", //"459240558
+            "CHAR_INTRO_TREVOR_01", //8F52758F", //2404545935", //"1890421361
+            "CHEF", //BF59CC9A", //3210333338", //"1084633958
+            "CHENG", //65BBBE48", //1706802760", //1706802760
+            "CLETUS", //9B00816A", //2600501610", //"1694465686
+            "CLINTON", //2B502F45", //726675269", //726675269
+            "CLOWNS", //D8088180", //3624436096", //"670531200
+            "COOK", //5673232D", //1450386221", //1450386221
+            "DAVE", //B1F68A9D", //2985724573", //"1309242723
+            "DOM", //BBF2D511", //3153253649", //"1141713647
+            "EDDIE", //C5FB1FF5", //3321569269", //"973398027
+            "EXECPA_MALE", //0C5C69CC", //207382988", //207382988
+            "EXT1HELIPILOT", //EF004581", //4009772417", //"285194879
+            "FACILITY_ANNOUNCER", //A9F8234D", //2851611469", //"1443355827
+            "FLOYD", //5E69D958", //1583995224", //1583995224
+            "FM", //FFE20CE1", //4293004513", //"1962783
+            "FM_TH", //2640742C", //641758252", //641758252
+            "GARDENER", //4260B7F4", //1113634804", //1113634804
+            "GAYMILITARY", //212EBC3B", //556710971", //556710971
+            "GERALD", //07DCC381", //131908481", //131908481
+            "GROOM", //4A735AF1", //1249073905", //1249073905
+            "GUSTAVO", //E5A7195C", //3852933468", //"442033828
+            "HAO", //5F91F8AE", //1603401902", //1603401902
+            "HEISTMANAGER", //3F3FAB0F", //1061137167", //1061137167
+            "HUGH", //F4EE78A9", //4109269161", //"185698135
+            "IMPOTENT_RAGE", //BE080ED8", //3188199128", //"1106768168
+            "INFERNUS", //18F25AC7", //418536135", //418536135
+            "JEROME", //D982DA50", //3649231440", //"645735856
+            "JESSE", //916BB095", //2439753877", //"1855213419
+            "JIMMY_DRUNK", //43C1EB55", //1136782165", //1136782165
+            "JIMMY_NORMAL", //95810242", //2508259906", //"1786707390
+            "JOE", //07CC375A", //130824026", //130824026
+            "JOSEF", //F63ED80C", //4131313676", //"163653620
+            "JOSH", //F4DDE967", //4108183911", //"186783385
+            "KARIM", //DB158746", //3675621190", //"619346106
+            "KARL", //D29BCDFD", //3533426173", //"761541123
+            "LAMAR", //EA22BC4D", //3928144973", //"366822323
+            "LAMAR_1_NORMAL", //35FE7226", //905867814", //905867814
+            "LAMAR_2_NORMAL", //25068D1D", //621186333", //621186333
+            "LAMAR_DRUNK", //648A554F", //1686787407", //1686787407
+            "LAMAR_NORMAL", //9D861581", //2642810241", //"1652157055
+            "LESTER", //8DB38846", //2377353286", //"1917614010
+            "LIENGINEER", //BD5D1E88", //3176996488", //"1117970808
+            "LIENGINEER2", //3A58B62B", //978892331", //978892331
+            "LI_GEORGE_01", //F22854E3", //4062729443", //"232237853
+            "LI_LOBBY_01", //3DB175B5", //1035040181", //1035040181
+            "LI_MALE_01", //9CF88EB5", //2633535157", //"1661432139
+            "LI_MALE_02", //AAB22A28", //2863802920", //"1431164376
+            "MALE_STRIP_DJ_WHITE", //54825131", //1417826609", //1417826609
+            "MANI", //9A9B1CC9", //2593856713", //"1701110583
+            "MELVIN", //558B495C", //1435191644", //1435191644
+            "MELVINSCIENTIST", //E90C6953", //3909904723", //"385062573
+            "MIME", //5B25DA1F", //1529207327", //1529207327
+            "MISTERK", //FF37663A", //4281820730", //"13146566
+            "MPCT", //FF02D40E", //4278375438", //"16591858
+            "MP_RESIDENT", //844127A9", //2218862505", //"2076104791
+            "NERVOUSRON", //20251950", //539302224", //539302224
+            "NIGEL", //F95E18F2", //4183693554", //"111273742
+            "NIGHT_OUT_MALE_01", //41EC4175", //1106002293", //1106002293
+            "NIGHT_OUT_MALE_02", //C428C5EC", //3291006444", //"1003960852
+            "NORM", //AE21D168", //2921451880", //"1373515416
+            "NO_VOICE", //87BFF09A", //2277503130", //"2017464166
+            "PACKIE", //B8791A2F", //3094944303", //"1200022993
+            "PACKIE_AI_NORM_PART1_BOOTH", //E0D1A809", //3771836425", //"523130871
+            "PANIC_WALLA", //14DEB561", //350139745", //350139745
+            "PIER_ANNOUNCE_MALE", //9567A0E1", //2506596577", //"1788370719
+            "PIER_FOLEY", //58EA9491", //1491768465", //1491768465
+            "PRISONER", //7EA26372", //2124571506", //2124571506
+            "PRISON_ANNOUNCER", //9BEE7F20", //2616098592", //"1678868704
+            "PRISON_TANNOY", //E5DCB564", //3856446820", //"438520476
+            "REDOCASTRO", //CED55457", //3470087255", //"824880041
+            "REDR1DRUNK1", //4184DA81", //1099225729", //1099225729
+            "REDR1DRUNK1_AI_DRUNK", //2B10FBD7", //722533335", //722533335
+            "REDR2DRUNKM", //51408669", //1363183209", //1363183209
+            "REHH2HIKER", //92977683", //2459399811", //"1835567485
+            "REHH3HIPSTER", //C0147C2B", //3222567979", //"1072399317
+            "SECUROMECH", //9C7CE8C0", //2625431744", //"1669535552
+            "SHOPASSISTANT", //53912D70", //1402023280", //1402023280
+            "SIMEON", //82816017", //2189516823", //"2105450473
+            "SOL1ACTOR", //4B0CAD83", //1259122051", //1259122051
+            "SPACE_RANGER", //21D80107", //567804167", //567804167
+            "STEVE", //CE95B9A9", //3465918889", //"829048407
+            "STRETCH", //8B13F083", //2333339779", //"1961627517
+            "SUBWAY_ANNOUNCER", //1C2F9BF2", //472882162", //472882162
+            "TOM", //97CBE769", //2546722665", //"1748244631
+            "TRANSLATOR", //EAC3FECB", //3938713291", //"356254005
+            "VULTURES", //18219991", //404855185", //404855185
+            "WADE", //7DD049A4", //2110802340", //2110802340
+            "WHISTLINGJANITOR", //168D3E8E", //378355342", //378355342
+            "YACHTCAPTAIN", //71C9A806", //1909041158", //1909041158
+            "ZOMBIE", //22666A99", //577137305", //577137305
+            "BTL_DAVE_PVG",
+            "HS4_RAMPA_PVG",
+            "HS4_ANDME_PVG",
+            "HS4_ADAM_PVG",
+            "HS4_PTRAX_PVG",
+            "HS4_MOODY_PVG",
+            "HS4_PRODUCER_PVG",
+            "HS4_POOH_PVG",
+            "HS4_BUSINESS_PVG",
+            "HS4_CELEB1_PVG",
+            "HS4_GUSTAVO_PVG",
+            "HS4_PAVEL_PVG",
+            "HS4_ELRUBIO_PVG",
+            "HS4_MIGUEL_PVG",
+            "HS4_ENTRYPILOT1_PVG",
+            "HS4_OLDRICHGUY_PVG",
+            "MALE_CLUB_R2PVG",
+            "MALE_GENERICCHEAPWORKER_LATINO_PVG",
+            "HS4_BODYGUARD1_PVG",
+            "IGUARD_PVG",
+            "AFFLUENT_SUBURBAN_MALE_01", //85FA12FF", //2247758591", //"2047208705
+            "AFFLUENT_SUBURBAN_MALE_02", //A4394F7D", //2755219325", //"1539747971
+            "A_M_M_AFRIAMER_01_BLACK_FULL_01", //43367BD1", //1127644113", //1127644113
+            "A_M_M_BEACH_01_BLACK_MINI_01", //D01013F6", //3490714614", //"804252682
+            "A_M_M_BEACH_01_LATINO_FULL_01", //26669A41", //644258369", //644258369
+            "A_M_M_BEACH_01_LATINO_MINI_01", //FB444157", //4215554391", //"79412905
+            "A_M_M_BEACH_01_WHITE_FULL_01", //30CB4589", //818627977", //818627977
+            "A_M_M_BEACH_01_WHITE_MINI_02", //A8E033BD", //2833265597", //"1461701699
+            "A_M_M_BEACH_02_BLACK_FULL_01", //BCACE696", //3165447830", //"1129519466
+            "A_M_M_BEACH_02_WHITE_FULL_01", //E8314D57", //3895545175", //"399422121
+            "A_M_M_BEACH_02_WHITE_MINI_01", //AE3CFC05", //2923232261", //"1371735035
+            "A_M_M_BEACH_02_WHITE_MINI_02", //4717ADD8", //1192734168", //1192734168
+            "A_M_M_BEVHILLS_01_BLACK_FULL_01", //457F9C3D", //1165990973", //1165990973
+            "A_M_M_BEVHILLS_01_BLACK_MINI_01", //29323F4A", //691158858", //691158858
+            "A_M_M_BevHills_01_WHITE_FULL_01", //DBCAE12A", //3687506218", //"607461078
+            "A_M_M_BEVHILLS_01_WHITE_MINI_01", //D19FFBCA", //3516922826", //"778044470
+            "A_M_M_BEVHILLS_02_BLACK_FULL_01", //5370D897", //1399904407", //1399904407
+            "A_M_M_BEVHILLS_02_BLACK_MINI_01", //25983C23", //630733859", //630733859
+            "A_M_M_BEVHILLS_02_WHITE_FULL_01", //6BB97FD6", //1807318998", //1807318998
+            "A_M_M_BEVHILLS_02_WHITE_MINI_01", //B509F09C", //3037327516", //"1257639780
+            "A_M_M_BUSINESS_01_BLACK_FULL_01", //4F3C06EB", //1329333995", //1329333995
+            "A_M_M_BUSINESS_01_BLACK_MINI_01", //9C4ACF39", //2622148409", //"1672818887
+            "A_M_M_BUSINESS_01_WHITE_FULL_01", //CE2B65BC", //3458950588", //"836016708
+            "A_M_M_BUSINESS_01_WHITE_MINI_01", //F3AD48DE", //4088219870", //"206747426
+            "A_M_M_EASTSA_01_LATINO_FULL_01", //BE01DD94", //3187793300", //"1107173996
+            "A_M_M_EASTSA_01_LATINO_MINI_01", //6BF8BF2C", //1811463980", //1811463980
+            "A_M_M_EASTSA_02_LATINO_FULL_01", //9CB34BA8", //2628996008", //"1665971288
+            "A_M_M_EASTSA_02_LATINO_MINI_01", //CDF2AD27", //3455233319", //"839733977
+            "A_M_M_FARMER_01_WHITE_MINI_01", //24689D1A", //610835738", //610835738
+            "A_M_M_FARMER_01_WHITE_MINI_02", //4ED1F1EC", //1322381804", //1322381804
+            "A_M_M_FARMER_01_WHITE_MINI_03", //F7F4C433", //4160013363", //"134953933
+            "A_M_M_FATLATIN_01_LATINO_FULL_01", //2F04A30B", //788833035", //788833035
+            "A_M_M_FATLATIN_01_LATINO_MINI_01", //4AED8689", //1257080457", //1257080457
+            "A_M_M_GENERICMALE_01_WHITE_MINI_01", //13EFDE7E", //334487166", //334487166
+            "A_M_M_GENERICMALE_01_WHITE_MINI_02", //221A7AD3", //572160723", //572160723
+            "A_M_M_GENERICMALE_01_WHITE_MINI_03", //5AA26BD6", //1520593878", //1520593878
+            "A_M_M_GENERICMALE_01_WHITE_MINI_04", //FD0AB0B4", //4245336244", //"49631052
+            "A_M_M_GENFAT_01_LATINO_FULL_01", //E53DAB11", //3846023953", //"448943343
+            "A_M_M_GENFAT_01_LATINO_MINI_01", //4C00FC14", //1275132948", //1275132948
+            "A_M_M_GOLFER_01_BLACK_FULL_01", //65B984D1", //1706656977", //1706656977
+            "A_M_M_GOLFER_01_WHITE_FULL_01", //57DD2744", //1474111300", //1474111300
+            "A_M_M_GOLFER_01_WHITE_MINI_01", //CA82D279", //3397571193", //"897396103
+            "A_M_M_HASJEW_01_WHITE_MINI_01", //31B413DD", //833885149", //833885149
+            "A_M_M_HILLBILLY_01_WHITE_MINI_01", //342FA137", //875536695", //875536695
+            "A_M_M_HILLBILLY_01_WHITE_MINI_02", //EEB2964E", //4004681294", //"290286002
+            "A_M_M_HILLBILLY_01_WHITE_MINI_03", //62B97E4A", //1656323658", //1656323658
+            "A_M_M_HILLBILLY_02_WHITE_MINI_01", //9E428A7D", //2655160957", //"1639806339
+            "A_M_M_HILLBILLY_02_WHITE_MINI_02", //ACECA7D1", //2901190609", //"1393776687
+            "A_M_M_HILLBILLY_02_WHITE_MINI_03", //7A9EC332", //2057225010", //2057225010
+            "A_M_M_HILLBILLY_02_WHITE_MINI_04", //14C3777D", //348354429", //348354429
+            "A_M_M_INDIAN_01_INDIAN_MINI_01", //0D92701D", //227700765", //227700765
+            "A_M_M_KTOWN_01_KOREAN_FULL_01", //CEB967A9", //3468257193", //"826710103
+            "A_M_M_KTOWN_01_KOREAN_MINI_01", //9D5568DD", //2639620317", //"1655346979
+            "A_M_M_MALIBU_01_BLACK_FULL_01", //704A0828", //1883899944", //1883899944
+            "A_M_M_MALIBU_01_LATINO_FULL_01", //C446CD11", //3292974353", //"1001992943
+            "A_M_M_MALIBU_01_LATINO_MINI_01", //23A05D0D", //597712141", //597712141
+            "A_M_M_MALIBU_01_WHITE_FULL_01", //ABCCBA7C", //2882321020", //"1412646276
+            "A_M_M_MALIBU_01_WHITE_MINI_01", //B71E2A9D", //3072207517", //"1222759779
+            "A_M_M_POLYNESIAN_01_POLYNESIAN_FULL_01", //68887F5A", //1753775962", //1753775962
+            "A_M_M_POLYNESIAN_01_POLYNESIAN_MINI_01", //CDB20C91", //3450997905", //"843969391
+            "A_M_M_SALTON_01_WHITE_FULL_01", //C4B4C301", //3300180737", //"994786559
+            "A_M_M_SALTON_02_WHITE_FULL_01", //AAD2C80E", //2865940494", //"1429026802
+            "A_M_M_SALTON_02_WHITE_MINI_01", //47C9EC4A", //1204415562", //1204415562
+            "A_M_M_SALTON_02_WHITE_MINI_02", //6D9837E6", //1838692326", //1838692326
+            "A_M_M_SKATER_01_BLACK_FULL_01", //256B9C01", //627809281", //627809281
+            "A_M_M_SKATER_01_WHITE_FULL_01", //011E5DF9", //18767353", //18767353
+            "A_M_M_SKATER_01_WHITE_MINI_01", //990DB923", //2567813411", //"1727153885
+            "A_M_M_SKIDROW_01_BLACK_FULL_01", //A9B4316E", //2847158638", //"1447808658
+            "A_M_M_SOCENLAT_01_LATINO_FULL_01", //06291B43", //103357251", //103357251
+            "A_M_M_SOCENLAT_01_LATINO_MINI_01", //E9A5A98F", //3919948175", //"375019121
+            "A_M_M_SOUCENT_01_BLACK_FULL_01", //15D5484D", //366299213", //366299213
+            "A_M_M_SOUCENT_02_BLACK_FULL_01", //465792F9", //1180144377", //1180144377
+            "A_M_M_SOUCENT_03_BLACK_FULL_01", //19DD2A37", //433924663", //433924663
+            "A_M_M_SOUCENT_04_BLACK_FULL_01", //3712F629", //923989545", //923989545
+            "A_M_M_SOUCENT_04_BLACK_MINI_01", //7BDBD27A", //2078003834", //2078003834
+            "A_M_M_STLAT_02_LATINO_FULL_01", //27BC1008", //666636296", //666636296
+            "A_M_M_TENNIS_01_BLACK_MINI_01", //74745D9B", //1953783195", //1953783195
+            "A_M_M_TENNIS_01_WHITE_MINI_01", //A7AD9A25", //2813172261", //"1481795035
+            "A_M_M_TOURIST_01_WHITE_MINI_01", //4B87E962", //1267198306", //1267198306
+            "A_M_M_TRAMPBEAC_01_BLACK_FULL_01", //126F2EEF", //309276399", //309276399
+            "A_M_M_TRAMP_01_BLACK_FULL_01", //EBC7775E", //3955717982", //"339249314
+            "A_M_M_TRAMP_01_BLACK_MINI_01", //7924B380", //2032448384", //2032448384
+            "A_M_M_TRANVEST_01_WHITE_MINI_01", //98921800", //2559711232", //"1735256064
+            "A_M_M_TRANVEST_02_LATINO_FULL_01", //659F48E4", //1704937700", //1704937700
+            "A_M_M_TRANVEST_02_LATINO_MINI_01", //F9BFF521", //4190106913", //"104860383
+            "A_M_O_BEACH_01_WHITE_FULL_01", //7FBF0F4A", //2143227722", //2143227722
+            "A_M_O_BEACH_01_WHITE_MINI_01", //B21E181B", //2988316699", //"1306650597
+            "A_M_O_GENSTREET_01_WHITE_FULL_01", //BB6B9D57", //3144392023", //"1150575273
+            "A_M_O_GENSTREET_01_WHITE_MINI_01", //10EE4E6A", //284053098", //284053098
+            "A_M_O_SALTON_01_WHITE_FULL_01", //5DBB7560", //1572566368", //1572566368
+            "A_M_O_SALTON_01_WHITE_MINI_01", //AEA39902", //2929957122", //"1365010174
+            "A_M_O_SOUCENT_01_BLACK_FULL_01", //8F45DF82", //2403721090", //"1891246206
+            "A_M_O_SOUCENT_02_BLACK_FULL_01", //C195B582", //3247814018", //"1047153278
+            "A_M_O_SOUCENT_03_BLACK_FULL_01", //9CE751AB", //2632405419", //"1662561877
+            "A_M_O_TRAMP_01_BLACK_FULL_01", //ABAB17E1", //2880116705", //"1414850591
+            "A_M_Y_BEACHVESP_01_CHINESE_FULL_01", //D5130E1F", //3574795807", //"720171489
+            "A_M_Y_BEACHVESP_01_CHINESE_MINI_01", //B0C6E699", //2965825177", //"1329142119
+            "A_M_Y_BEACHVESP_01_LATINO_MINI_01", //3F13D91C", //1058265372", //1058265372
+            "A_M_Y_BEACHVESP_01_WHITE_FULL_01", //3CE0CB56", //1021365078", //1021365078
+            "A_M_Y_BEACHVESP_01_WHITE_MINI_01", //AAD5FF3F", //2866151231", //"1428816065
+            "A_M_Y_BEACHVESP_02_WHITE_FULL_01", //4C19F4DE", //1276769502", //1276769502
+            "A_M_Y_BEACHVESP_02_WHITE_MINI_01", //7F7BB4CC", //2138813644", //2138813644
+            "A_M_Y_BEACH_01_CHINESE_FULL_01", //14611348", //341906248", //341906248
+            "A_M_Y_BEACH_01_CHINESE_MINI_01", //6A55B403", //1784001539", //1784001539
+            "A_M_Y_BEACH_01_WHITE_FULL_01", //1C2149A7", //471943591", //471943591
+            "A_M_Y_BEACH_01_WHITE_MINI_01", //912C1ADE", //2435586782", //"1859380514
+            "A_M_Y_BEACH_02_LATINO_FULL_01", //DBF1B32E", //3690050350", //"604916946
+            "A_M_Y_BEACH_02_WHITE_FULL_01", //0B3E6275", //188637813", //188637813
+            "A_M_Y_BEACH_03_BLACK_FULL_01", //18519A78", //408001144", //408001144
+            "A_M_Y_BEACH_03_BLACK_MINI_01", //5C219040", //1545703488", //1545703488
+            "A_M_Y_BEACH_03_WHITE_FULL_01", //187DBBE4", //410893284", //410893284
+            "A_M_Y_BEVHILLS_01_BLACK_FULL_01", //BB7823E2", //3145212898", //"1149754398
+            "A_M_Y_BevHills_01_WHITE_FULL_01", //FBF34319", //4227023641", //"67943655
+            "A_M_Y_BEVHILLS_01_WHITE_MINI_01", //7C5C68C5", //2086430917", //2086430917
+            "A_M_Y_BevHills_02_Black_FULL_01", //7FDB40A6", //2145075366", //2145075366
+            "A_M_Y_BEVHILLS_02_WHITE_FULL_01", //D4FC2A78", //3573295736", //"721671560
+            "A_M_Y_BEVHILLS_02_WHITE_MINI_01", //E24573FE", //3796202494", //"498764802
+            "A_M_Y_BUSICAS_01_WHITE_MINI_01", //AE353C51", //2922724433", //"1372242863
+            "A_M_Y_BUSINESS_01_BLACK_FULL_01", //14EA502A", //350900266", //350900266
+            "A_M_Y_BUSINESS_01_BLACK_MINI_01", //3EE0C0FD", //1054916861", //1054916861
+            "A_M_Y_BUSINESS_01_CHINESE_FULL_01", //2AF37A7A", //720599674", //720599674
+            "A_M_Y_BUSINESS_01_CHINESE_MINI_01", //BBE9D5F6", //3152664054", //"1142303242
+            "A_M_Y_BUSINESS_01_WHITE_FULL_01", //A3B29220", //2746389024", //"1548578272
+            "A_M_Y_BUSINESS_01_WHITE_MINI_02", //D5230A76", //3575843446", //"719123850
+            "A_M_Y_BUSINESS_02_BLACK_FULL_01", //455E1156", //1163792726", //1163792726
+            "A_M_Y_BUSINESS_02_BLACK_MINI_01", //728E84E0", //1921942752", //1921942752
+            "A_M_Y_BUSINESS_02_WHITE_FULL_01", //21BD5DCB", //566058443", //566058443
+            "A_M_Y_BUSINESS_02_WHITE_MINI_01", //DF04F10C", //3741643020", //"553324276
+            "A_M_Y_BUSINESS_02_WHITE_MINI_02", //D1405583", //3510654339", //"784312957
+            "A_M_Y_BUSINESS_03_BLACK_FULL_01", //63CAEDDD", //1674243549", //1674243549
+            "A_M_Y_BUSINESS_03_WHITE_MINI_01", //5161018C", //1365311884", //1365311884
+            "A_M_Y_DOWNTOWN_01_BLACK_FULL_01", //5C59E524", //1549395236", //1549395236
+            "A_M_Y_EASTSA_01_LATINO_FULL_01", //4D091B2B", //1292442411", //1292442411
+            "A_M_Y_EASTSA_01_LATINO_MINI_01", //90006FB0", //2415947696", //"1879019600
+            "A_M_Y_EASTSA_02_LATINO_FULL_01", //71EFEA69", //1911548521", //1911548521
+            "A_M_Y_EPSILON_01_BLACK_FULL_01", //3C737DA3", //1014201763", //1014201763
+            "A_M_Y_EPSILON_01_KOREAN_FULL_01", //C5901506", //3314554118", //"980413178
+            "A_M_Y_EPSILON_01_WHITE_FULL_01", //8B5E6BA1", //2338220961", //"1956746335
+            "A_M_Y_EPSILON_02_WHITE_MINI_01", //5929B31B", //1495905051", //1495905051
+            "A_M_Y_GAY_01_BLACK_FULL_01", //D66B6510", //3597362448", //"697604848
+            "A_M_Y_GAY_01_LATINO_FULL_01", //56EA4F8A", //1458196362", //1458196362
+            "A_M_Y_GAY_02_WHITE_MINI_01", //F31D141C", //4078769180", //"216198116
+            "A_M_Y_GENSTREET_01_CHINESE_FULL_01", //FBD60609", //4225107465", //"69859831
+            "A_M_Y_GENSTREET_01_CHINESE_MINI_01", //68B1C2E6", //1756480230", //1756480230
+            "A_M_Y_GenStreet_01_White_FULL_01", //CCC8E124", //3435716900", //"859250396
+            "A_M_Y_GENSTREET_01_WHITE_MINI_01", //0EA63482", //245773442", //245773442
+            "A_M_Y_GENSTREET_02_BLACK_FULL_01", //A05521B9", //2689933753", //"1605033543
+            "A_M_Y_GENSTREET_02_LATINO_FULL_01", //8A23EC00", //2317609984", //"1977357312
+            "A_M_Y_GENSTREET_02_LATINO_MINI_01", //71BDAFD1", //1908256721", //1908256721
+            "A_M_Y_GOLFER_01_WHITE_FULL_01", //DB7324F1", //3681756401", //"613210895
+            "A_M_Y_GOLFER_01_WHITE_MINI_01", //0F36AC80", //255241344", //255241344
+            "A_M_Y_HASJEW_01_WHITE_MINI_01", //C4E78448", //3303507016", //"991460280
+            "A_M_Y_HIPPY_01_WHITE_FULL_01", //72E9121E", //1927877150", //1927877150
+            "A_M_Y_HIPPY_01_WHITE_MINI_01", //A92E6392", //2838389650", //"1456577646
+            "A_M_Y_HIPSTER_01_BLACK_FULL_01", //4D67AAB4", //1298639540", //1298639540
+            "A_M_Y_HIPSTER_01_WHITE_FULL_01", //93896827", //2475255847", //"1819711449
+            "A_M_Y_HIPSTER_01_WHITE_MINI_01", //B4EB0EBF", //3035303615", //"1259663681
+            "A_M_Y_HIPSTER_02_WHITE_FULL_01", //742FB44D", //1949283405", //1949283405
+            "A_M_Y_HIPSTER_02_WHITE_MINI_01", //521933C3", //1377383363", //1377383363
+            "A_M_Y_HIPSTER_03_WHITE_FULL_01", //E694D959", //3868514649", //"426452647
+            "A_M_Y_HIPSTER_03_WHITE_MINI_01", //B22C563F", //2989250111", //"1305717185
+            "A_M_Y_KTOWN_01_KOREAN_FULL_01", //285D1B2F", //677190447", //677190447
+            "A_M_Y_KTOWN_01_KOREAN_MINI_01", //D97AF207", //3648713223", //"646254073
+            "A_M_Y_KTOWN_02_KOREAN_FULL_01", //7B3CEC0F", //2067590159", //2067590159
+            "A_M_Y_KTOWN_02_KOREAN_MINI_01", //77B4E675", //2008344181", //2008344181
+            "A_M_Y_LATINO_01_LATINO_MINI_01", //26ED66AF", //653092527", //653092527
+            "A_M_Y_LATINO_01_LATINO_MINI_02", //C2429D5B", //3259145563", //"1035821733
+            "A_M_Y_MEXTHUG_01_LATINO_FULL_01", //5756D257", //1465307735", //1465307735
+            "A_M_Y_MUSCLBEAC_01_BLACK_FULL_01", //C1B61E52", //3249938002", //"1045029294
+            "A_M_Y_MUSCLBEAC_01_WHITE_FULL_01", //0225E2F9", //36037369", //36037369
+            "A_M_Y_MUSCLBEAC_01_WHITE_MINI_01", //977DC3C1", //2541601729", //"1753365567
+            "A_M_Y_MUSCLBEAC_02_CHINESE_FULL_01", //A6F52D1E", //2801085726", //"1493881570
+            "A_M_Y_MUSCLBEAC_02_LATINO_FULL_01", //67CCA113", //1741463827", //1741463827
+            "A_M_Y_POLYNESIAN_01_POLYNESIAN_FULL_01", //121DA55B", //303932763", //303932763
+            "A_M_Y_RACER_01_WHITE_MINI_01", //F64541B5", //4131733941", //"163233355
+            "A_M_Y_ROLLERCOASTER_01_MINI_01", //7DB0EDFB", //2108747259", //2108747259
+            "A_M_Y_ROLLERCOASTER_01_MINI_02", //678FC1B9", //1737474489", //1737474489
+            "A_M_Y_ROLLERCOASTER_01_MINI_03", //A3F33A7F", //2750626431", //"1544340865
+            "A_M_Y_ROLLERCOASTER_01_MINI_04", //962B9EF0", //2519441136", //"1775526160
+            "A_M_Y_RUNNER_01_WHITE_FULL_01", //F85796B7", //4166489783", //"128477513
+            "A_M_Y_RUNNER_01_WHITE_MINI_01", //6816D078", //1746325624", //1746325624
+            "A_M_Y_SALTON_01_WHITE_MINI_01", //488C6273", //1217159795", //1217159795
+            "A_M_Y_SALTON_01_WHITE_MINI_02", //5E6F8E25", //1584369189", //1584369189
+            "A_M_Y_SKATER_01_WHITE_FULL_01", //1E6F76CB", //510621387", //510621387
+            "A_M_Y_SKATER_01_WHITE_MINI_01", //41386857", //1094215767", //1094215767
+            "A_M_Y_SKATER_02_BLACK_FULL_01", //46B9D99F", //1186584991", //1186584991
+            "A_M_Y_SOUCENT_01_BLACK_FULL_01", //7ADB7C56", //2061204566", //2061204566
+            "A_M_Y_SOUCENT_02_BLACK_FULL_01", //BA7414D7", //3128169687", //"1166797609
+            "A_M_Y_SOUCENT_03_BLACK_FULL_01", //997A83C0", //2574943168", //"1720024128
+            "A_M_Y_SOUCENT_04_BLACK_FULL_01", //97BA1740", //2545555264", //"1749412032
+            "A_M_Y_SOUCENT_04_BLACK_MINI_01", //E3DE23A6", //3822986150", //"471981146
+            "A_M_Y_STBLA_01_BLACK_FULL_01", //80372D5A", //2151099738", //"2143867558
+            "A_M_Y_STBLA_02_BLACK_FULL_01", //B77F38D5", //3078568149", //"1216399147
+            "A_M_Y_STLAT_01_LATINO_FULL_01", //AF739934", //2943588660", //"1351378636
+            "A_M_Y_STLAT_01_LATINO_MINI_01", //CDC7408D", //3452387469", //"842579827
+            "A_M_Y_STWHI_01_WHITE_FULL_01", //51843C65", //1367620709", //1367620709
+            "A_M_Y_STWHI_01_WHITE_MINI_01", //283E7635", //675182133", //675182133
+            "A_M_Y_STWHI_02_WHITE_FULL_01", //32F459E7", //854874599", //854874599
+            "A_M_Y_STWHI_02_WHITE_MINI_01", //D94A1B14", //3645512468", //"649454828
+            "A_M_Y_SUNBATHE_01_BLACK_FULL_01", //523A66C3", //1379559107", //1379559107
+            "A_M_Y_SUNBATHE_01_WHITE_FULL_01", //0CEA2526", //216671526", //216671526
+            "A_M_Y_SUNBATHE_01_WHITE_MINI_01", //C31ADD04", //3273317636", //"1021649660
+            "A_M_Y_TRIATHLON_01_MINI_01", //55B488C4", //1437894852", //1437894852
+            "A_M_Y_TRIATHLON_01_MINI_02", //87746C43", //2272554051", //"2022413245
+            "A_M_Y_TRIATHLON_01_MINI_03", //BB49D3ED", //3142177773", //"1152789523
+            "A_M_Y_TRIATHLON_01_MINI_04", //ED26B7A6", //3978737574", //"316229722
+            "A_M_Y_VINEWOOD_01_BLACK_FULL_01", //8567F85C", //2238183516", //"2056783780
+            "A_M_Y_VINEWOOD_01_BLACK_MINI_01", //0C746F67", //208957287", //208957287
+            "A_M_Y_VINEWOOD_02_WHITE_FULL_01", //0A626D28", //174222632", //174222632
+            "A_M_Y_VINEWOOD_02_WHITE_MINI_01", //C370059E", //3278898590", //"1016068706
+            "A_M_Y_Vinewood_03_Latino_FULL_01", //F450D2AC", //4098937516", //"196029780
+            "A_M_Y_VINEWOOD_03_LATINO_MINI_01", //9FDD31FF", //2682073599", //"1612893697
+            "A_M_Y_VINEWOOD_03_WHITE_FULL_01", //852D3A8F", //2234333839", //"2060633457
+            "A_M_Y_VINEWOOD_03_WHITE_MINI_01", //3A84F91E", //981793054", //981793054
+            "A_M_Y_VINEWOOD_04_WHITE_FULL_01", //77B21017", //2008158231", //2008158231
+            "A_M_Y_VINEWOOD_04_WHITE_MINI_01", //99DA0ADA", //2581203674", //"1713763622
+            "G_M_M_ARMBOSS_01_WHITE_ARMENIAN_MINI_01", //F840ABA3", //4164987811", //"129979485
+            "G_M_M_ARMBOSS_01_WHITE_ARMENIAN_MINI_02", //DD7F7641", //3716118081", //"578849215
+            "G_M_M_ARMLIEUT_01_WHITE_ARMENIAN_MINI_01", //9B88EB80", //2609441664", //"1685525632
+            "G_M_M_ARMLIEUT_01_WHITE_ARMENIAN_MINI_02", //8BCF4C0D", //2345618445", //"1949348851
+            "G_M_M_CHIBOSS_01_CHINESE_MINI_01", //FD2B8068", //4247486568", //"47480728
+            "G_M_M_CHIBOSS_01_CHINESE_MINI_02", //6EF5E41B", //1861608475", //1861608475
+            "G_M_M_CHIGOON_01_CHINESE_MINI_01", //E8CB59DD", //3905640925", //"389326371
+            "G_M_M_CHIGOON_01_CHINESE_MINI_02", //F8FCFA40", //4177328704", //"117638592
+            "G_M_M_CHIGOON_02_CHINESE_MINI_01", //93D6B240", //2480321088", //"1814646208
+            "G_M_M_CHIGOON_02_CHINESE_MINI_02", //2138CD06", //557370630", //557370630
+            "G_M_M_KORBOSS_01_KOREAN_MINI_01", //049ADD23", //77258019", //77258019
+            "G_M_M_KORBOSS_01_KOREAN_MINI_02", //9DB98F56", //2646183766", //"1648783530
+            "G_M_M_MEXBOSS_01_LATINO_MINI_01", //121AC997", //303745431", //303745431
+            "G_M_M_MEXBOSS_01_LATINO_MINI_02", //A86BF63B", //2825647675", //"1469319621
+            "G_M_M_MEXBOSS_02_LATINO_MINI_01", //FCB3B4DF", //4239635679", //"55331617
+            "G_M_M_MEXBOSS_02_LATINO_MINI_02", //59FC6F6F", //1509715823", //1509715823
+            "G_M_M_X17_RSO_01", //7B4E71E9", //2068738537", //2068738537
+            "G_M_M_X17_RSO_02", //0518057E", //85460350", //85460350
+            "G_M_M_X17_RSO_03", //16232794", //371402644", //371402644
+            "G_M_M_X17_RSO_04", //09AF0EA8", //162467496", //162467496
+            "G_M_Y_ARMGOON_02_WHITE_ARMENIAN_MINI_01", //F98339EA", //4186126826", //"108840470
+            "G_M_Y_ARMGOON_02_WHITE_ARMENIAN_MINI_02", //91C4EA6B", //2445601387", //"1849365909
+            "G_M_Y_BALLAEAST_01_BLACK_FULL_01", //9CFAAA5C", //2633673308", //"1661293988
+            "G_M_Y_BALLAEAST_01_BLACK_FULL_02", //8F2D0EC1", //2402094785", //"1892872511
+            "G_M_Y_BALLAEAST_01_BLACK_MINI_01", //2C0FCD9F", //739233183", //739233183
+            "G_M_Y_BALLAEAST_01_BLACK_MINI_02", //D5BE20F9", //3586007289", //"708960007
+            "G_M_Y_BALLAEAST_01_BLACK_MINI_03", //C77B8474", //3346760820", //"948206476
+            "G_M_Y_BALLAORIG_01_BLACK_FULL_01", //F0D6A527", //4040598823", //"254368473
+            "G_M_Y_BALLAORIG_01_BLACK_FULL_02", //DF4101FC", //3745579516", //"549387780
+            "G_M_Y_BALLAORIG_01_BLACK_MINI_01", //719C62A9", //1906074281", //1906074281
+            "G_M_Y_BALLAORIG_01_BLACK_MINI_02", //AD1BD9A7", //2904283559", //"1390683737
+            "G_M_Y_BALLAORIG_01_BLACK_MINI_03", //925BA427", //2455479335", //"1839487961
+            "G_M_Y_BALLASOUT_01_BLACK_FULL_01", //60B320B0", //1622352048", //1622352048
+            "G_M_Y_BALLASOUT_01_BLACK_FULL_02", //2A5033EB", //709899243", //709899243
+            "G_M_Y_BALLASOUT_01_BLACK_MINI_01", //6ED150A0", //1859211424", //1859211424
+            "G_M_Y_BALLASOUT_01_BLACK_MINI_02", //A00D3317", //2685219607", //"1609747689
+            "G_M_Y_BALLASOUT_01_BLACK_MINI_03", //BE746FE5", //3195301861", //"1099665435
+            "G_M_Y_FAMCA_01_BLACK_FULL_01", //3F299AE9", //1059691241", //1059691241
+            "G_M_Y_FAMCA_01_BLACK_FULL_02", //51573F44", //1364672324", //1364672324
+            "G_M_Y_FAMCA_01_BLACK_MINI_01", //D991FA9F", //3650222751", //"644744545
+            "G_M_Y_FAMCA_01_BLACK_MINI_02", //6B6D9E58", //1802346072", //1802346072
+            "G_M_Y_FAMCA_01_BLACK_MINI_03", //0658D3F8", //106484728", //106484728
+            "G_M_Y_FAMDNF_01_BLACK_FULL_01", //5F8F7FB9", //1603239865", //1603239865
+            "G_M_Y_FAMDNF_01_BLACK_FULL_02", //B271257B", //2993759611", //"1301207685
+            "G_M_Y_FAMDNF_01_BLACK_MINI_01", //BA8A1C11", //3129613329", //"1165353967
+            "G_M_Y_FAMDNF_01_BLACK_MINI_02", //28A77842", //682063938", //682063938
+            "G_M_Y_FAMDNF_01_BLACK_MINI_03", //D2384B6D", //3526904685", //"768062611
+            "G_M_Y_FAMFOR_01_BLACK_FULL_01", //4D505739", //1297110841", //1297110841
+            "G_M_Y_FAMFOR_01_BLACK_FULL_02", //7FEB3C3E", //2146122814", //2146122814
+            "G_M_Y_FAMFOR_01_BLACK_MINI_01", //FA83BCD1", //4202937553", //"92029743
+            "G_M_Y_FAMFOR_01_BLACK_MINI_02", //4721560B", //1193367051", //1193367051
+            "G_M_Y_FAMFOR_01_BLACK_MINI_03", //56CEF566", //1456403814", //1456403814
+            "G_M_Y_KOREAN_01_KOREAN_MINI_01", //3975B100", //964014336", //964014336
+            "G_M_Y_KOREAN_01_KOREAN_MINI_02", //0F585CC6", //257449158", //257449158
+            "G_M_Y_KOREAN_02_KOREAN_MINI_01", //E1E0349F", //3789567135", //"505400161
+            "G_M_Y_KOREAN_02_KOREAN_MINI_02", //D41A1913", //3558480147", //"736487149
+            "G_M_Y_KORLIEUT_01_KOREAN_MINI_01", //6B9A636E", //1805280110", //1805280110
+            "G_M_Y_KORLIEUT_01_KOREAN_MINI_02", //2116CE64", //555142756", //555142756
+            "G_M_Y_LATINO01_LATINO_MINI_02", //215F60FC", //559898876", //559898876
+            "G_M_Y_LOST_01_BLACK_FULL_01", //BD922FD5", //3180474325", //"1114492971
+            "G_M_Y_LOST_01_BLACK_FULL_02", //06D7C263", //114803299", //114803299
+            "G_M_Y_LOST_01_BLACK_MINI_01", //D03903FA", //3493397498", //"801569798
+            "G_M_Y_LOST_01_BLACK_MINI_02", //0154E631", //22341169", //22341169
+            "G_M_Y_LOST_01_BLACK_MINI_03", //2ADE3943", //719206723", //719206723
+            "G_M_Y_LOST_01_WHITE_FULL_01", //A29BB240", //2728112704", //"1566854592
+            "G_M_Y_LOST_01_WHITE_MINI_01", //0477B521", //74954017", //74954017
+            "G_M_Y_LOST_01_WHITE_MINI_02", //D6005837", //3590346807", //"704620489
+            "G_M_Y_LOST_02_LATINO_FULL_01", //93D0C3D0", //2479932368", //"1815034928
+            "G_M_Y_LOST_02_LATINO_FULL_02", //DD9DD769", //3718109033", //"576858263
+            "G_M_Y_LOST_02_LATINO_MINI_01", //B4A96868", //3031001192", //"1263966104
+            "G_M_Y_LOST_02_LATINO_MINI_02", //C34E85B2", //3276703154", //"1018264142
+            "G_M_Y_LOST_02_LATINO_MINI_03", //D1C5229F", //3519357599", //"775609697
+            "G_M_Y_LOST_02_WHITE_FULL_01", //552D4F23", //1429032739", //1429032739
+            "G_M_Y_LOST_02_WHITE_MINI_01", //AC382220", //2889359904", //"1405607392
+            "G_M_Y_LOST_02_WHITE_MINI_02", //302D2A08", //808266248", //808266248
+            "G_M_Y_LOST_03_WHITE_FULL_01", //269A2029", //647634985", //647634985
+            "G_M_Y_LOST_03_WHITE_MINI_02", //19793B32", //427375410", //427375410
+            "G_M_Y_LOST_03_WHITE_MINI_03", //6C55606D", //1817534573", //1817534573
+            "G_M_Y_MEXGOON_01_LATINO_MINI_01", //57C1000E", //1472266254", //1472266254
+            "G_M_Y_MEXGOON_01_LATINO_MINI_02", //4F90EFAA", //1334898602", //1334898602
+            "G_M_Y_MEXGOON_02_LATINO_MINI_01", //B00D3337", //2953655095", //"1341312201
+            "G_M_Y_MEXGOON_02_LATINO_MINI_02", //6A4227A2", //1782720418", //1782720418
+            "G_M_Y_MEXGOON_03_LATINO_MINI_01", //36640278", //912523896", //912523896
+            "G_M_Y_MEXGOON_03_LATINO_MINI_02", //45EBA187", //1173070215", //1173070215
+            "G_M_Y_POLOGOON_01_LATINO_MINI_01", //D1389B20", //3510147872", //"784819424
+            "G_M_Y_POLOGOON_01_LATINO_MINI_02", //DBFFB0AE", //3690967214", //"604000082
+            "G_M_Y_SALVABOSS_01_SALVADORIAN_MINI_01", //083FF1D1", //138408401", //138408401
+            "G_M_Y_SALVABOSS_01_SALVADORIAN_MINI_02", //FB1D578C", //4213004172", //"81963124
+            "G_M_Y_SALVAGOON_01_SALVADORIAN_MINI_01", //0E2D970B", //237868811", //237868811
+            "G_M_Y_SALVAGOON_01_SALVADORIAN_MINI_02", //C9228CF6", //3374484726", //"920482570
+            "G_M_Y_SALVAGOON_01_SALVADORIAN_MINI_03", //D6DD286B", //3604818027", //"690149269
+            "G_M_Y_SALVAGOON_02_SALVADORIAN_MINI_01", //38FB557B", //955995515", //955995515
+            "G_M_Y_SalvaGoon_02_SALVADORIAN_MINI_02", //2B1E39C1", //723401153", //723401153
+            "G_M_Y_SALVAGOON_02_SALVADORIAN_MINI_03", //1C639C4C", //476290124", //476290124
+            "G_M_Y_SALVAGOON_03_SALVADORIAN_MINI_01", //B2F150B6", //3002159286", //"1292808010
+            "G_M_Y_SALVAGOON_03_SALVADORIAN_MINI_02", //50C88C62", //1355320418", //1355320418
+            "G_M_Y_SalvaGoon_03_SALVADORIAN_MINI_03", //61092CDF", //1627991263", //1627991263
+            "G_M_Y_STREETPUNK02_BLACK_MINI_04", //5E2969AE", //1579772334", //1579772334
+            "G_M_Y_STREETPUNK_01_BLACK_MINI_01", //A5364DA4", //2771799460", //"1523167836
+            "G_M_Y_STREETPUNK_01_BLACK_MINI_02", //7AD978EB", //2061072619", //2061072619
+            "G_M_Y_STREETPUNK_01_BLACK_MINI_03", //4A3417A1", //1244927905", //1244927905
+            "G_M_Y_STREETPUNK_02_BLACK_MINI_01", //4C3FB5C7", //1279243719", //1279243719
+            "G_M_Y_STREETPUNK_02_BLACK_MINI_02", //658FE867", //1703929959", //1703929959
+            "G_M_Y_STREETPUNK_02_BLACK_MINI_03", //58794E3A", //1484344890", //1484344890
+            "G_M_Y_X17_AGUARD_01", //0FC95A0C", //264854028", //264854028
+            "G_M_Y_X17_AGUARD_02", //1AEC7052", //451702866", //451702866
+            "G_M_Y_X17_AGUARD_03", //ED3E94F7", //3980301559", //"314665737
+            "G_M_Y_X17_AGUARD_04", //71369CE9", //1899404521", //1899404521
+            "G_M_Y_X17_AGUARD_05", //7B64B145", //2070196549", //2070196549
+            "CONSTRUCTION_SITE_MALE_01", //C285BFCA", //3263545290", //"1031422006
+            "CONSTRUCTION_SITE_MALE_02", //3572A596", //896705942", //896705942
+            "CONSTRUCTION_SITE_MALE_03", //82A1C003", //2191638531", //"2103328765
+            "CONSTRUCTION_SITE_MALE_04", //93CE625C", //2479776348", //"1815190948
+            "BAILBOND1JUMPER", //6909D3CC", //1762251724", //1762251724
+            "BAILBOND2JUMPER", //8C257BBD", //2351266749", //"1943700547
+            "BAILBOND3JUMPER", //2E2EF1F8", //774828536", //774828536
+            "BAILBOND4JUMPER", //643A0559", //1681524057", //1681524057
+            "BARRY", //A9058E54", //2835713620", //"1459253676
+            "BARRY_01_ALIEN_A", //82BA2086", //2193236102", //"2101731194
+            "BARRY_01_ALIEN_B", //7494843B", //1955890235", //1955890235
+            "BARRY_01_ALIEN_C", //F06D7BEB", //4033706987", //"261260309
+            "BARRY_02_CLOWN_A", //7929F21D", //2032792093", //2032792093
+            "BARRY_02_CLOWN_B", //66F4CDB3", //1727319475", //1727319475
+            "BARRY_02_CLOWN_C", //9E16BBF6", //2652290038", //"1642677258
+            "HOSTAGEBF1", //D5D22CA5", //3587320997", //"707646299
+            "HOSTAGEBM1", //E8CB2CFF", //3905629439", //"389337857
+            "HOSTAGEWF1", //8632FA43", //2251487811", //"2043479485
+            "HOSTAGEWF2", //99952107", //2576687367", //"1718279929
+            "HOSTAGEWM1", //5779B631", //1467594289", //1467594289
+            "HOSTAGEWM2", //9F53C5E4", //2673067492", //"1621899804
+            "FRANKLIN_1_NORMAL", //D603B047", //3590565959", //"704401337
+            "FRANKLIN_2_NORMAL", //9F8D1B67", //2676824935", //"1618142361
+            "FRANKLIN_3_NORMAL", //FA7C388C", //4202444940", //"92522356
+            "FRANKLIN_ANGRY", //D227A0A9", //3525812393", //"769154903
+            "FRANKLIN_DRUNK", //E6EFD5C5", //3874477509", //"420489787
+            "FRANKLIN_NORMAL", //64CCE782", //1691150210", //1691150210
+            "MICHAEL_1_NORMAL", //78BECF39", //2025770809", //2025770809
+            "MICHAEL_2_NORMAL", //568D3564", //1452094820", //1452094820
+            "MICHAEL_3_NORMAL", //FBC7F7B9", //4224186297", //"70780999
+            "MICHAEL_ANGRY", //973C5F18", //2537316120", //"1757651176
+            "MICHAEL_DRUNK", //DEBBCFA7", //3736850343", //"558116953
+            "MICHAEL_NORMAL", //C46897D1", //3295188945", //"999778351
+            "MP_M_SHOPKEEP_01_CHINESE_MINI_01", //D36AF9E4", //3547003364", //"747963932
+            "MP_M_SHOPKEEP_01_LATINO_MINI_01", //0592C339", //93504313", //93504313
+            "MP_M_SHOPKEEP_01_PAKISTANI_MINI_01", //25364924", //624314660", //624314660
+            "PAIN_FRANKLIN_01", //2003420C", //537084428", //537084428
+            "PAIN_FRANKLIN_02", //EBF4D9F0", //3958692336", //"336274960
+            "PAIN_FRANKLIN_03", //1DA7BD55", //497532245", //497532245
+            "PAIN_FRANKLIN_04", //C5B08D68", //3316682088", //"978285208
+            "PAIN_MALE_MIXED_01", //0A14C671", //169133681", //169133681
+            "PAIN_MALE_MIXED_02", //A251F75D", //2723280733", //"1571686563
+            "PAIN_MALE_MIXED_03", //700712C8", //1879511752", //1879511752
+            "PAIN_MALE_MIXED_04", //86A03FFA", //2258649082", //"2036318214
+            "PAIN_MALE_MIXED_05", //5124548F", //1361335439", //1361335439
+            "PAIN_MALE_MIXED_06", //B25B96FC", //2992346876", //"1302620420
+            "PAIN_MALE_MIXED_07", //BC96AB72", //3163990898", //"1130976398
+            "PAIN_MALE_MIXED_08", //8DA5CD91", //2376453521", //"1918513775
+            "PAIN_MALE_MIXED_09", //97EBE21D", //2548818461", //"1746148835
+            "PAIN_MALE_NORMAL_01", //E3B792BC", //3820458684", //"474508612
+            "PAIN_MALE_NORMAL_02", //145573EB", //341144555", //341144555
+            "PAIN_MALE_NORMAL_03", //E296906E", //3801518190", //"493449106
+            "PAIN_MALE_NORMAL_04", //B7C53ACC", //3083156172", //"1211811124
+            "PAIN_MALE_NORMAL_05", //09F45F29", //167010089", //167010089
+            "PAIN_MALE_NORMAL_06", //CB49E1D5", //3410616789", //"884350507
+            "PAIN_MALE_TOUGH_01", //ACC806D0", //2898790096", //"1396177200
+            "PAIN_MALE_TOUGH_02", //DB33E3A7", //3677610919", //"617356377
+            "PAIN_MALE_TOUGH_03", //90FF4F3B", //2432651067", //"1862316229
+            "PAIN_MALE_TOUGH_04", //BF202B80", //3206556544", //"1088410752
+            "PAIN_MALE_TOUGH_05", //F397946E", //4086797422", //"208169874
+            "PAIN_MALE_WEAK_01", //22C36EE8", //583233256", //583233256
+            "PAIN_MALE_WEAK_02", //B05B0A1D", //2958756381", //"1336210915
+            "PAIN_MALE_WEAK_03", //D62355AD", //3592639917", //"702327379
+            "PAIN_MALE_WEAK_04", //E61CF5A0", //3860657568", //"434309728
+            "PAIN_MICHAEL_01", //E657BAA9", //3864509097", //"430458199
+            "PAIN_MICHAEL_02", //D8151E24", //3625262628", //"669704668
+            "PAIN_MICHAEL_03", //3436D666", //876009062", //876009062
+            "PAIN_MICHAEL_04", //66EB3BD2", //1726692306", //1726692306
+            "PAIN_PLAYER_TEST_01", //F38B2CC2", //4085984450", //"208982846
+            "PAIN_PLAYER_TEST_02", //E161886F", //3781265519", //"513701777
+            "PAIN_PLAYER_TEST_03", //576C746B", //1466725483", //1466725483
+            "PAIN_TEST_01", //F5655828", //4117059624", //"177907672
+            "PAIN_TEST_02", //FC1C6596", //4229719446", //"65247850
+            "PAIN_TEST_03", //172E9BA2", //388930466", //388930466
+            "PAIN_TREVOR_01", //21261ADB", //556145371", //556145371
+            "PAIN_TREVOR_02", //32DCBE48", //853327432", //853327432
+            "PAIN_TREVOR_03", //3DAED3EC", //1034867692", //1034867692
+            "PAIN_TREVOR_04", //4F427713", //1329755923", //1329755923
+            "S_M_M_AMMUCOUNTRY_01_WHITE_01", //14AE106F", //346951791", //346951791
+            "S_M_M_AMMUCOUNTRY_WHITE_MINI_01", //B6A5CF41", //3064319809", //"1230647487
+            "S_M_M_AUTOSHOP_01_WHITE_01", //B97E410A", //3112059146", //"1182908150
+            "S_M_M_BOUNCER_01_BLACK_FULL_01", //5CF368B8", //1559455928", //1559455928
+            "S_M_M_BOUNCER_01_LATINO_FULL_01", //57B91BD3", //1471749075", //1471749075
+            "S_M_M_BOUNCER_LATINO_FULL_01", //66E1CE62", //1726074466", //1726074466
+            "S_M_M_CIASEC_01_BLACK_MINI_01", //797CD9E6", //2038225382", //2038225382
+            "S_M_M_CIASEC_01_BLACK_MINI_02", //F6AED44C", //4138652748", //"156314548
+            "S_M_M_CIASEC_01_WHITE_MINI_01", //7DB88D9D", //2109246877", //2109246877
+            "S_M_M_CIASEC_01_WHITE_MINI_02", //AF77F11B", //2943873307", //"1351093989
+            "S_M_M_FIBOFFICE_01_BLACK_MINI_01", //DEA5CD64", //3735407972", //"559559324
+            "S_M_M_FIBOFFICE_01_BLACK_MINI_02", //F0C0F19A", //4039176602", //"255790694
+            "S_M_M_FIBOFFICE_01_LATINO_MINI_01", //655117C7", //1699813319", //1699813319
+            "S_M_M_FIBOFFICE_01_LATINO_MINI_02", //938DF440", //2475553856", //"1819413440
+            "S_M_M_FIBOFFICE_01_WHITE_MINI_01", //0AC9249C", //180954268", //180954268
+            "S_M_M_FIBOFFICE_01_WHITE_MINI_02", //FE040B12", //4261677842", //"33289454
+            "S_M_M_GENERICCHEAPWORKER_01_LATINO_MINI_01", //90328A79", //2419231353", //"1875735943
+            "S_M_M_GENERICCHEAPWORKER_01_LATINO_MINI_02", //D9249C5C", //3643055196", //"651912100
+            "S_M_M_GENERICCHEAPWORKER_01_LATINO_MINI_03", //EBDDC1CE", //3957178830", //"337788466
+            "S_M_M_GENERICCHEAPWORKER_01_LATINO_MINI_04", //635D30CB", //1667051723", //1667051723
+            "S_M_M_GENERICMARINE_01_LATINO_MINI_01", //24A78E34", //614960692", //614960692
+            "S_M_M_GENERICMARINE_01_LATINO_MINI_02", //8F6E63C0", //2406376384", //"1888590912
+            "S_M_M_GENERICMECHANIC_01_BLACK_MINI_01", //229CDFDF", //580706271", //580706271
+            "S_M_M_GENERICMECHANIC_01_BLACK_MINI_02", //09392D18", //154742040", //154742040
+            "S_M_M_GENERICPOSTWORKER_01_BLACK_MINI_01", //10C0CBFD", //281070589", //281070589
+            "S_M_M_GENERICPOSTWORKER_01_BLACK_MINI_02", //FC16A2A9", //4229341865", //"65625431
+            "S_M_M_GENERICPOSTWORKER_01_WHITE_MINI_01", //D2C75726", //3536279334", //"758687962
+            "S_M_M_GENERICPOSTWORKER_01_WHITE_MINI_02", //DC906AB8", //3700452024", //"594515272
+            "S_M_M_GENERICSECURITY_01_BLACK_MINI_01", //3D1D46D3", //1025328851", //1025328851
+            "S_M_M_GENERICSECURITY_01_BLACK_MINI_02", //565A794D", //1448769869", //1448769869
+            "S_M_M_GENERICSECURITY_01_BLACK_MINI_03", //9162EF15", //2439180053", //"1855787243
+            "S_M_M_GENERICSECURITY_01_LATINO_MINI_01", //B5910C1D", //3046181917", //"1248785379
+            "S_M_M_GENERICSECURITY_01_LATINO_MINI_02", //97D1D09F", //2547110047", //"1747857249
+            "S_M_M_GENERICSECURITY_01_WHITE_MINI_01", //5D4BE0A9", //1565253801", //1565253801
+            "S_M_M_GENERICSECURITY_01_WHITE_MINI_02", //4FE145D4", //1340163540", //1340163540
+            "S_M_M_GENERICSECURITY_01_WHITE_MINI_03", //66DDF3D9", //1725821913", //1725821913
+            "S_M_M_HAIRDRESSER_01_BLACK_MINI_01", //594BCB86", //1498139526", //1498139526
+            "S_M_M_HAIRDRESS_01_BLACK_01", //7E2CBE66", //2116861542", //2116861542
+            "S_M_M_PARAMEDIC_01_BLACK_MINI_01", //1DE649B3", //501631411", //501631411
+            "S_M_M_PARAMEDIC_01_LATINO_MINI_01", //43261273", //1126568563", //1126568563
+            "S_M_M_PARAMEDIC_01_WHITE_MINI_01", //54925FD6", //1418878934", //1418878934
+            "S_M_M_PILOT_01_BLACK_FULL_01", //3DAC41B0", //1034699184", //1034699184
+            "S_M_M_PILOT_01_BLACK_FULL_02", //4F73E53F", //1332995391", //1332995391
+            "S_M_M_PILOT_01_WHITE_FULL_01", //BC0F504A", //3155120202", //"1139847094
+            "S_M_M_PILOT_01_WHITE_FULL_02", //A9A32B72", //2846042994", //"1448924302
+            "S_M_M_TRUCKER_01_BLACK_FULL_01", //D940A3BC", //3644892092", //"650075204
+            "S_M_M_TRUCKER_01_WHITE_FULL_01", //3CA3269A", //1017325210", //1017325210
+            "S_M_M_TRUCKER_01_WHITE_FULL_02", //0B4743DF", //189219807", //189219807
+            "S_M_Y_AIRWORKER_BLACK_FULL_01", //90ECCFDC", //2431438812", //"1863528484
+            "S_M_Y_AIRWORKER_BLACK_FULL_02", //9EAF6B61", //2662296417", //"1632670879
+            "S_M_Y_AIRWORKER_LATINO_FULL_01", //0D981AB3", //228072115", //228072115
+            "S_M_Y_AIRWORKER_LATINO_FULL_02", //234F4621", //592397857", //592397857
+            "S_M_Y_AMMUCITY_01_WHITE_01", //5C7526F0", //1551181552", //1551181552
+            "S_M_Y_AMMUCITY_01_WHITE_MINI_01", //20C18390", //549553040", //549553040
+            "S_M_Y_BAYWATCH_01_BLACK_FULL_01", //CD79387C", //3447273596", //"847693700
+            "S_M_Y_BAYWATCH_01_BLACK_FULL_02", //E32263CE", //3810681806", //"484285490
+            "S_M_Y_BAYWATCH_01_WHITE_FULL_01", //BAB6D724", //3132544804", //"1162422492
+            "S_M_Y_BAYWATCH_01_WHITE_FULL_02", //1EA89F06", //514367238", //514367238
+            "S_M_Y_BLACKOPS_01_BLACK_MINI_01", //BBE7E188", //3152535944", //"1142431352
+            "S_M_Y_BLACKOPS_01_BLACK_MINI_02", //DDB7A52B", //3719800107", //"575167189
+            "S_M_Y_BLACKOPS_01_WHITE_MINI_01", //65B98207", //1706656263", //1706656263
+            "S_M_Y_BLACKOPS_01_WHITE_MINI_02", //D7FFE692", //3623872146", //"671095150
+            "S_M_Y_BLACKOPS_02_LATINO_MINI_01", //4214AE9E", //1108651678", //1108651678
+            "S_M_Y_BLACKOPS_02_LATINO_MINI_02", //13E2520A", //333599242", //333599242
+            "S_M_Y_BLACKOPS_02_WHITE_MINI_01", //C3A6E830", //3282495536", //"1012471760
+            "S_M_Y_BUSBOY_01_WHITE_MINI_01", //C847EAA9", //3360156329", //"934810967
+            "S_M_Y_COP_01_BLACK_FULL_01", //DD72FE87", //3715300999", //"579666297
+            "S_M_Y_COP_01_BLACK_FULL_02", //C7B3D309", //3350450953", //"944516343
+            "S_M_Y_COP_01_BLACK_MINI_01", //EF2409AE", //4012116398", //"282850898
+            "S_M_Y_COP_01_BLACK_MINI_02", //00CDAD01", //13479169", //13479169
+            "S_M_Y_COP_01_BLACK_MINI_03", //4A804065", //1249919077", //1249919077
+            "S_M_Y_COP_01_BLACK_MINI_04", //5C34E3CE", //1546970062", //1546970062
+            "S_M_Y_COP_01_WHITE_FULL_01", //6F38027D", //1865941629", //1865941629
+            "S_M_Y_COP_01_WHITE_FULL_02", //360C1026", //906760230", //906760230
+            "S_M_Y_COP_01_WHITE_MINI_01", //BA399207", //3124335111", //"1170632185
+            "S_M_Y_COP_01_WHITE_MINI_02", //CBEB356A", //3421189482", //"873777814
+            "S_M_Y_COP_01_WHITE_MINI_03", //DDB458FC", //3719583996", //"575383300
+            "S_M_Y_COP_01_WHITE_MINI_04", //EF5EFC51", //4015979601", //"278987695
+            "S_M_Y_FIREMAN_01_LATINO_FULL_01", //71549C50", //1901370448", //1901370448
+            "S_M_Y_FIREMAN_01_LATINO_FULL_02", //7C0BB1BE", //2081141182", //2081141182
+            "S_M_Y_FIREMAN_01_WHITE_FULL_01", //0094A96A", //9742698", //9742698
+            "S_M_Y_FIREMAN_01_WHITE_FULL_02", //80DB29FD", //2161846781", //"2133120515
+            "S_M_Y_GENERICCHEAPWORKER_01_BLACK_MINI_01", //09FD9FD3", //167616467", //167616467
+            "S_M_Y_GENERICCHEAPWORKER_01_BLACK_MINI_02", //37D07B78", //936409976", //936409976
+            "S_M_Y_GENERICCHEAPWORKER_01_WHITE_MINI_01", //3869CBA7", //946457511", //946457511
+            "S_M_Y_GENERICMARINE_01_BLACK_MINI_01", //17F5909B", //401969307", //401969307
+            "S_M_Y_GENERICMARINE_01_BLACK_MINI_02", //0E947DD1", //244612561", //244612561
+            "S_M_Y_GENERICMARINE_01_WHITE_MINI_01", //55FDC164", //1442693476", //1442693476
+            "S_M_Y_GENERICMARINE_01_WHITE_MINI_02", //08BBA6E1", //146515681", //146515681
+            "S_M_Y_GENERICWORKER_01_BLACK_MINI_01", //0A3A301F", //171585567", //171585567
+            "S_M_Y_GENERICWORKER_01_BLACK_MINI_02", //60D0DD4B", //1624300875", //1624300875
+            "S_M_Y_GENERICWORKER_01_LATINO_MINI_01", //86640419", //2254701593", //"2040265703
+            "S_M_Y_GENERICWORKER_01_LATINO_MINI_02", //F4AC60AC", //4104937644", //"190029652
+            "S_M_Y_GENERICWORKER_01_WHITE_01", //129AD4A3", //312136867", //312136867
+            "S_M_Y_GENERICWORKER_01_WHITE_MINI_01", //E8727D7D", //3899817341", //"395149955
+            "S_M_Y_GENERICWORKER_01_WHITE_MINI_02", //B23310FF", //2989691135", //"1305276161
+            "S_M_Y_HWAYCOP_01_BLACK_FULL_01", //DC403AA7", //3695196839", //"599770457
+            "S_M_Y_HWAYCOP_01_BLACK_FULL_02", //11AAA57B", //296396155", //296396155
+            "S_M_Y_HWAYCOP_01_WHITE_FULL_01", //F332D786", //4080195462", //"214771834
+            "S_M_Y_HWAYCOP_01_WHITE_FULL_02", //0384F82A", //59045930", //59045930
+            "S_M_Y_MCOP_01_WHITE_MINI_01", //7A44FB56", //2051341142", //2051341142
+            "S_M_Y_MCOP_01_WHITE_MINI_02", //670ED4EA", //1729025258", //1729025258
+            "S_M_Y_MCOP_01_WHITE_MINI_03", //54D0306D", //1422930029", //1422930029
+            "S_M_Y_MCOP_01_WHITE_MINI_04", //B361ED8F", //3009539471", //"1285427825
+            "S_M_Y_MCOP_01_WHITE_MINI_05", //0F8FA5E9", //261072361", //261072361
+            "S_M_Y_MCOP_01_WHITE_MINI_06", //FFE50694", //4293199508", //"1767788
+            "S_M_Y_RANGER_01_LATINO_FULL_01", //94EBCA6B", //2498480747", //"1796486549
+            "S_M_Y_RANGER_01_WHITE_FULL_01", //9723C55B", //2535703899", //"1759263397
+            "S_M_Y_SHERIFF_01_WHITE_FULL_01", //A1C8B88A", //2714286218", //"1580681078
+            "S_M_Y_SHERIFF_01_WHITE_FULL_02", //939F1C37", //2476678199", //"1818289097
+            "S_M_Y_SHOP_MASK_WHITE_MINI_01", //03AAB8B0", //61520048", //61520048
+            "S_M_Y_SWAT_01_WHITE_FULL_01", //BA960340", //3130393408", //"1164573888
+            "S_M_Y_SWAT_01_WHITE_FULL_02", //E55E58D0", //3848165584", //"446801712
+            "S_M_Y_SWAT_01_WHITE_FULL_03", //F324745C", //4079252572", //"215714724
+            "S_M_Y_SWAT_01_WHITE_FULL_04", //0236127F", //37098111", //37098111
+            "U_M_Y_TATTOO_01_WHITE_MINI_01", //956C178D", //2506889101", //"1788078195
+            "TAXIALONZO", //A0B07846", //2695919686", //"1599047610
+            "TAXIBRUCE", //1E0A9C18", //504011800", //504011800
+            "TAXICLYDE", //90992C60", //2425957472", //"1869009824
+            "TAXIDARREN", //2C1A5202", //739922434", //739922434
+            "TAXIDERRICK", //2D71435C", //762397532", //762397532
+            "TAXIDOM", //9DA9FDB5", //2645163445", //"1649803851
+            "TAXIFELIPE", //E66D1B66", //3865910118", //"429057178
+            "TAXIGANGM", //08AC318A", //145502602", //145502602
+            "TAXIJAMES", //A8A8F64E", //2829645390", //"1465321906
+            "TAXIKWAK", //58B68A9D", //1488358045", //1488358045
+            "TAXIOJCOP1", //5883C603", //1485030915", //1485030915
+            "TAXIOTIS", //A0B868F9", //2696440057", //"1598527239
+            "TAXIPAULIE", //05437D58", //88309080", //88309080
+            "TAXIWALTER", //1A43E0E1", //440656097", //440656097
+            "TEST_VOICE", //62883B8C", //1653095308", //1653095308
+            "TREVOR_1_NORMAL", //3AD6D338", //987157304", //987157304
+            "TREVOR_2_NORMAL", //CB2DDB29", //3408780073", //"886187223
+            "TREVOR_3_NORMAL", //4697A021", //1184342049", //1184342049
+            "TREVOR_ANGRY", //0953FCF8", //156499192", //156499192
+            "TREVOR_DRUNK", //EA0CA87A", //3926698106", //"368269190
+            "TREVOR_NORMAL", //4072CC77", //1081265271", //1081265271
+            "VB_LIFEGUARD_01", //6B6161EE", //1801544174", //1801544174
+            "VB_MALE_01", //AC519660", //2891028064", //"1403939232
+            "VB_MALE_02", //B5E5A988", //3051727240", //"1243240056
+            "VB_MALE_03", //3A03B192", //973320594", //973320594
+            "WAVELOAD_PAIN_FRANKLIN", //33F65FC3", //871784387", //871784387
+            "WAVELOAD_PAIN_MALE", //804C18BB", //2152470715", //"2142496581
+            "WAVELOAD_PAIN_MICHAEL", //6531A692", //1697752722", //1697752722
+            "WAVELOAD_PAIN_TREVOR" //0CF83E9F", //217595551", //217595551
+    };
+    inline const std::vector<std::string> VoicesFemale = {
+                "Default",
+                "ABIGAIL", //073DD899", //121493657", //121493657
+                "AIRPORT_PA_FEMALE", //80D0944F", //2161153103", //"2133814193
+                "AMANDA_DRUNK", //5C0B144D", //1544229965", //1544229965
+                "AMANDA_NORMAL", //EC6C9072", //3966537842", //"328429454
+                "CHASTITY", //9B4468A9", //2604951721", //"1690015575
+                "CHASTITY_MP", //4E0041AA", //1308639658", //1308639658
+                "CST4ACTRESS", //6A8C4C84", //1787579524", //1787579524
+                "DARYL", //10088962", //268994914", //268994914
+                "DENISE", //860AA79A", //2248845210", //"2046122086
+                "EXECPA_FEMALE", //B6FB2A37", //3069913655", //"1225053641
+                "GIRL1", //9ABA4CB8", //2595900600", //"1699066696
+                "GIRL2", //C38C1E5B", //3280739931", //"1014227365
+                "GRIFF", //03DD4948", //64833864", //64833864
+                "FUFU", //ED8EA575", //3985548661", //"309418635
+                "FUFU_MP", //4EA343CA", //1319322570", //1319322570
+                "JANE", //893E74D0", //2302571728", //"1992395568
+                "JANET", //8498F40B", //2224616459", //"2070350837
+                "JULIET", //27AD5D38", //665673016", //665673016
+                "KAREN", //FBF9CDB2", //4227452338", //"67514958
+                "KIDNAPPEDFEMALE", //064DC6E9", //105760489", //105760489
+                "LACEY", //29CAB776", //701151094", //701151094
+                "LI_FEMALE_01", //E58E5187", //3851309447", //"443657849
+                "LOSTKIDNAPGIRL", //7D8F4F88", //2106544008", //2106544008
+                "MAID", //015EE6C7", //22996679", //22996679
+                "MARNIE", //5FA82CAC", //1604857004", //1604857004
+                "MARYANN", //9FEEF145", //2683236677", //"1611730619
+                "MAUDE", //1AE32960", //451094880", //451094880
+                "MRSTHORNHILL", //C6DE44C8", //3336455368", //"958511928
+                "NIKKI", //47F4D564", //1207227748", //1207227748
+                "NIKKI_MP", //11515E1F", //290545183", //290545183
+                "PAIGE", //C2515320", //3260109600", //"1034857696
+                "PAMELA_DRAKE", //714E62B7", //1900962487", //1900962487
+                "PATRICIA", //D22B34C3", //3526046915", //"768920381
+                "PEACH", //FE7FCDEA", //4269788650", //"25178646
+                "PIER_ANNOUNCE_FEMALE", //3AB5E64D", //984999501", //984999501
+                "REHH5BRIDE", //923B42A5", //2453357221", //"1841610075
+                "REHOMGIRL", //745E2A7D", //1952328317", //1952328317
+                "REPRI1LOST", //4E9991FE", //1318687230", //1318687230
+                "SAPPHIRE", //74F8F352", //1962472274", //1962472274
+                "TALINA", //ED031790", //3976402832", //"318564464
+                "TAXIGANGGIRL1", //E2228087", //3793911943", //"501055353
+                "TAXIGANGGIRL2", //F7E3AC09", //4158893065", //"136074231
+                "TAXIKEYLA", //23ACB127", //598520103", //598520103
+                "TAXILIZ", //C8B6AC99", //3367414937", //"927552359
+                "TAXIMIRANDA", //97A199A8", //2543950248", //"1751017048
+                "TONYA", //FCB43161", //4239667553", //"55299743
+                "TRACEY", //5A7D2459", //1518150745", //1518150745
+                "VB_FEMALE_01", //CB2136C8", //3407951560", //"887015736
+                "VB_FEMALE_02", //E4EA6A5A", //3840567898", //"454399398
+                "VB_FEMALE_03", //B1510330", //2974876464", //"1320090832
+                "VB_FEMALE_04", //C397A7BD", //3281495997", //"1013471299
+                "WAVELOAD_PAIN_FEMALE", //332128AB", //857811115", //857811115
+                "WFSTEWARDESS", //84EDE1BF", //2230182335", //"2064784961
+                "HS4_KAYLEE_PVG",
+                "HS4_JACKIE_PVG",
+                "FEMALE_CLUB_R2PVG",
+                "BTL_CONNIE_PVG",
+                "AFFLUENT_SUBURBAN_FEMALE_01", //FF4D4698", //4283254424", //"11712872
+                "AFFLUENT_SUBURBAN_FEMALE_02", //12836D04", //310603012", //310603012
+                "AFFLUENT_SUBURBAN_FEMALE_03", //DC6000BE", //3697279166", //"597688130
+                "AFFLUENT_SUBURBAN_FEMALE_04", //EE1AA433", //3994723379", //"300243917
+                "AFFLUENT_SUBURBAN_FEMALE_05", //A47190DE", //2758906078", //"1536061218
+                "AFFLUENT_SUBURBAN_FEMALE_06", //B62C3453", //3056350291", //"1238617005
+                "AIRCRAFT_WARNING_FEMALE_01", //85A08F9C", //2241892252", //"2053075044
+                "A_F_M_BEACH_01_WHITE_FULL_01", //6B996380", //1805214592", //1805214592
+                "A_F_M_BEACH_01_WHITE_MINI_01", //139EA948", //329165128", //329165128
+                "A_F_M_BEVHILLS_01_WHITE_FULL_01", //00A8641D", //11035677", //11035677
+                "A_F_M_BEVHILLS_01_WHITE_MINI_01", //3E0995AE", //1040815534", //1040815534
+                "A_F_M_BEVHILLS_01_WHITE_MINI_02", //4ABAAF10", //1253748496", //1253748496
+                "A_F_M_BEVHILLS_02_BLACK_FULL_01", //8455F5F0", //2220226032", //"2074741264
+                "A_F_M_BEVHILLS_02_BLACK_MINI_01", //466B8D2A", //1181453610", //1181453610
+                "A_F_M_BEVHILLS_02_WHITE_FULL_01", //B228C501", //2989016321", //"1305950975
+                "A_F_M_BEVHILLS_02_WHITE_FULL_02", //CC76F99D", //3430349213", //"864618083
+                "A_F_M_BEVHILLS_02_WHITE_MINI_01", //3FD63057", //1071001687", //1071001687
+                "A_F_M_BODYBUILD_01_BLACK_FULL_01", //4B0E89BF", //1259243967", //1259243967
+                "A_F_M_BODYBUILD_01_BLACK_MINI_01", //23D791B0", //601330096", //601330096
+                "A_F_M_BODYBUILD_01_WHITE_FULL_01", //8773ADD6", //2272505302", //"2022461994
+                "A_F_M_BODYBUILD_01_WHITE_MINI_01", //B902AA3A", //3103959610", //"1191007686
+                "A_F_M_BUSINESS_02_WHITE_MINI_01", //9C4AD53A", //2622149946", //"1672817350
+                "A_F_M_DOWNTOWN_01_BLACK_FULL_01", //0AA25C8F", //178412687", //178412687
+                "A_F_M_EASTSA_01_LATINO_FULL_01", //0ACC23F9", //181150713", //181150713
+                "A_F_M_EASTSA_01_LATINO_MINI_01", //CE348715", //3459548949", //"835418347
+                "A_F_M_EASTSA_02_LATINO_FULL_01", //0AA30167", //178454887", //178454887
+                "A_F_M_EASTSA_02_LATINO_MINI_01", //721CC9FF", //1914489343", //1914489343
+                "A_F_M_FATWHITE_01_WHITE_FULL_01", //D2158D79", //3524627833", //"770339463
+                "A_F_M_FATWHITE_01_WHITE_MINI_01", //59E595EB", //1508218347", //1508218347
+                "A_F_M_KTOWN_01_KOREAN_FULL_01", //D77777E6", //3614930918", //"680036378
+                "A_F_M_KTOWN_01_KOREAN_MINI_01", //AF6FB9B1", //2943334833", //"1351632463
+                "A_F_M_KTOWN_02_CHINESE_MINI_01", //C533C983", //3308505475", //"986461821
+                "A_F_M_KTOWN_02_KOREAN_FULL_01", //D8CD3773", //3637327731", //"657639565
+                "A_F_M_SALTON_01_WHITE_FULL_01", //89DA8A2E", //2312800814", //"1982166482
+                "A_F_M_SALTON_01_WHITE_FULL_02", //9C052E83", //2617585283", //"1677382013
+                "A_F_M_SALTON_01_WHITE_FULL_03", //A66E4355", //2792244053", //"1502723243
+                "A_F_M_SALTON_01_WHITE_MINI_01", //8701705E", //2265018462", //"2029948834
+                "A_F_M_SALTON_01_WHITE_MINI_02", //7DC35DE2", //2109955554", //2109955554
+                "A_F_M_SALTON_01_WHITE_MINI_03", //6675AF47", //1718988615", //1718988615
+                "A_F_M_SKIDROW_01_BLACK_FULL_01", //A7C0DE51", //2814434897", //"1480532399
+                "A_F_M_SKIDROW_01_BLACK_MINI_01", //443E6FBE", //1144942526", //1144942526
+                "A_F_M_SKIDROW_01_WHITE_FULL_01", //F8F30014", //4176674836", //"118292460
+                "A_F_M_SKIDROW_01_WHITE_MINI_01", //705684C4", //1884718276", //1884718276
+                "A_F_M_SOUCENT_01_BLACK_FULL_01", //4E0DA806", //1309517830", //1309517830
+                "A_F_M_SOUCENT_02_BLACK_FULL_01", //C725E5CC", //3341149644", //"953817652
+                "A_F_M_TOURIST_01_WHITE_MINI_01", //25365382", //624317314", //624317314
+                "A_F_M_TRAMPBEAC_01_BLACK_FULL_01", //F091AF03", //4036079363", //"258887933
+                "A_F_M_TRAMPBEAC_01_BLACK_MINI_01", //DE24211D", //3726909725", //"568057571
+                "A_F_M_TRAMPBEAC_01_WHITE_FULL_01", //8D34DFCC", //2369052620", //"1925914676
+                "A_F_M_TRAMP_01_WHITE_FULL_01", //D05841FA", //3495444986", //"799522310
+                "A_F_M_TRAMP_01_WHITE_MINI_01", //55CE3CCC", //1439579340", //1439579340
+                "A_F_O_GENSTREET_01_WHITE_MINI_01", //482D1EC8", //1210916552", //1210916552
+                "A_F_O_INDIAN_01_INDIAN_MINI_01", //8755E8CA", //2270554314", //"2024412982
+                "A_F_O_KTOWN_01_KOREAN_FULL_01", //DBE7871F", //3689383711", //"605583585
+                "A_F_O_KTOWN_01_KOREAN_MINI_01", //F94EAEEB", //4182683371", //"112283925
+                "A_F_O_SALTON_01_WHITE_FULL_01", //F79EEC05", //4154387461", //"140579835
+                "A_F_O_SALTON_01_WHITE_MINI_01", //FCBC6F1F", //4240207647", //"54759649
+                "A_F_O_SOUCENT_01_BLACK_FULL_01", //3439D3C2", //876204994", //876204994
+                "A_F_O_SOUCENT_02_BLACK_FULL_01", //F27CEF94", //4068274068", //"226693228
+                "A_F_Y_BEACH_01_BLACK_MINI_01", //4B79AF9D", //1266266013", //1266266013
+                "A_F_Y_BEACH_01_WHITE_FULL_01", //2BCAB282", //734704258", //734704258
+                "A_F_Y_BEACH_01_WHITE_MINI_01", //13609A3C", //325098044", //325098044
+                "A_F_Y_BEACH_BLACK_FULL_01", //0422CC2C", //69389356", //69389356
+                "A_F_Y_BEVHILLS_01_WHITE_FULL_01", //E7099D21", //3876166945", //"418800351
+                "A_F_Y_BEVHILLS_01_WHITE_MINI_01", //D2C133B9", //3535877049", //"759090247
+                "A_F_Y_BEVHILLS_02_WHITE_FULL_01", //F700AB54", //4144016212", //"150951084
+                "A_F_Y_BEVHILLS_02_WHITE_MINI_01", //AA4B2212", //2857050642", //"1437916654
+                "A_F_Y_BEVHILLS_02_WHITE_MINI_02", //7E1BC9B0", //2115750320", //2115750320
+                "A_F_Y_BEVHILLS_03_WHITE_FULL_01", //8558FF3F", //2237202239", //"2057765057
+                "A_F_Y_BEVHILLS_03_WHITE_MINI_01", //D17E6765", //3514722149", //"780245147
+                "A_F_Y_BEVHILLS_04_WHITE_FULL_01", //B91127EB", //3104909291", //"1190058005
+                "A_F_Y_BEVHILLS_04_WHITE_MINI_01", //9A251230", //2586120752", //"1708846544
+                "A_F_Y_BUSINESS_01_WHITE_FULL_01", //A3D0C7CD", //2748368845", //"1546598451
+                "A_F_Y_BUSINESS_01_WHITE_MINI_01", //87816F13", //2273406739", //"2021560557
+                "A_F_Y_BUSINESS_01_WHITE_MINI_02", //188B9125", //411799845", //411799845
+                "A_F_Y_BUSINESS_02_WHITE_FULL_01", //4CC300E2", //1287848162", //1287848162
+                "A_F_Y_BUSINESS_02_WHITE_MINI_01", //94B7537B", //2495042427", //"1799924869
+                "A_F_Y_BUSINESS_03_CHINESE_FULL_01", //7D9DD020", //2107494432", //2107494432
+                "A_F_Y_BUSINESS_03_CHINESE_MINI_01", //D41AE44A", //3558532170", //"736435126
+                "A_F_Y_BUSINESS_03_LATINO_FULL_01", //420377DE", //1107523550", //1107523550
+                "A_F_Y_BUSINESS_04_BLACK_FULL_01", //26D1F656", //651294294", //651294294
+                "A_F_Y_BUSINESS_04_BLACK_MINI_01", //97D8B312", //2547561234", //"1747406062
+                "A_F_Y_BUSINESS_04_WHITE_MINI_01", //BE6FAE2C", //3194990124", //"1099977172
+                "A_F_Y_EASTSA_01_LATINO_FULL_01", //3CB71B34", //1018633012", //1018633012
+                "A_F_Y_EASTSA_01_LATINO_MINI_01", //D3A7F87F", //3551000703", //"743966593
+                "A_F_Y_EASTSA_02_WHITE_FULL_01", //3DDC0236", //1037828662", //1037828662
+                "A_F_Y_EASTSA_03_LATINO_FULL_01", //C801D0E0", //3355562208", //"939405088
+                "A_F_Y_EASTSA_03_LATINO_MINI_01", //38E9E4FC", //954852604", //954852604
+                "A_F_Y_EPSILON_01_WHITE_MINI_01", //1B66BF81", //459718529", //459718529
+                "A_F_Y_FITNESS_01_WHITE_FULL_01", //7639B49D", //1983493277", //1983493277
+                "A_F_Y_FITNESS_01_WHITE_MINI_01", //E2D732E6", //3805754086", //"489213210
+                "A_F_Y_FITNESS_02_BLACK_FULL_01", //851B5376", //2233160566", //"2061806730
+                "A_F_Y_FITNESS_02_BLACK_MINI_01", //27C40170", //667156848", //667156848
+                "A_F_Y_FITNESS_02_WHITE_FULL_01", //BF9CB8C8", //3214719176", //"1080248120
+                "A_F_Y_FITNESS_02_WHITE_MINI_01", //A105E3A0", //2701517728", //"1593449568
+                "A_F_Y_Golfer_01_WHITE_FULL_01", //B81316C5", //3088258757", //"1206708539
+                "A_F_Y_Golfer_01_WHITE_MINI_01", //5F5BFB44", //1599863620", //1599863620
+                "A_F_Y_HIKER_01_WHITE_FULL_01", //BB0A674E", //3138021198", //"1156946098
+                "A_F_Y_HIKER_01_WHITE_MINI_01", //C8CAFB5E", //3368745822", //"926221474
+                "A_F_Y_HIPSTER_01_WHITE_FULL_01", //A24D58EA", //2722978026", //"1571989270
+                "A_F_Y_HIPSTER_01_WHITE_MINI_01", //92D2202A", //2463244330", //"1831722966
+                "A_F_Y_HIPSTER_02_WHITE_FULL_01", //83EA9D79", //2213191033", //"2081776263
+                "A_F_Y_HIPSTER_02_WHITE_MINI_01", //41543F56", //1096040278", //1096040278
+                "A_F_Y_HIPSTER_02_WHITE_MINI_02", //2F6F9B8D", //795843469", //795843469
+                "A_F_Y_HIPSTER_03_WHITE_FULL_01", //ADED3C9F", //2918005919", //"1376961377
+                "A_F_Y_HIPSTER_03_WHITE_MINI_01", //F824C1C7", //4163158471", //"131808825
+                "A_F_Y_HIPSTER_03_WHITE_MINI_02", //E95A2432", //3914998834", //"379968462
+                "A_F_Y_HIPSTER_04_WHITE_FULL_01", //3141C876", //826394742", //826394742
+                "A_F_Y_HIPSTER_04_WHITE_MINI_01", //6B08FBA6", //1795750822", //1795750822
+                "A_F_Y_HIPSTER_04_WHITE_MINI_02", //3BDF1D53", //1004477779", //1004477779
+                "A_F_Y_INDIAN_01_INDIAN_MINI_01", //AD0551E1", //2902807009", //"1392160287
+                "A_F_Y_INDIAN_01_INDIAN_MINI_02", //BF49F66A", //3209295466", //"1085671830
+                "A_F_Y_ROLLERCOASTER_01_MINI_01", //5470D900", //1416681728", //1416681728
+                "A_F_Y_ROLLERCOASTER_01_MINI_02", //4295B54A", //1117107530", //1117107530
+                "A_F_Y_ROLLERCOASTER_01_MINI_03", //C2393483", //3258528899", //"1036438397
+                "A_F_Y_ROLLERCOASTER_01_MINI_04", //B015903C", //2954203196", //"1340764100
+                "A_F_Y_SKATER_01_WHITE_FULL_01", //52D929F1", //1389963761", //1389963761
+                "A_F_Y_SKATER_01_WHITE_MINI_01", //6E55B81F", //1851111455", //1851111455
+                "A_F_Y_SOUCENT_01_BLACK_FULL_01", //A0FDDA5B", //2700991067", //"1593976229
+                "A_F_Y_SOUCENT_02_BLACK_FULL_01", //DB96A76C", //3684083564", //"610883732
+                "A_F_Y_SOUCENT_03_LATINO_FULL_01", //AA71DF24", //2859589412", //"1435377884
+                "A_F_Y_SOUCENT_03_LATINO_MINI_01", //656710BE", //1701253310", //1701253310
+                "A_F_Y_TENNIS_01_BLACK_MINI_01", //B602DF7D", //3053641597", //"1241325699
+                "A_F_Y_TENNIS_01_WHITE_MINI_01", //434E2C2C", //1129196588", //1129196588
+                "A_F_Y_TOURIST_01_BLACK_FULL_01", //ECA3EB4D", //3970165581", //"324801715
+                "A_F_Y_TOURIST_01_BLACK_MINI_01", //A3713FCD", //2742108109", //"1552859187
+                "A_F_Y_TOURIST_01_LATINO_FULL_01", //D6F2B12F", //3606229295", //"688738001
+                "A_F_Y_TOURIST_01_LATINO_MINI_01", //122F5483", //305091715", //305091715
+                "A_F_Y_TOURIST_01_WHITE_FULL_01", //DBEFEC5C", //3689933916", //"605033380
+                "A_F_Y_TOURIST_01_WHITE_MINI_01", //216BE906", //560720134", //560720134
+                "A_F_Y_TOURIST_02_WHITE_MINI_01", //0D6F398A", //225393034", //225393034
+                "A_F_Y_VINEWOOD_01_WHITE_FULL_01", //2AF2EF5B", //720564059", //720564059
+                "A_F_Y_VINEWOOD_01_WHITE_MINI_01", //23A74DCA", //598166986", //598166986
+                "A_F_Y_VINEWOOD_02_WHITE_FULL_01", //3A311C01", //976296961", //976296961
+                "A_F_Y_VINEWOOD_02_WHITE_MINI_01", //191A5AF2", //421157618", //421157618
+                "A_F_Y_Vinewood_03_Chinese_FULL_01", //E632B0F0", //3862081776", //"432885520
+                "A_F_Y_VINEWOOD_03_CHINESE_MINI_01", //3512D951", //890427729", //890427729
+                "A_F_Y_VINEWOOD_04_WHITE_FULL_01", //20C68AC8", //549882568", //549882568
+                "A_F_Y_VINEWOOD_04_WHITE_MINI_01", //12763C39", //309738553", //309738553
+                "A_F_Y_VINEWOOD_04_WHITE_MINI_02", //C8CB28E4", //3368757476", //"926209820
+                "G_F_Y_BALLAS_01_BLACK_MINI_01", //15BB1C9C", //364584092", //364584092
+                "G_F_Y_BALLAS_01_BLACK_MINI_02", //17F72114", //402071828", //402071828
+                "G_F_Y_BALLAS_01_BLACK_MINI_03", //1D7F2C2C", //494873644", //494873644
+                "G_F_Y_BALLAS_01_BLACK_MINI_04", //403F71AC", //1077899692", //1077899692
+                "G_F_Y_FAMILIES_01_BLACK_MINI_01", //4D341506", //1295258886", //1295258886
+                "G_F_Y_FAMILIES_01_BLACK_MINI_02", //69F34E84", //1777553028", //1777553028
+                "G_F_Y_FAMILIES_01_BLACK_MINI_03", //B0B85C0D", //2964872205", //"1330095091
+                "G_F_Y_FAMILIES_01_BLACK_MINI_04", //5B7DB199", //1534964121", //1534964121
+                "G_F_Y_FAMILIES_01_BLACK_MINI_05", //85658568", //2238023016", //"2056944280
+                "G_F_Y_FAMILIES_01_BLACK_MINI_06", //BFA0F9DE", //3214997982", //"1079969314
+                "G_F_Y_VAGOS_01_LATINO_MINI_01", //0320E887", //52488327", //52488327
+                "G_F_Y_VAGOS_01_LATINO_MINI_02", //D6930F6C", //3599961964", //"695005332
+                "G_F_Y_VAGOS_01_LATINO_MINI_03", //7E0BDE5F", //2114707039", //2114707039
+                "G_F_Y_VAGOS_01_LATINO_MINI_04", //8854F2F1", //2287268593", //"2007698703
+                "NIGHT_OUT_FEMALE_01", //33A0908D", //866160781", //866160781
+                "NIGHT_OUT_FEMALE_02", //49EBBD23", //1240186147", //1240186147
+                "NIGHT_OUT_FEMALE_03", //831EAF88", //2199826312", //"2095140984
+                "NIGHT_OUT_FEMALE_04", //A56CF424", //2775381028", //"1519586268
+                "PAIN_FEMALE_01", //40F0B1B8", //1089515960", //1089515960
+                "PAIN_FEMALE_02", //D828602D", //3626524717", //"668442579
+                "PAIN_FEMALE_NORMAL_01", //6EF36D3C", //1861446972", //1861446972
+                "PAIN_FEMALE_NORMAL_02", //5CECC92F", //1559021871", //1559021871
+                "PAIN_FEMALE_NORMAL_03", //8AA3249B", //2325947547", //"1969019749
+                "PAIN_FEMALE_NORMAL_04", //78878064", //2022146148", //2022146148
+                "PAIN_FEMALE_NORMAL_05", //2629DBA6", //640277414", //640277414
+                "PAIN_FEMALE_NORMAL_06", //0BF1A736", //200386358", //200386358
+                "PAIN_FEMALE_NORMAL_07", //41699229", //1097437737", //1097437737
+                "PAIN_FEMALE_NORMAL_08", //374E7DEF", //927890927", //927890927
+                "PAIN_FEMALE_NORMAL_09", //DCDE4910", //3705555216", //"589412080
+                "PAIN_FEMALE_NORMAL_10", //966B3B23", //2523609891", //"1771357405
+                "PAIN_FEMALE_NORMAL_11", //343976BD", //876181181", //876181181
+                "PAIN_FEMALE_NORMAL_12", //21EAD220", //569037344", //569037344
+                "PAIN_FEMALE_TEST_01", //95928372", //2509407090", //"1785560206
+                "PAIN_FEMALE_TEST_02", //AAE0AE0E", //2866851342", //"1428115954
+                "PAIN_FEMALE_TEST_03", //B89E4989", //3097381257", //"1197586039
+                "S_F_M_FEMBARBER_BLACK_MINI_01", //4B82A928", //1266854184", //1266854184
+                "S_F_M_GENERICCHEAPWORKER_01_LATINO_MINI_01", //E085EF87", //3766873991", //"528093305
+                "S_F_M_GENERICCHEAPWORKER_01_LATINO_MINI_02", //EA440303", //3930325763", //"364641533
+                "S_F_M_GENERICCHEAPWORKER_01_LATINO_MINI_03", //51565112", //1364611346", //1364611346
+                "S_F_M_PONSEN_01_BLACK_01", //B60A191B", //3054115099", //"1240852197
+                "S_F_M_SHOP_HIGH_WHITE_MINI_01", //AD7E25AA", //2910725546", //"1384241750
+                "S_F_Y_AIRHOSTESS_01_BLACK_FULL_01", //50B140C7", //1353793735", //1353793735
+                "S_F_Y_AIRHOSTESS_01_BLACK_FULL_02", //D0FFC16E", //3506422126", //"788545170
+                "S_F_Y_AIRHOSTESS_01_WHITE_FULL_01", //090B4CD4", //151735508", //151735508
+                "S_F_Y_AIRHOSTESS_01_WHITE_FULL_02", //E1B67E2B", //3786833451", //"508133845
+                "S_F_Y_BAYWATCH_01_BLACK_FULL_01", //F33860E9", //4080558313", //"214408983
+                "S_F_Y_BAYWATCH_01_BLACK_FULL_02", //880F0A98", //2282687128", //"2012280168
+                "S_F_Y_BAYWATCH_01_WHITE_FULL_01", //26DECE02", //652135938", //652135938
+                "S_F_Y_BAYWATCH_01_WHITE_FULL_02", //35226A89", //891447945", //891447945
+                "S_F_Y_Cop_01_BLACK_FULL_01", //EFB0FA91", //4021353105", //"273614191
+                "S_F_Y_COP_01_BLACK_FULL_02", //62A6E07B", //1655103611", //1655103611
+                "S_F_Y_COP_01_WHITE_FULL_01", //EB73C44F", //3950232655", //"344734641
+                "S_F_Y_COP_01_WHITE_FULL_02", //F9C560F2", //4190462194", //"104505102
+                "S_F_Y_GENERICCHEAPWORKER_01_BLACK_MINI_01", //44ACE464", //1152181348", //1152181348
+                "S_F_Y_GENERICCHEAPWORKER_01_BLACK_MINI_02", //3707C91A", //923257114", //923257114
+                "S_F_Y_GENERICCHEAPWORKER_01_LATINO_MINI_01", //A135DE73", //2704662131", //"1590305165
+                "S_F_Y_GENERICCHEAPWORKER_01_LATINO_MINI_02", //CF08BA18", //3473455640", //"821511656
+                "S_F_Y_GENERICCHEAPWORKER_01_LATINO_MINI_03", //BC269454", //3156644948", //"1138322348
+                "S_F_Y_GENERICCHEAPWORKER_01_LATINO_MINI_04", //EB8E7323", //3951981347", //"342985949
+                "S_F_Y_GENERICCHEAPWORKER_01_WHITE_MINI_01", //E5EAA67A", //3857360506", //"437606790
+                "S_F_Y_GENERICCHEAPWORKER_01_WHITE_MINI_02", //39B64E08", //968248840", //968248840
+                "S_F_Y_HOOKER_01_WHITE_FULL_01", //18B73C7E", //414661758", //414661758
+                "S_F_Y_HOOKER_01_WHITE_FULL_02", //66F658FB", //1727420667", //1727420667
+                "S_F_Y_HOOKER_01_WHITE_FULL_03", //75E576D9", //1977972441", //1977972441
+                "S_F_Y_HOOKER_02_WHITE_FULL_01", //77BE674B", //2008966987", //2008966987
+                "S_F_Y_HOOKER_02_WHITE_FULL_02", //09978AFF", //160926463", //160926463
+                "S_F_Y_HOOKER_02_WHITE_FULL_03", //1B382E40", //456666688", //456666688
+                "S_F_Y_HOOKER_03_BLACK_FULL_01", //875814D6", //2270696662", //"2024270634
+                "S_F_Y_HOOKER_03_BLACK_FULL_03", //129DAB5F", //312322911", //312322911
+                "S_F_Y_PECKER_01_WHITE_01", //6B019062", //1795264610", //1795264610
+                "S_F_Y_RANGER_01_WHITE_MINI_01", //47A85382", //1202213762", //1202213762
+                "S_F_Y_SHOP_LOW_WHITE_MINI_01", //ED77E493", //3984057491", //"310909805
+                "S_F_Y_SHOP_MID_WHITE_MINI_01" //77B47F14", //2008317716", //2008317716
+    };
 
     inline const Mod_Class::AnimList SitUps = Mod_Class::AnimList(Mod_Class::AnimatedActions("amb@world_human_sit_ups@male@enter", "enter"), Mod_Class::AnimatedActions("amb@world_human_sit_ups@male@exit", "exit"), std::vector<Mod_Class::AnimatedActions>{ Mod_Class::AnimatedActions("amb@world_human_sit_ups@male@idle_a", "idle_a"), Mod_Class::AnimatedActions("amb@world_human_sit_ups@male@idle_b", "idle_b"), Mod_Class::AnimatedActions("amb@world_human_sit_ups@male@idle_c", "idle_c") });
     inline const Mod_Class::AnimList PushUps = Mod_Class::AnimList(Mod_Class::AnimatedActions("amb@world_human_push_ups@male@enter", "enter"), Mod_Class::AnimatedActions("amb@world_human_push_ups@male@exit", "exit"), std::vector<Mod_Class::AnimatedActions>{ Mod_Class::AnimatedActions("amb@world_human_push_ups@male@base", "base"), Mod_Class::AnimatedActions("amb@world_human_push_ups@male@idle_a", "idle_a"), Mod_Class::AnimatedActions("amb@world_human_push_ups@male@idle_a", "idle_b"), Mod_Class::AnimatedActions("amb@world_human_push_ups@male@idle_a", "idle_c"), Mod_Class::AnimatedActions("amb@world_human_push_ups@male@idle_a", "idle_d"), Mod_Class::AnimatedActions("amb@world_human_push_ups@male@idle_a", "idle_e") });
@@ -4519,6 +6747,7 @@ namespace Mod_Data
     inline const Mod_Class::AnimList SunbathefrontM = Mod_Class::AnimList(Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@front@enter", "enter"), Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@front@exit", "exit"), { Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@front@base" , "base"),	Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@front@idle_a" , "idle_a"),	Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@front@idle_a" , "idle_b"),	Mod_Class::AnimatedActions("amb@world_human_sunbathe@male@front@idle_a" , "idle_c") });
 
     inline const std::vector<Mod_Class::Tattoo> MaleTshirt = {
+        Mod_Class::Tattoo("", "ClearOverlay", "Clear Overlay"),
         Mod_Class::Tattoo("multiplayer_overlays", "FM_CREW_M_000_A", ""),
         Mod_Class::Tattoo("multiplayer_overlays", "FM_CREW_M_000_B", ""),
         Mod_Class::Tattoo("multiplayer_overlays", "FM_CREW_M_000_C", ""),
@@ -5317,6 +7546,7 @@ namespace Mod_Data
         Mod_Class::Tattoo("mp2023_01_overlays", "MP_2023_01_Tee_007_M", "")
     };
     inline const std::vector<Mod_Class::Tattoo> FemaleTshirt = {
+        Mod_Class::Tattoo("", "ClearOverlay", "Clear Overlay"),
         Mod_Class::Tattoo("multiplayer_overlays", "FM_CREW_F_000_A", ""),
         Mod_Class::Tattoo("multiplayer_overlays", "FM_CREW_F_000_B", ""),
         Mod_Class::Tattoo("multiplayer_overlays", "FM_CREW_F_000_C", ""),
@@ -7022,6 +9252,13 @@ namespace Mod_Data
     };
 
     inline const std::vector<Mod_Class::Tattoo> femaleTats01 = {
+        Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_007_F", "A Little Present For You"),
+        Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_014_F", "Masked Machete Killer"),
+        Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_022_F", "Fatal Incursion Outline"),
+        Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_023_F", "Many-Headed Beast"),
+        Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_024_F", "Demon Stitches"),
+        Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_025_F", "Collector"),
+
         Mod_Class::Tattoo("mp2023_02_overlays", "MP_2023_02_Tat_004_F", "Rearview"),//
         Mod_Class::Tattoo("mp2023_02_overlays", "MP_2023_02_Tat_012_F", "Tempesta Girl"),//
         Mod_Class::Tattoo("mp2023_02_overlays", "MP_2023_02_Tat_018_F", "Gearhead"),//
@@ -7211,8 +9448,6 @@ namespace Mod_Data
         Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_004_F", "Herbal Bouquet"),
         Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_005_F", "Cash Krampus"),
         Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_006_F", "All In One Night"),
-        Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_007_F", "A Little Present For You"),
-        Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_014_F", "Masked Machete Killer"),
         Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_015_F", "Killer"),
         Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_016_F", "Powwer"),
         Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_017_F", "Two Headed Beast"),
@@ -7220,10 +9455,7 @@ namespace Mod_Data
         Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_019_F", "Fooligan Jester"),
         Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_020_F", "Vile Smile"),
         Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_021_F", "Demon Skull Jester"),
-        Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_022_F", "Fatal Incursion Outline"),
-        Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_023_F", "Many-Headed Beast"),
-        Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_024_F", "Demon Stitches"),
-        Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_025_F", "Collector"),
+
         Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_040_F", "Monkey"),
         Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_041_F", "Dragon"),
         Mod_Class::Tattoo("mpchristmas3_overlays", "MP_Christmas3_Tat_042_F", "Snake"),
@@ -7946,636 +10178,6 @@ namespace Mod_Data
         Mod_Class::Tattoo("multiplayer_overlays", "FM_Tat_F_007", "The Warrior"),
 
         Mod_Class::Tattoo("multiplayer_overlays", "FM_Tat_Award_F_006", "Skull and Sword")
-    };
-
-    inline const std::vector<Mod_Class::Vector4> SpPoint = {
-        Mod_Class::Vector4(-1160.148f, -1607.229f, 4.282094f, 33.58816f),
-        Mod_Class::Vector4(-1246.173f, -1578.978f, 4.075636f, 88.40285f),
-        Mod_Class::Vector4(-1300.651f, -1693.796f, 2.652158f, 119.986f),
-        Mod_Class::Vector4(-1197.284f, -1673.913f, 4.368378f, 336.6819f),
-        Mod_Class::Vector4(-1231.23f, -1774.339f, 2.698436f, 307.819f),
-        Mod_Class::Vector4(-1081.606f, -1699.635f, 4.51774f, 341.5313f),
-        Mod_Class::Vector4(-1321.38f, -1803.161f, 0.5787229f, 338.6356f),
-        Mod_Class::Vector4(-1277.734f, -1796.447f, -100.0f, 190.3f),
-        Mod_Class::Vector4(-1329.865f, -1621.267f, 3.853039f, 125.3387f),
-        Mod_Class::Vector4(-1368.747f, -1588.793f, 2.370532f, 177.0662f),
-        Mod_Class::Vector4(-1380.893f, -1418.045f, 3.565593f, 323.6023f),
-        Mod_Class::Vector4(-1279.822f, -1427.41f, 4.510245f, 212.68f),
-        Mod_Class::Vector4(-1255.639f, -1592.376f, 4.094669f, 227.7035f),
-        Mod_Class::Vector4(-1224.641f, -1502.119f, 4.337264f, 236.9933f),
-        Mod_Class::Vector4(-1431.731f, -1508.598f, 3.715238f, 85.04395f),
-        Mod_Class::Vector4(-1308.609f, -1529.277f, 4.314957f, 74.17694f),
-        Mod_Class::Vector4(-1322.848f, -1734.16f, 1.786219f, 247.0966f),
-        Mod_Class::Vector4(-1427.198f, -1658.383f, -0.3996229f, 276.3645f),
-        Mod_Class::Vector4(-1270.877f, -1811.516f, 1.774477f, 192.7982f),
-        Mod_Class::Vector4(-1178.216f, -1781.372f, 4.050908f, 319.6324f),
-        Mod_Class::Vector4(-1153.027f, -1606.098f, 4.380119f, 56.83902f),
-        Mod_Class::Vector4(-1109.917f, -1688.4f, 4.375373f, 119.264f),
-        Mod_Class::Vector4(-1050.216f, -1619.146f, 4.389634f, 203.3658f),
-        Mod_Class::Vector4(-1108.875f, -1527.476f, 6.779634f, 211.7134f),
-        Mod_Class::Vector4(-1198.382f, -1673.201f, 4.36664f, 310.3611f),
-        Mod_Class::Vector4(-1170.423f, -1433.136f, 4.453862f, 216.7254f),
-        Mod_Class::Vector4(-1314.11f, -1352.265f, 4.469654f, 25.83949f),
-        Mod_Class::Vector4(-1346.334f, -1276.67f, 4.897387f, 190.3171f),
-        Mod_Class::Vector4(-1359.945f, -1193.812f, 4.450387f, 349.2703f),
-        Mod_Class::Vector4(-1241.474f, -1253.23f, 5.328512f, 105.528f),
-        Mod_Class::Vector4(-1369.884f, -1117.181f, 4.500574f, 260.4205f),
-        Mod_Class::Vector4(-1290.337f, -1108.623f, 6.826903f, 50.96396f),
-        Mod_Class::Vector4(-1423.398f, -1023.807f, 4.997945f, 239.7593f),
-        Mod_Class::Vector4(-1332.74f, -1028.393f, 7.703401f, 32.42556f),
-        Mod_Class::Vector4(-1484.517f, -960.1639f, 7.692502f, 45.27397f),
-        Mod_Class::Vector4(-1384.187f, -944.0807f, 10.06455f, 333.1175f),
-        Mod_Class::Vector4(-1577.719f, -970.7444f, 17.41236f, 134.7335f),
-        Mod_Class::Vector4(-1589.911f, -1069.783f, 13.01727f, 66.19942f),
-        Mod_Class::Vector4(-1526.156f, -1224.26f, 2.271887f, 198.1657f),
-        Mod_Class::Vector4(-1647.783f, -1125.91f, 18.34311f, 226.7262f),
-        Mod_Class::Vector4(-1817.684f, -1200.282f, 19.16987f, 272.2027f),
-        Mod_Class::Vector4(-1722.691f, -1102.711f, 13.10247f, 232.1385f),
-        Mod_Class::Vector4(-1741.421f, -1000.758f, 4.251456f, 283.4004f),
-        Mod_Class::Vector4(-1656.441f, -1023.758f, 13.01742f, 134.6409f),
-        Mod_Class::Vector4(-1789.288f, -867.3212f, 7.367817f, 26.9756f),
-        Mod_Class::Vector4(-1766.264f, -710.6727f, 14.04142f, 128.1337f),
-        Mod_Class::Vector4(-1840.649f, -786.7416f, 6.942594f, 209.3775f),
-        Mod_Class::Vector4(-1928.198f, -787.6534f, 1.400905f, 124.8805f),
-        Mod_Class::Vector4(-1853.948f, -643.4832f, 10.74218f, 51.13507f),
-        Mod_Class::Vector4(-1693.429f, -782.542f, 10.15547f, 31.77343f),
-        Mod_Class::Vector4(-2019.225f, -671.4921f, 1.732529f, 35.30247f),
-        Mod_Class::Vector4(-2073.122f, -556.3633f, 4.322869f, 112.1614f),
-        Mod_Class::Vector4(-1918.171f, -581.4932f, 11.82719f, 74.45322f),
-        Mod_Class::Vector4(-1941.187f, -683.3286f, 6.042047f, 317.4851f),
-        Mod_Class::Vector4(-2017.408f, -403.2584f, 10.99738f, 102.571f),
-        Mod_Class::Vector4(-2073.494f, -322.6716f, 13.31618f, 110.8201f),
-        Mod_Class::Vector4(-1920.867f, -395.7564f, 48.28661f, 144.3688f),
-        Mod_Class::Vector4(-1932.222f, -256.2742f, 39.38351f, 163.2952f),
-        Mod_Class::Vector4(-2006.573f, -292.1909f, 31.14633f, 32.56577f),
-        Mod_Class::Vector4(-1830.16f, -393.1055f, 57.13855f, 341.9896f),
-        Mod_Class::Vector4(-1812.373f, -487.2023f, 40.97498f, 99.4837f),
-        Mod_Class::Vector4(-1801.349f, -284.9655f, 42.74314f, 49.44889f),
-        Mod_Class::Vector4(-1750.369f, -388.2991f, 49.33112f, 306.9421f),
-        Mod_Class::Vector4(-1733.029f, -542.143f, 37.22449f, 46.17191f),
-        Mod_Class::Vector4(-1652.144f, -473.3973f, 38.76246f, 156.1328f),
-        Mod_Class::Vector4(-1582.329f, -541.8163f, 35.48005f, 318.3726f),
-        Mod_Class::Vector4(-1688.893f, -614.0651f, 32.71557f, 160.953f),
-        Mod_Class::Vector4(-1590.418f, -652.4891f, 29.94338f, 234.872f),
-        Mod_Class::Vector4(-1516.227f, -630.6576f, 29.60688f, 124.8291f),
-        Mod_Class::Vector4(-1514.848f, -720.5037f, 27.28335f, 44.38182f),
-        Mod_Class::Vector4(-1467.341f, -779.6733f, 23.88621f, 141.6295f),
-        Mod_Class::Vector4(-1426.177f, -608.0167f, 30.68489f, 216.1941f),
-        Mod_Class::Vector4(-1429.254f, -685.5729f, 30.09999f, 351.6236f),
-        Mod_Class::Vector4(-1370.448f, -786.2045f, 19.34618f, 46.06882f),
-        Mod_Class::Vector4(-1509.341f, -849.4481f, 23.72846f, 146.3204f),
-        Mod_Class::Vector4(-1338.667f, -684.4074f, 25.90955f, 337.9835f),
-        Mod_Class::Vector4(-1267.564f, -887.0582f, 11.46313f, 312.6759f),
-        Mod_Class::Vector4(-1291.891f, -963.3849f, 10.90977f, 17.93775f),
-        Mod_Class::Vector4(-1243.466f, -1037.107f, 8.533915f, 24.88162f),
-        Mod_Class::Vector4(-1205.129f, -946.3865f, 8.115028f, 78.52157f),
-        Mod_Class::Vector4(-1209.501f, -1145.148f, 7.699383f, 246.5961f),
-        Mod_Class::Vector4(-1152.507f, -1092.617f, 2.150213f, 78.05627f),
-        Mod_Class::Vector4(-1176.931f, -1326.262f, 5.043202f, 91.40005f),
-        Mod_Class::Vector4(-1278.753f, -1280.306f, -100.0f, 286.1835f),
-        Mod_Class::Vector4(-280.1419f, -2078.309f, 27.75568f, 120.8461f),
-        Mod_Class::Vector4(-362.931f, -2096.714f, -100.0f, 249.8338f),
-        Mod_Class::Vector4(-1233.953f, -2060.108f, 14.38426f, 322.4592f),
-        Mod_Class::Vector4(-1177.911f, -1969.751f, 12.2126f, 245.5379f),
-        Mod_Class::Vector4(-958.8653f, -2038.964f, 9.571634f, 275.1023f),
-        Mod_Class::Vector4(-1065.295f, -2082.96f, 13.29153f, 124.204f),
-        Mod_Class::Vector4(-1158.608f, -2165.972f, 13.38066f, 105.9783f),
-        Mod_Class::Vector4(-990.8157f, -2278.67f, 8.95359f, 230.7598f),
-        Mod_Class::Vector4(-878.8334f, -2183.131f, 8.937191f, 216.7394f),
-        Mod_Class::Vector4(-891.5108f, -2402.83f, 14.02515f, 147.8056f),
-        Mod_Class::Vector4(-893.0229f, -2317.104f, -3.507768f, 8.885142f),
-        Mod_Class::Vector4(-978.1707f, -2465.764f, 13.75622f, 149.0023f),
-        Mod_Class::Vector4(-900.1584f, -2491.51f, 14.54965f, 27.85674f),
-        Mod_Class::Vector4(-1033.629f, -2381.482f, 14.0936f, 173.6633f),
-        Mod_Class::Vector4(-955.9147f, -2386.496f, -100.0f, 149.8728f),
-        Mod_Class::Vector4(1450.433f, -1731.397f, 68.03314f, 41.98439f),
-        Mod_Class::Vector4(1600.253f, -1712.9f, 88.12589f, 185.5337f),
-        Mod_Class::Vector4(1568.778f, -1595.55f, 90.31343f, 334.3277f),
-        Mod_Class::Vector4(1715.997f, -1560.912f, 112.6362f, 265.2239f),
-        Mod_Class::Vector4(1729.931f, -1664.9f, 112.5535f, 55.15057f),
-        Mod_Class::Vector4(1677.571f, -1857.563f, 108.353f, 227.1044f),
-        Mod_Class::Vector4(1544.524f, -2091.144f, 77.13461f, 115.2182f),
-        Mod_Class::Vector4(1397.054f, -2203.803f, 61.26979f, 11.66307f),
-        Mod_Class::Vector4(1432.708f, -2318.181f, 66.93765f, 0.1958369f),
-        Mod_Class::Vector4(1090.301f, -2258.336f, 30.16828f, 154.4966f),
-        Mod_Class::Vector4(1050.76f, -2359.522f, 30.58618f, 359.6519f),
-        Mod_Class::Vector4(1257.031f, -2301.23f, 50.42583f, 297.5381f),
-        Mod_Class::Vector4(1213.246f, -2201.788f, 41.42298f, 174.4906f),
-        Mod_Class::Vector4(1181.73f, -2088.975f, 42.835f, 108.8092f),
-        Mod_Class::Vector4(1075.413f, -2130.978f, 32.65754f, 356.5745f),
-        Mod_Class::Vector4(1069.265f, -2051.669f, 30.54184f, 328.8749f),
-        Mod_Class::Vector4(1253.046f, -1965.152f, 43.31088f, 277.0399f),
-        Mod_Class::Vector4(1162.939f, -1835.688f, 37.32333f, 309.8178f),
-        Mod_Class::Vector4(1253.974f, -1801.581f, 41.43707f, 101.9945f),
-        Mod_Class::Vector4(1165.914f, -1757.395f, 36.09859f, 5.626177f),
-        Mod_Class::Vector4(1211.297f, -1635.897f, 46.98957f, 15.0685f),
-        Mod_Class::Vector4(1339.797f, -1769.144f, 58.84056f, 110.8002f),
-        Mod_Class::Vector4(1299.746f, -1624.184f, 52.31812f, 219.0709f),
-        Mod_Class::Vector4(1370.415f, -1683.915f, 59.39519f, 28.85051f),
-        Mod_Class::Vector4(1338.409f, -1524.272f, 54.58279f, 175.8651f),
-        Mod_Class::Vector4(1264.839f, -1511.525f, 40.75233f, 196.139f),
-        Mod_Class::Vector4(1162.592f, -1484.728f, 34.84315f, 45.85416f),
-        Mod_Class::Vector4(1215.056f, -1389.57f, 35.3749f, 298.4576f),
-        Mod_Class::Vector4(1064.018f, -1447.581f, 36.74253f, 272.2317f),
-        Mod_Class::Vector4(962.9564f, -1491.263f, 31.03523f, 283.0984f),
-        Mod_Class::Vector4(811.0013f, -1355.856f, 26.39643f, 139.9369f),
-        Mod_Class::Vector4(852.3708f, -1452.39f, 28.46454f, 153.5606f),
-        Mod_Class::Vector4(782.0834f, -1276.112f, 26.38883f, 245.5533f),
-        Mod_Class::Vector4(708.6996f, -1387.042f, 26.28415f, 95.50644f),
-        Mod_Class::Vector4(729.1082f, -1202.147f, 27.59183f, 314.4826f),
-        Mod_Class::Vector4(866.4579f, -1218.872f, 25.93666f, 150.9242f),
-        Mod_Class::Vector4(812.4778f, -1108.296f, 22.87424f, 358.1263f),
-        Mod_Class::Vector4(805.5677f, -992.9066f, 26.17185f, 93.29649f),
-        Mod_Class::Vector4(719.1799f, -1068.157f, 22.22762f, 76.04496f),
-        Mod_Class::Vector4(867.8777f, -949.1575f, 26.28246f, 284.0382f),
-        Mod_Class::Vector4(799.3265f, -910.1976f, 25.25154f, 64.5854f),
-        Mod_Class::Vector4(788.2667f, -779.5413f, 26.43379f, 76.76219f),
-        Mod_Class::Vector4(676.5705f, -893.8166f, 23.46652f, 48.36354f),
-        Mod_Class::Vector4(792.6351f, -680.9716f, 28.78763f, 182.0778f),
-        Mod_Class::Vector4(712.2411f, -718.2731f, 26.09179f, 222.572f),
-        Mod_Class::Vector4(871.4885f, -477.5969f, 57.6135f, 27.29279f),
-        Mod_Class::Vector4(802.2733f, -487.6502f, 29.98962f, 66.31482f),
-        Mod_Class::Vector4(762.3665f, -605.8344f, 29.01363f, 289.0056f),
-        Mod_Class::Vector4(647.2089f, -405.4547f, 25.90333f, 141.224f),
-        Mod_Class::Vector4(793.6388f, -251.5794f, 66.11258f, 262.0274f),
-        Mod_Class::Vector4(740.2285f, -348.7549f, 44.64523f, 102.3112f),
-        Mod_Class::Vector4(842.9829f, -326.1672f, 58.63135f, 78.39604f),
-        Mod_Class::Vector4(774.1849f, -157.5243f, 74.47166f, 194.3f),
-        Mod_Class::Vector4(717.7997f, -231.8359f, 66.49796f, 145.0598f),
-        Mod_Class::Vector4(879.2205f, -133.0256f, 78.19176f, 321.4662f),
-        Mod_Class::Vector4(954.9133f, -139.376f, 74.48351f, 261.024f),
-        Mod_Class::Vector4(770.9991f, -20.69291f, 81.40639f, 55.6139f),
-        Mod_Class::Vector4(918.6093f, -299.0002f, 65.7274f, 89.47182f),
-        Mod_Class::Vector4(1075.878f, -221.7357f, 57.22911f, 100.7295f),
-        Mod_Class::Vector4(1167.627f, -326.1849f, 69.27177f, 253.1378f),
-        Mod_Class::Vector4(1182.85f, -419.4162f, 67.44855f, 160.1736f),
-        Mod_Class::Vector4(1095.917f, -363.7542f, 67.05442f, 154.2719f),
-        Mod_Class::Vector4(1241.207f, -370.6926f, 69.08267f, 357.5793f),
-        Mod_Class::Vector4(1295.678f, -450.1477f, 69.11702f, 39.42892f),
-        Mod_Class::Vector4(1196.354f, -500.0268f, 65.35512f, 239.1896f),
-        Mod_Class::Vector4(1244.402f, -565.6254f, 69.36629f, 327.5226f),
-        Mod_Class::Vector4(1358.867f, -507.7113f, 74.07481f, 238.6464f),
-        Mod_Class::Vector4(1271.949f, -679.5294f, 65.78483f, 221.1033f),
-        Mod_Class::Vector4(1170.739f, -673.777f, 60.85263f, 8.802817f),
-        Mod_Class::Vector4(1157.536f, -826.6323f, 55.04485f, 261.9964f),
-        Mod_Class::Vector4(1229.198f, -774.131f, 59.95905f, 111.6313f),
-        Mod_Class::Vector4(1065.049f, -721.359f, 56.7688f, 251.442f),
-        Mod_Class::Vector4(961.0184f, -668.5934f, 58.42073f, 252.7814f),
-        Mod_Class::Vector4(944.5909f, -590.6015f, 57.93015f, 263.7933f),
-        Mod_Class::Vector4(1065.475f, -587.393f, 56.98307f, 176.1875f),
-        Mod_Class::Vector4(1087.19f, -483.9626f, 65.1468f, 43.63801f),
-        Mod_Class::Vector4(990.569f, -528.5084f, 60.1135f, 187.5177f),
-        Mod_Class::Vector4(1029.239f, -420.6697f, 65.71067f, 103.3361f),
-        Mod_Class::Vector4(878.2419f, 536.1291f, 125.7603f, 256.0516f),
-        Mod_Class::Vector4(780.4013f, 569.2122f, 127.5153f, 308.715f),
-        Mod_Class::Vector4(-1652.492f, -268.9684f, 53.03486f, 238.35f),
-        Mod_Class::Vector4(-1796.219f, -262.315f, 44.68269f, 225.691f),
-        Mod_Class::Vector4(-1862.262f, -346.5329f, 49.84129f, 207.6463f),
-        Mod_Class::Vector4(-1746.119f, -373.1069f, 46.04745f, 348.238f),
-        Mod_Class::Vector4(-1758.126f, -177.5893f, 59.93489f, 53.74375f),
-        Mod_Class::Vector4(-1851.886f, -211.0984f, 39.37838f, 30.06215f),
-        Mod_Class::Vector4(-1647.251f, -157.372f, 57.61746f, 114.5786f),
-        Mod_Class::Vector4(-1657.056f, -12.40816f, 61.96356f, 225.4638f),
-        Mod_Class::Vector4(-1855.837f, 87.75642f, 79.74529f, 317.2931f),
-        Mod_Class::Vector4(-2227.431f, 177.6394f, 174.6018f, 246.6147f),
-        Mod_Class::Vector4(-2183.896f, 284.1322f, 169.6021f, 263.2045f),
-        Mod_Class::Vector4(-2266.481f, 266.8381f, 184.6013f, 236.3674f),
-        Mod_Class::Vector4(-2340.92f, 224.7503f, 169.6533f, 147.9599f),
-        Mod_Class::Vector4(-2291.11f, 419.6725f, 174.6017f, 269.9671f),
-        Mod_Class::Vector4(-2351.723f, 354.5746f, 174.5702f, 316.094f),
-        Mod_Class::Vector4(-1992.776f, 597.1656f, 117.9074f, 244.9395f),
-        Mod_Class::Vector4(-1918.98f, 427.659f, 102.579f, 288.3187f),
-        Mod_Class::Vector4(-1942.294f, 537.5837f, 119.4511f, 71.42182f),
-        Mod_Class::Vector4(-1863.526f, 663.243f, 129.1108f, 47.40017f),
-        Mod_Class::Vector4(-1950.522f, 671.437f, 126.8631f, 49.11973f),
-        Mod_Class::Vector4(-1821.452f, 805.2283f, 138.6922f, 350.8116f),
-        Mod_Class::Vector4(-1596.12f, 763.6357f, 188.776f, 67.02236f),
-        Mod_Class::Vector4(-1537.647f, 824.0611f, 181.5576f, 132.0971f),
-        Mod_Class::Vector4(-1390.973f, 604.0109f, 130.5611f, 103.6059f),
-        Mod_Class::Vector4(-1380.87f, 733.273f, 182.4565f, 346.0296f),
-        Mod_Class::Vector4(-1273.141f, 606.6987f, 139.2841f, 177.0211f),
-        Mod_Class::Vector4(-1208.797f, 648.6027f, 144.6223f, 184.7298f),
-        Mod_Class::Vector4(-1187.657f, 561.1202f, 100.0236f, 282.7813f),
-        Mod_Class::Vector4(-1061.68f, 732.2233f, 165.4498f, 328.4958f),
-        Mod_Class::Vector4(-1123.518f, 796.3937f, 167.7469f, 256.4597f),
-        Mod_Class::Vector4(-974.0649f, 689.8514f, 158.0351f, 36.62312f),
-        Mod_Class::Vector4(-952.0835f, 799.6948f, 178.4169f, 358.3044f),
-        Mod_Class::Vector4(-854.5779f, 790.907f, 191.7423f, 343.4804f),
-        Mod_Class::Vector4(-800.5696f, 886.0236f, 203.1893f, 150.7404f),
-        Mod_Class::Vector4(-757.3545f, 774.8885f, 212.2914f, 21.35574f),
-        Mod_Class::Vector4(-679.4247f, 798.2404f, 198.0051f, 179.3822f),
-        Mod_Class::Vector4(-668.9477f, 906.9561f, 230.1238f, 229.8917f),
-        Mod_Class::Vector4(-538.2089f, 785.8329f, 196.6117f, 117.694f),
-        Mod_Class::Vector4(-398.9189f, 666.7883f, 163.8354f, 90.2931f),
-        Mod_Class::Vector4(-510.514f, 671.3224f, 150.273f, 163.8439f),
-        Mod_Class::Vector4(-472.1857f, 537.1354f, 124.354f, 0.0f),
-        Mod_Class::Vector4(-385.3415f, 515.0933f, 120.8225f, 227.8424f),
-        Mod_Class::Vector4(-355.368f, 423.3936f, 110.8382f, 345.9255f),
-        Mod_Class::Vector4(-506.4408f, 454.185f, 96.69381f, 276.8076f),
-        Mod_Class::Vector4(-245.8695f, 393.0556f, 112.4406f, 260.9666f),
-        Mod_Class::Vector4(-60.18164f, 494.9249f, 144.5688f, 247.2409f),
-        Mod_Class::Vector4(-88.42611f, 889.886f, 236.1728f, 212.5896f),
-        Mod_Class::Vector4(56.37422f, 1050.121f, 218.6296f, 295.7127f),
-        Mod_Class::Vector4(-449.0672f, 1062.479f, 327.6815f, 175.8242f),
-        Mod_Class::Vector4(-399.2907f, 1148.496f, 325.853f, 200.4087f),
-        Mod_Class::Vector4(-480.5667f, 1133.815f, 320.0966f, 190.5652f),
-        Mod_Class::Vector4(-294.9129f, 1429.549f, 339.3169f, 336.8831f),
-        Mod_Class::Vector4(-407.2495f, 1581.665f, 353.7131f, 73.89459f),
-        Mod_Class::Vector4(-149.5202f, 1453.246f, 292.8072f, 199.7669f),
-        Mod_Class::Vector4(-266.3375f, 1547.674f, 336.4588f, 141.5186f),
-        Mod_Class::Vector4(779.201f, 1187.419f, 325.5869f, 66.41692f),
-        Mod_Class::Vector4(307.273f, 1108.102f, 216.9276f, 75.9652f),
-        Mod_Class::Vector4(276.0082f, 1187.72f, 226.0305f, 14.18411f),
-        Mod_Class::Vector4(191.0497f, 1224.417f, 225.5948f, 106.2378f),
-        Mod_Class::Vector4(294.2169f, 953.3748f, 208.6888f, 254.3083f),
-        Mod_Class::Vector4(229.4137f, 675.6113f, 189.6827f, 210.8005f),
-        Mod_Class::Vector4(221.4684f, 513.708f, 140.7564f, 359.1328f),
-        Mod_Class::Vector4(218.7429f, 302.6817f, 105.5856f, 248.4243f),
-        Mod_Class::Vector4(336.653f, 312.7571f, 104.6787f, 170.513f),
-        Mod_Class::Vector4(127.0963f, 341.097f, 111.944f, 32.08784f),
-        Mod_Class::Vector4(2824.941f, -743.6797f, 1.471339f, 16.6061f),
-        Mod_Class::Vector4(2835.425f, -626.2703f, 1.730462f, 227.3414f),
-        Mod_Class::Vector4(2575.149f, -289.9889f, 93.07821f, 324.0676f),
-        Mod_Class::Vector4(2521.409f, -414.0672f, 94.12376f, 222.7773f),
-        Mod_Class::Vector4(2571.536f, 304.6294f, 108.6065f, 20.04023f),
-        Mod_Class::Vector4(2572.306f, 478.2309f, 108.6772f, 91.36018f),
-        Mod_Class::Vector4(2746.039f, 1453.321f, 24.48774f, 299.1059f),
-        Mod_Class::Vector4(2757.865f, 1528.199f, 32.49879f, 87.19512f),
-        Mod_Class::Vector4(2666.189f, 1508.934f, 24.50084f, 299.6714f),
-        Mod_Class::Vector4(2853.234f, 1474.861f, 24.61952f, 107.3717f),
-        Mod_Class::Vector4(2720.579f, 1647.611f, 24.57493f, 269.4894f),
-        Mod_Class::Vector4(2473.841f, 1572.31f, 32.72038f, 354.3351f),
-        Mod_Class::Vector4(2357.949f, 1845.58f, 101.2663f, 166.731f),
-        Mod_Class::Vector4(2319.202f, 2551.041f, 47.69345f, 227.7995f),
-        Mod_Class::Vector4(2526.939f, 2584.094f, 37.94465f, 8.938714f),
-        Mod_Class::Vector4(2595.807f, 2801.963f, 34.00152f, 323.103f),
-        Mod_Class::Vector4(2739.255f, 2782.027f, 35.73802f, 303.735f),
-        Mod_Class::Vector4(2570.977f, 2720.95f, 42.9959f, 209.3307f),
-        Mod_Class::Vector4(-2956.631f, 11.69463f, 6.931808f, 156.18f),
-        Mod_Class::Vector4(-2876.279f, 21.03024f, 11.60808f, 41.72112f),
-        Mod_Class::Vector4(-3012.55f, -51.12709f, 0.310649f, 38.1624f),
-        Mod_Class::Vector4(-3038.164f, 38.733f, 8.971894f, 41.44547f),
-        Mod_Class::Vector4(-3096.169f, 119.0552f, 6.728017f, 87.99979f),
-        Mod_Class::Vector4(-3091.035f, 352.2566f, 7.519391f, 67.82193f),
-        Mod_Class::Vector4(-3075.979f, 447.3828f, 6.362554f, 50.79964f),
-        Mod_Class::Vector4(-2964.959f, 452.5694f, 15.30891f, 148.5125f),
-        Mod_Class::Vector4(-3057.164f, 532.517f, 7.604911f, 255.576f),
-        Mod_Class::Vector4(-3047.145f, 614.4224f, 7.323409f, 264.085f),
-        Mod_Class::Vector4(-2982.056f, 719.5752f, 28.49753f, 22.28972f),
-        Mod_Class::Vector4(-3165.79f, 762.5814f, 3.421354f, 180.3855f),
-        Mod_Class::Vector4(-3237.243f, 914.8962f, 16.88076f, 110.9341f),
-        Mod_Class::Vector4(-3295.146f, 984.6699f, 2.889409f, 0.8584108f),
-        Mod_Class::Vector4(-3353.275f, 1037.395f, -0.4267793f, 0.1203664f),
-        Mod_Class::Vector4(-3270.502f, 1210.821f, 2.343407f, 180.0034f),
-        Mod_Class::Vector4(-3264.688f, 1110.545f, 2.304754f, 320.7578f),
-        Mod_Class::Vector4(-3187.552f, 1221.516f, 9.986886f, 167.8331f),
-        Mod_Class::Vector4(-2542.358f, 2317.119f, 33.21531f, 63.28617f),
-        Mod_Class::Vector4(-1955.376f, 2367.43f, 32.54905f, 161.8323f),
-        Mod_Class::Vector4(-1841.089f, 2195.876f, 97.38118f, 304.6146f),
-        Mod_Class::Vector4(-1837.205f, 2270.878f, 73.74523f, 312.3881f),
-        Mod_Class::Vector4(-1895.852f, 2143.426f, 121.225f, 65.59644f),
-        Mod_Class::Vector4(-1859.108f, 2072.094f, 140.9959f, 129.7641f),
-        Mod_Class::Vector4(-1790.499f, 2119.865f, 132.356f, 90.9618f),
-        Mod_Class::Vector4(-1916.931f, 1944.778f, 158.3994f, 296.9663f),
-        Mod_Class::Vector4(-1701.855f, 1957.936f, 131.0938f, 56.90914f),
-        Mod_Class::Vector4(-1721.216f, 2029.074f, 112.8439f, 156.9609f),
-        Mod_Class::Vector4(-1097.618f, 2700.906f, 18.90455f, 84.88656f),
-        Mod_Class::Vector4(-328.0197f, 2825.509f, 58.02246f, 111.1101f),
-        Mod_Class::Vector4(181.3483f, 2793.319f, 45.6552f, 24.21892f),
-        Mod_Class::Vector4(331.855f, 2873.202f, 43.45045f, 156.6868f),
-        Mod_Class::Vector4(361.1784f, 2976.71f, 40.4106f, 122.3371f),
-        Mod_Class::Vector4(282.1306f, 2568.33f, 45.2464f, 241.7109f),
-        Mod_Class::Vector4(203.8961f, 2702.276f, 42.54163f, 175.5621f),
-        Mod_Class::Vector4(391.2553f, 2633.707f, 44.6586f, 32.33579f),
-        Mod_Class::Vector4(470.7168f, 2610.214f, 42.72048f, 9.760907f),
-        Mod_Class::Vector4(586.6243f, 2742.652f, 42.07542f, 275.8898f),
-        Mod_Class::Vector4(754.2651f, 2783.679f, 66.97653f, 216.7942f),
-        Mod_Class::Vector4(848.8434f, 2382.375f, 54.18682f, 285.6466f),
-        Mod_Class::Vector4(914.1945f, 2294.065f, 48.86418f, 187.3512f),
-        Mod_Class::Vector4(980.6591f, 2667.654f, 40.06087f, 354.2927f),
-        Mod_Class::Vector4(1182.588f, 2701.389f, 38.15746f, 236.7878f),
-        Mod_Class::Vector4(1116.655f, 2641.605f, 38.14867f, 2.974739f),
-        Mod_Class::Vector4(1777.552f, 3325.553f, 41.43348f, 345.9209f),
-        Mod_Class::Vector4(1832.452f, 3443.146f, 41.04421f, 354.7577f),
-        Mod_Class::Vector4(1964.699f, 3257.751f, 45.65916f, 168.9078f),
-        Mod_Class::Vector4(1987.721f, 3047.302f, 46.74506f, 237.7831f),
-        Mod_Class::Vector4(2370.224f, 3156.767f, 48.20884f, 39.61424f),
-        Mod_Class::Vector4(2343.113f, 3046.043f, 48.15176f, 273.6578f),
-        Mod_Class::Vector4(2398.234f, 3315.428f, 47.70992f, 282.5903f),
-        Mod_Class::Vector4(2164.31f, 3396.292f, 45.43284f, 295.356f),
-        Mod_Class::Vector4(2259.422f, 3437.281f, 64.76982f, 128.1591f),
-        Mod_Class::Vector4(2179.717f, 3498.747f, 45.46162f, 354.1017f),
-        Mod_Class::Vector4(2062.606f, 3452.479f, 43.75446f, 37.58577f),
-        Mod_Class::Vector4(2486.352f, 3760.736f, 42.24755f, 176.6024f),
-        Mod_Class::Vector4(2616.738f, 3665.922f, 102.1075f, 62.15446f),
-        Mod_Class::Vector4(2418.972f, 4019.551f, 36.7912f, 209.7724f),
-        Mod_Class::Vector4(2483.769f, 4102.82f, 38.12365f, 182.0906f),
-        Mod_Class::Vector4(2565.83f, 4244.567f, 41.4447f, 328.7588f),
-        Mod_Class::Vector4(2702.66f, 4330.201f, 45.85205f, 10.36979f),
-        Mod_Class::Vector4(2904.14f, 4593.71f, 48.02999f, 80.57688f),
-        Mod_Class::Vector4(2859.294f, 4663.227f, 47.93969f, 195.7032f),
-        Mod_Class::Vector4(2227.497f, 4790.701f, 40.40303f, 345.2054f),
-        Mod_Class::Vector4(1684.557f, 4817.428f, 42.01131f, 117.5796f),
-        Mod_Class::Vector4(1668.184f, 4897.533f, 42.05532f, 203.0841f),
-        Mod_Class::Vector4(1717.725f, 4677.343f, 43.65575f, 290.9685f),
-        Mod_Class::Vector4(1428.173f, 4379.375f, 44.27631f, 216.4638f),
-        Mod_Class::Vector4(1370.321f, 4317.032f, 38.06339f, 42.11711f),
-        Mod_Class::Vector4(1240.904f, 4350.808f, 34.24231f, 94.9155f),
-        Mod_Class::Vector4(-271.7308f, 6400.089f, 31.30641f, 222.9104f),
-        Mod_Class::Vector4(-335.076f, 6493.833f, 2.34665f, 119.0187f),
-        Mod_Class::Vector4(-401.1573f, 6383.861f, 14.14575f, 136.2842f),
-        Mod_Class::Vector4(-640.2075f, 6236.555f, 2.976151f, 172.2602f),
-        Mod_Class::Vector4(-437.9801f, 6272.952f, 30.06834f, 249.4151f),
-        Mod_Class::Vector4(-661.4758f, 6157.757f, 2.040393f, 141.1119f),
-        Mod_Class::Vector4(-703.632f, 5802.625f, 17.31226f, 352.4189f),
-        Mod_Class::Vector4(-739.5485f, 5602.697f, 41.65934f, 180.9679f),
-        Mod_Class::Vector4(-594.1973f, 5364.056f, 70.43559f, 20.45568f),
-        Mod_Class::Vector4(-630.548f, 5208.631f, 83.00797f, 80.07411f),
-        Mod_Class::Vector4(-468.9976f, 5358.746f, 80.79279f, 4.032477f),
-        Mod_Class::Vector4(-514.1689f, 5266.845f, 80.48373f, 212.6361f),
-        Mod_Class::Vector4(-455.2321f, 6008.505f, 31.48877f, 260.9404f),
-        Mod_Class::Vector4(-379.7126f, 6033.835f, 31.49892f, 100.5203f),
-        Mod_Class::Vector4(-321.3374f, 6232.379f, 31.52865f, 281.4824f),
-        Mod_Class::Vector4(-416.6474f, 6137.146f, 31.53211f, 227.9525f),
-        Mod_Class::Vector4(-249.6663f, 6067.666f, 31.37034f, 140.0739f),
-        Mod_Class::Vector4(-246.1973f, 6155.588f, 31.42052f, 184.0397f),
-        Mod_Class::Vector4(-250.0735f, 6271.455f, 31.43178f, 146.0887f),
-        Mod_Class::Vector4(-182.6544f, 6334.627f, 31.4791f, 137.9106f),
-        Mod_Class::Vector4(-152.0446f, 6259.825f, 31.48942f, 321.7107f),
-        Mod_Class::Vector4(-68.66537f, 6270.102f, 31.33991f, 153.4193f),
-        Mod_Class::Vector4(-70.80379f, 6437.074f, 31.63992f, 149.3367f),
-        Mod_Class::Vector4(-168.8526f, 6436.67f, 31.9113f, 33.98012f),
-        Mod_Class::Vector4(-106.8976f, 6533.95f, 29.83228f, 22.53628f),
-        Mod_Class::Vector4(-17.19193f, 6502.194f, 31.50745f, 277.7401f),
-        Mod_Class::Vector4(107.219f, 6612.1f, 31.97963f, 176.6421f),
-        Mod_Class::Vector4(155.6443f, 6508.133f, 31.7202f, 50.47895f),
-        Mod_Class::Vector4(-97.19097f, 6350.258f, 31.58107f, 227.7804f),
-        Mod_Class::Vector4(291.5666f, 6515.816f, 29.77631f, 240.3053f),
-        Mod_Class::Vector4(381.5781f, 6526.341f, 28.18776f, 297.2371f),
-        Mod_Class::Vector4(509.6346f, 6512.681f, 29.83138f, 358.1497f),
-        Mod_Class::Vector4(1087.457f, 6511.739f, 20.55505f, 184.4623f),
-        Mod_Class::Vector4(1300.798f, 6609.131f, 2.210964f, 166.6302f),
-        Mod_Class::Vector4(1427.748f, 6551.687f, 15.48245f, 259.8033f),
-        Mod_Class::Vector4(1581.274f, 6453.915f, 25.31938f, 146.6987f),
-        Mod_Class::Vector4(1691.058f, 6427.246f, 32.54766f, 235.5572f),
-        Mod_Class::Vector4(488.016f, 5586.718f, 794.0623f, 207.1104f),
-        Mod_Class::Vector4(709.0751f, 4184.547f, 40.70778f, 34.69099f),
-        Mod_Class::Vector4(713.3973f, 4092.791f, 34.72971f, 183.6691f),
-        Mod_Class::Vector4(-18.10457f, 3768.18f, 31.31539f, 0.0f),
-        Mod_Class::Vector4(396.4519f, 3578.591f, 33.29235f, 292.9981f),
-        Mod_Class::Vector4(915.2141f, 3565.18f, 33.80116f, 296.1426f),
-        Mod_Class::Vector4(915.4491f, 3643.504f, 32.65174f, 224.7724f),
-        Mod_Class::Vector4(1361.951f, 3603.041f, 34.94891f, 248.2975f),
-        Mod_Class::Vector4(1261.829f, 3548.285f, 34.62054f, 191.3703f),
-        Mod_Class::Vector4(1229.425f, 3622.139f, 33.48791f, 194.691f),
-        Mod_Class::Vector4(1431.933f, 3669.91f, 39.73352f, 21.39104f),
-        Mod_Class::Vector4(1553.329f, 3801.798f, 34.25249f, 349.7805f),
-        Mod_Class::Vector4(1691.517f, 3866.717f, 34.91164f, 110.7219f),
-        Mod_Class::Vector4(1544.495f, 3722.99f, 34.59937f, 213.8932f),
-        Mod_Class::Vector4(1795.776f, 3949.233f, 33.90714f, 275.9398f),
-        Mod_Class::Vector4(1829.368f, 3833.267f, 33.35374f, 28.27547f),
-        Mod_Class::Vector4(1904.727f, 3708.882f, 32.73225f, 290.9872f),
-        Mod_Class::Vector4(1950.306f, 3845.622f, 32.18547f, 249.8298f),
-        Mod_Class::Vector4(1985.265f, 3705.139f, 32.3974f, 332.6318f),
-        Mod_Class::Vector4(2016.912f, 3773.148f, 32.20602f, 265.4035f),
-        Mod_Class::Vector4(1825.867f, 3656.211f, 34.08326f, 253.2209f),
-        Mod_Class::Vector4(1741.156f, 3710.271f, 34.1827f, 21.51038f),
-        Mod_Class::Vector4(1632.203f, 3597.311f, 35.43903f, 211.6864f)
-    };
-
-    inline std::vector<std::string> RSLangMenu = {
-            "Enter",                                                                                    //0
-            "Back",                                                                                     //1
-            "Left",                                                                                     //2
-            "Right",                                                                                    //3
-            "Random Scenarios",                                                                         //4
-            "Select available or launch a random scenario.",                                            //5
-            "Save Ped Menu",                                                                            //6
-            "Change customize and save characters.",                                                    //7
-            "Random Start",                                                                             //8
-            "Select a random scenario when game loads.",                                                //9
-            "Random Ped",                                                                               //10
-            "Load as or re-spawn as a random ped (includes animals).",                                  //11
-            "Saved Ped",                                                                                //12
-            "Load as or re-spawn as a saved ped.",                                                      //13
-            "Reincarnation",                                                                            //14
-            "Life after death?",                                                                        //15
-            "Re-spawn",                                                                                 //16
-            "Return as your current character in the area you died in.",                                //17
-            "Funeral",                                                                                  //18
-            "If you are using a random or non main character have a funeral service on death.",         //19
-            "Prison",                                                                                   //20
-            "Go straight to Bolingbroke do not pass go do not collect 200.",                            //21
-            "Random Weapons",                                                                           //22
-            "Get a random weapon selection or keep your current weapons.",                              //23
-            "Capture Weapon Load-out",                                                                  //24
-            "Save you current weapon selection.",                                                       //25
-            "Change Key-bindings",                                                                      //26
-            "Select menu load key.",                                                                    //27
-            "Beach Ped",                                                                                //28
-            "Sun bathing and motor boating.",                                                           //29
-            "Tramps",                                                                                   //30
-            "Down and out in Los Santos.",                                                              //31
-            "High class",                                                                               //32
-            "Nice house, nice car, nice weather.",                                                      //33
-            "Mid class",                                                                                //34
-            "Reasonable house, reasonable car, reasonable weather.",                                    //35
-            "Low class",                                                                                //36
-            "Rubbish house, trash car, crap weather.",                                                  //37
-            "Business",                                                                                 //38
-            "The high flying Los Santos elite.",                                                        //39
-            "Body builder",                                                                             //40
-            "Use the facilities at muscle beach.",                                                      //41
-            "Gangsters",                                                                                //42
-            "Defend your turf in the Los Santos war zones.",                                            //43
-            "Epsilon ",                                                                                 //44
-            "Join a cult and look down on the non-believers.",                                          //45
-            "Jogger",                                                                                   //46
-            "Take a run in some random location.",                                                      //47
-            "Golfer",                                                                                   //48
-            "Play a round or just burn up the turf in your caddy.",                                     //49
-            "Hiker",                                                                                    //50
-            "Explore the wilderness of Los Santos.",                                                    //51
-            "Meth addict",                                                                              //52
-            "Strawberry fields for ever.",                                                              //53
-            "Rural",                                                                                    //54
-            "Down on the farm.",                                                                        //55
-            "Cyclist",                                                                                  //56
-            "Put on the lycra and start peddling.",                                                     //57
-            "LGBTWXYZ",                                                                                 //58
-            "I am the very model of a modern Major-General I've information vegetable, animal, and mineral.",//59
-            "Pool Peds",                                                                                //60
-            "Take a swim or just chill by the pool.",                                                   //61
-            "Workers",                                                                                  //62
-            "The many trades and occupations in Los Santos.",                                           //63
-            "Jet ski",                                                                                  //64
-            "Race your jet-ski or just ride around for fun.",                                           //65
-            "Bike/ATV",                                                                                 //66
-            "Do some off-roading around Los Santos.",                                                   //67
-            "Services",                                                                                 //68
-            "Do your civic duty with fire, police, ambulance or military.",                             //69
-            "Pilot",                                                                                    //70
-            "Earn your wings gallivanting above Los Santos.",                                           //71
-            "Animals",                                                                                  //72
-            "Soar like a bird, strut like a deer, swim like a fish.",                                   //73
-            "Yankton",                                                                                  //74
-            "Visit snowy Yankton.",                                                                     //75
-            "Cayo Piero",                                                                               //76
-            "Visit sunny Cayo Piero.",                                                                  //77
-            "Saved Peds",                                                                               //78
-            "Select and edit your ped collection.",                                                     //79
-            "Save current ped",                                                                         //80
-            "save your current character.",                                                             //81
-            "Freemode Ped",                                                                             //82
-            "Generate a random freemode ped.",                                                          //83
-            "Reposes Ped",                                                                              //84
-            "Become a nearby ped.",                                                                     //85
-            "Select a Ped",                                                                             //86
-            "Rename Ped",                                                                               //87
-            "Change the name of your ped.",                                                             //88
-            "Change Outfit",                                                                            //89
-            "Change your outfit.",                                                                      //90
-            "Tattoo Pallor",                                                                            //91
-            "Add Tattoos to your character.",                                                           //92
-            "Set Hair Style",                                                                           //93
-            "Eye Colour",                                                                               //94
-            "Pick the colour of your eyes .",                                                           //95
-            "Pick Hair Colour",                                                                         //96
-            "Pick Hair Streaks",                                                                        //97
-            "Set Overlays",                                                                             //98
-            "Ped decals like age blush facial hair and make-up.",                                       //99
-            "Alter Face Shape",                                                                         //100
-            "Change position of chin, mouth, nose.",                                                    //101
-            "Change Parents",                                                                           //102
-            "Alter the base parents of your freemode character.",                                       //103
-            "Set Voice",                                                                                //104
-            "Save Changes",                                                                             //105
-            "Create or update saved peds ini.",                                                         //106
-            "Delete Ped",                                                                               //107
-            "Remove this ped from saved peds directory.",                                               //108
-            "Select outfit",                                                                            //109  
-            "Create New Outfit",                                                                        //110
-            "Save a new outfit on your character.",                                                     //111
-            "Edit Outfits",                                                                             //112
-            "edit the components on current outfit.",                                                   //113
-            "Edit Props",                                                                               //114
-            "Pick hats and glasses.",                                                                   //115
-            "Pre-made outfits",                                                                         //116
-            "Base Component",                                                                           //117
-            "Texture",                                                                                  //118
-            "Select ",                                                                                  //119
-            "Opacity",                                                                                  //120
-            "Colour",                                                                                   //121
-            "First Parent",                                                                             //122
-            "Second Parent",                                                                            //123
-            "Shape Mix",                                                                                //124
-            "Skin Mix",                                                                                 //125
-            "Third Mix",                                                                                //126
-            "Face",                                                                                     //127
-            "Head",                                                                                     //128
-            "Hair",                                                                                     //129
-            "Torso",                                                                                    //130
-            "Legs",                                                                                     //131
-            "Back Packs",                                                                               //132
-            "Feet",                                                                                     //133
-            "Accessories",                                                                              //134
-            "Top Add-ons",                                                                              //135
-            "Armour",                                                                                   //136
-            "Textures",                                                                                 //137
-            "Coats",                                                                                    //138
-            "Hats",                                                                                     //139
-            "Glasses",                                                                                  //140
-            "Ears",                                                                                     //141
-            "Watches",                                                                                  //142
-            "Torso",                                                                                    //143
-            "Head",                                                                                     //144
-            "Left Arm",                                                                                 //145
-            "Right Arm",                                                                                //146
-            "Left Leg",                                                                                 //147
-            "Right Leg",                                                                                //148
-            "Back",                                                                                     //149
-            "Chest",                                                                                    //150
-            "Stomach",                                                                                  //151
-            "Nose Width",                                                                               //152
-            "Nose Peak Hight",                                                                          //153
-            "Nose Peak Length",                                                                         //154
-            "Nose Bone_High",                                                                           //155
-            "Nose Peak Lowering",                                                                       //156
-            "Nose Bone Twist",                                                                          //157
-            "Eye Brow High",                                                                            //158
-            "Eye Brow Forward",                                                                         //159
-            "Cheeks Bone High",                                                                         //160
-            "Cheeks Bone Width",                                                                        //161
-            "Cheeks Width",                                                                             //162
-            "Eyes Opening",                                                                             //163
-            "Lips Thickness",                                                                           //164
-            "Jaw Bone Width 'Bone size to sides",                                                       //165
-            "Jaw Bone Back Length 'Bone size to back",                                                  //166
-            "Chimp_Bone_Lowering 'Go Down",                                                             //167
-            "Chimp Bone Length 'Go forward",                                                            //168
-            "Chimp Bone Width", "Chimp Hole",                                                           //169
-            "Neck Thickness",                                                                           //170
-            "Blemishes",                                                                                //171
-            "Facial Hair",                                                                              //172
-            "Eyebrows",                                                                                 //173
-            "Ageing",                                                                                   //174
-            "Make-up",                                                                                  //175
-            "Blush",                                                                                    //176
-            "Complexion",                                                                               //177
-            "Sun Damage",                                                                               //178
-            "Lipstick",                                                                                 //179
-            "Moles & Freckles",                                                                         //180
-            "Chest Hair",                                                                               //181
-            "Body Blemishes",                                                                           //182
-            "Add Body Blemishes",                                                                       //183
-            "Select a Keyboard Key",                                                                    //184
-            "Sets the menu open key.",                                                                  //185
-            "Select a Controller Combo",                                                                //186
-            "Choose two controller keys to open menu.",                                                 //187
-            "Hold ~INPUT_VEH_EXIT~ to take control",                                                    //188
-            "Hold the key you would like to use.",                                                      //189
-            "Key Changed",                                                                              //190
-            "Hold ~INPUT_VEH_EXIT~ to hide under van",                                                  //191
-            "Hold ~INPUT_VEH_EXIT~ to hide in waste bin",                                               //192
-            "Top Decal",                                                                                //193
-            "Explore the World: GTA games often feature vast open worlds with a lot of hidden content, collectibles, and easter eggs. Take your time to explore and enjoy the scenery.",
-            "Follow the Story: While you can engage in random chaos, the main story missions provide structure and context for the game. Completing these missions often unlocks new content and areas.",
-            "Use Cover: In gunfights, always use cover to protect yourself. Pop out to shoot, then take cover again. This reduces the chances of getting shot.",
-            "Manage Your Health: Keep an eye on your health and armor levels. You can usually find health packs and armor scattered throughout the game world. Stock up before difficult missions.",
-            "Plan Your Getaways: After committing a crime, have an escape plan. Know where you're going and what you'll do to evade the police.",
-            "Invest in Properties: In some GTA games, you can buy properties. These can provide a passive income and sometimes even offer other benefits.",
-            "Experiment with Vehicles: GTA games have a wide variety of vehicles, from cars to planes to bicycles. Experiment with different vehicles to see which ones suit your style and mission needs.",
-            "Customize Your Character: Many GTA games allow you to customize your character's appearance. Experiment with clothing and accessories to create your own unique style.",
-            "Use the Internet: In later GTA games, characters have smartphones and access to the internet. You can use it to buy vehicles, properties, and more.",
-            "Save Your Game: Don't forget to save your progress regularly, especially after completing important missions. This will prevent you from losing a lot of progress in case you fail a mission or get busted.",
-            "Don't Ignore Side Missions: Side missions can offer fun and unique experiences, as well as rewards like weapons, money, and even character upgrades.",
-            "Respect Traffic Rules (or Not): Sometimes following traffic rules can help you blend in and avoid the attention of the police. On the other hand, reckless driving can be a lot of fun. It's up to you!",
-            "Be Mindful of Police: Committing crimes will get the attention of the police. Pay attention to wanted levels and use Pay 'n' Spray or other hiding spots to lose the cops.",
-            "Play with Friends: If the game supports it, playing GTA with friends can be a blast. You can complete missions together or engage in chaotic, open-world mayhem.",
-            "Have Fun: Ultimately, GTA games are meant to be enjoyed. Whether you prefer causing chaos, following the story, or just exploring, remember that it's a game, and the goal is to have fun.",
-            "Press ~INPUT_TALK~ to change dance, hold ~INPUT_VEH_EXIT~ to  stop Dancing",              //209
-            "Press ~INPUT_TALK~ to start dancing",                                                       //210
-            "press ~INPUT_DUCK~ to select a ped, press ~INPUT_SPRINT~ to  become this ped, Press ~INPUT_RELOAD~ to Close.",                                                       //211
-            "Press ~INPUT_TALK~ to change action, hold ~INPUT_VEH_EXIT~ to exit.",                                                       //212
-            "Winter is Coming",                                                       //213
-            "January",                                                       //214
-            "February",                                                       //215
-            "March",                                                       //216
-            "April",                                                       //217
-            "May",                                                       //218
-            "June",                                                       //219
-            "July",                                                       //220
-            "August",                                                     //221
-            "September",                                                     //222
-            "October",                                                     //223
-            "November",                                                     //224
-            "December",                                                     //225
-            "Set your winter months",                                    //226
-            "Edit",                                                       //227
-            "Blank",                                                       //228
-            "Blank",                                                       //229
-            "Blank"                                                       //230
-
     };
 
     inline const std::vector<DWORD> KeyFind = {

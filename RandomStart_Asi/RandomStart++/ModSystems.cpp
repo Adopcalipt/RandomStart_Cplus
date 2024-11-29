@@ -4,47 +4,40 @@
 */
 
 #include "ModSystems.h"
+#include "GtaVMenu.h"
 #include "keyboard.h"
-
-using namespace Mod_Data;
-using namespace Mod_Systems;
 
 #include <cstdlib>		//sRand - Random Number Generator
 #include <ctime>		//time_t - Get the current date/time
 #include <cmath>		//Math Functions Cos Tan etc...
 #include <filesystem>	//Directory control Add/Remove Folders
+#include <fstream>		//ofstream read/write text documents
 #include <iostream>		//Header that defines the standard input/output stream objects:
 
+using namespace Mod_Data;
+
+#include <stdio.h>		//Makes Stream Pointers to files
 #include <wchar.h>		//Support for w_Chars
 #include <locale>		//streamng Support for w_Chars
-//#include <stdio.h>			//Makes Stream Pointers to files
-//#include <sys/stat.h>			//File Type Finder
-
+#include <random>		//Randomize vector lists
 
 #pragma comment(lib, "Winmm.lib")
 
 namespace Mod_Systems
 {
-	std::string ConvertWideToANSI(const std::wstring& wstr)
-	{//ouputs chinese... sometimes???
-		int count = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
-		std::string str(count, 0);
-		WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
-		return str;
+	void LoggerLight(const std::string& text);
+
+	Hash MyHashKey(const std::string& name)
+	{
+		return GAMEPLAY::GET_HASH_KEY((LPSTR)name.c_str());
 	}
+
 	std::string ConvertWideToUtf8(const std::wstring& wstr)
 	{
 		int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), NULL, 0, NULL, NULL);
 		std::string str(count, 0);
 		WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
 		return str;
-	}
-	std::wstring ConvertAnsiToWide(const std::string& str)
-	{
-		int count = MultiByteToWideChar(CP_ACP, 0, str.c_str(), (int)str.length(), NULL, 0);
-		std::wstring wstr(count, 0);
-		MultiByteToWideChar(CP_ACP, 0, str.c_str(), (int)str.length(), &wstr[0], count);
-		return wstr;
 	}
 
 	std::string GetExeFileName()
@@ -69,7 +62,32 @@ namespace Mod_Systems
 		tm[tm.length() - 1] = char(32);//32 is this fails testing the _s version..
 		return tm;
 	}
-	bool FileExists(const std::string& filename)
+	
+
+	void BuildMissingDirectory(std::string dir)
+	{
+		if (CreateDirectoryA((LPSTR)dir.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
+		{
+		}
+	}
+	void DirectoryTest()
+	{
+		BuildMissingDirectory(DirRandStart);
+		BuildMissingDirectory(DirRandNumb);
+		BuildMissingDirectory(DirSavedPed);
+		BuildMissingDirectory(DirWeapons);
+		BuildMissingDirectory(DirVehicles);
+		BuildMissingDirectory(DirTranslate);
+		BuildMissingDirectory(DirCustPeds);
+		BuildMissingDirectory(DirectOutfitFolder);
+		BuildMissingDirectory(DirectOutfitMale);
+		BuildMissingDirectory(DirectOutfitFemale);
+		BuildMissingDirectory(DirectOutfitMichael);
+		BuildMissingDirectory(DirectOutfitFranklin);
+		BuildMissingDirectory(DirectOutfitTrevor);
+	}
+
+	bool File_exists(const std::string& filename)
 	{
 		try
 		{
@@ -81,118 +99,7 @@ namespace Mod_Systems
 			return false;
 		}
 	}
-
-	void Play_Wav(const std::string& soundFile)
-	{
-		const wchar_t* path = ConvertAnsiToWide((LPSTR)soundFile.c_str()).c_str();
-		PlaySound(path, GetModuleHandle(NULL), SND_FILENAME | SND_ASYNC);
-		//(LPCWSTR)soundFile.c_str()
-	}
-
-	bool FileRemoval(const std::string& filename)
-	{
-		bool Removed = false;
-		try {
-			if (std::filesystem::remove(filename))
-				Removed = true;
-		}
-		catch (const std::filesystem::filesystem_error& err)
-		{
-			Removed = false;
-		}
-		return Removed;
-	}
-
-	void RemoveBlankStrings(std::vector<std::string>& stringlist)
-	{
-		for (int i = 0; i < (int)stringlist.size(); i++)
-		{
-			if (stringlist[i] == "")
-				stringlist.erase(stringlist.begin() + i);
-		}
-	}
-	const std::string sLogThis = GetDir() + "/RandomStart/LoggerLight.txt";
-	bool startLogs = false;
-	bool ListContains(std::vector<int>& List, int item)
-	{
-		bool b = false;
-		for (int i = 0; i < List.size(); i++)
-		{
-			if (List[i] == item)
-				b = true;
-		}
-		return b;
-	}
-	std::vector<std::string> Space38(const std::string& myLine)
-	{
-		std::vector<std::string> output = {};
-		if ((int)myLine.length() < 38)
-			output.push_back(myLine);
-		else
-		{
-			std::string sLine = "";
-			int i20 = 20;
-			for (int i = 0; i < (int)myLine.length(); i++)
-			{
-				if ((int)sLine.length() < 38)
-				{
-					sLine += myLine[i];
-					if (i20 < 0)
-					{
-						if (myLine[i] == char(46) || myLine[i] == char(44) || myLine[i] == char(32))
-						{
-							output.push_back(sLine);
-							i20 = 20;
-							sLine = "";
-						}
-					}
-					i20--;
-				}
-				else
-				{
-					output.push_back(sLine);
-					i20 = 20;
-					sLine = "";
-				}
-			}
-			output.push_back(sLine);
-		}
-		return output;
-	}
-	void LoggerLight(const std::string& text)
-	{
-		std::string RSFolder = GetDir() + "/RandomStart";
-		if (CreateDirectoryA((LPSTR)RSFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
-			First_Load = true;
-		else
-			LoggerLight("Settings_Ini Folder Load Fail...");
-
-		if (Mod_Settings.Loging)
-		{
-			if (startLogs)
-			{
-				std::ofstream MyFile(sLogThis, std::ios_base::app | std::ios_base::out);
-				std::string Mess = TimeDate() + text;
-
-				MyFile << Mess;
-				MyFile << "\n";
-
-				MyFile.close();
-			}
-			else
-			{
-				startLogs = true;
-
-				std::ofstream MyFile(sLogThis);
-
-				std::string Mess = TimeDate() + text;
-				MyFile << Mess;
-				MyFile << "\n";
-				MyFile.close();
-			}
-		}
-	}
-	void WriteFile(const std::string& file, std::vector<std::string>& text)
+	void Write_ini(const std::string& file, const std::vector<std::string>& text)
 	{
 		std::ofstream MyFile(file);
 		for (int i = 0; i < text.size(); i++)
@@ -202,21 +109,40 @@ namespace Mod_Systems
 		}
 		MyFile.close();
 	}
-	std::vector<std::string> IntoString(std::vector<int>& text)
+	void Edit_ini(const std::string& file, const std::string& text)
 	{
-		std::vector<std::string> output = {};
+		if (File_exists(file))
+		{
+			std::ofstream MyFile(file, std::ios_base::app | std::ios_base::out);
 
-		for (int i = 0; i < text.size(); i++)
-			output.push_back(std::to_string(text[i]));
-
-		return output;
+			MyFile << text;
+			MyFile << "\n";
+			MyFile.close();
+		}
 	}
-	std::vector<std::string> ReadSetFile(const std::string& fileName)
+	void Delete_ini(const std::string& filename)
+	{
+		LoggerLight("Delete_ini == " + filename);
+		if (File_exists(filename))
+		{
+			try
+			{
+				std::filesystem::remove(filename);
+			}
+			catch (...)
+			{
+				LoggerLight(filename + "Has Not Been Deleted");
+			}
+		}
+		else
+			LoggerLight("Delete_ini == " + filename + " Does not exist...");
+	}
+	std::vector<std::string> Read_ini(const std::string& fileName)
 	{
 		std::string myText;
 		std::vector<std::string> textList = {};
 
-		if (FileExists(fileName))
+		if (File_exists(fileName))
 		{
 			std::ifstream MyReadFile(fileName);
 
@@ -230,7 +156,123 @@ namespace Mod_Systems
 
 		return textList;
 	}
-	bool StringContains(const std::string& line, const std::string& wholeString)
+
+	const std::string VFunk = GetDir() + "/V_Functions.asi";
+	typedef bool(*SnowFallType)();
+	typedef void(*LetItSnowType)(bool snow);
+
+	bool AccessSnowFallType()
+	{
+		// Load the first .asi file (DLL)
+		bool b = false;
+		if (File_exists(VFunk))
+		{
+			HMODULE hMod = LoadLibrary(L"V_Functions.asi");
+			if (hMod != nullptr)
+			{
+				// Get the function pointer
+				SnowFallType MyExportedFunction = (SnowFallType)GetProcAddress(hMod, "SnowFall");
+
+				if (MyExportedFunction != nullptr)
+					b = MyExportedFunction();
+
+				FreeLibrary(hMod);
+			}
+		}
+		else
+			MissingFilesNag = true;
+
+		return b;
+	}
+	void AccessLetItSnowType(bool snow)
+	{
+		if (File_exists(VFunk))
+		{
+			// Load the first .asi file (DLL)
+			HMODULE hMod = LoadLibrary(L"V_Functions.asi");
+
+			if (hMod != nullptr)
+			{
+				// Get the function pointer
+				LetItSnowType MyExportedFunction = (LetItSnowType)GetProcAddress(hMod, "LetItSnow");
+
+				if (MyExportedFunction != nullptr)
+					MyExportedFunction(snow);
+
+				FreeLibrary(hMod);
+			}
+		}
+		else
+			MissingFilesNag = true;
+	}
+
+	bool startLogs = false;
+	void LoggerLight(const std::string& text)
+	{
+		if (Mod_Data::Mod_Settings.Loging)
+		{
+			if (startLogs)
+				Edit_ini(LoggingFile, TimeDate() + text);
+			else
+			{
+				startLogs = true;
+				std::vector<std::string> NewFile = { TimeDate() + text };
+				Write_ini(LoggingFile, NewFile);
+			}
+		}
+	}
+
+	void Play_wav(const std::string& soundFile)
+	{
+		PlaySoundA((LPSTR)soundFile.c_str(), GetModuleHandle(NULL), SND_FILENAME | SND_ASYNC);
+		//const wchar_t* path = ConvertAnsiToWide((LPSTR)soundFile.c_str()).c_str();
+		//PlaySound(path, GetModuleHandle(NULL), SND_FILENAME | SND_ASYNC);
+		//(LPCWSTR)soundFile.c_str()
+	}
+
+	void Remove_blanks(std::vector<std::string>* stringlist)
+	{
+		for (int i = 0; i < (int)stringlist->size(); i++)
+		{
+			if (stringlist->at(i) == "")
+				stringlist->erase(stringlist->begin() + i);
+		}
+	}
+	
+	std::vector<std::string> Convert_to_strings(const std::vector<int>& text)
+	{
+		std::vector<std::string> output = {};
+
+		for (int i = 0; i < text.size(); i++)
+			output.push_back(std::to_string(text[i]));
+
+		return output;
+	}
+	int Find_String_Pos(const std::vector<std::string>& stringList, const std::string& item) 
+	{
+		int Output = -1;
+		for (int i = 0; i < (int)stringList.size(); i++)
+		{
+			if (MyHashKey(stringList[i]) == MyHashKey(item))
+			{
+				Output = i;
+				break;
+			}
+		}
+		return Output;
+	}
+
+	bool Contains_int(const std::vector<int>& intList, int item)
+	{
+		bool b = false;
+		for (int i = 0; i < intList.size(); i++)
+		{
+			if (intList[i] == item)
+				b = true;
+		}
+		return b;
+	}
+	bool Contains_string(const std::string& line, const std::string& wholeString)
 	{
 		bool Contain = false;
 		int iLine = 0;
@@ -278,7 +320,7 @@ namespace Mod_Systems
 
 		return Contain;
 	}
-	bool StringContains(char line, const std::string& wholeString)
+	bool Contains_string(char line, const std::string& wholeString)
 	{
 		bool Contain = false;
 		for (int i = 0; i < wholeString.length(); i++)
@@ -291,7 +333,7 @@ namespace Mod_Systems
 		}
 		return Contain;
 	}
-	int FindCharicter(char chars, const std::string& wholeString)
+	int Find_char_position(char chars, const std::string& wholeString)
 	{
 		int iLine = -1;
 		for (int i = 0; i < wholeString.length(); i++)
@@ -304,7 +346,7 @@ namespace Mod_Systems
 		}
 		return iLine;
 	}
-	int FindCharicter(const std::string& chars, const std::string& wholeString)
+	int Find_char_position(const std::string& chars, const std::string& wholeString)
 	{
 		int iLine = -1;
 		for (int i = 0; i < wholeString.length(); i++)
@@ -317,7 +359,8 @@ namespace Mod_Systems
 		}
 		return iLine;
 	}
-	int StingNumbersInt(const std::string& line)
+
+	int Convert_to_int(const std::string& line)
 	{
 		int iNum = 0;
 		int iTimes = 0;
@@ -400,178 +443,97 @@ namespace Mod_Systems
 
 		return iNum;
 	}
-	std::string AfterEqual(const std::string& tag)
+	float Convert_to_float(const std::string& line)
+	{
+		float fNum = 0;
+		std::string decOp = ".";
+		int endIndex = -1; // Index to print until (exclusive)
+		for (int i = 0; i < line.length(); i++)
+		{
+			if (line[i] == decOp[0])
+			{
+				endIndex = i;
+				break;
+			}
+		}
+
+		if (endIndex >= 0 && endIndex <= line.length())
+		{
+			std::string afterDec = line.substr(endIndex + 1);
+			std::string bigNum = line.substr(0, endIndex) + afterDec;
+			fNum = (float)Convert_to_int(bigNum);
+
+			for (int i = 0; i < afterDec.length(); i++)
+				fNum = fNum / 10;
+		}
+		else
+			fNum = (float)Convert_to_int(line);
+
+		return fNum;
+	}
+	bool Convert_to_bool(const std::string& line)
+	{
+		if (Contains_string("True", line))
+			return true;
+		else if (Contains_string("true", line))
+			return true;
+		else if (Contains_string("TRUE", line))
+			return true;
+		else
+			return false;
+	}
+	std::string Remove_char61(const std::string& line)
 	{
 		int iSt = 0;
-		std::string out;
-		for (int i = 0; i < tag.length(); i++)
+		std::string Output;
+		for (int i = 0; i < line.length(); i++)
 		{
-			if (tag[i] == char(61))
+			if (line[i] == char(61))
 			{
 				iSt = i + 1;
 				break;
 			}
 		}
-		for (int i = iSt; i < tag.length(); i++)
-			out += tag[i];
+		for (int i = iSt; i < line.length(); i++)
+			Output += line[i];
 
-		return out;
+		return Output;
 	}
-	float StingNumbersFloat(const std::string& line)
-	{
-		float fNum = 0;
-		bool bNegative = false;
-		bool DecDone = false;
-		if (StringContains(".", line))
-		{
-			int iTimes = 0;
-			for (int i = (int)line.size(); i > -1; i--)
-			{
-				bool bSkip = false;
-				float fAdd = 0;
-				char sComp = line[i];
-				if (sComp == char(45))
-					bNegative = true;
-				else if (sComp == char(46))
-				{
-					fNum = fNum / iTimes;
-					iTimes = 0;
-					bSkip = true;
-					DecDone = true;
-				}
-				else if (sComp == char(48))
-				{
-					if (DecDone)
-					{
-						DecDone = false;
-						bSkip = true;
-					}
-				}
-				else if (sComp == char(49))
-				{
-					bNegative = false;
-					fAdd = 1;
-				}
-				else if (sComp == char(50))
-				{
-					bNegative = false;
-					fAdd = 2;
-				}
-				else if (sComp == char(51))
-				{
-					bNegative = false;
-					fAdd = 3;
-				}
-				else if (sComp == char(52))
-				{
-					bNegative = false;
-					fAdd = 4;
-				}
-				else if (sComp == char(53))
-				{
-					bNegative = false;
-					fAdd = 5;
-				}
-				else if (sComp == char(54))
-				{
-					bNegative = false;
-					fAdd = 6;
-				}
-				else if (sComp == char(55))
-				{
-					bNegative = false;
-					fAdd = 7;
-				}
-				else if (sComp == char(56))
-				{
-					bNegative = false;
-					fAdd = 8;
-				}
-				else if (sComp == char(57))
-				{
-					bNegative = false;
-					fAdd = 9;
-				}
-				else
-					bSkip = true;
-
-				if (!bSkip)
-				{
-					if (iTimes == 0)
-					{
-						fNum = fAdd;
-						iTimes = 1;
-					}
-					else
-						fNum += fAdd * iTimes;
-					iTimes *= 10;
-				}
-			}
-
-			if (bNegative)
-				fNum = fNum * (-1);
-		}
-		else
-			fNum = (float)StingNumbersInt(line);
-
-		return fNum;
-	}
-	bool StringBool(const std::string& line)
-	{
-		if (StringContains("True", line))
-			return true;
-		else if (StringContains("true", line))
-			return true;
-		else if (StringContains("TRUE", line))
-			return true;
-		else if (StringContains("1", line))
-			return true;
-		else
-			return false;
-	}
-	std::string BoolToString(bool bOut)
+	std::string Convert_to_string(bool outPut)
 	{
 		std::string s = "false";
-		if (bOut)
+		if (outPut)
 			s = "true";
 
 		return s;
 	}
-	float TwoDecimal(const std::string& Number)
+	float Two_decimal(const std::string& num)
 	{
-		int iSize = (int)Number.length();
+		int iSize = (int)num.length();
 		std::string Output = "";
 		for (int i = 0; i < iSize; i++)
 		{
-			Output += Number[i];
-			if (Number[i] == char(46) && i + 3 < Number.length())
+			Output += num[i];
+			int iMore = i + 3;
+			if (num[i] == char(46) && iMore < num.length())
 				iSize = i + 3;
 		}
-		return StingNumbersFloat(Output);
+		return Convert_to_float(Output);
 	}
-	bool ListstringContains(std::vector<std::string>& List, const std::string& item)
-	{
-		bool b = false;
-		for (int i = 0; i < List.size(); i++)
-		{
-			if (StringContains(item, List[i]))
-				b = true;
-		}
-		return b;
-	}
+
 	int DayOfWeek()
 	{
 		int iDay;
 		std::string t = TimeDate();
-		if (StringContains("Mon", t))
+		if (Contains_string("Mon", t))
 			iDay = 1;
-		else if (StringContains("Tue", t))
+		else if (Contains_string("Tue", t))
 			iDay = 2;
-		else if (StringContains("Wed", t))
+		else if (Contains_string("Wed", t))
 			iDay = 3;
-		else if (StringContains("Thu", t))
+		else if (Contains_string("Thu", t))
 			iDay = 4;
-		else if (StringContains("Fri", t))
+		else if (Contains_string("Fri", t))
 			iDay = 5;
 		else
 			iDay = 6;
@@ -579,153 +541,120 @@ namespace Mod_Systems
 		return iDay;
 	}
 
+	bool ERando = false;
+	bool DirTest = true;	
+
+
+	void RandomizeIntList(std::vector<int>* numbers)
+	{
+		std::random_device Randv;
+		std::mt19937 Output(Randv());
+
+		std::shuffle(numbers->begin(), numbers->end(), Output);
+	}
 	float RandomFloat(float min, float max)
 	{
 		if (min < max)
 		{
-			std::string BigNumbers = std::to_string(GAMEPLAY::GET_RANDOM_FLOAT_IN_RANGE(min, max));
-			float f = TwoDecimal(BigNumbers);
-			return f;
+			std::random_device RandoNum;
+			std::mt19937 Mt(RandoNum());
+			std::uniform_real_distribution<double> Output((double)min, (double)max);
+
+			return (float)Output(Mt);
 		}
 		else
 			return min;
 	}
-	bool ERando = false;
 	int RandomInt(int min, int max)
 	{
-		int EllRando = max - min;
-		if (EllRando > 10)
-		{
-			if (ERando)
-			{
-				min /= 2;
-				max /= 2;
-			}
-			else
-			{
-				if (min > -1 && min > max / 2)
-				{
-					min = max / 2;
-				}
-			}
-			ERando = !ERando;
-		}
-
 		if (min < max)
 		{
-			srand((unsigned)time(NULL));
+			std::random_device RandoNum;
+			std::mt19937 Mt(RandoNum());
+			std::uniform_real_distribution<double> Output((double)min, (double)max);
 
-			return min + (rand() % max);
+			return (int)Output(Mt);
 		}
 		else
 			return min;
 	}
-	std::vector<int> NewNums(int min, int max)
+	void NewNums(std::vector<int>* numbers, int min, int max)
 	{
-		std::vector<int> Nums = {};
+		numbers->clear();
 		for (int i = min; i < max + 1; i++)
-			Nums.push_back(i);
-		return Nums;
+			numbers->push_back(i);
+		RandomizeIntList(numbers);
 	}
-	bool DirTest = true;
-	const std::string RandNumFolder = GetDir() + "/RandomStart/Randoms";
-	int LessRandomInt(const std::string& sName, int min, int max)
+	int LessRandomInt(const std::string& file, int min, int max)
 	{
-		if (DirTest)
+		if (min < max)
 		{
-			LoggerLight("LessRandomInt, Direct Test");
-			if (CreateDirectoryA((LPSTR)RandNumFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
-			{
-				LoggerLight("LessRandomInt, Direct Working");
-				DirTest = false;
-			}
-			else
-			{
-				LoggerLight("LessRandomInt, Direct failed");
-				if (min < max || min == max)
-				{
-
-				}
-				else
-				{
-					max = RandomInt(min, max);
-					min = max;
-				}
-			}
-		}
-
-		if (min < max || min == max)
-		{
-			int yourPlace = 0;
-			int yourNum = min;
-			std::vector<std::string> MyNums = ReadSetFile(RandNumFolder + "/" + sName + ".txt");
+			int Place = 0;
+			int Num = min;
+			std::string FileLoc = DirRandNumb + "/" + file + ".txt";
+			std::vector<std::string> MyNums = Read_ini(FileLoc);
 			std::vector<int> NumList = {};
 
 			if (MyNums.size() < 2)
-				NumList = NewNums(min, max);
+				NewNums(&NumList, min, max);
 			else
 			{
-				bool newWrite = false;
-				if (StringContains("min=", MyNums[0]))
+				bool NewWrite = false;
+				if (Contains_string("min=", MyNums[0]))
 				{
-					if (StingNumbersInt(MyNums[0]) != min)
-						newWrite = true;
-
-					if (StringContains("max=", MyNums[1]))
-					{
-						if (StingNumbersInt(MyNums[1]) != max)
-							newWrite = true;
-					}
+					if (Convert_to_int(MyNums[0]) != min)
+						NewWrite = true;
 				}
 				else
-					newWrite = true;
+					NewWrite = true;
+
+				if (Contains_string("max=", MyNums[1]))
+				{
+					if (Convert_to_int(MyNums[1]) != max)
+						NewWrite = true;
+				}
+				else
+					NewWrite = true;
 
 				for (int i = 2; i < MyNums.size(); i++)
-					NumList.push_back(StingNumbersInt(MyNums[i]));
+					NumList.push_back(Convert_to_int(MyNums[i]));
 
-				if (NumList.size() == 0 || newWrite)
-					NumList = NewNums(min, max);
+				if (NumList.size() == 0 || NewWrite)
+					NewNums(&NumList, min, max);
 			}
-			yourPlace = RandomInt(0, (int)NumList.size());
-			yourNum = NumList[yourPlace];
-			NumList.erase(NumList.begin() + yourPlace);
 
-			std::vector<std::string> output = { "min=" + std::to_string(min) , "max=" + std::to_string(max) };
+			Place = RandomInt(0, (int)NumList.size() - 1);
+			Num = NumList[Place];
+			NumList.erase(NumList.begin() + Place);
+
+			std::vector<std::string> Output = { "min=" + std::to_string(min) , "max=" + std::to_string(max) };
 
 			for (int i = 0; i < NumList.size(); i++)
-				output.push_back(std::to_string(NumList[i]));
+				Output.push_back(std::to_string(NumList[i]));
 
-			WriteFile(RandNumFolder + "/" + sName + ".txt", output);
+			Write_ini(FileLoc, Output);
 
-			return yourNum;
+			LoggerLight("LessRandomInt, id == " + file + ", min == " + std::to_string(min) + ", max == " + std::to_string(max) + "Num == " + std::to_string(Num));
+
+			return Num;
 		}
 		else
 			return min;
 	}
-	int LessRandomInt(const std::string& sName, std::vector<int>& ranNum)
+	int LessRandomInt(const std::string& file, const std::vector<int>& intList)
 	{
-		if (DirTest)
-		{
-			LoggerLight("LessRandomInt, Direct Test");
-			if (CreateDirectoryA((LPSTR)RandNumFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
-			{
-				LoggerLight("LessRandomInt, Direct Working");
-				DirTest = false;
-			}
-		}
-
-		if ((int)ranNum.size() > 0)
+		if ((int)intList.size() > 0)
 		{
 			int yourPlace = 0;
 			int yourNum = 0;
-			std::vector<std::string> MyNums = ReadSetFile(RandNumFolder + "/" + sName + ".txt");
+			std::vector<std::string> MyNums = Read_ini(DirRandNumb + "/" + file + ".txt");
 			std::vector<int> NumList = {};
 
 			for (int i = 0; i < MyNums.size(); i++)
-				NumList.push_back(StingNumbersInt(MyNums[i]));;
+				NumList.push_back(Convert_to_int(MyNums[i]));;
 
 			if (NumList.size() == 0)
-				NumList = ranNum;
+				NumList = intList;
 
 			yourPlace = RandomInt(0, (int)NumList.size());
 			yourNum = NumList[yourPlace];
@@ -736,7 +665,7 @@ namespace Mod_Systems
 			for (int i = 0; i < NumList.size(); i++)
 				output.push_back(std::to_string(NumList[i]));
 
-			WriteFile(RandNumFolder + "/" + sName + ".txt", output);
+			Write_ini(DirRandNumb + "/" + file + ".txt", output);
 
 			return yourNum;
 		}
@@ -757,255 +686,346 @@ namespace Mod_Systems
 		SCRIPT::SET_SCRIPT_AS_NO_LONGER_NEEDED((LPSTR)scriptName.c_str());
 	}
 
-	void ReBuildIni(Mod_Class::Settings_Ini* PSet)
+	void ReBuildIni(void* obj)
 	{
+		Mod_Class::Settings_Ini* PSet = static_cast<Mod_Class::Settings_Ini*>(obj);
 		if (PSet != nullptr)
 		{
 			LoggerLight("ReBuildIni");
-			std::string RSFolder = GetDir() + "/RandomStart";
 			std::vector<std::string> AddIni = {
 				"[Settings]",
 				"MenuKey=" + std::to_string(PSet->MenuKey),
-				"Auto_Run=" + BoolToString(PSet->Auto_Run),
-				"Random_Ped=" + BoolToString(PSet->Random_Ped),
-				"Saved_Ped=" + BoolToString(PSet->Saved_Ped),
-				"Disable_Record_Key=" + BoolToString(PSet->Disable_Record_Key),
-				"Random_Weapons=" + BoolToString(PSet->Random_Weapons),
-				"Funeral=" + BoolToString(PSet->Funeral),
-				"Prison=" + BoolToString(PSet->Prison),
-				"BeachPart=" + BoolToString(PSet->BeachPart),
+				"Auto_Run=" + Convert_to_string(PSet->Auto_Run),
+				"Random_Ped=" + Convert_to_string(PSet->Random_Ped),
+				"Saved_Ped=" + Convert_to_string(PSet->Saved_Ped),
+				"Disable_Record_Key=" + Convert_to_string(PSet->Disable_Record_Key),
+				"Random_Weapons=" + Convert_to_string(PSet->Random_Weapons),
+				"Funeral=" + Convert_to_string(PSet->Funeral),
+				"Prison=" + Convert_to_string(PSet->Prison),
+				"BeachPart=" + Convert_to_string(PSet->BeachPart),
+				"Auto_Save=" + Convert_to_string(PSet->Auto_Save),
+				"Menu_Left_Side=" + Convert_to_string(PSet->Menu_Left_Side),
 				"[Reincarnation]",
-				"Reincarnate=" + BoolToString(PSet->Reincarnate),
-				"ReCurr=" + BoolToString(PSet->ReCurr),
+				"Reincarnate=" + Convert_to_string(PSet->Reincarnate),
+				"ReCurr=" + Convert_to_string(PSet->ReCurr),
 				"[Controler]",
-				"ControlSupport=" + BoolToString(PSet->ControlSupport),
+				"ControlSupport=" + Convert_to_string(PSet->ControlSupport),
 				"ControlA=" + std::to_string(PSet->ControlA),
 				"ControlB=" + std::to_string(PSet->ControlB),
 				"[Language]",
 				"Lang_Set=" + std::to_string(PSet->Lang_Set),
 				"[Senarios]",
-				"BeachPed=" + BoolToString(PSet->BeachPed),
-				"Tramps=" + BoolToString(PSet->Tramps),
-				"Highclass=" + BoolToString(PSet->Highclass),
-				"Midclass=" + BoolToString(PSet->Midclass),
-				"Lowclass=" + BoolToString(PSet->Lowclass),
-				"Business=" + BoolToString(PSet->Business),
-				"Bodybuilder=" + BoolToString(PSet->Bodybuilder),
-				"GangStars=" + BoolToString(PSet->GangStars),
-				"Epsilon=" + BoolToString(PSet->Epsilon),
-				"Jogger=" + BoolToString(PSet->Jogger),
-				"Golfer=" + BoolToString(PSet->Golfer),
-				"Hiker=" + BoolToString(PSet->Hiker),
-				"Methaddict=" + BoolToString(PSet->Methaddict),
-				"Rural=" + BoolToString(PSet->Rural),
-				"Cyclist=" + BoolToString(PSet->Cyclist),
-				"LGBTWXYZ=" + BoolToString(PSet->LGBTWXYZ),
-				"PoolPeds=" + BoolToString(PSet->PoolPeds),
-				"Workers=" + BoolToString(PSet->Workers),
-				"Jetski=" + BoolToString(PSet->Jetski),
-				"BikeATV=" + BoolToString(PSet->BikeATV),
-				"Services=" + BoolToString(PSet->Services),
-				"Pilot=" + BoolToString(PSet->Pilot),
-				"Animals=" + BoolToString(PSet->Animals),
-				"Yankton=" + BoolToString(PSet->Yankton),
-				"Cayo=" + BoolToString(PSet->Cayo),
+				"BeachPed=" + Convert_to_string(PSet->BeachPed),
+				"Tramps=" + Convert_to_string(PSet->Tramps),
+				"Highclass=" + Convert_to_string(PSet->Highclass),
+				"Midclass=" + Convert_to_string(PSet->Midclass),
+				"Lowclass=" + Convert_to_string(PSet->Lowclass),
+				"Business=" + Convert_to_string(PSet->Business),
+				"Bodybuilder=" + Convert_to_string(PSet->Bodybuilder),
+				"GangStars=" + Convert_to_string(PSet->GangStars),
+				"Epsilon=" + Convert_to_string(PSet->Epsilon),
+				"Jogger=" + Convert_to_string(PSet->Jogger),
+				"Golfer=" + Convert_to_string(PSet->Golfer),
+				"Hiker=" + Convert_to_string(PSet->Hiker),
+				"Methaddict=" + Convert_to_string(PSet->Methaddict),
+				"Rural=" + Convert_to_string(PSet->Rural),
+				"Cyclist=" + Convert_to_string(PSet->Cyclist),
+				"LGBTWXYZ=" + Convert_to_string(PSet->LGBTWXYZ),
+				"PoolPeds=" + Convert_to_string(PSet->PoolPeds),
+				"Workers=" + Convert_to_string(PSet->Workers),
+				"Jetski=" + Convert_to_string(PSet->Jetski),
+				"BikeATV=" + Convert_to_string(PSet->BikeATV),
+				"Services=" + Convert_to_string(PSet->Services),
+				"Pilot=" + Convert_to_string(PSet->Pilot),
+				"Animals=" + Convert_to_string(PSet->Animals),
+				"Yankton=" + Convert_to_string(PSet->Yankton),
+				"Cayo=" + Convert_to_string(PSet->Cayo),
 				"[Additional]",
-				"Loging=" + BoolToString(PSet->Loging),
+				"Loging=" + Convert_to_string(PSet->Loging),
 				"[Snow Months]",
-				"SDJan=" + BoolToString(PSet->SnowMonths.Jan),
-				"SDFeb=" + BoolToString(PSet->SnowMonths.Feb),
-				"SDMar=" + BoolToString(PSet->SnowMonths.Mar),
-				"SDApr=" + BoolToString(PSet->SnowMonths.Apr),
-				"SDMay=" + BoolToString(PSet->SnowMonths.May),
-				"SDJun=" + BoolToString(PSet->SnowMonths.Jun),
-				"SDJul=" + BoolToString(PSet->SnowMonths.Jul),
-				"SDAug=" + BoolToString(PSet->SnowMonths.Aug),
-				"SDSep=" + BoolToString(PSet->SnowMonths.Sep),
-				"SDOct=" + BoolToString(PSet->SnowMonths.Oct),
-				"SDNov=" + BoolToString(PSet->SnowMonths.Nov),
-				"SDDec=" + BoolToString(PSet->SnowMonths.Dec)
+				"SDJan=" + Convert_to_string(PSet->Jan),
+				"SDFeb=" + Convert_to_string(PSet->Feb),
+				"SDMar=" + Convert_to_string(PSet->Mar),
+				"SDApr=" + Convert_to_string(PSet->Apr),
+				"SDMay=" + Convert_to_string(PSet->May),
+				"SDJun=" + Convert_to_string(PSet->Jun),
+				"SDJul=" + Convert_to_string(PSet->Jul),
+				"SDAug=" + Convert_to_string(PSet->Aug),
+				"SDSep=" + Convert_to_string(PSet->Sep),
+				"SDOct=" + Convert_to_string(PSet->Oct),
+				"SDNov=" + Convert_to_string(PSet->Nov),
+				"SDDec=" + Convert_to_string(PSet->Dec)
 			};
-
-			std::ofstream MyFile(GetDir() + "/RandomStart/Settings.ini");
-
-			for (int i = 0; i < AddIni.size(); i++)
-			{
-				MyFile << AddIni[i];
-				MyFile << "\n";
-			}
-
-			MyFile.close();
+			Write_ini(SettingsFile, AddIni);
 		}
-
 	}
-	void FindSettings(Mod_Class::Settings_Ini* mySets)
+	void FindSettings(Mod_Class::Settings_Ini* modSets)
 	{
-		if (mySets != nullptr)
+		if (modSets != nullptr)
 		{
-
 			LoggerLight("FindSettings");
-			std::vector<std::string> MySet = ReadSetFile(GetDir() + "/RandomStart/Settings.ini");
-			std::string RSFolder = GetDir() + "/RandomStart";
+			std::vector<std::string> MySet = Read_ini(SettingsFile);
 			if (MySet.size() == 0)
-			{
-				if (CreateDirectoryA((LPSTR)RSFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
-					First_Load = true;
-				else
-					LoggerLight("Settings_Ini Folder Load Fail...");
-			}
+				Mod_Data::First_Load = true;
 			else
 			{
 				for (int i = 0; i < (int)MySet.size(); i++)
 				{
 					std::string line = MySet[i];
-					if (StringContains("MenuKey", line))
-						mySets->MenuKey = StingNumbersInt(line);
-					else if (StringContains("Auto_Run", line))
-						mySets->Auto_Run = StringBool(line);
-					else if (StringContains("Random_Ped", line))
-						mySets->Random_Ped = StringBool(line);
-					else if (StringContains("Saved_Ped", line))
-						mySets->Saved_Ped = StringBool(line);
-					else if (StringContains("Disable_Record_Key", line))
-						mySets->Disable_Record_Key = StringBool(line);
-					else if (StringContains("Random_Weapons", line))
-						mySets->Random_Weapons = StringBool(line);
-					else if (StringContains("Funeral", line))
-						mySets->Funeral = StringBool(line);
-					else if (StringContains("Prison", line))
-						mySets->Prison = StringBool(line);
-					else if (StringContains("BeachPart", line))
-						mySets->BeachPart = StringBool(line);
-					else if (StringContains("Reincarnate", line))
-						mySets->Reincarnate = StringBool(line);
-					else if (StringContains("ReCurr", line))
-						mySets->ReCurr = StringBool(line);
-					else if (StringContains("ControlSupport", line))
-						mySets->ControlSupport = StringBool(line);
-					else if (StringContains("ControlA", line))
-						mySets->ControlA = StingNumbersInt(line);
-					else if (StringContains("ControlB", line))
-						mySets->ControlB = StingNumbersInt(line);
-					else if (StringContains("Lang_Set", line))
-						mySets->Lang_Set = StingNumbersInt(line);
-					else if (StringContains("BeachPed", line))
-						mySets->BeachPed = StringBool(line);
-					else if (StringContains("Tramps", line))
-						mySets->Tramps = StringBool(line);
-					else if (StringContains("Highclass", line))
-						mySets->Highclass = StringBool(line);
-					else if (StringContains("Midclass", line))
-						mySets->Midclass = StringBool(line);
-					else if (StringContains("Lowclass", line))
-						mySets->Lowclass = StringBool(line);
-					else if (StringContains("Business", line))
-						mySets->Business = StringBool(line);
-					else if (StringContains("Bodybuilder", line))
-						mySets->Bodybuilder = StringBool(line);
-					else if (StringContains("GangStars", line))
-						mySets->GangStars = StringBool(line);
-					else if (StringContains("Epsilon", line))
-						mySets->Epsilon = StringBool(line);
-					else if (StringContains("Jogger", line))
-						mySets->Jogger = StringBool(line);
-					else if (StringContains("Golfer", line))
-						mySets->Golfer = StringBool(line);
-					else if (StringContains("Hiker", line))
-						mySets->Hiker = StringBool(line);
-					else if (StringContains("Methaddict", line))
-						mySets->Methaddict = StringBool(line);
-					else if (StringContains("Rural", line))
-						mySets->Rural = StringBool(line);
-					else if (StringContains("Cyclist", line))
-						mySets->Cyclist = StringBool(line);
-					else if (StringContains("LGBTWXYZ", line))
-						mySets->LGBTWXYZ = StringBool(line);
-					else if (StringContains("PoolPeds", line))
-						mySets->PoolPeds = StringBool(line);
-					else if (StringContains("Workers", line))
-						mySets->Workers = StringBool(line);
-					else if (StringContains("Jetski", line))
-						mySets->Jetski = StringBool(line);
-					else if (StringContains("BikeATV", line))
-						mySets->BikeATV = StringBool(line);
-					else if (StringContains("Services", line))
-						mySets->Services = StringBool(line);
-					else if (StringContains("Pilot", line))
-						mySets->Pilot = StringBool(line);
-					else if (StringContains("Animals", line))
-						mySets->Animals = StringBool(line);
-					else if (StringContains("Yankton", line))
-						mySets->Yankton = StringBool(line);
-					else if (StringContains("Cayo", line))
-						mySets->Cayo = StringBool(line);
-					else if (StringContains("Loging", line))
-						mySets->Loging = StringBool(line);
-					else if (StringContains("SDJan", line))
-						mySets->SnowMonths.Jan = StringBool(line);
-					else if (StringContains("SDFeb", line))
-						mySets->SnowMonths.Feb = StringBool(line);
-					else if (StringContains("SDMar", line))
-						mySets->SnowMonths.Mar = StringBool(line);
-					else if (StringContains("SDApr", line))
-						mySets->SnowMonths.Apr = StringBool(line);
-					else if (StringContains("SDMay", line))
-						mySets->SnowMonths.May = StringBool(line);
-					else if (StringContains("SDJun", line))
-						mySets->SnowMonths.Jun = StringBool(line);
-					else if (StringContains("SDJul", line))
-						mySets->SnowMonths.Jul = StringBool(line);
-					else if (StringContains("SDAug", line))
-						mySets->SnowMonths.Aug = StringBool(line);
-					else if (StringContains("SDSep", line))
-						mySets->SnowMonths.Sep = StringBool(line);
-					else if (StringContains("SDOct", line))
-						mySets->SnowMonths.Oct = StringBool(line);
-					else if (StringContains("SDNov", line))
-						mySets->SnowMonths.Nov = StringBool(line);
-					else if (StringContains("SDDec", line))
-						mySets->SnowMonths.Dec = StringBool(line);
+					if (Contains_string("MenuKey", line))
+						modSets->MenuKey = Convert_to_int(line);
+					else if (Contains_string("Auto_Run", line))
+						modSets->Auto_Run = Convert_to_bool(line);
+					else if (Contains_string("Random_Ped", line))
+						modSets->Random_Ped = Convert_to_bool(line);
+					else if (Contains_string("Saved_Ped", line))
+						modSets->Saved_Ped = Convert_to_bool(line);
+					else if (Contains_string("Disable_Record_Key", line))
+						modSets->Disable_Record_Key = Convert_to_bool(line);
+					else if (Contains_string("Random_Weapons", line))
+						modSets->Random_Weapons = Convert_to_bool(line);
+					else if (Contains_string("Funeral", line))
+						modSets->Funeral = Convert_to_bool(line);
+					else if (Contains_string("Prison", line))
+						modSets->Prison = Convert_to_bool(line);
+					else if (Contains_string("BeachPart", line))
+						modSets->BeachPart = Convert_to_bool(line);
+					else if (Contains_string("Reincarnate", line))
+						modSets->Reincarnate = Convert_to_bool(line);
+					else if (Contains_string("ReCurr", line))
+						modSets->ReCurr = Convert_to_bool(line);
+					else if (Contains_string("Auto_Save", line))
+						modSets->Auto_Save = Convert_to_bool(line);
+					else if (Contains_string("Menu_Left_Side", line))
+						modSets->Menu_Left_Side = Convert_to_bool(line);
+					else if (Contains_string("ControlSupport", line))
+						modSets->ControlSupport = Convert_to_bool(line);
+					else if (Contains_string("ControlA", line))
+						modSets->ControlA = Convert_to_int(line);
+					else if (Contains_string("ControlB", line))
+						modSets->ControlB = Convert_to_int(line);
+					else if (Contains_string("Lang_Set", line))
+						modSets->Lang_Set = Convert_to_int(line);
+					else if (Contains_string("BeachPed", line))
+						modSets->BeachPed = Convert_to_bool(line);
+					else if (Contains_string("Tramps", line))
+						modSets->Tramps = Convert_to_bool(line);
+					else if (Contains_string("Highclass", line))
+						modSets->Highclass = Convert_to_bool(line);
+					else if (Contains_string("Midclass", line))
+						modSets->Midclass = Convert_to_bool(line);
+					else if (Contains_string("Lowclass", line))
+						modSets->Lowclass = Convert_to_bool(line);
+					else if (Contains_string("Business", line))
+						modSets->Business = Convert_to_bool(line);
+					else if (Contains_string("Bodybuilder", line))
+						modSets->Bodybuilder = Convert_to_bool(line);
+					else if (Contains_string("GangStars", line))
+						modSets->GangStars = Convert_to_bool(line);
+					else if (Contains_string("Epsilon", line))
+						modSets->Epsilon = Convert_to_bool(line);
+					else if (Contains_string("Jogger", line))
+						modSets->Jogger = Convert_to_bool(line);
+					else if (Contains_string("Golfer", line))
+						modSets->Golfer = Convert_to_bool(line);
+					else if (Contains_string("Hiker", line))
+						modSets->Hiker = Convert_to_bool(line);
+					else if (Contains_string("Methaddict", line))
+						modSets->Methaddict = Convert_to_bool(line);
+					else if (Contains_string("Rural", line))
+						modSets->Rural = Convert_to_bool(line);
+					else if (Contains_string("Cyclist", line))
+						modSets->Cyclist = Convert_to_bool(line);
+					else if (Contains_string("LGBTWXYZ", line))
+						modSets->LGBTWXYZ = Convert_to_bool(line);
+					else if (Contains_string("PoolPeds", line))
+						modSets->PoolPeds = Convert_to_bool(line);
+					else if (Contains_string("Workers", line))
+						modSets->Workers = Convert_to_bool(line);
+					else if (Contains_string("Jetski", line))
+						modSets->Jetski = Convert_to_bool(line);
+					else if (Contains_string("BikeATV", line))
+						modSets->BikeATV = Convert_to_bool(line);
+					else if (Contains_string("Services", line))
+						modSets->Services = Convert_to_bool(line);
+					else if (Contains_string("Pilot", line))
+						modSets->Pilot = Convert_to_bool(line);
+					else if (Contains_string("Animals", line))
+						modSets->Animals = Convert_to_bool(line);
+					else if (Contains_string("Yankton", line))
+						modSets->Yankton = Convert_to_bool(line);
+					else if (Contains_string("Cayo", line))
+						modSets->Cayo = Convert_to_bool(line);
+					else if (Contains_string("Loging", line))
+						modSets->Loging = Convert_to_bool(line);
+					else if (Contains_string("SDJan", line))
+						modSets->Jan = Convert_to_bool(line);
+					else if (Contains_string("SDFeb", line))
+						modSets->Feb = Convert_to_bool(line);
+					else if (Contains_string("SDMar", line))
+						modSets->Mar = Convert_to_bool(line);
+					else if (Contains_string("SDApr", line))
+						modSets->Apr = Convert_to_bool(line);
+					else if (Contains_string("SDMay", line))
+						modSets->May = Convert_to_bool(line);
+					else if (Contains_string("SDJun", line))
+						modSets->Jun = Convert_to_bool(line);
+					else if (Contains_string("SDJul", line))
+						modSets->Jul = Convert_to_bool(line);
+					else if (Contains_string("SDAug", line))
+						modSets->Aug = Convert_to_bool(line);
+					else if (Contains_string("SDSep", line))
+						modSets->Sep = Convert_to_bool(line);
+					else if (Contains_string("SDOct", line))
+						modSets->Oct = Convert_to_bool(line);
+					else if (Contains_string("SDNov", line))
+						modSets->Nov = Convert_to_bool(line);
+					else if (Contains_string("SDDec", line))
+						modSets->Dec = Convert_to_bool(line);
 				}
+			
+				if (modSets->Random_Ped && modSets->Saved_Ped)
+					modSets->Saved_Ped = false;
+				else if (!modSets->Random_Ped && !modSets->Saved_Ped && modSets->ReCurr)
+					modSets->ReCurr = false;
+
+				if (modSets->Reincarnate && modSets->Funeral)
+					modSets->Reincarnate = false;
 			}
 
-			ReBuildIni(mySets);
+			ReBuildIni(modSets);
 		}
+	}
 
+	void FindWeapons(std::vector<Mod_Class::Weap_Read>* myWeaps, const std::string& file)
+	{
+		std::vector<std::string> MySet = Read_ini(file);
+		std::string Lingos = LangosPick[Mod_Data::Mod_Settings.Lang_Set];
+		LoggerLight("FindWeapons == " + Lingos);
+		if (MySet.size() == 0)
+			LoggerLight("FindWeapons...Some_Div_Cant_just_add_the_files_in_the Zip_file");
+		else
+		{
+			std::string Weap = "", Desc = "";
+			int Tint = 7;
+			bool Addons = false, Liverys = false;
+
+			for (int i = 0; i < (int)MySet.size(); i++)
+			{
+				std::string line = MySet[i];
+				if (Contains_string("Name", line))
+					Weap = Remove_char61(line);
+				else if (Contains_string(Lingos, line))
+					Desc = Remove_char61(line);
+				else if (Contains_string("Tints", line))
+					Tint = Convert_to_int(line);
+				else if (Contains_string("Components", line))
+					Addons = Convert_to_bool(line);
+				else if (Contains_string("Liveries", line))
+				{
+					Liverys = Convert_to_bool(line);
+					myWeaps->push_back(Mod_Class::Weap_Read(Weap, Desc, Tint, Addons, Liverys));
+				}
+			}
+		}
+	}
+	void FindWeaponComponents(std::vector<Mod_Class::Weap_Addons>* myWeaps, const std::string& file, const std::string& weapon)
+	{
+		LoggerLight("FindWeaponComponents == " + weapon);
+		if (myWeaps != nullptr)
+		{
+			LoggerLight("FindWeaponComponents " + weapon);
+			std::vector<std::string> MySet = Read_ini(file);
+			std::string Lingos = LangosPick[Mod_Data::Mod_Settings.Lang_Set];
+			if (MySet.size() == 0)
+				LoggerLight("FindWeaponComponents...Some_Div_Cant_just_add_the_files_in_the Zip_file");
+			else
+			{
+				std::string Addon = "", Desc = "";
+				for (int i = 0; i < (int)MySet.size(); i++)
+				{
+					std::string line = MySet[i];
+					if (Contains_string("Name=", line))
+					{
+						Addon = Remove_char61(line);
+					}
+					else if (Contains_string(Lingos, line))
+					{
+						if ((bool)WEAPON::DOES_WEAPON_TAKE_WEAPON_COMPONENT(Mod_Systems::MyHashKey(weapon), Mod_Systems::MyHashKey(Addon)))
+						{
+							Desc = Remove_char61(line);
+							myWeaps->push_back(Mod_Class::Weap_Addons(Addon, Desc));
+						}
+
+					}
+
+				}
+			}
+		}
+	}
+	void FindWeaponTints(std::vector<std::string>* myWeaps, int list)
+	{
+		if (myWeaps != nullptr)
+		{
+			LoggerLight("FindWeaponTints list == " + std::to_string(list));
+			std::vector<std::string> MySet = Read_ini(WeapTints);
+			std::string Lingos = LangosPick[Mod_Data::Mod_Settings.Lang_Set];
+			bool thisList = false;
+			if (MySet.size() == 0)
+				LoggerLight("FindWeaponTints...Some_Div_Cant_just_add_the_files_in_the Zip_file");
+			else
+			{
+				int Mode = 6;
+				for (int i = 0; i < (int)MySet.size(); i++)
+				{
+					std::string line = MySet[i];
+					if (Contains_string("Version=", line))
+					{
+						Mode = Convert_to_int(line);
+						if (Mode == list)
+							thisList = true;
+						else
+							thisList = false;
+						LoggerLight("FindWeaponTints iMode == " + std::to_string(Mode));
+					}
+					else if (thisList)
+					{
+						if (Contains_string(Lingos, line))
+							myWeaps->push_back(Remove_char61(line));
+					}
+				}
+			}
+		}
 	}
 
 	void SaveMyWeaps()
 	{
 		std::vector<std::string> NewSave = {};
 
-		for (int i = 0; i < (int)Player_Weaps.size(); i++)
+		for (int i = 0; i < (int)Mod_Data::Player_Weaps.size(); i++)
 		{
 			NewSave.push_back("[WeaponSaver]");
-			NewSave.push_back("MyWeapon=" + Player_Weaps[i].MyWeapon);
-			NewSave.push_back("MyAmmo=" + std::to_string(Player_Weaps[i].Ammo));
+			NewSave.push_back("MyWeapon=" + Mod_Data::Player_Weaps[i].MyWeapon);
+			NewSave.push_back("MyAmmo=" + std::to_string(Mod_Data::Player_Weaps[i].Ammo));
+			NewSave.push_back("TintSet=" + std::to_string(Mod_Data::Player_Weaps[i].TintSet));
+			NewSave.push_back("WeapTint=" + std::to_string(Mod_Data::Player_Weaps[i].WeapTint));
 			NewSave.push_back("[Addons]");
 
-			for (int j = 0; j < Player_Weaps[i].MyAddons.size(); j++)
-				NewSave.push_back("MyAddon=" + Player_Weaps[i].MyAddons[j]);
+			for (int j = 0; j < Mod_Data::Player_Weaps[i].MyAddons.size(); j++)
+				NewSave.push_back("MyAddon=" + Mod_Data::Player_Weaps[i].MyAddons[j]);
 		}
-
-
-		std::ofstream MyFile(GetDir() + "/RandomStart/MyWeaps.ini");
-
-		for (int i = 0; i < (int)NewSave.size(); i++)
-		{
-			MyFile << NewSave[i];
-			MyFile << "\n";
-		}
-
-		MyFile.close();
+		Write_ini(SaveWeapsFile, NewSave);
 	}
 	std::vector<Mod_Class::WeaponSaver> LoadSavedWeapons()
 	{
 		bool Addons = false;
 		std::vector<Mod_Class::WeaponSaver> MyWeaopns = {};
-		std::vector<std::string> MyColect = ReadSetFile(GetDir() + "/RandomStart/MyWeaps.ini");
+		std::vector<std::string> MyColect = Read_ini(SaveWeapsFile);
 
 		std::string weapon = "";
 		int ammo = 0;
+		int tintSet = 0;
+		int weapTint = 0;
 		std::vector<std::string> MyAddons = {};
 
 		for (int i = 0; i < MyColect.size(); i++)
@@ -1013,305 +1033,75 @@ namespace Mod_Systems
 			std::string line = MyColect[i];
 			if (Addons)
 			{
-				if (StringContains("[WeaponSaver]", line))
+				if (Contains_string("[WeaponSaver]", line))
 				{
 					Addons = false;
-					MyWeaopns.push_back(Mod_Class::WeaponSaver(weapon, MyAddons, ammo));
+					MyWeaopns.push_back(Mod_Class::WeaponSaver(weapon, MyAddons, ammo, tintSet, weapTint));
 					MyAddons.clear();
 				}
 				else
-					MyAddons.push_back(AfterEqual(line));
+					MyAddons.push_back(Remove_char61(line));
 			}
-			else if (StringContains("MyWeapon=", line))
-				weapon = AfterEqual(line);
-			else if (StringContains("MyAmmo", line))
-				ammo = StingNumbersInt(line);
-			else if (StringContains("[Addons]", line))
+			else if (Contains_string("MyWeapon=", line))
+				weapon = Remove_char61(line);
+			else if (Contains_string("MyAmmo", line))
+				ammo = Convert_to_int(line);
+			else if (Contains_string("TintSet", line))
+				ammo = Convert_to_int(line);
+			else if (Contains_string("WeapTint", line))
+				ammo = Convert_to_int(line);
+			else if (Contains_string("[Addons]", line))
 				Addons = true;
 		}
 
 		return MyWeaopns;
 	}
+	std::vector<Mod_Class::WeaponSaver> BuildWeaponList()
+	{
+		LoggerLight("BuildWeaponList");
+		std::string weapon = "";
+		std::vector<Mod_Class::WeaponSaver> output = {};
+		int ammo = 0;
+		int tint = 0;
+		int tintSet = 0;
+		for (int i = 0; i < (int)Mod_Data::Weapons_List.size(); i++)
+		{
+			weapon = Mod_Data::Weapons_List[i];
+			if (WEAPON::HAS_PED_GOT_WEAPON(PLAYER::PLAYER_PED_ID(), Mod_Systems::MyHashKey(weapon), false))
+			{
+				tintSet = WEAPON::GET_WEAPON_TINT_COUNT(Mod_Systems::MyHashKey(weapon));
+				tint = WEAPON::GET_PED_WEAPON_TINT_INDEX(PLAYER::PLAYER_PED_ID(), Mod_Systems::MyHashKey(weapon));
+				ammo = WEAPON::GET_AMMO_IN_PED_WEAPON(PLAYER::PLAYER_PED_ID(), Mod_Systems::MyHashKey(weapon));
 
+				std::vector<std::string> myAddons = {};
+				for (int j = 0; j < (int)Mod_Data::WeapAdd_List.size(); j++)
+				{
+					if (WEAPON::HAS_PED_GOT_WEAPON_COMPONENT(PLAYER::PLAYER_PED_ID(), Mod_Systems::MyHashKey(weapon), Mod_Systems::MyHashKey(Mod_Data::WeapAdd_List[j])))
+						myAddons.push_back(Mod_Data::WeapAdd_List[j]);
+				}
+				output.push_back(Mod_Class::WeaponSaver(weapon, myAddons, ammo, tintSet, tint));
+			}
+		}
+		return output;
+	}
+	
 	void LoadLang()
 	{
 		LoggerLight("LoadLang");
 
-		const std::vector<std::string> LangEng = {
-			"Enter",                                                                                    //0
-			"Back",                                                                                     //1
-			"Left",                                                                                     //2
-			"Right",                                                                                    //3
-			"Random Scenarios",                                                                         //4
-			"Select available or launch a random scenario.",                                            //5
-			"Save Ped Menu",                                                                            //6
-			"Change customize and save characters.",                                                    //7
-			"Random Start",                                                                             //8
-			"Select a random scenario when game loads.",                                                //9
-			"Random Ped",                                                                               //10
-			"Load as or re-spawn as a random ped (includes animals).",                                  //11
-			"Saved Ped",                                                                                //12
-			"Load as or re-spawn as a saved ped.",                                                      //13
-			"Reincarnation",                                                                            //14
-			"Life after death?",                                                                        //15
-			"Re-spawn",                                                                                 //16
-			"Return as your current character in the area you died in.",                                //17
-			"Funeral",                                                                                  //18
-			"If you are using a random or non main character have a funeral service on death.",         //19
-			"Prison",                                                                                   //20
-			"Go straight to Bolingbroke do not pass go do not collect 200.",                            //21
-			"Random Weapons",                                                                           //22
-			"Get a random weapon selection or keep your current weapons.",                              //23
-			"Capture Weapon Load-out",                                                                  //24
-			"Save you current weapon selection.",                                                       //25
-			"Change Key-bindings",                                                                      //26
-			"Select menu load key.",                                                                    //27
-			"Beach Ped",                                                                                //28
-			"Sun bathing and motor boating.",                                                           //29
-			"Tramps",                                                                                   //30
-			"Down and out in Los Santos.",                                                              //31
-			"High class",                                                                               //32
-			"Nice house, nice car, nice weather.",                                                      //33
-			"Mid class",                                                                                //34
-			"Reasonable house, reasonable car, reasonable weather.",                                    //35
-			"Low class",                                                                                //36
-			"Rubbish house, trash car, crap weather.",                                                  //37
-			"Business",                                                                                 //38
-			"The high flying Los Santos elite.",                                                        //39
-			"Body builder",                                                                             //40
-			"Use the facilities at muscle beach.",                                                      //41
-			"Gangsters",                                                                                //42
-			"Defend your turf in the Los Santos war zones.",                                            //43
-			"Epsilon ",                                                                                 //44
-			"Join a cult and look down on the non-believers.",                                          //45
-			"Jogger",                                                                                   //46
-			"Take a run in some random location.",                                                      //47
-			"Golfer",                                                                                   //48
-			"Play a round or just burn up the turf in your caddy.",                                     //49
-			"Hiker",                                                                                    //50
-			"Explore the wilderness of Los Santos.",                                                    //51
-			"Meth addict",                                                                              //52
-			"Strawberry fields for ever.",                                                              //53
-			"Rural",                                                                                    //54
-			"Down on the farm.",                                                                        //55
-			"Cyclist",                                                                                  //56
-			"Put on the lycra and start peddling.",                                                     //57
-			"LGBTWXYZ",                                                                                 //58
-			"I am the very model of a modern Major-General I've information vegetable, animal, and mineral.",//59
-			"Pool Peds",                                                                                //60
-			"Take a swim or just chill by the pool.",                                                   //61
-			"Workers",                                                                                  //62
-			"The many trades and occupations in Los Santos.",                                           //63
-			"Jet ski",                                                                                  //64
-			"Race your jet-ski or just ride around for fun.",                                           //65
-			"Bike/ATV",                                                                                 //66
-			"Do some off-roading around Los Santos.",                                                   //67
-			"Services",                                                                                 //68
-			"Do your civic duty with fire, police, ambulance or military.",                             //69
-			"Pilot",                                                                                    //70
-			"Earn your wings gallivanting above Los Santos.",                                           //71
-			"Animals",                                                                                  //72
-			"Soar like a bird, strut like a deer, swim like a fish.",                                   //73
-			"Yankton",                                                                                  //74
-			"Visit snowy Yankton.",                                                                     //75
-			"Cayo Piero",                                                                               //76
-			"Visit sunny Cayo Piero.",                                                                  //77
-			"Saved Peds",                                                                               //78
-			"Select and edit your ped collection.",                                                     //79
-			"Save current ped",                                                                         //80
-			"save your current character.",                                                             //81
-			"Freemode Ped",                                                                             //82
-			"Generate a random freemode ped.",                                                          //83
-			"Reposes Ped",                                                                              //84
-			"Become a nearby ped.",                                                                     //85
-			"Select a Ped",                                                                             //86
-			"Rename Ped",                                                                               //87
-			"Change the name of your ped.",                                                             //88
-			"Change Outfit",                                                                            //89
-			"Change your outfit.",                                                                      //90
-			"Tattoo Pallor",                                                                            //91
-			"Add Tattoos to your character.",                                                           //92
-			"Set Hair Style",                                                                           //93
-			"Eye Colour",                                                                               //94
-			"Pick the colour of your eyes .",                                                           //95
-			"Pick Hair Colour",                                                                         //96
-			"Pick Hair Streaks",                                                                        //97
-			"Set Overlays",                                                                             //98
-			"Ped decals like age blush facial hair and make-up.",                                       //99
-			"Alter Face Shape",                                                                         //100
-			"Change position of chin, mouth, nose.",                                                    //101
-			"Change Parents",                                                                           //102
-			"Alter the base parents of your freemode character.",                                       //103
-			"Set Voice",                                                                                //104
-			"Save Changes",                                                                             //105
-			"Create or update saved peds ini.",                                                         //106
-			"Delete Ped",                                                                               //107
-			"Remove this ped from saved peds directory.",                                               //108
-			"Select outfit",                                                                            //109  
-			"Create New Outfit",                                                                        //110
-			"Save a new outfit on your character.",                                                     //111
-			"Edit Outfits",                                                                             //112
-			"edit the components on current outfit.",                                                   //113
-			"Edit Props",                                                                               //114
-			"Pick hats and glasses.",                                                                   //115
-			"Pre-made outfits",                                                                         //116
-			"Base Component",                                                                           //117
-			"Texture",                                                                                  //118
-			"Select ",                                                                                  //119
-			"Opacity",                                                                                  //120
-			"Colour",                                                                                   //121
-			"First Parent",                                                                             //122
-			"Second Parent",                                                                            //123
-			"Shape Mix",                                                                                //124
-			"Skin Mix",                                                                                 //125
-			"Third Mix",                                                                                //126
-			"Face",                                                                                     //127
-			"Head",                                                                                     //128
-			"Hair",                                                                                     //129
-			"Torso",                                                                                    //130
-			"Legs",                                                                                     //131
-			"Back Packs",                                                                               //132
-			"Feet",                                                                                     //133
-			"Accessories",                                                                              //134
-			"Top Add-ons",                                                                              //135
-			"Armour",                                                                                   //136
-			"Textures",                                                                                 //137
-			"Coats",                                                                                    //138
-			"Hats",                                                                                     //139
-			"Glasses",                                                                                  //140
-			"Ears",                                                                                     //141
-			"Watches",                                                                                  //142
-			"Torso",                                                                                    //143
-			"Head",                                                                                     //144
-			"Left Arm",                                                                                 //145
-			"Right Arm",                                                                                //146
-			"Left Leg",                                                                                 //147
-			"Right Leg",                                                                                //148
-			"Back",                                                                                     //149
-			"Chest",                                                                                    //150
-			"Stomach",                                                                                  //151
-			"Nose Width",                                                                               //152
-			"Nose Peak Hight",                                                                          //153
-			"Nose Peak Length",                                                                         //154
-			"Nose Bone_High",                                                                           //155
-			"Nose Peak Lowering",                                                                       //156
-			"Nose Bone Twist",                                                                          //157
-			"Eye Brow High",                                                                            //158
-			"Eye Brow Forward",                                                                         //159
-			"Cheeks Bone High",                                                                         //160
-			"Cheeks Bone Width",                                                                        //161
-			"Cheeks Width",                                                                             //162
-			"Eyes Opening",                                                                             //163
-			"Lips Thickness",                                                                           //164
-			"Jaw Bone Width 'Bone size to sides",                                                       //165
-			"Jaw Bone Back Length 'Bone size to back",                                                  //166
-			"Chimp_Bone_Lowering 'Go Down",                                                             //167
-			"Chimp Bone Length 'Go forward",                                                            //168
-			"Chimp Bone Width", "Chimp Hole",                                                           //169
-			"Neck Thickness",                                                                           //170
-			"Blemishes",                                                                                //171
-			"Facial Hair",                                                                              //172
-			"Eyebrows",                                                                                 //173
-			"Ageing",                                                                                   //174
-			"Make-up",                                                                                  //175
-			"Blush",                                                                                    //176
-			"Complexion",                                                                               //177
-			"Sun Damage",                                                                               //178
-			"Lipstick",                                                                                 //179
-			"Moles & Freckles",                                                                         //180
-			"Chest Hair",                                                                               //181
-			"Body Blemishes",                                                                           //182
-			"Add Body Blemishes",                                                                       //183
-			"Select a Keyboard Key",                                                                    //184
-			"Sets the menu open key.",                                                                  //185
-			"Select a Controller Combo",                                                                //186
-			"Choose two controller keys to open menu.",                                                 //187
-			"Hold ~INPUT_VEH_EXIT~ to take control",                                                    //188
-			"Hold the key you would like to use.",                                                      //189
-			"Key Changed",                                                                              //190
-			"Hold ~INPUT_VEH_EXIT~ to hide under van",                                                  //191
-			"Hold ~INPUT_VEH_EXIT~ to hide in waste bin",                                               //192
-			"Top Decal",                                                                                //193
-			"Explore the World: GTA games often feature vast open worlds with a lot of hidden content, collectibles, and easter eggs. Take your time to explore and enjoy the scenery.",
-			"Follow the Story: While you can engage in random chaos, the main story missions provide structure and context for the game. Completing these missions often unlocks new content and areas.",
-			"Use Cover: In gunfights, always use cover to protect yourself. Pop out to shoot, then take cover again. This reduces the chances of getting shot.",
-			"Manage Your Health: Keep an eye on your health and armor levels. You can usually find health packs and armor scattered throughout the game world. Stock up before difficult missions.",
-			"Plan Your Getaways: After committing a crime, have an escape plan. Know where you're going and what you'll do to evade the police.",
-			"Invest in Properties: In some GTA games, you can buy properties. These can provide a passive income and sometimes even offer other benefits.",
-			"Experiment with Vehicles: GTA games have a wide variety of vehicles, from cars to planes to bicycles. Experiment with different vehicles to see which ones suit your style and mission needs.",
-			"Customize Your Character: Many GTA games allow you to customize your character's appearance. Experiment with clothing and accessories to create your own unique style.",
-			"Use the Internet: In later GTA games, characters have smartphones and access to the internet. You can use it to buy vehicles, properties, and more.",
-			"Save Your Game: Don't forget to save your progress regularly, especially after completing important missions. This will prevent you from losing a lot of progress in case you fail a mission or get busted.",
-			"Don't Ignore Side Missions: Side missions can offer fun and unique experiences, as well as rewards like weapons, money, and even character upgrades.",
-			"Respect Traffic Rules (or Not): Sometimes following traffic rules can help you blend in and avoid the attention of the police. On the other hand, reckless driving can be a lot of fun. It's up to you!",
-			"Be Mindful of Police: Committing crimes will get the attention of the police. Pay attention to wanted levels and use Pay 'n' Spray or other hiding spots to lose the cops.",
-			"Play with Friends: If the game supports it, playing GTA with friends can be a blast. You can complete missions together or engage in chaotic, open-world mayhem.",
-			"Have Fun: Ultimately, GTA games are meant to be enjoyed. Whether you prefer causing chaos, following the story, or just exploring, remember that it's a game, and the goal is to have fun.",
-			"Press ~INPUT_TALK~ to change dance, hold ~INPUT_VEH_EXIT~ to  stop Dancing",              //209
-			"Press ~INPUT_TALK~ to start dancing",                                                       //210
-			"press ~INPUT_DUCK~ to select a ped, press ~INPUT_SPRINT~ to  become this ped, Press ~INPUT_RELOAD~ to Close.",                                                       //211
-			"Press ~INPUT_TALK~ to change action, hold ~INPUT_VEH_EXIT~ to exit.",                                                       //212
-			"Winter is Coming",                                                       //213
-			"January",                                                       //214
-			"February",                                                       //215
-			"March",                                                       //216
-			"April",                                                       //217
-			"May",                                                       //218
-			"June",                                                       //219
-			"July",                                                       //220
-			"August",                                                     //221
-			"September",                                                     //222
-			"October",                                                     //223
-			"November",                                                     //224
-			"December",                                                     //225
-			"Set your winter months",                                    //226
-			"Blank",                                                       //227
-			"Blank",                                                       //228
-			"Blank",                                                       //229
-			"Blank"                                                       //230
-		};
+		std::vector<std::string> LangEng = Mod_Data::RSLangMenu;
 
-		int MyLan = Mod_Settings.Lang_Set;
+		int MyLan = Mod_Data::Mod_Settings.Lang_Set;
 		
-		if (MyLan == -1)
+		if (MyLan == -1 || MyLan >= TranlsteDir.size())
 			MyLan = UNK::_GET_UI_LANGUAGE_ID(); // 2BDD44CC428A7EAE
 
-		if (MyLan == 0)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/English.txt");
-		else if (MyLan == 1)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/French.txt");
-		else if (MyLan == 2)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/German.txt");
-		else if (MyLan == 3)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Italian.txt");
-		else if (MyLan == 4)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Spanish.txt");
-		else if (MyLan == 5)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Portuguese.txt");
-		else if (MyLan == 6)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Polish.txt");
-		else if (MyLan == 7)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Russian.txt");
-		else if (MyLan == 8)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Korean.txt");
-		else if (MyLan == 9)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Chinese.txt");
-		else if (MyLan == 10)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Japanese.txt");
-		else if (MyLan == 11)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/Spanish.txt");
-		else if (MyLan == 12)
-			RSLangMenu = ReadSetFile(GetDir() + "/RandomStart/Translate/ChineseSimplify.txt");
+		Mod_Data::RSLangMenu = Read_ini(TranlsteDir[MyLan]);
 
-		if ((int)RSLangMenu.size() < 224)
-			RSLangMenu = LangEng;
+		if ((int)Mod_Data::RSLangMenu.size() < 276)
+			Mod_Data::RSLangMenu = LangEng;
 
-		Mod_Settings.Lang_Set = MyLan;
-	}
-
-	Hash MyHashKey(const std::string& name)
-	{
-		return GAMEPLAY::GET_HASH_KEY((LPSTR)name.c_str());
+		Mod_Data::Mod_Settings.Lang_Set = MyLan;
 	}
 
 	const std::vector<std::string> ControlSym = {
@@ -1677,35 +1467,10 @@ namespace Mod_Systems
 	" ~INPUT_RESPAWN_FASTER~ ",//~ ");//
 	" ~INPUT_HUDMARKER_SELECT~ "
 	};
+
 	void menu_beep()
 	{
 		AUDIO::PLAY_SOUND_FRONTEND(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0);
-	}
-	void ButtonDisabler(int LButt)
-	{
-		CONTROLS::ENABLE_CONTROL_ACTION(0, LButt, false);
-		CONTROLS::ENABLE_CONTROL_ACTION(1, LButt, false);
-		CONTROLS::ENABLE_CONTROL_ACTION(2, LButt, false);
-	}
-	bool WhileButtonDown(int CButt, bool bDisable)
-	{
-		if (bDisable)
-			ButtonDisabler(CButt); ;
-
-		bool bButt = (bool)CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, CButt);
-
-		if (bButt)
-		{
-			while (!(bool)CONTROLS::IS_DISABLED_CONTROL_JUST_RELEASED(0, CButt))
-				WAIT(1);
-		}
-		return bButt;
-	}
-	bool ButtonDown(int CButt, bool bDisable)
-	{
-		if (bDisable)
-			ButtonDisabler(CButt);
-		return (bool)CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, CButt);
 	}
 
 	void get_button_state(bool* ent, bool* del, bool* up, bool* down, bool* left, bool* right, bool* shutDown)
@@ -1718,12 +1483,11 @@ namespace Mod_Systems
 		if (right) *right = IsKeyDown(VK_RIGHT);
 		if (shutDown) *shutDown = IsKeyDown(VK_ESCAPE);
 	}
-	void Menu_Button_state(bool* Mb)
+	void Menu_Button_state(bool* returnBool, DWORD myButton)
 	{
-		if (Mb) *Mb = IsKeyDown(KeyFind[Mod_Data::Mod_Settings.MenuKey]);//VK_NUMPAD0
+		if (returnBool) *returnBool = IsKeyDown(myButton);//VK_NUMPAD0
 	}
-
-	int FindKeyBinds(bool Control)
+	int FindKeyBinds(bool controler)
 	{
 		WAIT(4000);
 		int iReturn = -1;
@@ -1734,15 +1498,15 @@ namespace Mod_Systems
 			if ((bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
 				break;
 
-			Mod_Ui::TopLeft(RSLangMenu[189]);
+			GVM::TopLeft(Mod_Data::RSLangMenu[189]);
 
-			if (Control)
+			if (controler)
 			{
 				if (TestCase < (int)ControlSym.size())
 				{
-					if (ButtonDown(TestCase, false))
+					if (GVM::ButtonDown(TestCase))
 					{
-						Mod_Ui::BottomLeft(RSLangMenu[190]);
+						GVM::BottomLeft(Mod_Data::RSLangMenu[190]);
 						iReturn = TestCase;
 						break;
 					}
@@ -1753,11 +1517,11 @@ namespace Mod_Systems
 			}
 			else
 			{
-				if (TestCase < (int)KeyFind.size())
+				if (TestCase < (int)Mod_Data::KeyFind.size())
 				{
-					if (IsKeyDown(KeyFind[TestCase]))
+					if (IsKeyDown(Mod_Data::KeyFind[TestCase]))
 					{
-						Mod_Ui::BottomLeft(RSLangMenu[190]);
+						GVM::BottomLeft(Mod_Data::RSLangMenu[190]);
 						iReturn = TestCase;
 						break;
 					}
@@ -1775,60 +1539,57 @@ namespace Mod_Systems
 	{
 		return (int)GAMEPLAY::GET_GAME_TIMER();
 	}
-	bool IsIsSafe(int Key)
+	bool IsIsSafe(int key)
 	{
-		bool isSafe = false;
+		bool IsSafe = false;
 		if (!(bool)PED::IS_PED_RUNNING_MOBILE_PHONE_TASK(PLAYER::PLAYER_PED_ID()))
 		{
-			while (ButtonDown(Key, false))
+			while (GVM::ButtonDown(key))
 			{
 				WAIT(1000);
-				if (ButtonDown(Key, false))
-					isSafe = true;
+				if (GVM::ButtonDown(key))
+					IsSafe = true;
 				break;
 			}
 		}
-		return isSafe;
+		return IsSafe;
 	}
 
-	const std::string SavedPedFolder = GetDir() + "/RandomStart/SavedPeds";
-	void LoadSavedPeds()
+	void LoadSavedPeds(Mod_Class::ClothBank& clothBank)
 	{
 		LoggerLight("LoadSavedPeds");
 
+		Mod_Data::SavedPeds.clear();
 		std::vector<Mod_Class::ClothBank> PzCont = {};
+		Mod_Data::SavedPeds.push_back(clothBank);
 
-		if (CreateDirectoryA((LPSTR)SavedPedFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
-		{
-
-		}
 		std::vector<std::string> Files = {};
-		for (const auto& entry : std::filesystem::directory_iterator(SavedPedFolder))
+		for (const auto& entry : std::filesystem::directory_iterator(DirSavedPed))
 			Files.push_back(entry.path().string());
 
 		for (int i = 0; i < Files.size(); i++)
 		{
-			std::string model = "", name = "", walkySt = "", moods = "", HairTag = "H_FMM_3_4", HairName = "", voice = "";
-			
+			std::string model = "", name = "", HairTag = "H_FMM_3_4", HairName = "";		
 			Hash modelHash = 0;
-
-			int hairColour = 7, hairStreaks = 7, eyeColour = 0, comp = 3, text = 4, overLib = -1, over = 1, cloth_Pick = 0, shapeFirstID = 5, shapeSecondID = 5;
-			
+			int hairColour = 7, hairStreaks = 7, eyeColour = 0, comp = 3, text = 4, overLib = -1, over = 1, cloth_Pick = 0, shapeFirstID = 5, shapeSecondID = 5, voice = 0, walkySt = 0, moods = 0;		
 			float shapeMix = 0.0, skinMix = 0.92, thirdMix = 0.0;
-
-			bool male = true, animal_Farm = false, freeMode = false;
-
-			bool ClothBuild = false;
+			bool male = true, animal_Farm = false, freeMode = false, ClothBuild = false, ReDoOverlay = false;
 
 			int intList = 0;
 			int ClothNo = -1;
+			int WeaponsNo = -1;
 
+			int PlHealth = 200;
+			float PlRunSp = 1.0f;
+			float PlSwimSp = 1.0f;
+
+			std::vector<Mod_Class::WeaponSaver> myWeapons = {};
 			std::vector<Mod_Class::ClothX> myOutfits = {};
 			std::vector<Mod_Class::FreeOverLay> myOverlay = {};
 			std::vector<Mod_Class::Tattoo> myTattoo = {};
 			std::vector<float> faceScale = {};
 
-			std::vector<std::string> MyColect = ReadSetFile(Files[i]);
+			std::vector<std::string> MyColect = Read_ini(Files[i]);
 
 			for (int i = 0; i < MyColect.size(); i++)
 			{
@@ -1836,250 +1597,313 @@ namespace Mod_Systems
 
 				if (ClothBuild)
 				{
-					if (StringContains("Title", line))
+					if (Contains_string("Title", line))
 					{
 						ClothNo++;
-						myOutfits.push_back(Mod_Class::ClothX(AfterEqual(line), {}, {}, {}, {}));
+						myOutfits.push_back(Mod_Class::ClothX(Remove_char61(line), {}, {}, {}, {}));
 					}
-					else if (StringContains("DecalLib", line))
+					else if (Contains_string("DecalLib", line))
 					{
-						myOutfits[ClothNo].Badge.BaseName = AfterEqual(line);
+						myOutfits[ClothNo].Badge.BaseName = Remove_char61(line);
 					}
-					else if (StringContains("DecalName", line))
+					else if (Contains_string("DecalName", line))
 					{
-						myOutfits[ClothNo].Badge.TatName = AfterEqual(line);
+						myOutfits[ClothNo].Badge.TatName = Remove_char61(line);
 					}
-					else if (StringContains("[ClothA]", line))
+					else if (Contains_string("[ClothA]", line))
 					{
 						intList = 1;
 					}
-					else if (StringContains("[ClothB]", line))
+					else if (Contains_string("[ClothB]", line))
 					{
 						intList = 2;
 					}
-					else if (StringContains("[ExtraA]", line))
+					else if (Contains_string("[ExtraA]", line))
 					{
 						intList = 3;
 					}
-					else if (StringContains("[ExtraB]", line))
+					else if (Contains_string("[ExtraB]", line))
 					{
 						intList = 4;
 					}
 					else if (intList == 1)
 					{
-						if (StringContains("ClothA", line))
-							myOutfits[ClothNo].ClothA.push_back(StingNumbersInt(line));
+						if (Contains_string("ClothA", line))
+							myOutfits[ClothNo].ClothA.push_back(Convert_to_int(line));
 					}
 					else if (intList == 2)
 					{
-						if (StringContains("ClothB", line))
-							myOutfits[ClothNo].ClothB.push_back(StingNumbersInt(line));
+						if (Contains_string("ClothB", line))
+							myOutfits[ClothNo].ClothB.push_back(Convert_to_int(line));
 					}
 					else if (intList == 3)
 					{
-						if (StringContains("ExtraA", line))
-							myOutfits[ClothNo].ExtraA.push_back(StingNumbersInt(line));
+						if (Contains_string("ExtraA", line))
+							myOutfits[ClothNo].ExtraA.push_back(Convert_to_int(line));
 					}
 					else if (intList == 4)
 					{
-						if (StringContains("ExtraB", line))
-							myOutfits[ClothNo].ExtraB.push_back(StingNumbersInt(line));
+						if (Contains_string("ExtraB", line))
+							myOutfits[ClothNo].ExtraB.push_back(Convert_to_int(line));
 					}
 				}
-				else if (StringContains("CharName", line))
-					name = AfterEqual(line);
-				else if (StringContains("Model", line))
-					model = AfterEqual(line);
-				else if (StringContains("XmodelHash", line))
-					modelHash = (Hash)StingNumbersInt(line);
-				else if (StringContains("FreeMode", line))
-					freeMode = StringBool(line);
-				else if (StringContains("Male", line))
-					male = StringBool(line);
-				else if (StringContains("Animal_Farm", line))
-					animal_Farm = StringBool(line);
-				else if (StringContains("Voice", line))
-					voice = AfterEqual(line);
-				else if (StringContains("Cloth_Pick", line))
-					cloth_Pick = StingNumbersInt(line);
-				else if (StringContains("EyeColour", line))
-					eyeColour = StingNumbersInt(line);
-				else if (StringContains("WalkStyle", line))
-					walkySt = AfterEqual(line);
-				else if (StringContains("ShapeFirstID", line))
-					shapeFirstID = StingNumbersInt(line);
-				else if (StringContains("ShapeSecondID", line))
-					shapeSecondID = StingNumbersInt(line);
-				else if (StringContains("ShapeMix", line))
-					shapeMix = StingNumbersFloat(line);
-				else if (StringContains("SkinMix", line))
-					skinMix = StingNumbersFloat(line);
-				else if (StringContains("ThirdMix", line))
-					thirdMix = StingNumbersFloat(line);
-				else if (StringContains("HairColour", line))
-					hairColour = StingNumbersInt(line);
-				else if (StringContains("HairStreaks", line))
-					hairStreaks = StingNumbersInt(line);
-				else if (StringContains("Comp", line))
-					comp = StingNumbersInt(line);
-				else if (StringContains("Text", line))
-					text = StingNumbersInt(line);
-				else if (StringContains("HairTag", line))
-					HairTag = AfterEqual(line);
-				else if (StringContains("HairName", line))
-					HairName = AfterEqual(line);
-				else if (StringContains("OverLib", line))
-					overLib = StingNumbersInt(line);
-				else if (StringContains("OverOb", line))
-					over = StingNumbersInt(line);
-				else if (StringContains("[FreeOverLay]", line))
+				else if (Contains_string("CharName", line))
+					name = Remove_char61(line);
+				else if (Contains_string("Model", line))
+					model = Remove_char61(line);
+				else if (Contains_string("XmodelHash", line))
+					modelHash = (Hash)Convert_to_int(line);
+				else if (Contains_string("FreeMode", line))
+					freeMode = Convert_to_bool(line);
+				else if (Contains_string("Male", line))
+					male = Convert_to_bool(line);
+				else if (Contains_string("Animal_Farm", line))
+					animal_Farm = Convert_to_bool(line);
+				else if (Contains_string("Voice", line))
+					voice = Convert_to_int(line);
+				else if (Contains_string("Cloth_Pick", line))
+					cloth_Pick = Convert_to_int(line);
+				else if (Contains_string("EyeColour", line))
+					eyeColour = Convert_to_int(line);
+				else if (Contains_string("WalkStyle", line))
+					walkySt = Convert_to_int(line);
+				else if (Contains_string("ShapeFirstID", line))
+					shapeFirstID = Convert_to_int(line);
+				else if (Contains_string("ShapeSecondID", line))
+					shapeSecondID = Convert_to_int(line);
+				else if (Contains_string("ShapeMix", line))
+					shapeMix = Convert_to_float(line);
+				else if (Contains_string("SkinMix", line))
+					skinMix = Convert_to_float(line);
+				else if (Contains_string("ThirdMix", line))
+					thirdMix = Convert_to_float(line);
+				else if (Contains_string("HairColour", line))
+					hairColour = Convert_to_int(line);
+				else if (Contains_string("HairStreaks", line))
+					hairStreaks = Convert_to_int(line);
+				else if (Contains_string("Comp", line))
+					comp = Convert_to_int(line);
+				else if (Contains_string("Text", line))
+					text = Convert_to_int(line);
+				else if (Contains_string("HairTag", line))
+					HairTag = Remove_char61(line);
+				else if (Contains_string("HairName", line))
+					HairName = Remove_char61(line);
+				else if (Contains_string("OverLib", line))
+					overLib = Convert_to_int(line);
+				else if (Contains_string("OverOb", line))
+					over = Convert_to_int(line);
+				else if (Contains_string("[FreeOverLay]", line))
 					intList = 5;
-				else if (StringContains("[Tattoo]", line))
+				else if (Contains_string("[Tattoo]", line))
 					intList = 6;
-				else if (StringContains("[FaceScale]", line))
+				else if (Contains_string("[FaceScale]", line))
 					intList = 7;
-				else if (StringContains("Mood", line))
-					moods = AfterEqual(line);
-				else if (StringContains("[ClothX]", line))
+				else if (Contains_string("[WeaponSaver]", line))
+					intList = 8;
+				else if (Contains_string("Mood", line))
+					moods = Convert_to_int(line);
+				else if (Contains_string("PlHealth", line))
+					PlHealth = Convert_to_int(line);
+				else if (Contains_string("PlRunSp", line))
+					PlRunSp = Convert_to_float(line);
+				else if (Contains_string("PlSwimSp", line))
+					PlSwimSp = Convert_to_float(line);
+				else if (Contains_string("[ClothX]", line))
 					ClothBuild = true;
 				else if (intList == 5)
 				{
-					if (StringContains("Overlay", line))
-						myOverlay.push_back(Mod_Class::FreeOverLay(StingNumbersInt(line), StingNumbersInt(MyColect[i + 1]), StingNumbersFloat(MyColect[i + 2])));
+					if (Contains_string("Overlay", line))
+					{
+						if (MyColect[i + 1] == "ColourOver=")
+						{
+							float Optics = Convert_to_float(MyColect[i + 3]);
+							myOverlay.push_back(Mod_Class::FreeOverLay(Convert_to_int(line), Convert_to_int(MyColect[i + 1]), Convert_to_int(MyColect[i + 2]), Optics));
+						}
+						else
+						{
+							ReDoOverlay = true;
+							float Optics = Convert_to_float(MyColect[i + 2]);
+							if (Optics > 1.0f || Optics < 0.0f)
+								Optics = 0.65f;
+
+							myOverlay.push_back(Mod_Class::FreeOverLay(-1, Convert_to_int(line), Convert_to_int(MyColect[i + 1]), Optics));
+						}
+					}
 				}
 				else if (intList == 6)
 				{
-					if (StringContains("BaseName", line))
-						myTattoo.push_back(Mod_Class::Tattoo(AfterEqual(line), AfterEqual(MyColect[i + 1]), AfterEqual(MyColect[i + 2])));
+					if (Contains_string("BaseName", line))
+						myTattoo.push_back(Mod_Class::Tattoo(Remove_char61(line), Remove_char61(MyColect[i + 1]), Remove_char61(MyColect[i + 2])));
 				}
 				else if (intList == 7)
 				{
-					if (StringContains("Face", line))
-						faceScale.push_back(StingNumbersFloat(line));
+					if (Contains_string("Face", line))
+						faceScale.push_back(Convert_to_float(line));
+				}
+				else if (intList == 8)
+				{
+					if (Contains_string("MyWeapon=", line))
+					{
+						myWeapons.push_back(Mod_Class::WeaponSaver(Remove_char61(line), {}, 0, 0, 0));
+						WeaponsNo++;
+					}
+					else if (Contains_string("MyAddon=", line))
+					{
+						myWeapons[WeaponsNo].MyAddons.push_back(Remove_char61(line));
+					}
+					else if (Contains_string("MyAmmo=", line))
+					{
+						myWeapons[WeaponsNo].Ammo = Convert_to_int(line);
+					}
+					else if (Contains_string("TintSet=", line))
+					{
+						myWeapons[WeaponsNo].TintSet = Convert_to_int(line);
+					}
+					else if (Contains_string("WeapTint=", line))
+					{
+						myWeapons[WeaponsNo].WeapTint = Convert_to_int(line);
+					}
 				}
 			}
 
 			bool bReBuild = false;
 
+			if (ReDoOverlay)
+			{
+				for (int i = 0; i < (int)myOverlay.size(); i++)
+				{
+					if (i == 1)
+						myOverlay[i].Colour = 1;
+					else if (i == 2)
+						myOverlay[i].Colour = 1;
+					else if (i == 5)
+						myOverlay[i].Colour = 2;
+					else if (i == 8)
+						myOverlay[i].Colour = 2;
+					else if (i == 10)
+						myOverlay[i].Colour = 1;
+				}
+			}
+
 			Mod_Class::FaceBank myFaces = Mod_Class::FaceBank(shapeFirstID, shapeSecondID, shapeMix, skinMix, thirdMix);
 			Mod_Class::HairSets myHair = Mod_Class::HairSets(comp, text, HairTag, HairName, overLib, over);
-			if (myOutfits[0].Title != "Default")
-				myOutfits[0].Title = "Default";
 
-			Mod_Class::ClothBank ThisBank = Mod_Class::ClothBank(name, model, modelHash, freeMode, myFaces, male, animal_Farm, myHair, hairColour, hairStreaks, eyeColour, cloth_Pick, myOverlay, myTattoo, myOutfits, faceScale, voice, walkySt, moods);
-
+			Mod_Class::ClothBank ThisBank = Mod_Class::ClothBank(name, model, modelHash, freeMode, myFaces, male, animal_Farm, myHair, hairColour, hairStreaks, eyeColour, cloth_Pick, myWeapons, myOverlay, myTattoo, myOutfits, faceScale, voice, walkySt, moods, PlHealth, PlRunSp, PlSwimSp);
+			 
 			PzCont.push_back(ThisBank);
 		}
-
 		for (int i = 0; i < PzCont.size(); i++)
 		{
 			if (PzCont[i].Cloth_Pick < 0 || PzCont[i].Cloth_Pick >(int)PzCont[i].Cothing.size() - 1)
 				PzCont[i].Cloth_Pick = 0;
 
-			SavedPeds.push_back(PzCont[i]);
+			Mod_Data::SavedPeds.push_back(PzCont[i]);
 		}
 	}
-	void SaveClothBank(Mod_Class::ClothBank& bank)
+	void SaveClothBank(const Mod_Class::ClothBank& clothBank)
 	{
-		LoggerLight("SaveClothBank");
-		if (CreateDirectoryA((LPSTR)SavedPedFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
-		{
+		LoggerLight("SaveClothBank == " + clothBank.CharName);
 
-		}
-
-		if (bank.CharName != "")
+		if (clothBank.CharName != "")
 		{
 			std::vector<std::string> NewSave = {
 				"[ClothBank]",
-				"CharName=" + bank.CharName,
-				"Model=" + bank.Model,
-				"XmodelHash=" + std::to_string(bank.ModelHash),
-				"FreeMode=" + BoolToString(bank.FreeMode),
-				"Male=" + BoolToString(bank.Male),
-				"Animal_Farm=" + BoolToString(bank.Animal_Farm),
-				"Voice=" + bank.Voice,
-				"Cloth_Pick=" + std::to_string(bank.Cloth_Pick),
-				"EyeColour=" + std::to_string(bank.EyeColour),
-				"WalkStyle=" + bank.Walkies,
+				"CharName=" + clothBank.CharName,
+				"Model=" + clothBank.Model,
+				"XmodelHash=" + std::to_string(clothBank.ModelHash),
+				"FreeMode=" + Convert_to_string(clothBank.FreeMode),
+				"Male=" + Convert_to_string(clothBank.Male),
+				"Animal_Farm=" + Convert_to_string(clothBank.Animal_Farm),
+				"Voice=" + std::to_string(clothBank.Voice),
+				"Cloth_Pick=" + std::to_string(clothBank.Cloth_Pick),
+				"EyeColour=" + std::to_string(clothBank.EyeColour),
+				"WalkStyle=" + std::to_string(clothBank.Walkies),
+				"Mood=" + std::to_string(clothBank.Moods),
+				"PlHealth=" + std::to_string(clothBank.PlHealth),
+				"PlRunSp=" + std::to_string(clothBank.PlRunSp),
+				"PlSwimSp=" + std::to_string(clothBank.PlSwimSp),
 				"[FaceBank]",
-				"ShapeFirstID=" + std::to_string(bank.MyFaces.ShapeFirstID),
-				"ShapeSecondID=" + std::to_string(bank.MyFaces.ShapeSecondID),
-				"ShapeMix=" + std::to_string(bank.MyFaces.ShapeMix),
-				"SkinMix=" + std::to_string(bank.MyFaces.SkinMix),
-				"ThirdMix=" + std::to_string(bank.MyFaces.ThirdMix),
+				"ShapeFirstID=" + std::to_string(clothBank.MyFaces.ShapeFirstID),
+				"ShapeSecondID=" + std::to_string(clothBank.MyFaces.ShapeSecondID),
+				"ShapeMix=" + std::to_string(clothBank.MyFaces.ShapeMix),
+				"SkinMix=" + std::to_string(clothBank.MyFaces.SkinMix),
+				"ThirdMix=" + std::to_string(clothBank.MyFaces.ThirdMix),
 				"[Hair]",
-				"HairColour=" + std::to_string(bank.HairColour),
-				"HairStreaks=" + std::to_string(bank.HairStreaks),
-				"Comp=" + std::to_string(bank.MyHair.Comp),
-				"Text=" + std::to_string(bank.MyHair.Text),
-				"HairTag=" + bank.MyHair.HandName,
-				"HairName=" + bank.MyHair.Name,
-				"OverLib=" + std::to_string(bank.MyHair.OverLib),
-				"OverOb=" + std::to_string(bank.MyHair.Over),
-				"Mood=" + bank.Moods,
+				"HairColour=" + std::to_string(clothBank.HairColour),
+				"HairStreaks=" + std::to_string(clothBank.HairStreaks),
+				"Comp=" + std::to_string(clothBank.MyHair.Comp),
+				"Text=" + std::to_string(clothBank.MyHair.Text),
+				"HairTag=" + clothBank.MyHair.HandName,
+				"HairName=" + clothBank.MyHair.Name,
+				"OverLib=" + std::to_string(clothBank.MyHair.OverLib),
+				"OverOb=" + std::to_string(clothBank.MyHair.Over),
 				"[FreeOverLay]"
 			};
 
-			for (int i = 0; i < bank.MyOverlay.size(); i++)
+			for (int i = 0; i < clothBank.MyOverlay.size(); i++)
 			{
 				NewSave.push_back("[OverLay]");
-				NewSave.push_back("Overlay=" + std::to_string(bank.MyOverlay[i].Overlay));
-				NewSave.push_back("OverCol=" + std::to_string(bank.MyOverlay[i].OverCol));
-				NewSave.push_back("OverOpc=" + std::to_string(bank.MyOverlay[i].OverOpc));
+				NewSave.push_back("ColourOver=" + std::to_string(clothBank.MyOverlay[i].Colour));
+				NewSave.push_back("Overlay=" + std::to_string(clothBank.MyOverlay[i].Overlay));
+				NewSave.push_back("OverCol=" + std::to_string(clothBank.MyOverlay[i].OverCol));
+				NewSave.push_back("OverOpc=" + std::to_string(clothBank.MyOverlay[i].OverOpc));
 			}
 
 			NewSave.push_back("[Tattoo]");
 
-			for (int i = 0; i < bank.MyTattoo.size(); i++)
+			for (int i = 0; i < clothBank.MyTattoo.size(); i++)
 			{
 				NewSave.push_back("[Tat]");
-				NewSave.push_back("BaseName=" + bank.MyTattoo[i].BaseName);
-				NewSave.push_back("TatsDesc=" + bank.MyTattoo[i].Name);
-				NewSave.push_back("TatName=" + bank.MyTattoo[i].TatName);
+				NewSave.push_back("BaseName=" + clothBank.MyTattoo[i].BaseName);
+				NewSave.push_back("TatsDesc=" + clothBank.MyTattoo[i].Name);
+				NewSave.push_back("TatName=" + clothBank.MyTattoo[i].TatName);
 			}
 
 			NewSave.push_back("[FaceScale]");
 
-			for (int i = 0; i < bank.FaceScale.size(); i++)
-				NewSave.push_back("Face=" + std::to_string(bank.FaceScale[i]));
+			for (int i = 0; i < clothBank.FaceScale.size(); i++)
+				NewSave.push_back("Face=" + std::to_string(clothBank.FaceScale[i]));
 
-			for (int i = 0; i < bank.Cothing.size(); i++)
+			NewSave.push_back("[WeaponSaver]");
+
+			for (int i = 0; i < clothBank.MyWeapons.size(); i++)
+			{
+				NewSave.push_back("MyWeapon=" + clothBank.MyWeapons[i].MyWeapon);
+				NewSave.push_back("MyAmmo=" + std::to_string(clothBank.MyWeapons[i].Ammo));
+				for (int j = 0; j < clothBank.MyWeapons[i].MyAddons.size(); j++)
+					NewSave.push_back("MyAddon=" + clothBank.MyWeapons[i].MyAddons[j]);
+			}
+
+			for (int i = 0; i < clothBank.Cothing.size(); i++)
 			{
 				NewSave.push_back("[ClothX]");
-				NewSave.push_back("Title=" + bank.Cothing[i].Title);
-				NewSave.push_back("DecalLib=" + bank.Cothing[i].Badge.BaseName);
-				NewSave.push_back("DecalName=" + bank.Cothing[i].Badge.TatName);
+				NewSave.push_back("Title=" + clothBank.Cothing[i].Title);
+				NewSave.push_back("DecalLib=" + clothBank.Cothing[i].Badge.BaseName);
+				NewSave.push_back("DecalName=" + clothBank.Cothing[i].Badge.TatName);
 
 				NewSave.push_back("[ClothA]");
-				for (int j = 0; j < bank.Cothing[i].ClothA.size(); j++)
-					NewSave.push_back("ClothA=" + std::to_string(bank.Cothing[i].ClothA[j]));
+				for (int j = 0; j < clothBank.Cothing[i].ClothA.size(); j++)
+					NewSave.push_back("ClothA=" + std::to_string(clothBank.Cothing[i].ClothA[j]));
 
 				NewSave.push_back("[ClothB]");
-				for (int j = 0; j < bank.Cothing[i].ClothB.size(); j++)
-					NewSave.push_back("ClothB=" + std::to_string(bank.Cothing[i].ClothB[j]));
+				for (int j = 0; j < clothBank.Cothing[i].ClothB.size(); j++)
+					NewSave.push_back("ClothB=" + std::to_string(clothBank.Cothing[i].ClothB[j]));
 
 				NewSave.push_back("[ExtraA]");
-				for (int j = 0; j < bank.Cothing[i].ExtraA.size(); j++)
-					NewSave.push_back("ExtraA=" + std::to_string(bank.Cothing[i].ExtraA[j]));
+				for (int j = 0; j < clothBank.Cothing[i].ExtraA.size(); j++)
+					NewSave.push_back("ExtraA=" + std::to_string(clothBank.Cothing[i].ExtraA[j]));
 
 				NewSave.push_back("[ExtraB]");
-				for (int j = 0; j < bank.Cothing[i].ExtraA.size(); j++)
-					NewSave.push_back("ExtraB=" + std::to_string(bank.Cothing[i].ExtraB[j]));
+				for (int j = 0; j < clothBank.Cothing[i].ExtraA.size(); j++)
+					NewSave.push_back("ExtraB=" + std::to_string(clothBank.Cothing[i].ExtraB[j]));
 			}
 
-			std::ofstream MyFile(SavedPedFolder + "/" + bank.CharName + ".ini");
-
-			for (int i = 0; i < NewSave.size(); i++)
-			{
-				MyFile << NewSave[i];
-				MyFile << "\n";
-			}
-
-			MyFile.close();
+			Write_ini(DirSavedPed + "/" + clothBank.CharName + ".ini", NewSave);
 		}
 	}
 
-	void AddMonies(int iAmount)
+	void AddMonies(int amount)
 	{
 		Hash H1 = ENTITY::GET_ENTITY_MODEL(PLAYER::PLAYER_PED_ID());
 		int iPedCred = -1;
@@ -2091,25 +1915,17 @@ namespace Mod_Systems
 			iPedCred = MyHashKey("SP0_TOTAL_CASH");
 		int Credit = 0;
 		STATS::STAT_GET_INT(iPedCred, &Credit, -1);
-		Credit += iAmount;
+		Credit += amount;
 		STATS::STAT_SET_INT(iPedCred, Credit, 1);
 	}
 
 	void FindAddCars()
 	{
-		std::string OutputFolder = GetDir() + "/RandomStart/Vehicles";
-		if (CreateDirectoryA((LPSTR)OutputFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
-		{
-			LoggerLight("RandomStart/Vehicles, Direct Working");
-		}
-		else
-		{
-			LoggerLight("RandomStart/Vehicles, Direct failed");
-		}
+		LoggerLight("FindAddCars");
 
-		const std::string sVehList01 = GetDir() + "/RandomStart/Vehicles/Boats.ini";
-		PreVeh_01 = ReadSetFile(sVehList01);
-		if (PreVeh_01.size() == 0)
+		const std::string sVehList01 = DirVehicles + "/Boats.ini";
+		Mod_Data::PreVeh_01 = Read_ini(sVehList01);
+		if (Mod_Data::PreVeh_01.size() == 0)
 		{
 			const std::vector<std::string> PreVehSet_01 = {
 				"AVISA",//<!-- Kraken Avisa -->
@@ -2128,14 +1944,14 @@ namespace Mod_Systems
 				"TROPIC"//
 			};
 
-			PreVeh_01 = PreVehSet_01;
-			WriteFile(sVehList01, PreVeh_01);
+			Mod_Data::PreVeh_01 = PreVehSet_01;
+			Write_ini(sVehList01, Mod_Data::PreVeh_01);
 		}
 		else
-			RemoveBlankStrings(PreVeh_01);
-		const std::string sVehList02 = GetDir() + "/RandomStart/Vehicles/HighValueVeh.ini";
-		PreVeh_02 = ReadSetFile(sVehList02);
-		if (PreVeh_02.size() == 0)
+			Remove_blanks(&Mod_Data::PreVeh_01);
+		const std::string sVehList02 = DirVehicles + "/HighValueVeh.ini";
+		Mod_Data::PreVeh_02 = Read_ini(sVehList02);
+		if (Mod_Data::PreVeh_02.size() == 0)
 		{
 			const std::vector<std::string> PreVehSet_02 = {
 				"PFISTER811",  //<!-- 811 -->
@@ -2301,18 +2117,22 @@ namespace Mod_Systems
 				"dominator9", // Muscle
 				"driftyosemite", // Muscle
 				"impaler6", // Muscle
-				"Vigero3" // Muscle
+				"Vigero3",	// Muscle
+				"niobe",	//Sports--
+				"paragon3",	//Sports--
+				"coquette5",	//Sports Classics--
+				"pipistrello"	//super--
 			};
 
-			PreVeh_02 = PreVehSet_02;
-			WriteFile(sVehList02, PreVeh_02);
+			Mod_Data::PreVeh_02 = PreVehSet_02;
+			Write_ini(sVehList02, Mod_Data::PreVeh_02);
 		}
 		else
-			RemoveBlankStrings(PreVeh_02);
+			Remove_blanks(&Mod_Data::PreVeh_02);
 
-		const std::string sVehList03 = GetDir() + "/RandomStart/Vehicles/MidValueVeh.ini";
-		PreVeh_03 = ReadSetFile(sVehList03);
-		if (PreVeh_03.size() == 0)
+		const std::string sVehList03 = DirVehicles + "/MidValueVeh.ini";
+		Mod_Data::PreVeh_03 = Read_ini(sVehList03);
+		if (Mod_Data::PreVeh_03.size() == 0)
 		{
 			const std::vector<std::string> PreVehSet_03 = {
 				"COGCABRIO",  //
@@ -2334,7 +2154,7 @@ namespace Mod_Systems
 				"ZION",  //
 				"ZION2",  //<!-- Zion Cabrio -->
 				"ASEA",  //
-				"ASEA2",  //<!-- Asea North Yankton variant -->
+				"ASEA2",  //<!-- Asea North Mod_Data::Yankton variant -->
 				"ASTEROPE",  //
 				"CINQUEMILA",  //
 				"COGNOSCENTI",  //
@@ -2389,7 +2209,7 @@ namespace Mod_Systems
 				"LANDSTALKER",  //
 				"LANDSTALKER2",  //<!-- Landstalker XL -->
 				"MESA",  //
-				"MESA2",  //<!-- Mesa North Yankton variant -->
+				"MESA2",  //<!-- Mesa North Mod_Data::Yankton variant -->
 				"NOVAK",  //
 				"PATRIOT",  //
 				"PATRIOT2",  //<!-- Patriot Stretch -->
@@ -2418,18 +2238,25 @@ namespace Mod_Systems
 				"driftzr350", // Sports
 				"driftfr36", // Coupes
 				"fr36", // Coupes
-				"terminus" // Off-Road
+				"terminus", // Off-Road
+				"castigator", 		//SUV
+				"driftcypher",		//Sports
+				"driftsentinel",	//Sports
+				"envisage",	//Sports
+				"driftvorschlag",	//Sedans
+				"vorschlaghammer",	//Sedans
+				"eurosX32"	//Coupes
 			};
 
-			PreVeh_03 = PreVehSet_03;
-			WriteFile(sVehList03, PreVeh_03);
+			Mod_Data::PreVeh_03 = PreVehSet_03;
+			Write_ini(sVehList03, Mod_Data::PreVeh_03);
 		}
 		else
-			RemoveBlankStrings(PreVeh_03);
+			Remove_blanks(&Mod_Data::PreVeh_03);
 
-		const std::string sVehList04 = GetDir() + "/RandomStart/Vehicles/LowValueVeh.ini";
-		PreVeh_04 = ReadSetFile(sVehList04);
-		if (PreVeh_04.size() == 0)
+		const std::string sVehList04 = DirVehicles + "/LowValueVeh.ini";
+		Mod_Data::PreVeh_04 = Read_ini(sVehList04);
+		if (Mod_Data::PreVeh_04.size() == 0)
 		{
 			const std::vector<std::string> PreVehSet_04 = {
 				"GREENWOOD",  //
@@ -2443,18 +2270,22 @@ namespace Mod_Systems
 				"INGOT",  //
 				"PRIMO",  //
 				"WARRENER",  //
-				"HABANERO"  //
+				"HABANERO",  //
+				"dominator10",		//Muscle
+				"driftnebula",		//Sports Classics
+				"pizzaboy",		//Motorcycles
+				"yosemite1500"		//Off-Road
 			};
 
-			PreVeh_04 = PreVehSet_04;
-			WriteFile(sVehList04, PreVeh_04);
+			Mod_Data::PreVeh_04 = PreVehSet_04;
+			Write_ini(sVehList04, Mod_Data::PreVeh_04);
 		}
 		else
-			RemoveBlankStrings(PreVeh_04);
+			Remove_blanks(&Mod_Data::PreVeh_04);
 
-		const std::string sVehList10 = GetDir() + "/RandomStart/Vehicles/Planes.ini";
-		PreVeh_10 = ReadSetFile(sVehList10);
-		if (PreVeh_10.size() == 0)
+		const std::string sVehList10 = DirVehicles + "/Planes.ini";
+		Mod_Data::PreVeh_10 = Read_ini(sVehList10);
+		if (Mod_Data::PreVeh_10.size() == 0)
 		{
 			const std::vector<std::string> PreVehSet_10 = {
 				"ALPHAZ1",  //
@@ -2490,15 +2321,15 @@ namespace Mod_Systems
 				"VESTRA"  //
 			};
 
-			PreVeh_10 = PreVehSet_10;
-			WriteFile(sVehList10, PreVeh_10);
+			Mod_Data::PreVeh_10 = PreVehSet_10;
+			Write_ini(sVehList10, Mod_Data::PreVeh_10);
 		}
 		else
-			RemoveBlankStrings(PreVeh_10);
+			Remove_blanks(&Mod_Data::PreVeh_10);
 
-		const std::string sVehList11 = GetDir() + "/RandomStart/Vehicles/Helicopters.ini";
-		PreVeh_11 = ReadSetFile(sVehList11);
-		if (PreVeh_11.size() == 0)
+		const std::string sVehList11 = DirVehicles + "/Helicopters.ini";
+		Mod_Data::PreVeh_11 = Read_ini(sVehList11);
+		if (Mod_Data::PreVeh_11.size() == 0)
 		{
 			const std::vector<std::string> PreVehSet_11 = {
 				"CONADA",  //
@@ -2511,27 +2342,19 @@ namespace Mod_Systems
 				"VOLATUS"  //
 			};
 
-			PreVeh_11 = PreVehSet_11;
-			WriteFile(sVehList11, PreVeh_11);
+			Mod_Data::PreVeh_11 = PreVehSet_11;
+			Write_ini(sVehList11, Mod_Data::PreVeh_11);
 		}
 		else
-			RemoveBlankStrings(PreVeh_11);
+			Remove_blanks(&Mod_Data::PreVeh_11);
 	}
 	void FindAddPeds()
 	{
-		std::string OutputFolder = GetDir() + "/RandomStart/Peds";
-		if (CreateDirectoryA((LPSTR)OutputFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
-		{
-			LoggerLight("RandomStart/Vehicles, Direct Working");
-		}
-		else
-		{
-			LoggerLight("RandomStart/Vehicles, Direct failed");
-		}
+		LoggerLight("FindAddPeds");
 
-		const std::string sPedList01 = GetDir() + "/RandomStart/Peds/Beach.ini";
-		PrePed_01 = ReadSetFile(sPedList01);
-		if (PrePed_01.size() == 0)
+		const std::string sPedList01 = DirCustPeds + "/Beach.ini";
+		Mod_Data::PrePed_01 = Read_ini(sPedList01);
+		if (Mod_Data::PrePed_01.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_01 = {
 				"a_f_m_beach_01",//"Beach Female",  		
@@ -2553,15 +2376,15 @@ namespace Mod_Systems
 				"a_f_m_trampbeac_01"//"Beach Tramp Female", 
 			};
 
-			PrePed_01 = PrePeSet_01;
-			WriteFile(sPedList01, PrePed_01);
+			Mod_Data::PrePed_01 = PrePeSet_01;
+			Write_ini(sPedList01, Mod_Data::PrePed_01);
 		}
 		else
-			RemoveBlankStrings(PrePed_01);
+			Remove_blanks(&Mod_Data::PrePed_01);
 
-		const std::string sPedList02 = GetDir() + "/RandomStart/Peds/Tramp.ini";
-		PrePed_02 = ReadSetFile(sPedList02);
-		if (PrePed_02.size() == 0)
+		const std::string sPedList02 = DirCustPeds + "/Tramp.ini";
+		Mod_Data::PrePed_02 = Read_ini(sPedList02);
+		if (Mod_Data::PrePed_02.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_02 = {
 				"a_f_m_trampbeac_01",//"Beach Tramp Female",  
@@ -2572,15 +2395,15 @@ namespace Mod_Systems
 				"a_m_o_tramp_01"//"Tramp Old Male",  
 			};
 
-			PrePed_02 = PrePeSet_02;
-			WriteFile(sPedList02, PrePed_02);
+			Mod_Data::PrePed_02 = PrePeSet_02;
+			Write_ini(sPedList02, Mod_Data::PrePed_02);
 		}
 		else
-			RemoveBlankStrings(PrePed_02);
+			Remove_blanks(&Mod_Data::PrePed_02);
 
-		const std::string sPedList03 = GetDir() + "/RandomStart/Peds/HighClass.ini";
-		PrePed_03 = ReadSetFile(sPedList03);
-		if (PrePed_03.size() == 0)
+		const std::string sPedList03 = DirCustPeds + "/HighClass.ini";
+		Mod_Data::PrePed_03 = Read_ini(sPedList03);
+		if (Mod_Data::PrePed_03.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_03 = {
 				"a_f_y_scdressy_01",//"Dressy Female",  
@@ -2611,15 +2434,15 @@ namespace Mod_Systems
 				"a_f_y_hipster_04"//"Hipster Female 4", 
 			};
 
-			PrePed_03 = PrePeSet_03;
-			WriteFile(sPedList03, PrePed_03);
+			Mod_Data::PrePed_03 = PrePeSet_03;
+			Write_ini(sPedList03, Mod_Data::PrePed_03);
 		}
 		else
-			RemoveBlankStrings(PrePed_03);
-	
-		const std::string sPedList04 = GetDir() + "/RandomStart/Peds/MidClass.ini";
-		PrePed_04 = ReadSetFile(sPedList04);
-		if (PrePed_04.size() == 0)
+			Remove_blanks(&Mod_Data::PrePed_03);
+
+		const std::string sPedList04 = DirCustPeds + "/MidClass.ini";
+		Mod_Data::PrePed_04 = Read_ini(sPedList04);
+		if (Mod_Data::PrePed_04.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_04 = {
 				"a_f_y_indian_01",//"Indian Young Female",  
@@ -2662,15 +2485,15 @@ namespace Mod_Systems
 				"a_f_y_gencaspat_01"//"Casual Casino Guest",  
 			};
 
-			PrePed_04 = PrePeSet_04;
-			WriteFile(sPedList04, PrePed_04);
+			Mod_Data::PrePed_04 = PrePeSet_04;
+			Write_ini(sPedList04, Mod_Data::PrePed_04);
 		}
 		else
-			RemoveBlankStrings(PrePed_04);
-	
-		const std::string sPedList05 = GetDir() + "/RandomStart/Peds/LowClass.ini";
-		PrePed_05 = ReadSetFile(sPedList05);
-		if (PrePed_05.size() == 0)
+			Remove_blanks(&Mod_Data::PrePed_04);
+
+		const std::string sPedList05 = DirCustPeds + "/LowClass.ini";
+		Mod_Data::PrePed_05 = Read_ini(sPedList05);
+		if (Mod_Data::PrePed_05.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_05 = {
 				"a_f_m_eastsa_01",//"East SA Female",  
@@ -2726,15 +2549,15 @@ namespace Mod_Systems
 				"a_m_m_tourist_01"//"Tourist Male",  
 			};
 
-			PrePed_05 = PrePeSet_05;
-			WriteFile(sPedList05, PrePed_05);
+			Mod_Data::PrePed_05 = PrePeSet_05;
+			Write_ini(sPedList05, Mod_Data::PrePed_05);
 		}
 		else
-			RemoveBlankStrings(PrePed_05);
+			Remove_blanks(&Mod_Data::PrePed_05);
 
-		const std::string sPedList06 = GetDir() + "/RandomStart/Peds/Buisness.ini";
-		PrePed_06 = ReadSetFile(sPedList06);
-		if (PrePed_06.size() == 0)
+		const std::string sPedList06 = DirCustPeds + "/Buisness.ini";
+		Mod_Data::PrePed_06 = Read_ini(sPedList06);
+		if (Mod_Data::PrePed_06.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_06 = {
 				"g_m_m_casrn_01",//"Casino Guests?",  
@@ -2754,15 +2577,15 @@ namespace Mod_Systems
 				"a_m_m_prolhost_01"//"Prologue Host Male",  
 			};
 
-			PrePed_06 = PrePeSet_06;
-			WriteFile(sPedList06, PrePed_06);
+			Mod_Data::PrePed_06 = PrePeSet_06;
+			Write_ini(sPedList06, Mod_Data::PrePed_06);
 		}
 		else
-			RemoveBlankStrings(PrePed_06);
+			Remove_blanks(&Mod_Data::PrePed_06);
 
-		const std::string sPedList07 = GetDir() + "/RandomStart/Peds/BodyBuilders.ini";
-		PrePed_07 = ReadSetFile(sPedList07);
-		if (PrePed_07.size() == 0)
+		const std::string sPedList07 = DirCustPeds + "/BodyBuilders.ini";
+		Mod_Data::PrePed_07 = Read_ini(sPedList07);
+		if (Mod_Data::PrePed_07.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_07 = {
 				"a_f_m_bodybuild_01",//"Bodybuilder Female",  
@@ -2770,15 +2593,15 @@ namespace Mod_Systems
 				"a_m_y_musclbeac_02"//"Beach Muscle Male 2", 
 			};
 
-			PrePed_07 = PrePeSet_07;
-			WriteFile(sPedList07, PrePed_07);
+			Mod_Data::PrePed_07 = PrePeSet_07;
+			Write_ini(sPedList07, Mod_Data::PrePed_07);
 		}
 		else
-			RemoveBlankStrings(PrePed_07);
+			Remove_blanks(&Mod_Data::PrePed_07);
 
-		const std::string sPedList08 = GetDir() + "/RandomStart/Peds/Joggers.ini";
-		PrePed_08 = ReadSetFile(sPedList08);
-		if (PrePed_08.size() == 0)
+		const std::string sPedList08 = DirCustPeds + "/Joggers.ini";
+		Mod_Data::PrePed_08 = Read_ini(sPedList08);
+		if (Mod_Data::PrePed_08.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_08 = {
 				"a_f_y_fitness_01",//"Fitness Female",  
@@ -2789,15 +2612,15 @@ namespace Mod_Systems
 				"a_m_y_runner_02"//"Jogger Male 2", 
 			};
 
-			PrePed_08 = PrePeSet_08;
-			WriteFile(sPedList08, PrePed_08);
+			Mod_Data::PrePed_08 = PrePeSet_08;
+			Write_ini(sPedList08, Mod_Data::PrePed_08);
 		}
 		else
-			RemoveBlankStrings(PrePed_08);
+			Remove_blanks(&Mod_Data::PrePed_08);
 
-		const std::string sPedList09 = GetDir() + "/RandomStart/Peds/Golfer.ini";
-		PrePed_09 = ReadSetFile(sPedList09);
-		if (PrePed_09.size() == 0)
+		const std::string sPedList09 = DirCustPeds + "/Golfer.ini";
+		Mod_Data::PrePed_09 = Read_ini(sPedList09);
+		if (Mod_Data::PrePed_09.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_09 = {
 				"a_f_y_golfer_01",//"Golfer Young Female",  
@@ -2805,30 +2628,30 @@ namespace Mod_Systems
 				"a_m_y_golfer_01"//"Golfer Young Male",  
 			};
 
-			PrePed_09 = PrePeSet_09;
-			WriteFile(sPedList09, PrePed_09);
+			Mod_Data::PrePed_09 = PrePeSet_09;
+			Write_ini(sPedList09, Mod_Data::PrePed_09);
 		}
 		else
-			RemoveBlankStrings(PrePed_09);
+			Remove_blanks(&Mod_Data::PrePed_09);
 
-		const std::string sPedList10 = GetDir() + "/RandomStart/Peds/Hiker.ini";
-		PrePed_10 = ReadSetFile(sPedList10);
-		if (PrePed_10.size() == 0)
+		const std::string sPedList10 = DirCustPeds + "/Hiker.ini";
+		Mod_Data::PrePed_10 = Read_ini(sPedList10);
+		if (Mod_Data::PrePed_10.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_10 = {
 				"a_f_y_hiker_01",//"Hiker Female",  
 				"a_m_y_hiker_01"//"Hiker Male",  
 			};
 
-			PrePed_10 = PrePeSet_10;
-			WriteFile(sPedList10, PrePed_10);
+			Mod_Data::PrePed_10 = PrePeSet_10;
+			Write_ini(sPedList10, Mod_Data::PrePed_10);
 		}
 		else
-			RemoveBlankStrings(PrePed_10);
+			Remove_blanks(&Mod_Data::PrePed_10);
 
-		const std::string sPedList11 = GetDir() + "/RandomStart/Peds/MethodAct.ini";
-		PrePed_11 = ReadSetFile(sPedList11);
-		if (PrePed_11.size() == 0)
+		const std::string sPedList11 = DirCustPeds + "/MethodAct.ini";
+		Mod_Data::PrePed_11 = Read_ini(sPedList11);
+		if (Mod_Data::PrePed_11.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_11 = {
 				"a_f_y_juggalo_01",//"Juggalo Female",  
@@ -2843,15 +2666,15 @@ namespace Mod_Systems
 				"a_m_y_methhead_01"//"Meth Addict",  
 			};
 
-			PrePed_11 = PrePeSet_11;
-			WriteFile(sPedList11, PrePed_11);
+			Mod_Data::PrePed_11 = PrePeSet_11;
+			Write_ini(sPedList11, Mod_Data::PrePed_11);
 		}
 		else
-			RemoveBlankStrings(PrePed_11);
+			Remove_blanks(&Mod_Data::PrePed_11);
 
-		const std::string sPedList12 = GetDir() + "/RandomStart/Peds/Rural.ini";
-		PrePed_12 = ReadSetFile(sPedList12);
-		if (PrePed_12.size() == 0)
+		const std::string sPedList12 = DirCustPeds + "/Rural.ini";
+		Mod_Data::PrePed_12 = Read_ini(sPedList12);
+		if (Mod_Data::PrePed_12.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_12 = {
 				"a_m_m_salton_01",//"Salton Male",  
@@ -2863,15 +2686,15 @@ namespace Mod_Systems
 				"s_m_m_cntrybar_01"//"Bartender (Rural)",
 			};
 
-			PrePed_12 = PrePeSet_12;
-			WriteFile(sPedList12, PrePed_12);
+			Mod_Data::PrePed_12 = PrePeSet_12;
+			Write_ini(sPedList12, Mod_Data::PrePed_12);
 		}
 		else
-			RemoveBlankStrings(PrePed_12);
+			Remove_blanks(&Mod_Data::PrePed_12);
 
-		const std::string sPedList13 = GetDir() + "/RandomStart/Peds/Cycleist.ini";
-		PrePed_13 = ReadSetFile(sPedList13);
-		if (PrePed_13.size() == 0)
+		const std::string sPedList13 = DirCustPeds + "/Cycleist.ini";
+		Mod_Data::PrePed_13 = Read_ini(sPedList13);
+		if (Mod_Data::PrePed_13.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_13 = {
 				"a_f_y_skater_01",//"Skater Female",  
@@ -2883,15 +2706,15 @@ namespace Mod_Systems
 				"a_m_m_tennis_01"//"Tennis Player Male",  
 			};
 
-			PrePed_13 = PrePeSet_13;
-			WriteFile(sPedList13, PrePed_13);
+			Mod_Data::PrePed_13 = PrePeSet_13;
+			Write_ini(sPedList13, Mod_Data::PrePed_13);
 		}
 		else
-			RemoveBlankStrings(PrePed_13);
+			Remove_blanks(&Mod_Data::PrePed_13);
 
-		const std::string sPedList14 = GetDir() + "/RandomStart/Peds/LLGBQWXYZ.ini";
-		PrePed_14 = ReadSetFile(sPedList14);
-		if (PrePed_14.size() == 0)
+		const std::string sPedList14 = DirCustPeds + "/LLGBQWXYZ.ini";
+		Mod_Data::PrePed_14 = Read_ini(sPedList14);
+		if (Mod_Data::PrePed_14.size() == 0)
 		{
 			const std::vector<std::string> PrePeSet_14 = {
 				"a_m_y_gay_01",//"Gay Male",  
@@ -2900,91 +2723,71 @@ namespace Mod_Systems
 				"a_m_m_tranvest_02"//"Transvestite Male 2", 
 			};
 
-			PrePed_14 = PrePeSet_14;
-			WriteFile(sPedList14, PrePed_14);
+			Mod_Data::PrePed_14 = PrePeSet_14;
+			Write_ini(sPedList14, Mod_Data::PrePed_14);
 		}
 		else
-			RemoveBlankStrings(PrePed_14);
+			Remove_blanks(&Mod_Data::PrePed_14);
 	}
+	
 	bool SnowOnGround = false;
-	void WeatherReport(int iWet)
+
+	void WeatherReport(int wet)
 	{
-		if (iWet == -1)
+		if (wet == -1)
 		{
-			if (CanSnow)
-				iWet = LessRandomInt("RanWeatherWinter", 10, 13);
+			if (Mod_Data::CanSnow)
+				wet = LessRandomInt("RanWeatherWinter", 10, 13);
 			else
-				iWet = LessRandomInt("RanWeatherSummer", 1, 9);
+				wet = LessRandomInt("RanWeatherSummer", 1, 9);
 		}
 
-		if (iWet == 1)
+		if (wet == 1)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("EXTRASUNNY");
-		else if (iWet == 2)
+		else if (wet == 2)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("CLEAR");
-		else if (iWet == 3)
+		else if (wet == 3)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("CLOUDS");
-		else if (iWet == 4)
+		else if (wet == 4)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("SMOG");
-		else if (iWet == 4)
+		else if (wet == 4)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("FOGGY");
-		else if (iWet == 5)
+		else if (wet == 5)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("OVERCAST");
-		else if (iWet == 6)
+		else if (wet == 6)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("RAIN");
-		else if (iWet == 7)
+		else if (wet == 7)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("THUNDER");
-		else if (iWet == 8)
+		else if (wet == 8)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("CLEARING");
-		else if (iWet == 9)
+		else if (wet == 9)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("NEUTRAL");
-		else if (iWet == 10)
+		else if (wet == 10)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("SNOW");
-		else if (iWet == 11)
+		else if (wet == 11)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("BLIZZARD");
-		else if (iWet == 12)
+		else if (wet == 12)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("SNOWLIGHT");
-		else if (iWet == 13)
+		else if (wet == 13)
 			GAMEPLAY::SET_WEATHER_TYPE_NOW("XMAS");
 
-		if (CanSnow)
+		if (Mod_Data::CanSnow)
 		{
 			if (!SnowOnGround)
 			{
-				if (getGameVersion() > eGameVersion::VER_1_0_2944_0_NOSTEAM)
-				{
-					SnowOnGround = true;
-					invoke<Void>(0x6E9EF3A33C8899F8, true);
-					invoke<Void>(0xAEEDAD1420C65CC0, true);
-					invoke<Void>(0xA342A3763B3AFB6C, true);
-					invoke<Void>(0x4CC7F0FEA5283FE0, true);
-
-					STREAMING::REQUEST_NAMED_PTFX_ASSET("core_snow");
-					if (STREAMING::HAS_NAMED_PTFX_ASSET_LOADED("core_snow"))
-						GRAPHICS::_SET_PTFX_ASSET_NEXT_CALL("core_snow");
-				}
-				else
-				{
-					CanSnow = false;
-					Mod_Settings.SnowMonths = Mod_Class::SnowDates();
-					Mod_Settings.SnowMonths.Dec = false;
-					Mod_Settings.SnowMonths.Jan = false;
-					Mod_Settings.SnowMonths.Feb = false;
-
-					Mod_Ui::BottomLeft("This version of GTA is not compatable with this snow method.");
-				}
+				AccessLetItSnowType(true);
+				//Write_ini(sRaceSnowOn, Snows);
+				SnowOnGround = true;
 			}
 		}
 		else
 		{
 			if (SnowOnGround)
 			{
+				AccessLetItSnowType(false);
+				//Write_ini(sRaceSnowOff, Snows);
 				SnowOnGround = false;
-				invoke<Void>(0x6E9EF3A33C8899F8, false);
-				invoke<Void>(0xAEEDAD1420C65CC0, false);
-				invoke<Void>(0xA342A3763B3AFB6C, false);
-				invoke<Void>(0x4CC7F0FEA5283FE0, false);
 
-				STREAMING::_REMOVE_NAMED_PTFX_ASSET("core_snow");
 			}
 		}
 	}
@@ -3000,6 +2803,34 @@ namespace Mod_Systems
 namespace Mod_Maths
 {
 	const std::vector<std::string> MainLandIPLs = {
+		"xm_bunkerentrance_door",
+		"xm_hatch_01_cutscene",
+		"xm_hatch_02_cutscene",
+		"xm_hatch_03_cutscene",
+		"xm_hatch_04_cutscene",
+		"xm_hatch_06_cutscene",
+		"xm_hatch_07_cutscene",
+		"xm_hatch_08_cutscene",
+		"xm_hatch_09_cutscene",
+		"xm_hatch_10_cutscene",
+		"xm_hatch_closed",
+		"xm_hatches_terrain",
+		"xm_hatches_terrain_lod",
+		"xm_mpchristmasadditions",
+		"xm_siloentranceclosed_x17",
+
+		"gr_case10_bunkerclosed",
+		"gr_case9_bunkerclosed",
+		"gr_case3_bunkerclosed",
+		"gr_case0_bunkerclosed",
+		"gr_case1_bunkerclosed",
+		"gr_case2_bunkerclosed",
+		"gr_case5_bunkerclosed",
+		"gr_case7_bunkerclosed",
+		"gr_case11_bunkerclosed",
+		"gr_case6_bunkerclosed",
+		"gr_case4_bunkerclosed",
+
 		"vw_casino_billboard_lod",
 		"vw_casino_billboard_lod(1)",
 		"vw_casino_billboard",
@@ -3008,7 +2839,25 @@ namespace Mod_Maths
 		"hei_dlc_casino_door_lod",
 		"hei_dlc_casino_door",
 		"hei_dlc_casino_aircon_lod",
-		"hei_dlc_casino_aircon"
+		"hei_dlc_casino_aircon",
+
+		"hei_dlc_vw_roofdoors_locked",
+		"vw_ch3_additions",
+		"vw_ch3_additions_long_0",
+		"vw_ch3_additions_strm_0",
+		"vw_dlc_casino_door",
+		"vw_dlc_casino_door_lod",
+
+		"ba_barriers_case1",
+		"ba_barriers_case2",
+		"ba_barriers_case3",
+		"ba_barriers_case4",
+		"ba_barriers_case5",
+		"ba_barriers_case6",
+		"ba_barriers_case7",
+		"ba_barriers_case8",
+		"ba_barriers_case9",
+		"bkr_bi_hw1_13_int"
 	};
 	const std::vector<std::string> CayoPericoIPLs = {
 		"h4_islandairstrip",
@@ -3177,19 +3026,20 @@ namespace Mod_Maths
 		"prologuerd_lod"
 	};
 
-	Vector3 NewVector3(float X, float Y, float Z)
+	Vector3 NewVector3(float x, float y, float z)
 	{
 		Vector3 NewVec = Vector3();
-		NewVec.x = X;
-		NewVec.y = Y;
-		NewVec.z = Z;
+		NewVec.x = x;
+		NewVec.y = y;
+		NewVec.z = z;
 
 		return NewVec;
 	}
-	Vector3 NewVector3(Mod_Class::Vector4 Vpos)
+	Vector3 NewVector3(Mod_Class::Vector4 pos)
 	{
-		return NewVector3(Vpos.X, Vpos.Y, Vpos.Z);
+		return NewVector3(pos.X, pos.Y, pos.Z);
 	}
+	
 	float GetAngle(Vector3 postion1, Vector3 postion2)
 	{
 		double ang = (postion1.x * postion2.x) + (postion1.y * postion2.y);
@@ -3243,32 +3093,32 @@ namespace Mod_Maths
 		return (float)sqrt(num * num + num2 * num2 + num3 * num3);
 	}
 
-	std::string MyZone(Vector3 VPos)
+	std::string MyZone(Vector3 pos)
 	{
-		static char* ZName = ZONE::GET_NAME_OF_ZONE(VPos.x, VPos.y, VPos.z);
+		char* ZName = ZONE::GET_NAME_OF_ZONE(pos.x, pos.y, pos.z);
 		std::string s = ZName;
 		return s;
 	}
-	std::string MyZone(Mod_Class::Vector4 VPos)
+	std::string MyZone(Mod_Class::Vector4 pos)
 	{
-		return MyZone(NewVector3(VPos.X, VPos.Y, VPos.Z));
+		return MyZone(NewVector3(pos.X, pos.Y, pos.Z));
 	}
 
 	Vector3 MyWayPoint()
 	{
 		return UI::GET_BLIP_INFO_ID_COORD(UI::GET_FIRST_BLIP_INFO_ID(8));
 	}
-	Vector3 EntPosition(Entity Ent)
+	Vector3 EntPosition(Entity ent)
 	{
-		return ENTITY::GET_ENTITY_COORDS(Ent, 0);
+		return ENTITY::GET_ENTITY_COORDS(ent, 0);
 	}
 	Vector3 PlayerPosi()
 	{
 		return EntPosition(PLAYER::PLAYER_PED_ID());
 	}
-	Vector3 RightOfEntity(Entity Object)
+	Vector3 RightOfEntity(Entity ent)
 	{
-		Vector3 Pos = ENTITY::GET_ENTITY_ROTATION(Object, 00);
+		Vector3 Pos = ENTITY::GET_ENTITY_ROTATION(ent, 00);
 		const double PI = 3.14259;
 		double num = cos((double)Pos.y * (PI / 180.0));
 		double num2 = cos((double)(0 - Pos.z) * (PI / 180.0)) * num;
@@ -3340,8 +3190,8 @@ namespace Mod_Maths
 	}
 	Mod_Class::Vector4 InAreaOf(Mod_Class::Vector4  area, float minDist, float maxDist)
 	{
-		float X = RandomFloat(maxDist * -1, maxDist);
-		float Y = RandomFloat(maxDist * -1, maxDist);
+		float X = Mod_Systems::RandomFloat(maxDist * -1, maxDist);
+		float Y = Mod_Systems::RandomFloat(maxDist * -1, maxDist);
 
 		if (X > -1.0 && X < minDist)
 			X = minDist;
@@ -3364,89 +3214,83 @@ namespace Mod_Maths
 	{
 		return InAreaOf(Mod_Class::Vector4(area.x, area.y, area.z, 0.0), minDist, maxDist);
 	}
-	Mod_Class::Vector4 NearByStreet(Mod_Class::Vector4 Area)
+	Mod_Class::Vector4 NearByStreet(Mod_Class::Vector4 area)
 	{
-		Mod_Class::Vector4 Here = InAreaOf(Area, 25.0f, 75.0f);
+		Mod_Class::Vector4 Here = InAreaOf(area, 25.0f, 75.0f);
 		Vector3 VMe = NewVector3(Here.X, Here.Y, Here.Z);
 		PATHFIND::GET_SAFE_COORD_FOR_PED(Here.X, Here.Y, Here.Z, true, &VMe, 16);
 		return Mod_Class::Vector4(VMe.x, VMe.y, VMe.z, 0.0f);
 	}
 
-	std::vector<int> BeenThereA = {};
-	std::vector<int> BeenThereB = {};
-	std::vector<int> BeenThereC = {};
+	std::vector<Vector3> LastPoint = {};
 
-	Mod_Class::Vector4 FindPedSpPoint(Vector3 Pos)
+	bool ItsTooNear(Mod_Class::Vector4 spot, float minDist)
 	{
-		float fAr = 4000.0f;
-		int Near = -1;
-		if (Yankton_Loaded)
+		bool ItsNear = true;		
+		if ((int)LastPoint.size() > 0)
 		{
-			for (int i = 0; i < (int)Yankton.size(); i++)
+			int i = 0;
+			for (; i < (int)LastPoint.size(); i++)
 			{
-				if (DistanceTo(Yankton[i], Pos) < fAr && !Mod_Systems::ListContains(BeenThereA, i))
-				{
-					fAr = DistanceTo(Yankton[i], Pos);
-					Near = i;
-				}
+				if (DistanceTo(spot, LastPoint[i]) < minDist)
+					break;
 			}
 
-			BeenThereA.push_back(Near);
-			if (BeenThereA.size() > 4)
-				BeenThereA.erase(BeenThereA.begin());
-
-			return Yankton[Near];
-		}
-		else if (Cayo_Loaded)
-		{
-			for (int i = 0; i < (int)CayoSpPoint.size(); i++)
-			{
-				if (DistanceTo(CayoSpPoint[i], Pos) < fAr && !Mod_Systems::ListContains(BeenThereB, i))
-				{
-					fAr = DistanceTo(CayoSpPoint[i], Pos);
-					Near = i;
-				}
-			}
-
-			BeenThereB.push_back(Near);
-			if (BeenThereB.size() > 4)
-				BeenThereB.erase(BeenThereB.begin());
-
-			return CayoSpPoint[Near];
+			if (i == (int)LastPoint.size())
+				ItsNear = false;
 		}
 		else
+			ItsNear = false;
+
+		return ItsNear;
+	}
+	void FindSpPoint(Mod_Class::Vector4* spot, const std::vector<Mod_Class::Vector4>& ListOfPlaces)
+	{
+		float Far = 9000.0f;
+		int Near = 0;
+		for (int i = 0; i < (int)ListOfPlaces.size(); i++)
 		{
-			for (int i = 0; i < (int)SpPoint.size(); i++)
+			float Dist = DistanceTo(ListOfPlaces[i], *spot);
+			if (Dist < Far && !ItsTooNear(ListOfPlaces[i], 5.0f))
 			{
-				if (DistanceTo(SpPoint[i], Pos) < fAr && !Mod_Systems::ListContains(BeenThereC, i))
-				{
-					fAr = DistanceTo(SpPoint[i], Pos);
-					Near = i;
-				}
+				Far = Dist;
+				Near = i;
 			}
-
-			BeenThereC.push_back(Near);
-			if (BeenThereC.size() > 4)
-				BeenThereC.erase(BeenThereC.begin());
-
-			return SpPoint[Near];
 		}
+		*spot = ListOfPlaces[Near];
+	}
+	Mod_Class::Vector4 FindPedSpPoint(Vector3 pos)
+	{
+		Mod_Class::Vector4 Location = Mod_Class::Vector4(pos);
+
+		if (Mod_Data::Yankton_Loaded)
+			FindSpPoint(&Location, Mod_Data::Yankton);
+		else if (Mod_Data::Cayo_Loaded)
+			FindSpPoint(&Location, Mod_Data::CayoSpPoint);
+		else
+			FindSpPoint(&Location, Mod_Data::SpPoint);
+
+		LastPoint.push_back(NewVector3(Location));
+		if (LastPoint.size() > 10)
+			LastPoint.erase(LastPoint.begin());
+
+		return Location;
 	}
 
-	bool NotTheSame(Mod_Class::Vector4 V1, Mod_Class::Vector4 V2)
+	bool NotTheSame(Mod_Class::Vector4 postion1, Mod_Class::Vector4 postion2)
 	{
 		bool bTrue = false;
 
-		if (V1.X != V2.X)
+		if (postion1.X != postion2.X)
 			bTrue = true;
 
-		if (V1.Y != V2.Y)
+		if (postion1.Y != postion2.Y)
 			bTrue = true;
 
-		if (V1.Z != V2.Z)
+		if (postion1.Z != postion2.Z)
 			bTrue = true;
 
-		if (V1.R != V2.R)
+		if (postion1.R != postion2.R)
 			bTrue = true;
 
 		return bTrue;
@@ -3483,10 +3327,11 @@ namespace Mod_Maths
 		 NewVector3(29.53166, 219.7558, 581.6113),
 		 NewVector3(-169.9742, 1746.14, 484.2034)
 	};
-	std::vector<Vector3> BuildFlightPath(Vector3 vStart)
+	
+	std::vector<Vector3> BuildFlightPath(Vector3 start)
 	{
-		float f1 = DistanceTo(vStart, landSand[0]);
-		float f2 = DistanceTo(vStart, landLS[0]);
+		float f1 = DistanceTo(start, landSand[0]);
+		float f2 = DistanceTo(start, landLS[0]);
 
 		if (f1 < f2)
 			return landSand;
@@ -3494,14 +3339,11 @@ namespace Mod_Maths
 			return landLS;
 	}
 
-	const std::string ZeroYank = GetDir() + "/PlayerZero/Yankton.txt";
-	const std::string ZeroCayo = GetDir() + "/PlayerZero/Cayo.txt";
-
 	bool YanktonIPL()
 	{
-		LoggerLight("YankLoad == " + std::to_string(Yankton_Loaded));
-		bool bFailed = false;
-		if (Yankton_Loaded)
+		Mod_Systems::LoggerLight("YankLoad == " + std::to_string(Mod_Data::Yankton_Loaded));
+		bool Failed = false;
+		if (Mod_Data::Yankton_Loaded)
 		{
 			invoke<Void>(0x9BAE5AD2508DF078, false);
 			invoke<Void>(0x9133955F1A2DA957, false);
@@ -3512,9 +3354,9 @@ namespace Mod_Maths
 				STREAMING::REMOVE_IPL((LPSTR)YanktonIPLs[i].c_str());
 				WAIT(1);
 			}
-			if (GotPlayZero)
-				FileRemoval(ZeroYank);
-			Yankton_Loaded = false;
+			if (Mod_Data::GotPlayZero)
+				Mod_Systems::Delete_ini(ZeroYank);
+			Mod_Data::Yankton_Loaded = false;
 		}
 		else
 		{
@@ -3528,35 +3370,20 @@ namespace Mod_Maths
 				STREAMING::REQUEST_IPL((LPSTR)YanktonIPLs[i].c_str());
 				WAIT(1);
 				if (!STREAMING::IS_IPL_ACTIVE((LPSTR)YanktonIPLs[i].c_str()))
-					bFailed = true;
+					Failed = true;
 			}
-			if (GotPlayZero)
-				WriteFile(ZeroYank, PzTest);
-			Yankton_Loaded = true;
+			if (Mod_Data::GotPlayZero)
+				Mod_Systems::Write_ini(ZeroYank, PzTest);
+			Mod_Data::Yankton_Loaded = true;
 		}
 
-		return bFailed;
-	}
-	void LoadOnlineIps()
-	{
-		GAMEPLAY::_ENABLE_MP_DLC_MAPS(1);
-		DLC2::_LOAD_MP_DLC_MAPS();
-
-		invoke<Void>(0x9BAE5AD2508DF078, 1);
-
-		/*
-		for (int i = 0; i < MainLandIPLs.size(); i++)
-		{
-			if (!STREAMING::IS_IPL_ACTIVE((LPSTR)MainLandIPLs[i].c_str()))
-				STREAMING::REQUEST_IPL((LPSTR)MainLandIPLs[i].c_str());
-		}
-		*/
+		return Failed;
 	}
 	bool CayoPericoIPL()
 	{
-		LoggerLight("CayoPericoIPL == " + std::to_string(Cayo_Loaded));
-		bool bFailed = false;
-		if (Cayo_Loaded)
+		Mod_Systems::LoggerLight("CayoPericoIPL == " + std::to_string(Mod_Data::Cayo_Loaded));
+		bool Failed = false;
+		if (Mod_Data::Cayo_Loaded)
 		{
 			invoke<Void>(0x9A9D1BA639675CF1, "HeistIsland", 0);
 			invoke<Void>(0x5E1460624D194A38, 0);
@@ -3571,15 +3398,32 @@ namespace Mod_Maths
 				WAIT(1);
 			}
 
-			if (GotPlayZero)
-				FileRemoval(ZeroCayo);
-			Cayo_Loaded = false;
+			GAMEPLAY::_ENABLE_MP_DLC_MAPS(0);
+
+			for (int i = 0; i < MainLandIPLs.size(); i++)
+			{
+				if (!STREAMING::IS_IPL_ACTIVE((LPSTR)MainLandIPLs[i].c_str()))
+					STREAMING::REQUEST_IPL((LPSTR)MainLandIPLs[i].c_str());
+			}
+
+			if (Mod_Data::GotPlayZero)
+				Mod_Systems::Delete_ini(ZeroCayo);
+			Mod_Data::Cayo_Loaded = false;
 		}
 		else
 		{
-			LoadOnlineIps();
+			invoke<Void>(0x9BAE5AD2508DF078, 1);
+
+
+			for (int i = 0; i < MainLandIPLs.size(); i++)
+			{
+				if (STREAMING::IS_IPL_ACTIVE((LPSTR)MainLandIPLs[i].c_str()))
+					STREAMING::REMOVE_IPL((LPSTR)MainLandIPLs[i].c_str());
+			}
 
 			GAMEPLAY::_ENABLE_MP_DLC_MAPS(1);
+			DLC2::_LOAD_MP_DLC_MAPS();
+
 			invoke<Void>(0x9A9D1BA639675CF1, "HeistIsland", 1);
 			invoke<Void>(0x5E1460624D194A38, 1);
 
@@ -3592,42 +3436,44 @@ namespace Mod_Maths
 
 			for (int i = 0; i < CayoPericoIPLs.size(); i++)
 			{
-				STREAMING::REQUEST_IPL((LPSTR)CayoPericoIPLs[i].c_str());
+				if (!STREAMING::IS_IPL_ACTIVE((LPSTR)CayoPericoIPLs[i].c_str()))
+					STREAMING::REQUEST_IPL((LPSTR)CayoPericoIPLs[i].c_str());
 				WAIT(1);
 				if (!STREAMING::IS_IPL_ACTIVE((LPSTR)CayoPericoIPLs[i].c_str()))
-					bFailed = true;
+					Failed = true;
 			}
 
-			if (GotPlayZero)
-				WriteFile(ZeroCayo, PzTest);
+			if (Mod_Data::GotPlayZero)
+				Mod_Systems::Write_ini(ZeroCayo, PzTest);
 
-			Cayo_Loaded = true;
+			Mod_Data::Cayo_Loaded = true;
 		}
-		return bFailed;
+		
+		return Failed;
 	}
 
-	void AnyPreActives(int iSelect, bool MainLand)
+	void AnyPreActives(int select, bool mainLand)
 	{
-		if (Meth_Act)
+		if (Mod_Data::Meth_Act)
 		{
-			Meth_Act = false;
-			Mod_Entitys::MethEdd(Meth_Act);
+			Mod_Data::Meth_Act = false;
+			Mod_Entitys::MethEdd(Mod_Data::Meth_Act);
 		}
 
-		if (Deputize)
+		if (Mod_Data::Deputize)
 		{
-			Deputize = false;
-			Mod_Entitys::PoliceAcadamy(Deputize);
+			Mod_Data::Deputize = false;
+			Mod_Entitys::PoliceAcadamy(Mod_Data::Deputize);
 		}
 
-		if (MainLand)
+		if (mainLand)
 		{
-			if (Cayo_Loaded && iSelect != 25)
+			if (Mod_Data::Cayo_Loaded && select != 25)
 			{
 				CayoPericoIPL();
 				Mod_Entitys::CayoAudio();
 			}
-			else if (Yankton_Loaded && iSelect != 24)
+			else if (Mod_Data::Yankton_Loaded && select != 24)
 				YanktonIPL();
 		}
 	}
@@ -3646,59 +3492,59 @@ namespace Mod_Entitys
 	{
 		return PED::GET_PED_RELATIONSHIP_GROUP_HASH(PLAYER::PLAYER_PED_ID());
 	}
-	void RelGroupMember(Ped Peddy, Hash group)
+	void RelGroupMember(Ped peddy, Hash group)
 	{
-		PED::SET_PED_RELATIONSHIP_GROUP_HASH(Peddy, group);
+		PED::SET_PED_RELATIONSHIP_GROUP_HASH(peddy, group);
 	}
-	void SetRelBetween_Gp(Hash Group1, Hash Group2, int Rel)
+	void SetRelBetween_Gp(Hash group1, Hash group2, int relation)
 	{
-		PED::SET_RELATIONSHIP_BETWEEN_GROUPS(Rel, Group1, Group2);
-		PED::SET_RELATIONSHIP_BETWEEN_GROUPS(Rel, Group2, Group1);
+		PED::SET_RELATIONSHIP_BETWEEN_GROUPS(relation, group1, group2);
+		PED::SET_RELATIONSHIP_BETWEEN_GROUPS(relation, group2, group1);
 	}
 	void SetRelationType(bool friendly)
 	{
 		if (friendly)
 		{
-			SetRelBetween_Gp(GP_Player, Gp_Follow, 0);
-			SetRelBetween_Gp(Gp_Follow, Gp_Friend, 1);
-			SetRelBetween_Gp(GP_Attack, Gp_Follow, 5);
-			SetRelBetween_Gp(GP_Mental, Gp_Follow, 5);
-			SetRelBetween_Gp(GP_Player, Gp_Friend, 2);
-			SetRelBetween_Gp(GP_Attack, Gp_Friend, 5);
-			SetRelBetween_Gp(GP_Player, GP_Attack, 5);
-			SetRelBetween_Gp(GP_Mental, Gp_Friend, 5);
-			SetRelBetween_Gp(GP_Attack, GP_Mental, 5);
-			SetRelBetween_Gp(GP_Player, GP_Mental, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Player, Mod_Data::Gp_Follow, 0);
+			SetRelBetween_Gp(Mod_Data::Gp_Follow, Mod_Data::Gp_Friend, 1);
+			SetRelBetween_Gp(Mod_Data::GP_Attack, Mod_Data::Gp_Follow, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Mental, Mod_Data::Gp_Follow, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Player, Mod_Data::Gp_Friend, 2);
+			SetRelBetween_Gp(Mod_Data::GP_Attack, Mod_Data::Gp_Friend, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Player, Mod_Data::GP_Attack, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Mental, Mod_Data::Gp_Friend, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Attack, Mod_Data::GP_Mental, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Player, Mod_Data::GP_Mental, 5);
 
-			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(5, GP_Mental, GP_Mental);
+			PED::SET_RELATIONSHIP_BETWEEN_GROUPS(5, Mod_Data::GP_Mental, Mod_Data::GP_Mental);
 		}
 		else
 		{
-			SetRelBetween_Gp(GP_Player, Gp_Follow, 2);
-			SetRelBetween_Gp(Gp_Follow, Gp_Friend, 2);
-			SetRelBetween_Gp(GP_Attack, Gp_Follow, 5);
-			SetRelBetween_Gp(GP_Mental, Gp_Follow, 5);
-			SetRelBetween_Gp(GP_Player, Gp_Friend, 2);
-			SetRelBetween_Gp(GP_Attack, Gp_Friend, 5);
-			SetRelBetween_Gp(GP_Player, GP_Attack, 5);
-			SetRelBetween_Gp(GP_Mental, Gp_Friend, 5);
-			SetRelBetween_Gp(GP_Attack, GP_Mental, 5);
-			SetRelBetween_Gp(GP_Player, GP_Mental, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Player, Mod_Data::Gp_Follow, 2);
+			SetRelBetween_Gp(Mod_Data::Gp_Follow, Mod_Data::Gp_Friend, 2);
+			SetRelBetween_Gp(Mod_Data::GP_Attack, Mod_Data::Gp_Follow, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Mental, Mod_Data::Gp_Follow, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Player, Mod_Data::Gp_Friend, 2);
+			SetRelBetween_Gp(Mod_Data::GP_Attack, Mod_Data::Gp_Friend, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Player, Mod_Data::GP_Attack, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Mental, Mod_Data::Gp_Friend, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Attack, Mod_Data::GP_Mental, 5);
+			SetRelBetween_Gp(Mod_Data::GP_Player, Mod_Data::GP_Mental, 5);
 		}
 	}
 
-	void MoveEntity(Entity MyEnt, Vector3 position)
+	void MoveEntity(Entity ent, Vector3 position)
 	{
-		ENTITY::SET_ENTITY_COORDS(MyEnt, position.x, position.y, position.z, 1, 0, 0, 1);
+		ENTITY::SET_ENTITY_COORDS(ent, position.x, position.y, position.z, 1, 0, 0, 1);
 	}
-	void MoveEntity(Entity MyEnt, Mod_Class::Vector4 position)
+	void MoveEntity(Entity ent, Mod_Class::Vector4 position)
 	{
-		ENTITY::SET_ENTITY_COORDS(MyEnt, position.X, position.Y, position.Z, 1, 0, 0, 1);
-		ENTITY::SET_ENTITY_HEADING(MyEnt, position.R);
+		ENTITY::SET_ENTITY_COORDS(ent, position.X, position.Y, position.Z, 1, 0, 0, 1);
+		ENTITY::SET_ENTITY_HEADING(ent, position.R);
 	}
-	void StayOnGround(Vehicle Vhick)
+	void StayOnGround(Vehicle vic)
 	{
-		VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(Vhick);
+		VEHICLE::SET_VEHICLE_ON_GROUND_PROPERLY(vic);
 	}
 
 	int GetPedOverlayValues(int overlay)
@@ -3719,68 +3565,67 @@ namespace Mod_Entitys
 
 		return RandMods;
 	}
-
-	Prop BuildProps(const std::string& sObject, Vector3 vPos, Vector3 vRot, bool bPush, bool Frozen)
+	Prop BuildProps(const std::string& propName, Vector3 pos, Vector3 rot, bool push, bool frozen)
 	{
-		LoggerLight("BuildProps == " + sObject);
-		Prop Plop = OBJECT::CREATE_OBJECT(MyHashKey(sObject), vPos.x, vPos.y, vPos.z, 1, 1, 1);
+		Mod_Systems::LoggerLight("BuildProps == " + propName);
+		Prop Plop = OBJECT::CREATE_OBJECT(Mod_Systems::MyHashKey(propName), pos.x, pos.y, pos.z, 1, 1, 1);
 		ENTITY::SET_ENTITY_AS_MISSION_ENTITY(Plop, 1, 1);
-		ENTITY::SET_ENTITY_COORDS(Plop, vPos.x, vPos.y, vPos.z, 0, 0, 0, 1);
-		ENTITY::SET_ENTITY_ROTATION(Plop, vRot.x, vRot.y, vRot.z, 2, 1);
-		if (bPush)
+		ENTITY::SET_ENTITY_COORDS(Plop, pos.x, pos.y, pos.z, 0, 0, 0, 1);
+		ENTITY::SET_ENTITY_ROTATION(Plop, rot.x, rot.y, rot.z, 2, 1);
+		if (push)
 			ENTITY::APPLY_FORCE_TO_ENTITY(Plop, 1, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1, 1, 1, 1, 1, 1);
-		else if (Frozen)
+		else if (frozen)
 			ENTITY::FREEZE_ENTITY_POSITION(Plop, true);
-		Prop_List.push_back(Plop);
+		Mod_Data::Prop_List.push_back(Plop);
 		return Plop;
 	}
-	Prop BuildProps(const std::string& sObject, Mod_Class::Vector4 vPos, bool bPush, bool Frozen)
+	Prop BuildProps(const std::string& propName, Mod_Class::Vector4 pos, bool push, bool frozen)
 	{
-		return BuildProps(sObject, Mod_Maths::NewVector3(vPos.X, vPos.Y, vPos.Z), Mod_Maths::NewVector3(0.0f, 0.0f, vPos.R), bPush, Frozen);
+		return BuildProps(propName, Mod_Maths::NewVector3(pos.X, pos.Y, pos.Z), Mod_Maths::NewVector3(0.0f, 0.0f, pos.R), push, frozen);
 	}
 
-	void EraseBlip(Blip MyBlip)
+	void EraseBlip(Blip blippy)
 	{
-		if (MyBlip != NULL)
+		if (blippy != NULL)
 		{
-			if ((bool)UI::DOES_BLIP_EXIST(MyBlip))
-				UI::REMOVE_BLIP(&MyBlip);
+			if ((bool)UI::DOES_BLIP_EXIST(blippy))
+				UI::REMOVE_BLIP(&blippy);
 		}
 	}
 	void ClearAllPeds()
 	{
-		for (int i = 0; i < (int)Ped_List.size(); i++)
+		for (int i = 0; i < (int)Mod_Data::Ped_List.size(); i++)
 		{
-			Entity E = Ped_List[i];
+			Entity E = Mod_Data::Ped_List[i];
 			if (ENTITY::DOES_ENTITY_EXIST(E))
 				ENTITY::SET_ENTITY_AS_NO_LONGER_NEEDED(&E);
 		}
-		Ped_List.clear();
-		CayDancers.clear();
+		Mod_Data::Ped_List.clear();
+		Mod_Data::CayDancers.clear();
 	}
 	void ClearAllEntitys(bool andPeds)
 	{
-		for (int i = 0; i < (int)Prop_List.size(); i++)
+		for (int i = 0; i < (int)Mod_Data::Prop_List.size(); i++)
 		{
-			Prop Pops = Prop_List[i];
+			Prop Pops = Mod_Data::Prop_List[i];
 			if (ENTITY::DOES_ENTITY_EXIST(Pops))
 				ENTITY::SET_ENTITY_AS_NO_LONGER_NEEDED(&Pops);
 		}
-		Prop_List.clear();
+		Mod_Data::Prop_List.clear();
 
-		for (int i = 0; i < (int)Vehicle_List.size(); i++)
+		for (int i = 0; i < (int)Mod_Data::Vehicle_List.size(); i++)
 		{
-			Vehicle Vic = Vehicle_List[i];
+			Vehicle Vic = Mod_Data::Vehicle_List[i];
 			if (ENTITY::DOES_ENTITY_EXIST(Vic))
 				ENTITY::SET_ENTITY_AS_NO_LONGER_NEEDED(&Vic);
 		}
-		Vehicle_List.clear();
+		Mod_Data::Vehicle_List.clear();
 
 		if (andPeds)
 			ClearAllPeds();
 	}
 
-	const std::vector<Mod_Class::VehBlips> vehBlips = {
+	const std::vector<Mod_Class::VehBlips> VehBlips = {
 		Mod_Class::VehBlips("BUFFALO4",825),
 		Mod_Class::VehBlips("CHAMPION",824),
 		Mod_Class::VehBlips("DEITY",823),
@@ -3980,14 +3825,15 @@ namespace Mod_Entitys
 		Mod_Class::VehBlips("dune",147),
 		Mod_Class::VehBlips("stockade",67)
 	};
-	int OhMyBlip(Vehicle MyVehic)
+	
+	int OhMyBlip(Vehicle vic)
 	{
-		LoggerLight("OhMyBlip");
+		Mod_Systems::LoggerLight("OhMyBlip");
 
 		int iBeLip = 0;
-		if (MyVehic != NULL)
+		if (vic != NULL)
 		{
-			int iVehClass = VEHICLE::GET_VEHICLE_CLASS(MyVehic);
+			int iVehClass = VEHICLE::GET_VEHICLE_CLASS(vic);
 
 			if (iVehClass == 14)
 				iBeLip = 427;
@@ -4015,23 +3861,23 @@ namespace Mod_Entitys
 				iBeLip = 225;
 
 
-			for (int i = 0; i < vehBlips.size(); i++)
+			for (int i = 0; i < VehBlips.size(); i++)
 			{
-				if ((bool)VEHICLE::IS_VEHICLE_MODEL(MyVehic, MyHashKey(vehBlips[i].VehicleKey)))
-					iBeLip = vehBlips[i].BlipNo;
+				if ((bool)VEHICLE::IS_VEHICLE_MODEL(vic, Mod_Systems::MyHashKey(VehBlips[i].VehicleKey)))
+					iBeLip = VehBlips[i].BlipNo;
 			}
 		}
 
 		return iBeLip;
 	}
 
-	Prop FindingProps(Vector3 Area, float radius, const std::string& modelHash)
+	Prop FindingProps(Vector3 area, float radius, const std::string& modelHash)
 	{
-		return OBJECT::GET_CLOSEST_OBJECT_OF_TYPE(Area.x, Area.y, Area.z, radius, MyHashKey(modelHash), false, 1, 1);
+		return OBJECT::GET_CLOSEST_OBJECT_OF_TYPE(area.x, area.y, area.z, radius, Mod_Systems::MyHashKey(modelHash), false, 1, 1);
 	}
-	Prop FindingProps(Mod_Class::Vector4 Area, float radius, const std::string& modelHash)
+	Prop FindingProps(Mod_Class::Vector4 area, float radius, const std::string& modelHash)
 	{
-		return FindingProps(Mod_Maths::NewVector3(Area.X, Area.Y, Area.Z), radius, modelHash);
+		return FindingProps(Mod_Maths::NewVector3(area.X, area.Y, area.Z), radius, modelHash);
 	}
 
 	Object AddDecals(Vector3 pos, int decalType, float width = 1.0f, float height = 1.0f, float rCoef = 0.1f, float gCoef = 0.1f, float bCoef = 0.1f, float opacity = 1.0f, float timeout = 20.0f)
@@ -4051,126 +3897,123 @@ namespace Mod_Entitys
 		"TECHNICAL3", //><!-- Technical Custom -->
 		"HALFTRACK", //>
 	};
-	int FindUSeat(Vehicle vMe)
+	
+	int FindUSeat(Vehicle vic)
 	{
 		bool bPass = true;
 		for (int i = 0; i < (int)GunnerSeat.size(); i++)
 		{
-			if (MyHashKey(GunnerSeat[i]) == ENTITY::GET_ENTITY_MODEL(vMe))
+			if (Mod_Systems::MyHashKey(GunnerSeat[i]) == ENTITY::GET_ENTITY_MODEL(vic))
 			{
 				bPass = false;
 				break;
 			}
 		}
 
-		int iSeats;
+		int Seats;
 		if (bPass)
 		{
-			iSeats = 0;
-			while (iSeats < VEHICLE::GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vMe))
+			Seats = 0;
+			while (Seats < VEHICLE::GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vic))
 			{
-				if ((bool)VEHICLE::IS_VEHICLE_SEAT_FREE(vMe, iSeats))
+				if ((bool)VEHICLE::IS_VEHICLE_SEAT_FREE(vic, Seats))
 					break;
 				else
-					iSeats++;
+					Seats++;
 			}
 		}
 		else
 		{
-			iSeats = VEHICLE::GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vMe);
-			while (iSeats > -1)
+			Seats = VEHICLE::GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vic);
+			while (Seats > -1)
 			{
-				if ((bool)VEHICLE::IS_VEHICLE_SEAT_FREE(vMe, iSeats))
+				if ((bool)VEHICLE::IS_VEHICLE_SEAT_FREE(vic, Seats))
 					break;
 				else
-					iSeats--;
+					Seats--;
 			}
 		}
 
-		return iSeats;
+		return Seats;
 	}
-	void WarptoAnyVeh(Vehicle Vhic, Ped Peddy, int iSeat)
+	void WarptoAnyVeh(Vehicle vic, Ped peddy, int seat)
 	{
-		LoggerLight("WarptoAnyVeh");
+		Mod_Systems::LoggerLight("WarptoAnyVeh");
 
-		PED::SET_PED_INTO_VEHICLE(Peddy, Vhic, iSeat);
+		PED::SET_PED_INTO_VEHICLE(peddy, vic, seat);
 	}
-	void GetOutVehicle(Ped Peddy)
+	void GetOutVehicle(Ped peddy)
 	{
-		LoggerLight("-GetOutVehicle-");
+		Mod_Systems::LoggerLight("-GetOutVehicle-");
 
-		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(Peddy, 0))
-			AI::TASK_LEAVE_VEHICLE(Peddy, PED::GET_VEHICLE_PED_IS_IN(Peddy, true), 4160);
+		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(peddy, 0))
+			AI::TASK_LEAVE_VEHICLE(peddy, PED::GET_VEHICLE_PED_IS_IN(peddy, true), 4160);
 	}
-	void EmptyVeh(Vehicle Vhic)
+	void EmptyVeh(Vehicle vic)
 	{
-		LoggerLight("PedActions.EmptyVeh");
+		Mod_Systems::LoggerLight("PedActions.EmptyVeh");
 
-		if ((bool)ENTITY::DOES_ENTITY_EXIST(Vhic))
+		if ((bool)ENTITY::DOES_ENTITY_EXIST(vic))
 		{
-			int iSeats = 0;
-			while (iSeats < VEHICLE::GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(Vhic))
+			int Seats = 0;
+			while (Seats < VEHICLE::GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vic))
 			{
-				if (!(bool)VEHICLE::IS_VEHICLE_SEAT_FREE(Vhic, iSeats))
-					GetOutVehicle(VEHICLE::GET_PED_IN_VEHICLE_SEAT(Vhic, iSeats));
-				iSeats += 1;
+				if (!(bool)VEHICLE::IS_VEHICLE_SEAT_FREE(vic, Seats))
+					GetOutVehicle(VEHICLE::GET_PED_IN_VEHICLE_SEAT(vic, Seats));
+				Seats += 1;
 			}
 		}
 	}
-	bool InSameVeh(Ped Peddy)
+	bool InSameVeh(Ped peddy)
 	{
-		bool bIn = false;
-		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(Peddy, 0))
+		bool InSame = false;
+		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(peddy, 0))
 		{
-			Vehicle Vic = PED::GET_VEHICLE_PED_IS_IN(Peddy, true);
+			Vehicle Vic = PED::GET_VEHICLE_PED_IS_IN(peddy, true);
 			if ((bool)PED::IS_PED_IN_VEHICLE(PLAYER::PLAYER_PED_ID(), Vic, false))
-				bIn = true;
+				InSame = true;
 		}
-		return bIn;
+		return InSame;
 	}
 
-	void BlipFiler(Blip MyBlip, int iBlippy, const std::string& sName, int iColour)
+	void BlipFiler(Blip blippy, int blipType, const std::string& name, int colour)
 	{
-		UI::SET_BLIP_SPRITE(MyBlip, iBlippy);
-		UI::SET_BLIP_AS_SHORT_RANGE(MyBlip, true);
-		UI::SET_BLIP_CATEGORY(MyBlip, 2);
-		UI::SET_BLIP_COLOUR(MyBlip, iColour);
+		UI::SET_BLIP_SPRITE(blippy, blipType);
+		UI::SET_BLIP_AS_SHORT_RANGE(blippy, true);
+		UI::SET_BLIP_CATEGORY(blippy, 2);
+		UI::SET_BLIP_COLOUR(blippy, colour);
 
-		std::string name = " Player: " + sName;
+		std::string MadeName = " Player: " + name;
 
-		if (sName != "")
+		if (name != "")
 		{
 			UI::BEGIN_TEXT_COMMAND_SET_BLIP_NAME("STRING");
-			UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)name.c_str());
-			UI::END_TEXT_COMMAND_SET_BLIP_NAME(MyBlip);
-
-			//UI::BEGIN_TEXT_COMMAND_SET_BLIP_NAME("STRING");
-			//UI::_ADD_TEXT_COMPONENT_STRING(" Player: " + sName);
-			//UI::END_TEXT_COMMAND_SET_BLIP_NAME( MyBlip);
+			UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)MadeName.c_str());
+			UI::END_TEXT_COMMAND_SET_BLIP_NAME(blippy);
 		}
 	}
-	Blip PedBlimp(Blip CurBlip, Ped pEdd, int iBlippy, const std::string& sName, int iColour, bool heading)
+	Blip PedBlimp(Blip blippy, Ped peddy, int blipType, const std::string& name, int colour, bool heading)
 	{
-		LoggerLight("PedBlimp, iBlippy == " + std::to_string(iBlippy) + ", sName == " + sName + ", iColour" + std::to_string(iColour));
+		Mod_Systems::LoggerLight("PedBlimp, blipType == " + std::to_string(blipType) + ", name == " + name + ", colour" + std::to_string(colour));
 
-		EraseBlip(CurBlip);
+		EraseBlip(blippy);
 
-		Blip MyBlip = UI::ADD_BLIP_FOR_ENTITY(pEdd);;
+		Blip NewBlip = UI::ADD_BLIP_FOR_ENTITY(peddy);;
 
-		BlipFiler(MyBlip, iBlippy, sName, iColour);
+		BlipFiler(NewBlip, blipType, name, colour);
 		if (heading)
-			UI::_SET_BLIP_SHOW_HEADING_INDICATOR(MyBlip, true);
+			UI::_SET_BLIP_SHOW_HEADING_INDICATOR(NewBlip, true);
 
-		return MyBlip;
+		return NewBlip;
 	}
-	Blip LocalBlip(Blip CurBlip, Mod_Class::Vector4 Vlocal, int iBlippy, const std::string& sName, int iColour)
+	Blip LocalBlip(Blip blippy, Mod_Class::Vector4 local, int blipType, const std::string& name, int colour)
 	{
-		LoggerLight("BuildObjects, iBlippy == " + std::to_string(iBlippy) + ", sName == " + sName);
+		Mod_Systems::LoggerLight("BuildObjects, blipType == " + std::to_string(blipType) + ", name == " + name);
 
-		EraseBlip(CurBlip);
-		Blip MyBlip = UI::ADD_BLIP_FOR_COORD(Vlocal.X, Vlocal.Y, Vlocal.Z);
-		BlipFiler(MyBlip, iBlippy, sName, iColour);
-		return MyBlip;
+		EraseBlip(blippy);
+		Blip NewBlip = UI::ADD_BLIP_FOR_COORD(local.X, local.Y, local.Z);
+		BlipFiler(NewBlip, blipType, name, colour);
+		return NewBlip;
 	}
 
 	const std::vector<std::string> Mk2Weaps = {
@@ -4187,43 +4030,17 @@ namespace Mod_Entitys
 		"WEAPON_heavysniper_mk2",  //0xA914799",---75
 		"WEAPON_marksmanrifle_mk2"  //0x6A6C02E0"--77
 	};
-	bool WeaponIsMk2(Hash WeapHash)
+	
+	bool WeaponIsMk2(Hash weapHash)
 	{
 		bool b = false;
 		for (int i = 0; i < Mk2Weaps.size(); i++)
 		{
-			if (MyHashKey(Mk2Weaps[i]) == WeapHash)
+			if (Mod_Systems::MyHashKey(Mk2Weaps[i]) == weapHash)
 				b = true;
 		}
 
 		return b;
-	}
-	void ReturnPlayerWeapons()
-	{
-		if (PED::GET_PED_TYPE(PLAYER::PLAYER_PED_ID()) != 28)
-		{
-			for (int i = 0; i < (int)Player_Weaps.size(); i++)
-			{
-				Hash MyWeap = MyHashKey(Player_Weaps[i].MyWeapon);
-				WEAPON::GIVE_WEAPON_TO_PED(PLAYER::PLAYER_PED_ID(), MyWeap, 0, false, true);
-				WEAPON::SET_CURRENT_PED_WEAPON(PLAYER::PLAYER_PED_ID(), MyWeap, true);
-				for (int j = 0; j < (int)Player_Weaps[i].MyAddons.size(); j++)
-				{
-					Hash MyAdon = MyHashKey(Player_Weaps[i].MyAddons[j]);
-					if (WEAPON::DOES_WEAPON_TAKE_WEAPON_COMPONENT, MyWeap, MyAdon)
-						WEAPON::GIVE_WEAPON_COMPONENT_TO_PED(PLAYER::PLAYER_PED_ID(), MyWeap, MyAdon);
-
-				}
-				if (WeaponIsMk2(MyWeap))
-					WAIT(500);
-				//int Yourammo;
-				//WEAPON::GET_MAX_AMMO(PLAYER::PLAYER_PED_ID(), MyHashKey(Player_Weaps[i].MyWeapon), &Yourammo);
-				WEAPON::SET_PED_AMMO(PLAYER::PLAYER_PED_ID(), MyWeap, Player_Weaps[i].Ammo);
-				WEAPON::SET_AMMO_IN_CLIP(PLAYER::PLAYER_PED_ID(), MyWeap, WEAPON::GET_MAX_AMMO_IN_CLIP(PLAYER::PLAYER_PED_ID(), MyWeap, true));
-			}
-			//WEAPON::SET_PED_CURRENT_WEAPON_VISIBLE(PLAYER::PLAYER_PED_ID(), false, true, true, true);
-			WEAPON::SET_CURRENT_PED_WEAPON(PLAYER::PLAYER_PED_ID(), -1569615261, true);
-		}
 	}
 
 	const std::vector<Mod_Class::AnimatedActions> MaleDance01 = {
@@ -4626,48 +4443,49 @@ namespace Mod_Entitys
 	};
 
 	bool VehicleEnter = false;
-	int iFindingTime;
-	void GetInVehicle(Ped Peddy, Vehicle Vhick, int Seat, bool clearSeat)
-	{
-		LoggerLight("PlayerEnterVeh");
+	int FindingTime;
 
-		iFindingTime = InGameTime() + 30000;
+	void GetInVehicle(Ped peddy, Vehicle vic, int seat, bool clearSeat)
+	{
+		Mod_Systems::LoggerLight("GetInVehicle, seat == " + std::to_string(seat));
+
+		FindingTime = Mod_Systems::InGameTime() + 30000;
 
 		if (clearSeat)
-			GetOutVehicle(VEHICLE::GET_PED_IN_VEHICLE_SEAT(Vhick, Seat));
+			GetOutVehicle(VEHICLE::GET_PED_IN_VEHICLE_SEAT(vic, seat));
 
-		AI::TASK_ENTER_VEHICLE(Peddy, Vhick, -1, Seat, 1.0f, 1, 0);
-		while (!(bool)PED::IS_PED_IN_ANY_VEHICLE(Peddy, 0))
+		AI::TASK_ENTER_VEHICLE(peddy, vic, -1, seat, 1.0f, 1, 0);
+		while (!(bool)PED::IS_PED_IN_ANY_VEHICLE(peddy, 0))
 		{
 			WAIT(1000);
-			if (iFindingTime < InGameTime())
+			if (FindingTime < Mod_Systems::InGameTime())
 			{
-				WarptoAnyVeh(Vhick, Peddy, Seat);
+				WarptoAnyVeh(vic, peddy, seat);
 				break;
 			}
 		}
 	}
-	void PlayerEnterVeh(Vehicle Vhick)
+	void PlayerEnterVeh(Vehicle vic)
 	{
 		VehicleEnter = true;
-		int iSeats = FindUSeat(Vhick);
-		GetInVehicle(PLAYER::PLAYER_PED_ID(), Vhick, iSeats, false);
+		int iSeats = FindUSeat(vic);
+		GetInVehicle(PLAYER::PLAYER_PED_ID(), vic, iSeats, false);
 		VehicleEnter = false;
 	}
 	
-	void WalkingStyle(Ped myPEd, const std::string& Anim)
+	void WalkingStyle(Ped peddy, const std::string& anim)
 	{
-		PED::SET_PED_MOVEMENT_CLIPSET(myPEd, (LPSTR)Anim.c_str(), 1.0f);
+		PED::SET_PED_MOVEMENT_CLIPSET(peddy, (LPSTR)anim.c_str(), 1.0f);
 	}
-	void ForceAnim(Ped peddy, const std::string& sAnimDict, const std::string& sAnimName, Vector3 AnPos, Vector3 AnRot)
+	void ForceAnim(Ped peddy, const std::string& animDict, const std::string& animName, Vector3 pos, Vector3 rot)
 	{
 		AI::CLEAR_PED_TASKS(peddy);
-		STREAMING::REQUEST_ANIM_DICT((LPSTR)sAnimDict.c_str());
-		int iFailed = InGameTime() + 5000;
+		STREAMING::REQUEST_ANIM_DICT((LPSTR)animDict.c_str());
+		int iFailed = Mod_Systems::InGameTime() + 5000;
 		bool bFine = true;
-		while (!STREAMING::HAS_ANIM_DICT_LOADED((LPSTR)sAnimDict.c_str()))
+		while (!STREAMING::HAS_ANIM_DICT_LOADED((LPSTR)animDict.c_str()))
 		{
-			if (iFailed < InGameTime())
+			if (iFailed < Mod_Systems::InGameTime())
 			{
 				bFine = false;
 				break;
@@ -4676,27 +4494,27 @@ namespace Mod_Entitys
 		}
 
 		if (bFine)
-			AI::TASK_PLAY_ANIM_ADVANCED(peddy, (LPSTR)sAnimDict.c_str(), (LPSTR)sAnimName.c_str(), AnPos.x, AnPos.y, AnPos.z, AnRot.x, AnRot.y, AnRot.z, 8.0f, 0.0f, -1, 0, 0.01f, 0, 0);
-		STREAMING::REMOVE_ANIM_DICT((LPSTR)sAnimDict.c_str());
+			AI::TASK_PLAY_ANIM_ADVANCED(peddy, (LPSTR)animDict.c_str(), (LPSTR)animName.c_str(), pos.x, pos.y, pos.z, rot.x, rot.y, rot.z, 8.0f, 0.0f, -1, 0, 0.01f, 0, 0);
+		STREAMING::REMOVE_ANIM_DICT((LPSTR)animDict.c_str());
 	}
-	void ForceAnim(Ped peddy, const std::string& sAnimDict, const std::string& sAnimName, Mod_Class::Vector4 AnPos)
+	void ForceAnim(Ped peddy, const std::string& animDict, const std::string& animName, Mod_Class::Vector4 pos)
 	{
-		ForceAnim(peddy, sAnimDict, sAnimName, Mod_Maths::NewVector3(AnPos.X, AnPos.Y, AnPos.Z), Mod_Maths::NewVector3(0.0f, 0.0f, AnPos.R));
+		ForceAnim(peddy, animDict, animName, Mod_Maths::NewVector3(pos.X, pos.Y, pos.Z), Mod_Maths::NewVector3(0.0f, 0.0f, pos.R));
 	}
-	void ForceAnim(Ped peddy, Mod_Class::AnimatedActions sAnim, Mod_Class::Vector4 AnPos)
+	void ForceAnim(Ped peddy, Mod_Class::AnimatedActions anim, Mod_Class::Vector4 pos)
 	{
-		ForceAnim(peddy, sAnim.Libary, sAnim.Action, Mod_Maths::NewVector3(AnPos.X, AnPos.Y, AnPos.Z), Mod_Maths::NewVector3(0.0f, 0.0f, AnPos.R));
+		ForceAnim(peddy, anim.Libary, anim.Action, Mod_Maths::NewVector3(pos.X, pos.Y, pos.Z), Mod_Maths::NewVector3(0.0f, 0.0f, pos.R));
 	}
-	void ForceSenario(const std::string& senareo, Mod_Class::Vector4 vpos, bool sitting)
+	void ForceSenario(const std::string& senareo, Mod_Class::Vector4 pos, bool sitting)
 	{
 		Ped peddy = PLAYER::PLAYER_PED_ID();
-		AI::TASK_START_SCENARIO_AT_POSITION(peddy, (LPSTR)senareo.c_str(), vpos.X, vpos.Y, vpos.Z, vpos.R, -1, sitting, true);
+		AI::TASK_START_SCENARIO_AT_POSITION(peddy, (LPSTR)senareo.c_str(), pos.X, pos.Y, pos.Z, pos.R, -1, sitting, true);
 		while (true)
 		{
-			Mod_Ui::TopLeft(RSLangMenu[188]);
+			GVM::TopLeft(Mod_Data::RSLangMenu[188]);
 			if ((bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
 				break;
-			else if (WhileButtonDown(75, true))
+			else if (GVM::WhileButtonDown(75))
 			{
 				AI::CLEAR_PED_TASKS_IMMEDIATELY(peddy);
 				AI::CLEAR_PED_TASKS(peddy);
@@ -4706,327 +4524,310 @@ namespace Mod_Entitys
 			WAIT(1);
 		}
 	}
-	void AddSenario(Ped Peddy, const std::string& senareo, Mod_Class::Vector4 vpos)
+	void AddSenario(Ped peddy, const std::string& senareo, Mod_Class::Vector4 pos)
 	{
-		AI::TASK_START_SCENARIO_AT_POSITION(Peddy, (LPSTR)senareo.c_str(), vpos.X, vpos.Y, vpos.Z, vpos.R, -1, true, true);
+		AI::TASK_START_SCENARIO_AT_POSITION(peddy, (LPSTR)senareo.c_str(), pos.X, pos.Y, pos.Z, pos.R, -1, true, true);
 	}
-	void RunAnimSeq(Mod_Class::AnimList myAnim, Mod_Class::Vector4 pos)
+	void RunAnimSeq(Mod_Class::AnimList animList, Mod_Class::Vector4 pos)
 	{
-		int iPause = 0;
-		Ped peddy = PLAYER::PLAYER_PED_ID();
-		ForceAnim(peddy, myAnim.Start.Libary, myAnim.Start.Action, pos);
+		int Pause = 0;
+		Ped PLped = PLAYER::PLAYER_PED_ID();
+		ForceAnim(PLped, animList.Start.Libary, animList.Start.Action, pos);
 		CAM::DO_SCREEN_FADE_IN(1000);
 		while (true)
 		{
-			if ((int)myAnim.Middle.size() > 0)
-				Mod_Ui::TopLeft(RSLangMenu[212]);
+			if ((int)animList.Middle.size() > 0)
+				GVM::TopLeft(Mod_Data::RSLangMenu[212]);
 			else
-				Mod_Ui::TopLeft(RSLangMenu[188]);
+				GVM::TopLeft(Mod_Data::RSLangMenu[188]);
 
-			if (Mod_Systems::WhileButtonDown(75, false) || (bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
+			if (GVM::WhileButtonDown(75) || (bool)ENTITY::IS_ENTITY_DEAD(PLped) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
 				break;
-			else if (!AI::GET_IS_TASK_ACTIVE(peddy, 134) || Mod_Systems::ButtonDown(46, false))
+			else if (!AI::GET_IS_TASK_ACTIVE(PLped, 134) || GVM::ButtonDown(46))
 			{
-				if (iPause < InGameTime())
+				if (Pause < Mod_Systems::InGameTime())
 				{
-					iPause = InGameTime() + 2000;
-					if ((int)myAnim.Middle.size() > 0)
+					Pause = Mod_Systems::InGameTime() + 2000;
+					if ((int)animList.Middle.size() > 0)
 					{
-						int iBe = LessRandomInt("RN_" + myAnim.Start.Libary, 0, (int)myAnim.Middle.size() - 1);
-						ForceAnim(peddy, myAnim.Middle[iBe].Libary, myAnim.Middle[iBe].Action, pos);
+						int iBe = Mod_Systems::LessRandomInt("RN_" + animList.Start.Libary, 0, (int)animList.Middle.size() - 1);
+						ForceAnim(PLped, animList.Middle[iBe].Libary, animList.Middle[iBe].Action, pos);
 					}
 					else
-						ForceAnim(peddy, myAnim.Start.Libary, myAnim.Start.Action, pos);
+						ForceAnim(PLped, animList.Start.Libary, animList.Start.Action, pos);
 				}
 			}
 			WAIT(1);
 		}
-		ForceAnim(peddy, myAnim.End.Libary, myAnim.End.Action, pos);
+		ForceAnim(PLped, animList.End.Libary, animList.End.Action, pos);
 
-		iPause = InGameTime() + 6000;
-		while (AI::GET_IS_TASK_ACTIVE(peddy, 134))
+		Pause = Mod_Systems::InGameTime() + 6000;
+		while (AI::GET_IS_TASK_ACTIVE(PLped, 134))
 		{
-			if (iPause < InGameTime())
+			if (Pause < Mod_Systems::InGameTime())
 				break;
 			WAIT(1);
 		}
 		WAIT(2500);
-		AI::CLEAR_PED_TASKS_IMMEDIATELY(peddy);
-		AI::CLEAR_PED_TASKS(peddy);
-		AI::STOP_ANIM_PLAYBACK(peddy, 0, 0);
+		AI::CLEAR_PED_TASKS_IMMEDIATELY(PLped);
+		AI::CLEAR_PED_TASKS(PLped);
+		AI::STOP_ANIM_PLAYBACK(PLped, 0, 0);
 	}
-	void DanceDanceDance(Ped Dancer)
+	void DanceDanceDance(Ped peddy)
 	{
-		Mod_Class::Vector4 DanceHere = Mod_Maths::GetPosV4(Dancer);
-		int iRanSpeed = LessRandomInt("DanceDanceDance01", 1, 3);
-		if (PED::IS_PED_MALE(Dancer))
+		Mod_Class::Vector4 DanceHere = Mod_Maths::GetPosV4(peddy);
+		int iRanSpeed = Mod_Systems::LessRandomInt("DanceDanceDance01", 1, 3);
+		if (PED::IS_PED_MALE(peddy))
 		{
 			if (iRanSpeed == 1)
-				ForceAnim(Dancer, MaleDance01[LessRandomInt("DanceDanceM01", 0, (int)MaleDance01.size() - 1)], DanceHere);
+				ForceAnim(peddy, MaleDance01[Mod_Systems::LessRandomInt("DanceDanceM01", 0, (int)MaleDance01.size() - 1)], DanceHere);
 			else if (iRanSpeed == 2)
-				ForceAnim(Dancer, MaleDance02[LessRandomInt("DanceDanceM02", 0, (int)MaleDance02.size() - 1)], DanceHere);
+				ForceAnim(peddy, MaleDance02[Mod_Systems::LessRandomInt("DanceDanceM02", 0, (int)MaleDance02.size() - 1)], DanceHere);
 			else
-				ForceAnim(Dancer, MaleDance03[LessRandomInt("DanceDanceM03", 0, (int)MaleDance03.size() - 1)], DanceHere);
+				ForceAnim(peddy, MaleDance03[Mod_Systems::LessRandomInt("DanceDanceM03", 0, (int)MaleDance03.size() - 1)], DanceHere);
 		}
 		else
 		{
 			if (iRanSpeed == 1)
-				ForceAnim(Dancer, FemaleDance01[LessRandomInt("DanceDanceF01", 0, (int)FemaleDance01.size() - 1)], DanceHere);
+				ForceAnim(peddy, FemaleDance01[Mod_Systems::LessRandomInt("DanceDanceF01", 0, (int)FemaleDance01.size() - 1)], DanceHere);
 			else if (iRanSpeed == 2)
-				ForceAnim(Dancer, FemaleDance02[LessRandomInt("DanceDanceF02", 0, (int)FemaleDance02.size() - 1)], DanceHere);
+				ForceAnim(peddy, FemaleDance02[Mod_Systems::LessRandomInt("DanceDanceF02", 0, (int)FemaleDance02.size() - 1)], DanceHere);
 			else
-				ForceAnim(Dancer, FemaleDance03[LessRandomInt("DanceDanceF03", 0, (int)FemaleDance03.size() - 1)], DanceHere);
+				ForceAnim(peddy, FemaleDance03[Mod_Systems::LessRandomInt("DanceDanceF03", 0, (int)FemaleDance03.size() - 1)], DanceHere);
 		}
 	}
-	void TakeAChair(Ped Sitter, Mod_Class::Vector4 ChairPos)
+	void TakeAChair(Ped peddy, Mod_Class::Vector4 pos)
 	{
-		ChairPos.R -= 180.0f;
-		AddSenario(Sitter, "PROP_HUMAN_SEAT_CHAIR", ChairPos);
+		pos.R -= 180.0f;
+		AddSenario(peddy, "PROP_HUMAN_SEAT_CHAIR", pos);
 	}
-	void SunningIt(Ped Sitter, Mod_Class::Vector4 ChairPos)
+	void SunningIt(Ped peddy, Mod_Class::Vector4 pos)
 	{
-		int iTurn = LessRandomInt("SunningIt", 1, 5);
+		int iTurn = Mod_Systems::LessRandomInt("SunningIt", 1, 5);
 		if (iTurn < 3)
 		{
-			if (PED::IS_PED_MALE(Sitter))
-				ForceAnim(Sitter, SunbathefrontM.Middle[0].Libary, SunbathefrontM.Middle[0].Action, ChairPos);
+			if (PED::IS_PED_MALE(peddy))
+				ForceAnim(peddy, Mod_Data::SunbathefrontM.Middle[0].Libary, Mod_Data::SunbathefrontM.Middle[0].Action, pos);
 			else
-				ForceAnim(Sitter, SunbathefrontF.Middle[0].Libary, SunbathefrontF.Middle[0].Action, ChairPos);
+				ForceAnim(peddy, Mod_Data::SunbathefrontF.Middle[0].Libary, Mod_Data::SunbathefrontF.Middle[0].Action, pos);
 		}
 		else
 		{
-			if (PED::IS_PED_MALE(Sitter))
-				ForceAnim(Sitter, SunbathebackM.Middle[0].Libary, SunbathebackM.Middle[0].Action, ChairPos);
+			if (PED::IS_PED_MALE(peddy))
+				ForceAnim(peddy, Mod_Data::SunbathebackM.Middle[0].Libary, Mod_Data::SunbathebackM.Middle[0].Action, pos);
 			else
-				ForceAnim(Sitter, SunbathebackF.Middle[0].Libary, SunbathebackF.Middle[0].Action, ChairPos);
+				ForceAnim(peddy, Mod_Data::SunbathebackF.Middle[0].Libary, Mod_Data::SunbathebackF.Middle[0].Action, pos);
 		}
 	}
 
-	void PlayHorn(Vehicle Vic, int duration)
+	void PlayHorn(Vehicle vic, int duration)
 	{
-		VEHICLE::START_VEHICLE_HORN(Vic, duration, MyHashKey("HELDDOWN"), 0);
+		VEHICLE::START_VEHICLE_HORN(vic, duration, Mod_Systems::MyHashKey("HELDDOWN"), 0);
 	}
-	int LandingGear(Vehicle Vic)
+	int LandingGear(Vehicle vic)
 	{
 		//	0: Deployed
 		//	1 : Closing
 		//	2 : Opening
 		//	3 : Retracted
-		return VEHICLE::_GET_VEHICLE_LANDING_GEAR(Vic);
+		return VEHICLE::_GET_VEHICLE_LANDING_GEAR(vic);
 	}
-	void LandNearHeli(Ped Peddy, Vehicle vHick, Vector3 vTarget)
+	void LandNearHeli(Ped peddy, Vehicle vic, Vector3 target)
 	{
-		AI::CLEAR_PED_TASKS(Peddy);
-		float HeliDesX = vTarget.x;
-		float HeliDesY = vTarget.y;
-		float HeliDesZ = vTarget.z;
+		AI::CLEAR_PED_TASKS(peddy);
+		float HeliDesX = target.x;
+		float HeliDesY = target.y;
+		float HeliDesZ = target.z;
 		float HeliSpeed = 35;
 		float HeliLandArea = 10;
-		Vector3 VHickPos = ENTITY::GET_ENTITY_COORDS(vHick, true);
+		Vector3 VHickPos = ENTITY::GET_ENTITY_COORDS(vic, true);
 		float dx = VHickPos.x - HeliDesX;
 		float dy = VHickPos.y - HeliDesY;
 
 		float HeliDirect = GAMEPLAY::GET_HEADING_FROM_VECTOR_2D(dx, dy) - 180.00f;
 
+		VEHICLE::_SET_VEHICLE_LANDING_GEAR(vic, 2);
+		AI::TASK_HELI_MISSION(peddy, vic, 0, 0, HeliDesX, HeliDesY, HeliDesZ, 20, HeliSpeed, HeliLandArea, HeliDirect, -1, -1, -1, 32);
 
-		AI::TASK_HELI_MISSION(Peddy, vHick, 0, 0, HeliDesX, HeliDesY, HeliDesZ, 20, HeliSpeed, HeliLandArea, HeliDirect, -1, -1, -1, 32);
+		//PED::SET_PED_FIRING_PATTERN(Peddy, Mod_Systems::MyHashKey("FIRING_PATTERN_BURST_FIRE_HELI"));
 
-		PED::SET_PED_FIRING_PATTERN(Peddy, MyHashKey("FIRING_PATTERN_BURST_FIRE_HELI"));
-
-		PED::SET_PED_KEEP_TASK(Peddy, true);
-		PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(Peddy, true);
+		PED::SET_PED_KEEP_TASK(peddy, true);
+		PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(peddy, true);
 	}
-	void LandNearPlane(Ped Peddy, Vehicle vHick, Vector3 vStart, Vector3 vFinish)
+	void LandNearPlane(Ped peddy, Vehicle vic, Vector3 start, Vector3 finish)
 	{
-		AI::CLEAR_PED_TASKS(Peddy);
-		AI::TASK_PLANE_LAND(Peddy, vHick, vStart.x, vStart.y, vStart.z, vFinish.x, vFinish.y, vFinish.z);
-		PED::SET_PED_KEEP_TASK(Peddy, true);
-		PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(Peddy, true);
+		AI::CLEAR_PED_TASKS(peddy);
+		AI::TASK_PLANE_LAND(peddy, vic, start.x, start.y, start.z, finish.x, finish.y, finish.z);
+		PED::SET_PED_KEEP_TASK(peddy, true);
+		PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(peddy, true);
 	}
 
-	void WalkHere(Ped Peddy, Mod_Class::Vector4 Dest)
+	void WalkHere(Ped peddy, Mod_Class::Vector4 dest)
 	{
-		AI::CLEAR_PED_TASKS(Peddy);
-		AI::TASK_FOLLOW_NAV_MESH_TO_COORD(Peddy, Dest.X, Dest.Y, Dest.Z, 1.0, -1, 0.0, false, 0.0);
-		PED::SET_PED_KEEP_TASK(Peddy, true);
+		AI::CLEAR_PED_TASKS(peddy);
+		AI::TASK_FOLLOW_NAV_MESH_TO_COORD(peddy, dest.X, dest.Y, dest.Z, 1.0, -1, 0.0, false, 0.0);
+		PED::SET_PED_KEEP_TASK(peddy, true);
 	}
-	void RunHere(Ped Peddy, Vector3 Dest)
+	void RunHere(Ped peddy, Vector3 dest)
 	{
-		AI::CLEAR_PED_TASKS(Peddy);
-		AI::TASK_FOLLOW_NAV_MESH_TO_COORD(Peddy, Dest.x, Dest.y, Dest.z, 2.0, -1, 0.0, false, 0.0);
-		PED::SET_PED_KEEP_TASK(Peddy, true);
+		AI::CLEAR_PED_TASKS(peddy);
+		AI::TASK_FOLLOW_NAV_MESH_TO_COORD(peddy, dest.x, dest.y, dest.z, 2.0, -1, 0.0, false, 0.0);
+		PED::SET_PED_KEEP_TASK(peddy, true);
 	}
-	void DriveAround(Ped Peddy)
+	void DriveAround(Ped peddy)
 	{
-		AI::CLEAR_PED_TASKS(Peddy);
-		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(Peddy, 0))
+		AI::CLEAR_PED_TASKS(peddy);
+		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(peddy, 0))
 		{
-			if (Peddy == VEHICLE::GET_PED_IN_VEHICLE_SEAT(PED::GET_VEHICLE_PED_IS_USING(Peddy), -1))
+			if (peddy == VEHICLE::GET_PED_IN_VEHICLE_SEAT(PED::GET_VEHICLE_PED_IS_USING(peddy), -1))
 			{
-				Vehicle Vick = PED::GET_VEHICLE_PED_IS_IN(Peddy, false);
+				Vehicle Vick = PED::GET_VEHICLE_PED_IS_IN(peddy, false);
 
-				AI::TASK_VEHICLE_DRIVE_WANDER(Peddy, Vick, 25, 262972);
-				PED::SET_PED_KEEP_TASK(Peddy, true);
-				PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(Peddy, true);
+				AI::TASK_VEHICLE_DRIVE_WANDER(peddy, Vick, 25, 262972);
+				PED::SET_PED_KEEP_TASK(peddy, true);
+				PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(peddy, true);
 			}
 		}
 
 	}
-	void DriveToooPed(Ped Peddy, Ped Target, bool bRunOver)
+	void DriveToooPed(Ped peddy, Ped target, bool runOver)
 	{
-		AI::CLEAR_PED_TASKS(Peddy);
-		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(Peddy, 0))
+		AI::CLEAR_PED_TASKS(peddy);
+		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(peddy, 0))
 		{
-			if (Peddy == VEHICLE::GET_PED_IN_VEHICLE_SEAT(PED::GET_VEHICLE_PED_IS_USING(Peddy), -1))
+			if (peddy == VEHICLE::GET_PED_IN_VEHICLE_SEAT(PED::GET_VEHICLE_PED_IS_USING(peddy), -1))
 			{
-				Vector3 PlayerPos = ENTITY::GET_ENTITY_COORDS(Target, true);
-				Vehicle Vick = PED::GET_VEHICLE_PED_IS_IN(Peddy, false);
-				if (bRunOver)
-					AI::TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE(Peddy, Vick, PlayerPos.x, PlayerPos.y, PlayerPos.z, 45, 262972, 0);
+				Vector3 PlayerPos = ENTITY::GET_ENTITY_COORDS(target, true);
+				Vehicle Vick = PED::GET_VEHICLE_PED_IS_IN(peddy, false);
+				if (runOver)
+					AI::TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE(peddy, Vick, PlayerPos.x, PlayerPos.y, PlayerPos.z, 45, 262972, 0);
 				else
-					AI::TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE(Peddy, Vick, PlayerPos.x, PlayerPos.y, PlayerPos.z, 25, 262972, 0);
+					AI::TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE(peddy, Vick, PlayerPos.x, PlayerPos.y, PlayerPos.z, 25, 262972, 0);
 
-				//PED::SET_PED_KEEP_TASK(Peddy, true);
-				PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(Peddy, true);
+				PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(peddy, true);
 			}
 		}
 	}
-	void DriveBye(Ped Peddy, Ped Target, int iVeh)
+	void DriveBye(Ped peddy, Ped target, int vehType)
 	{
-		AI::CLEAR_PED_TASKS(Peddy);
-		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(Peddy, 0))
+		AI::CLEAR_PED_TASKS(peddy);
+		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(peddy, 0))
 		{
-			if (Peddy == VEHICLE::GET_PED_IN_VEHICLE_SEAT(PED::GET_VEHICLE_PED_IS_USING(Peddy), -1))
+			if (peddy == VEHICLE::GET_PED_IN_VEHICLE_SEAT(PED::GET_VEHICLE_PED_IS_USING(peddy), -1))
 			{
-				if ((bool)PED::IS_PED_IN_ANY_VEHICLE(Target, 0))
-					AI::TASK_VEHICLE_CHASE(Peddy, Target);
+				if ((bool)PED::IS_PED_IN_ANY_VEHICLE(target, 0))
+					AI::TASK_VEHICLE_CHASE(peddy, target);
 				else
-					DriveToooPed(Peddy, Target, true);
+					DriveToooPed(peddy, target, true);
 			}
 
-			AI::TASK_VEHICLE_SHOOT_AT_PED(Peddy, Target, 5);
-			//PED::SET_PED_KEEP_TASK(Peddy, true);
+			AI::TASK_VEHICLE_SHOOT_AT_PED(peddy, target, 5);
+
 			bool blocking = false;
-			if (iVeh == 6)
+			if (vehType == 6)
 				blocking = true;
-			PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(Peddy, blocking);
+			PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(peddy, blocking);
 		}
 	}
-	void FlyHeli(Ped Pedd, Vehicle Vhick, Vector3 vHeliDest, float fSpeed, float flanding)
+	void FlyHeli(Ped peddy, Vehicle vic, Vector3 dest, float speed, float landing)
 	{
-		ENTITY::FREEZE_ENTITY_POSITION(Vhick, false);
-		AI::CLEAR_PED_TASKS(Pedd);
-		float HeliDesX = vHeliDest.x;
-		float HeliDesY = vHeliDest.y;
-		float HeliDesZ = vHeliDest.z;
-		float HeliSpeed = fSpeed;
-		float HeliLandArea = flanding;
+		ENTITY::FREEZE_ENTITY_POSITION(vic, false);
+		AI::CLEAR_PED_TASKS(peddy);
+		float HeliDesX = dest.x;
+		float HeliDesY = dest.y;
+		float HeliDesZ = dest.z;
+		float HeliSpeed = speed;
+		float HeliLandArea = landing;
 
-		Vector3 VHickPos = Mod_Maths::EntPosition(Vhick);
+		Vector3 VHickPos = Mod_Maths::EntPosition(vic);
 
 		float dx = VHickPos.x - HeliDesX;
 		float dy = VHickPos.y - HeliDesY;
 		float HeliDirect = GAMEPLAY::GET_HEADING_FROM_VECTOR_2D(dx, dy) - 180.00f;
 
-		AI::TASK_HELI_MISSION(Pedd, Vhick, 0, 0, HeliDesX, HeliDesY, HeliDesZ, 9, HeliSpeed, HeliLandArea, HeliDirect, -1, -1, -1, 0);
-		PED::SET_PED_FIRING_PATTERN(Pedd, MyHashKey("FIRING_PATTERN_BURST_FIRE_HELI"));
-		PED::SET_PED_KEEP_TASK(Pedd, true);
-		PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(Pedd, true);
+		AI::TASK_HELI_MISSION(peddy, vic, 0, 0, HeliDesX, HeliDesY, HeliDesZ, 9, HeliSpeed, HeliLandArea, HeliDirect, -1, -1, -1, 0);
+		PED::SET_PED_FIRING_PATTERN(peddy, Mod_Systems::MyHashKey("FIRING_PATTERN_BURST_FIRE_HELI"));
+		PED::SET_PED_KEEP_TASK(peddy, true);
+		PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(peddy, true);
 	}
-	void FlyPlane(Ped Pedd, Vehicle Vhick, Vector3 vPlaneDest)
+	void FlyPlane(Ped peddy, Vehicle vic, Vector3 dest)
 	{
-		float fAngle = Mod_Maths::GetAngle(ENTITY::GET_ENTITY_COORDS(Vhick, true), vPlaneDest);
-		AI::CLEAR_PED_TASKS(Pedd);
+		float fAngle = Mod_Maths::GetAngle(ENTITY::GET_ENTITY_COORDS(vic, true), dest);
+		AI::CLEAR_PED_TASKS(peddy);
 
-		AI::TASK_PLANE_MISSION(Pedd, Vhick, 0, 0, vPlaneDest.x, vPlaneDest.y, vPlaneDest.z, 6, 20, 50, fAngle, 50, 1);
+		AI::TASK_PLANE_MISSION(peddy, vic, 0, 0, dest.x, dest.y, dest.z, 6, 20, 50, fAngle, 50, 1);
 
-		PED::SET_PED_KEEP_TASK(Pedd, true);
-		PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(Pedd, true);
+		PED::SET_PED_KEEP_TASK(peddy, true);
+		PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(peddy, true);
 	}
-	void DriveToooDest(Ped Peddy, Vector3 Vme, float fSpeed)
+	void DriveToooDest(Ped peddy, Vector3 dest, float speed)
 	{
-		AI::CLEAR_PED_TASKS(Peddy);
-		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(Peddy, 0))
+		AI::CLEAR_PED_TASKS(peddy);
+		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(peddy, 0))
 		{
-			Vehicle Vick = PED::GET_VEHICLE_PED_IS_IN(Peddy, false);
-			if (Peddy == VEHICLE::GET_PED_IN_VEHICLE_SEAT(PED::GET_VEHICLE_PED_IS_USING(Peddy), -1))
+			Vehicle Vick = PED::GET_VEHICLE_PED_IS_IN(peddy, false);
+			if (peddy == VEHICLE::GET_PED_IN_VEHICLE_SEAT(PED::GET_VEHICLE_PED_IS_USING(peddy), -1))
 			{
-				AI::TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE(Peddy, Vick, Vme.x, Vme.y, Vme.z, fSpeed, 262972, 1);
-				PED::SET_PED_KEEP_TASK(Peddy, true);
-				PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(Peddy, true);
+				AI::TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE(peddy, Vick, dest.x, dest.y, dest.z, speed, 262972, 1);
+				PED::SET_PED_KEEP_TASK(peddy, true);
+				PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(peddy, true);
 			}
 		}
 	}
-	void DriveDirect(Ped Peddy, Vector3 Vme, float fSpeed)
+	void DriveDirect(Ped peddy, Vector3 dest, float speed)
 	{
-		AI::CLEAR_PED_TASKS(Peddy);
-		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(Peddy, 0))
+		AI::CLEAR_PED_TASKS(peddy);
+		if ((bool)PED::IS_PED_IN_ANY_VEHICLE(peddy, 0))
 		{
-			Vehicle Vick = PED::GET_VEHICLE_PED_IS_IN(Peddy, false);
-			if (Peddy == VEHICLE::GET_PED_IN_VEHICLE_SEAT(PED::GET_VEHICLE_PED_IS_USING(Peddy), -1))
+			Vehicle Vick = PED::GET_VEHICLE_PED_IS_IN(peddy, false);
+			if (peddy == VEHICLE::GET_PED_IN_VEHICLE_SEAT(PED::GET_VEHICLE_PED_IS_USING(peddy), -1))
 			{
-				AI::TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE(Peddy, Vick, Vme.x, Vme.y, Vme.z, fSpeed, 16777216, 1);
-				PED::SET_PED_KEEP_TASK(Peddy, true);
-				PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(Peddy, true);
+				AI::TASK_VEHICLE_DRIVE_TO_COORD_LONGRANGE(peddy, Vick, dest.x, dest.y, dest.z, speed, 16777216, 1);
+				PED::SET_PED_KEEP_TASK(peddy, true);
+				PED::SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(peddy, true);
 			}
 		}
 	}
-	void PedDoGetIn(Vehicle GetV, Ped Peddy, const std::string& sId)
-	{
-		int iSeats = FindUSeat(GetV);
-		Vector3 PedPos = ENTITY::GET_ENTITY_COORDS(Peddy, true);
-		Vector3 VehPos = ENTITY::GET_ENTITY_COORDS(GetV, true);
 
-		if (iSeats > -1)
-		{
-			if (Mod_Maths::DistanceTo(PedPos, VehPos) < 65.00)
-			{
-				GetInVehicle(Peddy, GetV, iSeats, false);
-			}
-			else
-				WarptoAnyVeh(GetV, Peddy, iSeats);
-		}
-	}
-	void FightPlayer(Ped Peddy, bool bInVeh, int PrefVeh)
+	void FightPlayer(Ped peddy, bool inVeh, int vehType)
 	{
 		Ped Player = PLAYER::PLAYER_PED_ID();
-		PED::REMOVE_PED_FROM_GROUP(Peddy);
-		PED::SET_PED_RELATIONSHIP_GROUP_HASH(Peddy, GP_Attack);
-		//AI::CLEAR_PED_TASKS_IMMEDIATELY(Peddy);
-		PED::SET_PED_FLEE_ATTRIBUTES(Peddy, 0, 1);
-		PED::SET_PED_COMBAT_ATTRIBUTES(Peddy, 46, 1);
-		if (!bInVeh)
-			AI::TASK_COMBAT_PED(Peddy, Player, 0, 16);
+		PED::REMOVE_PED_FROM_GROUP(peddy);
+		PED::SET_PED_RELATIONSHIP_GROUP_HASH(peddy, Mod_Data::GP_Attack);
+		PED::SET_PED_FLEE_ATTRIBUTES(peddy, 0, 1);
+		PED::SET_PED_COMBAT_ATTRIBUTES(peddy, 46, 1);
+		if (!inVeh)
+			AI::TASK_COMBAT_PED(peddy, Player, 0, 16);
 		else
-			DriveBye(Peddy, Player, PrefVeh);
+			DriveBye(peddy, Player, vehType);
 	}
-	void GreefWar(Ped Peddy, Ped Victim)
+	void GreefWar(Ped peddy, Ped target)
 	{
-		if (Victim != NULL)
+		if (target != NULL)
 		{
-			AI::CLEAR_PED_TASKS(Peddy);
-			PED::SET_PED_FLEE_ATTRIBUTES(Peddy, 0, true);
-			PED::SET_PED_COMBAT_ATTRIBUTES(Peddy, 46, true);
+			AI::CLEAR_PED_TASKS(peddy);
+			PED::SET_PED_FLEE_ATTRIBUTES(peddy, 0, true);
+			PED::SET_PED_COMBAT_ATTRIBUTES(peddy, 46, true);
 
-			AI::TASK_COMBAT_PED(Peddy, Victim, 0, 16);
+			AI::TASK_COMBAT_PED(peddy, target, 0, 16);
 		}
 	}
-	void JogOn(std::vector<Mod_Class::Vector4>& Route, int start)
+	void JogOn(const std::vector<Mod_Class::Vector4>& destList, int start)
 	{
-		MoveEntity(PLAYER::PLAYER_PED_ID(), Route[start]);
+		MoveEntity(PLAYER::PLAYER_PED_ID(), destList[start]);
 		while (true)
 		{
-			Mod_Ui::TopLeft(RSLangMenu[188]);
-			if (Mod_Systems::WhileButtonDown(75, true) || (bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
+			GVM::TopLeft(Mod_Data::RSLangMenu[188]);
+			if (GVM::WhileButtonDown(75) || (bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
 				break;
-			else if (Mod_Maths::DistanceTo(PLAYER::PLAYER_PED_ID(), Route[start]) < 3.0f)
+			else if (Mod_Maths::DistanceTo(PLAYER::PLAYER_PED_ID(), destList[start]) < 3.0f)
 			{
-				if (start < Route.size())
+				if (start < destList.size())
 					start++;
 				else
 					start = 0;
 
-				RunHere(PLAYER::PLAYER_PED_ID(), Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z));
+				RunHere(PLAYER::PLAYER_PED_ID(), Mod_Maths::NewVector3(destList[start].X, destList[start].Y, destList[start].Z));
 			}
 			WAIT(1);
 		}
@@ -5034,39 +4835,50 @@ namespace Mod_Entitys
 		WAIT(4000);
 		AI::CLEAR_PED_TASKS(PLAYER::PLAYER_PED_ID());
 	}
-	void Drive_Fly_On(Ped peddy, Vehicle vic, std::vector<Mod_Class::Vector4>& Route, bool plane, bool heli, bool playerDrives, int start)
+	void Drive_Fly_On(Ped peddy, Vehicle vic, const std::vector<Mod_Class::Vector4>& destList, bool plane, bool heli, bool playerDrives, int start)
 	{
 		if (plane)
-			FlyPlane(peddy, vic, Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z));
+			FlyPlane(peddy, vic, Mod_Maths::NewVector3(destList[start].X, destList[start].Y, destList[start].Z));
 		else if (heli)
-			FlyHeli(peddy, vic, Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z), 45.0f, 5.0f);
+			FlyHeli(peddy, vic, Mod_Maths::NewVector3(destList[start].X, destList[start].Y, destList[start].Z), 45.0f, 5.0f);
 		else
-			DriveToooDest(peddy, Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z), 25.0f);
+			DriveToooDest(peddy, Mod_Maths::NewVector3(destList[start].X, destList[start].Y, destList[start].Z), 25.0f);
 
+		float fDis = 3.0f;
+		if (heli || plane)
+			fDis = 30.0f;
 		while (true)
 		{
 			if (playerDrives)
 			{
-				Mod_Ui::TopLeft(RSLangMenu[188]);
-				if (WhileButtonDown(75, true) || (bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
+				GVM::TopLeft(Mod_Data::RSLangMenu[188]);
+				if (GVM::WhileButtonDown(75) || (bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()) || PLAYER::IS_PLAYER_BEING_ARRESTED(PLAYER::PLAYER_ID(), true))
 					break;
 			}
 
 			if (Mod_Maths::DistanceTo(PLAYER::PLAYER_PED_ID(), vic) > 50.0f)
 				break;
 
-			if (Mod_Maths::DistanceTo(vic, Route[start]) < 3.0f)
+			if (Mod_Maths::DistanceTo(vic, destList[start]) < fDis)
 			{
 				start++;
-				if (start >= Route.size())
+				if (start >= destList.size())
 					start = 0;
 
 				if (plane)
-					FlyPlane(peddy, vic, Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z));
+					FlyPlane(peddy, vic, Mod_Maths::NewVector3(destList[start].X, destList[start].Y, destList[start].Z));
 				else if (heli)
-					FlyHeli(peddy, vic, Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z), 45.0f, 5.0f);
+				{
+					if (destList.size() == 2)
+					{
+						LandNearHeli(peddy, vic, Mod_Maths::NewVector3(destList[1].X, destList[1].Y, destList[1].Z));
+						break;
+					}
+					else
+						FlyHeli(peddy, vic, Mod_Maths::NewVector3(destList[start].X, destList[start].Y, destList[start].Z), 45.0f, 5.0f);
+				}
 				else
-					DriveToooDest(peddy, Mod_Maths::NewVector3(Route[start].X, Route[start].Y, Route[start].Z), 25.0f);
+					DriveToooDest(peddy, Mod_Maths::NewVector3(destList[start].X, destList[start].Y, destList[start].Z), 25.0f);
 			}
 			WAIT(1);
 		}
@@ -5074,9 +4886,9 @@ namespace Mod_Entitys
 		if (playerDrives)
 			AI::CLEAR_PED_TASKS(PLAYER::PLAYER_PED_ID());
 	}
-	void MethEdd(bool Act)
+	void MethEdd(bool act)
 	{
-		if (Act)
+		if (act)
 		{
 			int iTenPass = 10;
 			GRAPHICS::SET_TIMECYCLE_MODIFIER("DRUG_gas_huffin");
@@ -5095,85 +4907,112 @@ namespace Mod_Entitys
 		}
 	}
 
-	void GunningIt(Ped Peddy, int iGun)
+	void GunningIt(Ped peddy, std::vector<Mod_Class::WeaponSaver>& gunList)
 	{
-		LoggerLight("GunningIt Gun == " + std::to_string(iGun));
+		Mod_Systems::LoggerLight("GunningIt GunsGunsGuns ");
 
-		std::vector<std::string> sWeapList = {};
+		WEAPON::REMOVE_ALL_PED_WEAPONS(peddy, true);
+		for (int i = 0; i < (int)gunList.size(); i++)
+		{
+			Hash NewWeap = Mod_Systems::MyHashKey(gunList[i].MyWeapon);
+			WEAPON::GIVE_WEAPON_TO_PED(peddy, NewWeap, 0, false, true);
+			WEAPON::SET_CURRENT_PED_WEAPON(peddy, NewWeap, true);
+			for (int j = 0; j < (int)gunList[i].MyAddons.size(); j++)
+			{
+				Hash MyAdon = Mod_Systems::MyHashKey(gunList[i].MyAddons[j]);
+				if (WEAPON::DOES_WEAPON_TAKE_WEAPON_COMPONENT(NewWeap, MyAdon))
+					WEAPON::GIVE_WEAPON_COMPONENT_TO_PED(peddy, NewWeap, MyAdon);
 
-		if (iGun == 1)
-		{
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt01", 1, 17)]);//Meelee
-		}
-		else if (iGun == 2)
-		{
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt02", 18, 37)]);//HandGuns
-		}
-		else if (iGun == 3)
-		{
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt01", 1, 17)]);//Meelee
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt02", 18, 37)]);//HandGuns
-		}
-		else if (iGun == 4)
-		{
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt04", 46, 55)]);//ShotGun
-		}
-		else if (iGun == 5)
-		{
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt01", 1, 17)]);//Meelee
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt02", 18, 37)]);//HandGuns
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt07", 73, 78)]);//sniper
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt08", 79, 87)]);//Heavey
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt09", 88, 94)]);//throw
-		}
-		else if (iGun == 6)
-		{
-			sWeapList.push_back("WEAPON_golfclub");//golf
-		}
-		else if (iGun == 7)
-		{
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt01", 1, 17)]);//Meelee
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt03", 38, 45)]);//Smg
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt05", 56, 68)]);//riflles
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt06", 69, 72)]);//Mg
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt07", 73, 78)]);//sniper
-		}
-		else if (iGun == 8)
-		{
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt07", 73, 78)]);//sniper
-		}
-		else if (iGun == 9)
-		{
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt01", 1, 17)]);//Meelee
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt02", 18, 37)]);//HandGuns
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt03", 38, 45)]);//Smg
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt04", 46, 55)]);//ShotGun
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt05", 56, 68)]);//riflles
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt06", 69, 72)]);//Mg
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt07", 73, 78)]);//sniper
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt08", 79, 87)]);//Heavey
-			sWeapList.push_back(Weapons_List[LessRandomInt("GunIt09", 88, 94)]);//throw
-		}
-		else if (iGun == 10)
-		{
-			sWeapList.push_back("WEAPON_raypistol");  //0xAF3696A1",--36
-			sWeapList.push_back("WEAPON_raycarbine");  //0x476BF155"--44
-			sWeapList.push_back("weapon_rayminigun");
-		}
-		else if (iGun == 50)
-			ReturnPlayerWeapons();
+			}
+			if (WeaponIsMk2(NewWeap))
+				WAIT(750);
 
-		for (int i = 0; i < sWeapList.size(); i++)
-			WEAPON::GIVE_WEAPON_TO_PED(Peddy, MyHashKey(sWeapList[i]), 9999, false, true);
+			WEAPON::SET_AMMO_IN_CLIP(peddy, NewWeap, WEAPON::GET_MAX_AMMO_IN_CLIP(peddy, NewWeap, true));
+			WEAPON::SET_PED_AMMO(peddy, NewWeap, gunList[i].Ammo);
+			WEAPON::SET_PED_WEAPON_TINT_INDEX(peddy, NewWeap, gunList[i].WeapTint);
+		}
+		WEAPON::SET_CURRENT_PED_WEAPON(peddy, -1569615261, true);
 	}
-	void MaxOutAllModsNoWheels(Vehicle Vehic, int cT)
+	void GunningIt(Ped peddy, int gun)
 	{
-		LoggerLight("MaxOutAllModsNoWheels");
+		Mod_Systems::LoggerLight("GunningIt Gun == " + std::to_string(gun));
 
-		VEHICLE::SET_VEHICLE_MOD_KIT(Vehic, 0);
+		std::vector<std::string> WeapList = {};
+
+		if (gun == 1)
+		{
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt01", 1, 17)]);//Meelee
+		}
+		else if (gun == 2)
+		{
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt02", 18, 37)]);//HandGuns
+		}
+		else if (gun == 3)
+		{
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt01", 1, 17)]);//Meelee
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt02", 18, 37)]);//HandGuns
+		}
+		else if (gun == 4)
+		{
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt04", 46, 55)]);//ShotGun
+		}
+		else if (gun == 5)
+		{
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt01", 1, 17)]);//Meelee
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt02", 18, 37)]);//HandGuns
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt07", 73, 78)]);//sniper
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt08", 79, 87)]);//Heavey
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt09", 88, 94)]);//throw
+		}
+		else if (gun == 6)
+		{
+			WeapList.push_back("WEAPON_golfclub");//golf
+		}
+		else if (gun == 7)
+		{
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt01", 1, 17)]);//Meelee
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt03", 38, 45)]);//Smg
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt05", 56, 68)]);//riflles
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt06", 69, 72)]);//Mg
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt07", 73, 78)]);//sniper
+		}
+		else if (gun == 8)
+		{
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt07", 73, 78)]);//sniper
+		}
+		else if (gun == 9)
+		{
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt01", 1, 17)]);//Meelee
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt02", 18, 37)]);//HandGuns
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt03", 38, 45)]);//Smg
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt04", 46, 55)]);//ShotGun
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt05", 56, 68)]);//riflles
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt06", 69, 72)]);//Mg
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt07", 73, 78)]);//sniper
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt08", 79, 87)]);//Heavey
+			WeapList.push_back(Mod_Data::Weapons_List[Mod_Systems::LessRandomInt("GunIt09", 88, 94)]);//throw
+		}
+		else if (gun == 10)
+		{
+			WeapList.push_back("WEAPON_raypistol");  //0xAF3696A1",--36
+			WeapList.push_back("WEAPON_raycarbine");  //0x476BF155"--44
+			WeapList.push_back("weapon_rayminigun");
+		}
+		else if (gun == 50)
+			GunningIt(peddy, Mod_Data::Player_Weaps);
+
+		for (int i = 0; i < WeapList.size(); i++)
+			WEAPON::GIVE_WEAPON_TO_PED(peddy, Mod_Systems::MyHashKey(WeapList[i]), 9999, false, true);
+	}
+
+	void MaxOutAllModsNoWheels(Vehicle vic, int vehType)
+	{
+		Mod_Systems::LoggerLight("MaxOutAllModsNoWheels");
+
+		VEHICLE::SET_VEHICLE_MOD_KIT(vic, 0);
 		for (int i = 0; i < 50; i++)
 		{
-			int iSpoilher = VEHICLE::GET_NUM_VEHICLE_MODS(Vehic, i);
+			int Spoilher = VEHICLE::GET_NUM_VEHICLE_MODS(vic, i);
 
 			if (i == 18 || i == 22 || i == 23 || i == 24)
 			{
@@ -5181,84 +5020,84 @@ namespace Mod_Entitys
 			}
 			else
 			{
-				iSpoilher -= 1;
-				VEHICLE::SET_VEHICLE_MOD(Vehic, i, iSpoilher, true);
+				Spoilher -= 1;
+				VEHICLE::SET_VEHICLE_MOD(vic, i, Spoilher, true);
 			}
 		}
 
-		if (cT != 13 && cT != 14 && cT != 15 && cT != 16)
+		if (vehType != 13 && vehType != 14 && vehType != 15 && vehType != 16)
 		{
-			VEHICLE::TOGGLE_VEHICLE_MOD(Vehic, 18, true);
-			VEHICLE::TOGGLE_VEHICLE_MOD(Vehic, 22, true);
+			VEHICLE::TOGGLE_VEHICLE_MOD(vic, 18, true);
+			VEHICLE::TOGGLE_VEHICLE_MOD(vic, 22, true);
 		}
-		else if (cT == 15 || cT == 16)
-			VEHICLE::_SET_VEHICLE_LANDING_GEAR(Vehic, 3);
+		else if (vehType == 15 || vehType == 16)
+			VEHICLE::_SET_VEHICLE_LANDING_GEAR(vic, 3);
 	}
-	void MakeModsNotWar(Vehicle Vehic, std::vector<int>& MyMods)
+	void MakeModsNotWar(Vehicle vic, std::vector<int>* modsList)
 	{
-		LoggerLight("MakeModsNotWar");
+		Mod_Systems::LoggerLight("MakeModsNotWar");
 
-		VEHICLE::SET_VEHICLE_MOD_KIT(Vehic, 0);
+		VEHICLE::SET_VEHICLE_MOD_KIT(vic, 0);
 
-		for (int i = 0; i < MyMods.size(); i++)
+		for (int i = 0; i < modsList->size(); i++)
 		{
-			if (MyMods[i] == -10)
+			if (modsList->at(i) == -10)
 			{
 
 			}
 			else if (i == 48)
 			{
-				int iSpoilher = -1;
-				if (MyMods[i] == -1)
+				int Spoilher = -1;
+				if (modsList->at(i) == -1)
 				{
-					iSpoilher = VEHICLE::GET_NUM_VEHICLE_MODS(Vehic, i) - 1;
-					if (iSpoilher < 1)
-						iSpoilher = VEHICLE::GET_VEHICLE_LIVERY_COUNT(Vehic) - 1;
+					Spoilher = VEHICLE::GET_NUM_VEHICLE_MODS(vic, i) - 1;
+					if (Spoilher < 1)
+						Spoilher = VEHICLE::GET_VEHICLE_LIVERY_COUNT(vic) - 1;
 
-					if (iSpoilher > 0)
+					if (Spoilher > 0)
 					{
-						MyMods[i] = RandomInt(0, iSpoilher);
+						modsList->at(i) = Mod_Systems::RandomInt(0, Spoilher);
 					}
 				}
 
-				if (iSpoilher > -1 || MyMods[i] > -1)
+				if (Spoilher > -1 || modsList->at(i) > -1)
 				{
-					VEHICLE::SET_VEHICLE_LIVERY(Vehic, MyMods[i]);
-					VEHICLE::SET_VEHICLE_MOD(Vehic, i, MyMods[i], true);
+					VEHICLE::SET_VEHICLE_LIVERY(vic, modsList->at(i));
+					VEHICLE::SET_VEHICLE_MOD(vic, i, modsList->at(i), true);
 				}
 			}
 			else if (i == 66)
 			{
-				if (MyMods[i] == -1)
+				if (modsList->at(i) == -1)
 				{
-					int iCheckHere = RandomInt(0, 159);
-					MyMods[i] = iCheckHere;
+					int CheckHere = Mod_Systems::RandomInt(0, 159);
+					modsList->at(i) = CheckHere;
 				}
 			}
 			else if (i == 67)
 			{
-				if (MyMods[i] == -1)
+				if (modsList->at(i) == -1)
 				{
-					int iCheckHere = RandomInt(0, 159);
-					VEHICLE::SET_VEHICLE_COLOURS(Vehic, MyMods[i - 1], iCheckHere);
+					int CheckHere = Mod_Systems::RandomInt(0, 159);
+					VEHICLE::SET_VEHICLE_COLOURS(vic, modsList->at(i - 1), CheckHere);
 				}
 				else
 				{
-					VEHICLE::SET_VEHICLE_COLOURS(Vehic, MyMods[i - 1], MyMods[i]);
+					VEHICLE::SET_VEHICLE_COLOURS(vic, modsList->at(i - 1), modsList->at(i));
 				}
 			}
-			else if (MyMods[i] == -1)
+			else if (modsList->at(i) == -1)
 			{
-				int iSpoilher = VEHICLE::GET_NUM_VEHICLE_MODS(Vehic, i) - 1;
-				if (iSpoilher > 0)
+				int Spoilher = VEHICLE::GET_NUM_VEHICLE_MODS(vic, i) - 1;
+				if (Spoilher > 0)
 				{
-					int iCheckHere = RandomInt(0, iSpoilher);
-					VEHICLE::SET_VEHICLE_MOD(Vehic, i, iCheckHere, true);
+					int CheckHere = Mod_Systems::RandomInt(0, Spoilher);
+					VEHICLE::SET_VEHICLE_MOD(vic, i, CheckHere, true);
 				}
 			}
 			else
 			{
-				VEHICLE::SET_VEHICLE_MOD(Vehic, i, MyMods[i], true);
+				VEHICLE::SET_VEHICLE_MOD(vic, i, modsList->at(i), true);
 			}
 		}
 	}
@@ -5269,401 +5108,12 @@ namespace Mod_Entitys
 		{
 			PED::SET_PED_AS_COP(PLAYER::PLAYER_PED_ID(), togg);
 			//PLAYER::_0xDC64D2C53493ED12(PLAYER::PLAYER_ID());
-			PED::SET_PED_RELATIONSHIP_GROUP_HASH(PLAYER::PLAYER_PED_ID(), MyHashKey("COP"));
+			PED::SET_PED_RELATIONSHIP_GROUP_HASH(PLAYER::PLAYER_PED_ID(), Mod_Systems::MyHashKey("COP"));
 		}
-		else if (!Mod_Settings.Saved_Ped && !Mod_Settings.Random_Ped)
-			SavedPlayer(&SavedPeds[0], 50);
+		else if (!Mod_Data::Mod_Settings.Saved_Ped && !Mod_Data::Mod_Settings.Random_Ped)
+			SavedPlayer(&Mod_Data::SavedPeds[0], 50);
 		PLAYER::SET_POLICE_IGNORE_PLAYER(PLAYER::PLAYER_ID(), togg);
 	}
-
-	const std::vector<Mod_Class::HairSets> MHairsets = {
-		Mod_Class::HairSets(1, 0, "H_FMM_1_0", "Buzzcut Dark Brown", -1, -1),
-		Mod_Class::HairSets(1, 1, "H_FMM_1_1", "Buzzcut Light Brown", -1, -1),
-		Mod_Class::HairSets(1, 2, "H_FMM_1_2", "Buzzcut Auburn", -1, -1),
-		Mod_Class::HairSets(1, 3, "H_FMM_1_3", "Buzzcut Blond", -1, -1),
-		Mod_Class::HairSets(1, 4, "H_FMM_1_4", "Buzzcut Black", -1, -1),
-		Mod_Class::HairSets(2, 0, "H_FMM_2_0", "Faux Hawk Dark Brown", -1, -1),
-		Mod_Class::HairSets(2, 1, "H_FMM_2_1", "Faux Hawk Light Brown", -1, -1),
-		Mod_Class::HairSets(2, 2, "H_FMM_2_2", "Faux Hawk Auburn", -1, -1),
-		Mod_Class::HairSets(2, 3, "H_FMM_2_3", "Faux Hawk Blond", -1, -1),
-		Mod_Class::HairSets(2, 4, "H_FMM_2_4", "Faux Hawk Black", -1, -1),
-		Mod_Class::HairSets(2, 5, "H_FMM_2_5", "Faux Hawk Purple", -1, -1),
-		Mod_Class::HairSets(3, 0, "H_FMM_3_0", "Hipster Shaved Dark Brown", -1, -1),
-		Mod_Class::HairSets(3, 1, "H_FMM_3_1", "Hipster Shaved Light Brown", -1, -1),
-		Mod_Class::HairSets(3, 2, "H_FMM_3_2", "Hipster Shaved Auburn", -1, -1),
-		Mod_Class::HairSets(3, 3, "H_FMM_3_3", "Hipster Shaved Blond", -1, -1),
-		Mod_Class::HairSets(3, 4, "H_FMM_3_4", "Hipster Shaved Black", -1, -1),
-		Mod_Class::HairSets(3, 5, "H_FMM_3_5", "Hipster Shaved Red", -1, -1),
-		Mod_Class::HairSets(4, 0, "H_FMM_4_0", "Side Parting Spiked Dark Brown", -1, -1),
-		Mod_Class::HairSets(4, 1, "H_FMM_4_1", "Side Parting Spiked Light Brown", -1, -1),
-		Mod_Class::HairSets(4, 2, "H_FMM_4_2", "Side Parting Spiked Auburn", -1, -1),
-		Mod_Class::HairSets(4, 3, "H_FMM_4_3", "Side Parting Spiked Blond", -1, -1),
-		Mod_Class::HairSets(4, 4, "H_FMM_4_4", "Side Parting Spiked Black", -1, -1),
-		Mod_Class::HairSets(4, 6, "H_FMM_4_6", "Side Parting Spiked Blue", -1, -1),
-		Mod_Class::HairSets(5, 0, "H_FMM_5_0", "Shorter Cut Dark Brown", -1, -1),
-		Mod_Class::HairSets(5, 1, "H_FMM_5_1", "Shorter Cut Light Brown", -1, -1),
-		Mod_Class::HairSets(5, 2, "H_FMM_5_2", "Shorter Cut Auburn", -1, -1),
-		Mod_Class::HairSets(5, 3, "H_FMM_5_3", "Shorter Cut Blond", -1, -1),
-		Mod_Class::HairSets(5, 4, "H_FMM_5_4", "Shorter Cut Black", -1, -1),
-		Mod_Class::HairSets(5, 5, "H_FMM_5_5", "Shorter Cut Green", -1, -1),
-		Mod_Class::HairSets(6, 0, "H_FMM_6_0", "Biker Dark Brown", -1, -1),
-		Mod_Class::HairSets(6, 1, "H_FMM_6_1", "Biker Light Brown", -1, -1),
-		Mod_Class::HairSets(6, 2, "H_FMM_6_2", "Biker Auburn", -1, -1),
-		Mod_Class::HairSets(6, 3, "H_FMM_6_3", "Biker Blond", -1, -1),
-		Mod_Class::HairSets(6, 4, "H_FMM_6_4", "Biker Black", -1, -1),
-		Mod_Class::HairSets(6, 5, "H_FMM_6_5", "Biker Purple Fade", -1, -1),
-		Mod_Class::HairSets(7, 0, "H_FMM_7_0", "Ponytail Dark Brown", -1, -1),
-		Mod_Class::HairSets(7, 1, "H_FMM_7_1", "Ponytail Light Brown", -1, -1),
-		Mod_Class::HairSets(7, 2, "H_FMM_7_2", "Ponytail Auburn", -1, -1),
-		Mod_Class::HairSets(7, 3, "H_FMM_7_3", "Ponytail Blond", -1, -1),
-		Mod_Class::HairSets(7, 4, "H_FMM_7_4", "Ponytail Black", -1, -1),
-		Mod_Class::HairSets(7, 6, "H_FMM_7_6", "Ponytail Purple", -1, -1),
-		Mod_Class::HairSets(8, 0, "H_FMM_8_0", "Cornrows Dark Brown", -1, -1),
-		Mod_Class::HairSets(8, 1, "H_FMM_8_1", "Cornrows Light Brown", -1, -1),
-		Mod_Class::HairSets(8, 2, "H_FMM_8_2", "Cornrows Auburn", -1, -1),
-		Mod_Class::HairSets(8, 3, "H_FMM_8_3", "Cornrows Blond", -1, -1),
-		Mod_Class::HairSets(8, 4, "H_FMM_8_4", "Cornrows Black", -1, -1),
-		Mod_Class::HairSets(9, 0, "H_FMM_9_0", "Slicked Dark Brown", -1, -1),
-		Mod_Class::HairSets(9, 1, "H_FMM_9_1", "Slicked Light Brown", -1, -1),
-		Mod_Class::HairSets(9, 2, "H_FMM_9_2", "Slicked Auburn", -1, -1),
-		Mod_Class::HairSets(9, 3, "H_FMM_9_3", "Slicked Blond", -1, -1),
-		Mod_Class::HairSets(9, 4, "H_FMM_9_4", "Slicked Black", -1, -1),
-		Mod_Class::HairSets(9, 6, "H_FMM_9_6", "Slicked Red", -1, -1),
-		Mod_Class::HairSets(10, 0, "H_FMM_10_0", "Short Brushed Dark Brown", -1, -1),
-		Mod_Class::HairSets(10, 1, "H_FMM_10_1", "Short Brushed Light Brown", -1, -1),
-		Mod_Class::HairSets(10, 2, "H_FMM_10_2", "Short Brushed Auburn", -1, -1),
-		Mod_Class::HairSets(10, 3, "H_FMM_10_3", "Short Brushed Blond", -1, -1),
-		Mod_Class::HairSets(10, 4, "H_FMM_10_4", "Short Brushed Black", -1, -1),
-		Mod_Class::HairSets(11, 0, "H_FMM_11_0", "Spikey Dark Brown", -1, -1),
-		Mod_Class::HairSets(11, 1, "H_FMM_11_1", "Spikey Light Brown", -1, -1),
-		Mod_Class::HairSets(11, 2, "H_FMM_11_2", "Spikey Auburn", -1, -1),
-		Mod_Class::HairSets(11, 3, "H_FMM_11_3", "Spikey Blond", -1, -1),
-		Mod_Class::HairSets(11, 4, "H_FMM_11_4", "Spikey Black", -1, -1),
-		Mod_Class::HairSets(11, 5, "H_FMM_11_5", "Spikey Blue", -1, -1),
-		Mod_Class::HairSets(12, 0, "H_FMM_12_0", "Caesar Dark Brown", -1, -1),
-		Mod_Class::HairSets(12, 1, "H_FMM_12_1", "Caesar Light Brown", -1, -1),
-		Mod_Class::HairSets(12, 2, "H_FMM_12_2", "Caesar Auburn", -1, -1),
-		Mod_Class::HairSets(12, 3, "H_FMM_12_3", "Caesar Blond", -1, -1),
-		Mod_Class::HairSets(12, 4, "H_FMM_12_4", "Caesar Black", -1, -1),
-		Mod_Class::HairSets(13, 0, "H_FMM_13_0", "Chopped Dark Brown", -1, -1),
-		Mod_Class::HairSets(13, 1, "H_FMM_13_1", "Chopped Light Brown", -1, -1),
-		Mod_Class::HairSets(13, 2, "H_FMM_13_2", "Chopped Auburn", -1, -1),
-		Mod_Class::HairSets(13, 3, "H_FMM_13_3", "Chopped Blond", -1, -1),
-		Mod_Class::HairSets(13, 4, "H_FMM_13_4", "Chopped Black", -1, -1),
-		Mod_Class::HairSets(13, 5, "H_FMM_13_5", "Chopped Green", -1, -1),
-		Mod_Class::HairSets(14, 0, "H_FMM_14_0", "Dreads Dark Brown", -1, -1),
-		Mod_Class::HairSets(14, 1, "H_FMM_14_1", "Dreads Light Brown", -1, -1),
-		Mod_Class::HairSets(14, 2, "H_FMM_14_2", "Dreads Auburn", -1, -1),
-		Mod_Class::HairSets(14, 3, "H_FMM_14_3", "Dreads Blond", -1, -1),
-		Mod_Class::HairSets(14, 4, "H_FMM_14_4", "Dreads Black", -1, -1),
-		Mod_Class::HairSets(15, 0, "H_FMM_15_0", "Long Hair Dark Brown", -1, -1),
-		Mod_Class::HairSets(15, 1, "H_FMM_15_1", "Long Hair Light Brown", -1, -1),
-		Mod_Class::HairSets(15, 2, "H_FMM_15_2", "Long Hair Auburn", -1, -1),
-		Mod_Class::HairSets(15, 3, "H_FMM_15_3", "Long Hair Blond", -1, -1),
-		Mod_Class::HairSets(15, 4, "H_FMM_15_4", "Long Hair Black", -1, -1),
-		Mod_Class::HairSets(15, 5, "H_FMM_15_5", "Long Hair Purple Fade", -1, -1),
-		Mod_Class::HairSets(16, 0, "CLO_BBM_H_00", "Shaggy Curls Dark Brown", -1, -1),
-		Mod_Class::HairSets(16, 1, "CLO_BBM_H_01", "Shaggy Curls Light Brown", -1, -1),
-		Mod_Class::HairSets(16, 2, "CLO_BBM_H_02", "Shaggy Curls Auburn", -1, -1),
-		Mod_Class::HairSets(16, 3, "CLO_BBM_H_03", "Shaggy Curls Blonde", -1, -1),
-		Mod_Class::HairSets(16, 4, "CLO_BBM_H_04", "Shaggy Curls Black", -1, -1),
-		Mod_Class::HairSets(17, 0, "CLO_BBM_H_05", "Surfer Dude Dark Brown", -1, -1),
-		Mod_Class::HairSets(17, 1, "CLO_BBM_H_06", "Surfer Dude Light Brown", -1, -1),
-		Mod_Class::HairSets(17, 2, "CLO_BBM_H_07", "Surfer Dude Auburn", -1, -1),
-		Mod_Class::HairSets(17, 3, "CLO_BBM_H_08", "Surfer Dude Blonde", -1, -1),
-		Mod_Class::HairSets(17, 4, "CLO_BBM_H_09", "Surfer Dude Black", -1, -1),
-		Mod_Class::HairSets(18, 0, "CLO_BUS_H_0_0", "Short Side Part Dark Brown", -2086773, 224730392),
-		Mod_Class::HairSets(18, 1, "CLO_BUS_H_0_1", "Short Side Part Light Brown", -2086773, 1988816738),
-		Mod_Class::HairSets(18, 2, "CLO_BUS_H_0_2", "Short Side Part Auburn", -2086773, 736778786),
-		Mod_Class::HairSets(18, 3, "CLO_BUS_H_0_3", "Short Side Part Blonde", -2086773, 439629494),
-		Mod_Class::HairSets(18, 4, "CLO_BUS_H_0_4", "Short Side Part Black", -2086773, 1048444745),
-		Mod_Class::HairSets(19, 0, "CLO_BUS_H_1_0", "High Slicked Sides Dark Brown", -2086773, 2140603469),
-		Mod_Class::HairSets(19, 1, "CLO_BUS_H_1_1", "High Slicked Sides Light Brown", -2086773, -681528353),
-		Mod_Class::HairSets(19, 2, "CLO_BUS_H_1_2", "High Slicked Sides Auburn", -2086773, 1006238992),
-		Mod_Class::HairSets(19, 3, "CLO_BUS_H_1_3", "High Slicked Sides Blonde", -2086773, 214245031),
-		Mod_Class::HairSets(19, 4, "CLO_BUS_H_1_4", "High Slicked Sides Black", -2086773, 689952604),
-		Mod_Class::HairSets(20, 0, "CLO_HP_HR_0_0", "Long Slicked Dark Brown", -1398869298, 965649655),
-		Mod_Class::HairSets(20, 1, "CLO_HP_HR_0_1", "Long Slicked Light Brown", -1398869298, 718800778),
-		Mod_Class::HairSets(20, 2, "CLO_HP_HR_0_2", "Long Slicked Auburn", -1398869298, 1959959422),
-		Mod_Class::HairSets(20, 3, "CLO_HP_HR_0_3", "Long Slicked Blonde", -1398869298, 1200177388),
-		Mod_Class::HairSets(20, 4, "CLO_HP_HR_0_4", "Long Slicked Black", -1398869298, -1874439579),
-		Mod_Class::HairSets(21, 0, "CLO_HP_HR_1_0", "Hipster Youth Dark Brown", -1398869298, -1679505893),
-		Mod_Class::HairSets(21, 1, "CLO_HP_HR_1_1", "Hipster Youth Blonde", -1398869298, -1976229188),
-		Mod_Class::HairSets(21, 2, "CLO_HP_HR_1_2", "Hipster Youth Auburn", -1398869298, 2037875009),
-		Mod_Class::HairSets(21, 3, "CLO_HP_HR_1_3", "Hipster Youth Light Brown", -1398869298, -235146664),
-		Mod_Class::HairSets(21, 4, "CLO_HP_HR_1_4", "Hipster Youth Black", -1398869298, -441853516),
-		Mod_Class::HairSets(22, 0, "CLO_IND_H_0_0", "Mullet Dark Brown", -1, -1),
-		Mod_Class::HairSets(22, 1, "CLO_IND_H_0_1", "Mullet Light Brown", -1, -1),
-		Mod_Class::HairSets(22, 2, "CLO_IND_H_0_2", "Mullet Auburn", -1, -1),
-		Mod_Class::HairSets(22, 3, "CLO_IND_H_0_3", "Mullet Blonde", -1, -1),
-		Mod_Class::HairSets(22, 4, "CLO_IND_H_0_4", "Mullet Black", -1, -1),
-		Mod_Class::HairSets(24, 0, "CLO_S1M_H_0_0", "Classic Cornrows", 62137527, 534771589),
-		Mod_Class::HairSets(25, 0, "CLO_S1M_H_1_0", "Palm Cornrows", 62137527, -1340139519),
-		Mod_Class::HairSets(26, 0, "CLO_S1M_H_2_0", "Lightning Cornrows", 62137527, -849980761),
-		Mod_Class::HairSets(27, 0, "CLO_S1M_H_3_0", "Whipped Cornrows", 62137527, -551553478),
-		Mod_Class::HairSets(28, 0, "CLO_S2M_H_0_0", "Zig Zag Cornrows", 1529191571, -1431204514),
-		Mod_Class::HairSets(29, 0, "CLO_S2M_H_1_0", "Snail Cornrows", 1529191571, -1133334304),
-		Mod_Class::HairSets(30, 0, "CLO_S2M_H_2_0", "Hightop", 1529191571, -1809784771),
-		Mod_Class::HairSets(31, 0, "CLO_BIM_H_0_0", "Loose Swept Back", -240234547, 1431846777),
-		Mod_Class::HairSets(32, 0, "CLO_BIM_H_1_0", "Undercut Swept Back", -240234547, -460168116),
-		Mod_Class::HairSets(33, 0, "CLO_BIM_H_2_0", "Undercut Swept Side", -240234547, -311245907),
-		Mod_Class::HairSets(34, 0, "CLO_BIM_H_3_0", "Spiked Mohawk", -240234547, -942031335),
-		Mod_Class::HairSets(35, 0, "CLO_BIM_H_4_0", "Mod", -240234547, -644503216),
-		Mod_Class::HairSets(36, 0, "CLO_BIM_H_5_0", "Layered Mod", -240234547, 211198653),
-		Mod_Class::HairSets(37, 0, "CC_M_HS_1", "Buzzcut", 598190139, 739308497),
-		Mod_Class::HairSets(38, 0, "CC_M_HS_2", "Faux Hawk", 598190139, 495343292),
-		Mod_Class::HairSets(39, 0, "CC_M_HS_3", "Hipster", 598190139, -1686711653),
-		Mod_Class::HairSets(40, 0, "CC_M_HS_4", "Side Parting", 598190139, 1187457341),
-		Mod_Class::HairSets(41, 0, "CC_M_HS_5", "Shorter Cut", 598190139, 956403122),
-		Mod_Class::HairSets(42, 0, "CC_M_HS_6", "Biker", 598190139, 1647042566),
-		Mod_Class::HairSets(43, 0, "CC_M_HS_7", "Ponytail", 598190139, -461478743),
-		Mod_Class::HairSets(44, 0, "CC_M_HS_8", "Cornrows", 598190139, -1883325653),
-		Mod_Class::HairSets(45, 0, "CC_M_HS_9", "Slicked", 598190139, -2114248796),
-		Mod_Class::HairSets(46, 0, "CC_M_HS_10", "Short Brushed", 598190139, 314228205),
-		Mod_Class::HairSets(47, 0, "CC_M_HS_11", "Spikey", 598190139, 1503775674),
-		Mod_Class::HairSets(48, 0, "CC_M_HS_12", "Caesar", 598190139, 1862399610),
-		Mod_Class::HairSets(49, 0, "CC_M_HS_13", "Chopped", 598190139, 708472048),
-		Mod_Class::HairSets(50, 0, "CC_M_HS_14", "Dreads", 598190139, -1207367545),
-		Mod_Class::HairSets(51, 0, "CC_M_HS_15", "Long Hair", 598190139, 111650251),
-		Mod_Class::HairSets(52, 0, "CLO_BBM_H_00", "Shaggy Curls Dark Brown", -1, -1),
-		Mod_Class::HairSets(53, 0, "CLO_BBM_H_05", "Surfer Dude Dark Brown", -1, -1),
-		Mod_Class::HairSets(54, 0, "CLO_BUS_H_0_0", "Short Side Part Dark Brown", -2086773, 224730392),
-		Mod_Class::HairSets(55, 0, "CLO_BUS_H_1_0", "High Slicked Sides Dark Brown", -2086773, 2140603469),
-		Mod_Class::HairSets(56, 0, "CLO_HP_HR_0_0", "Long Slicked Dark Brown", -1398869298, 965649655),
-		Mod_Class::HairSets(57, 0, "CLO_HP_HR_1_0", "Hipster Youth Dark Brown", -1398869298, -1679505893),
-		Mod_Class::HairSets(58, 0, "CLO_IND_H_0_0", "Mullet Dark Brown", -1, -1),
-		Mod_Class::HairSets(59, 0, "CLO_S1M_H_0_0", "Classic Cornrows", 62137527, 534771589),
-		Mod_Class::HairSets(60, 0, "CLO_S1M_H_1_0", "Palm Cornrows", 62137527, -1340139519),
-		Mod_Class::HairSets(61, 0, "CLO_S1M_H_2_0", "Lightning Cornrows", 62137527, -849980761),
-		Mod_Class::HairSets(62, 0, "CLO_S1M_H_3_0", "Whipped Cornrows", 62137527, -551553478),
-		Mod_Class::HairSets(63, 0, "CLO_S2M_H_0_0", "Zig Zag Cornrows", 1529191571, -1431204514),
-		Mod_Class::HairSets(64, 0, "CLO_S2M_H_1_0", "Snail Cornrows", 1529191571, -1133334304),
-		Mod_Class::HairSets(65, 0, "CLO_S2M_H_2_0", "Hightop", 1529191571, -1809784771),
-		Mod_Class::HairSets(66, 0, "CLO_BIM_H_0_0", "Loose Swept Back", -240234547, 1431846777),
-		Mod_Class::HairSets(67, 0, "CLO_BIM_H_1_0", "Undercut Swept Back", -240234547, -460168116),
-		Mod_Class::HairSets(68, 0, "CLO_BIM_H_2_0", "Undercut Swept Side", -240234547, -311245907),
-		Mod_Class::HairSets(69, 0, "CLO_BIM_H_3_0", "Spiked Mohawk", -240234547, -942031335),
-		Mod_Class::HairSets(70, 0, "CLO_BIM_H_4_0", "Mod", -240234547, -644503216),
-		Mod_Class::HairSets(71, 0, "CLO_BIM_H_5_0", "Layered Mod", -240234547, 211198653),
-		Mod_Class::HairSets(72, 0, "CLO_GRM_H_0_0", "Flattop", 1616273011, -1119221482),
-		Mod_Class::HairSets(73, 0, "CLO_GRM_H_1_0", "Military Buzzcut", 1616273011, -1642199958),
-		Mod_Class::HairSets(74, 0, "CLO_VWM_H_0_0", "Impotent Rage", 1347816957, -599666460),
-		Mod_Class::HairSets(75, 0, "CLO_TRM_H_0_0", "Afro Faded", -1970774728, -416636904),
-		Mod_Class::HairSets(76, 0, "CLO_FXM_H_0_0", "Top Knot", 601646824, 1334100948),
-		Mod_Class::HairSets(77, 0, "CLO_SBM_H_0_0", "Two Block", 987639353, -1927370417),
-		Mod_Class::HairSets(78, 0, "CLO_SBM_H_1_0", "Shaggy Mullet", 987639353, -1088161005)
-	};
-	const std::vector<Mod_Class::HairSets> FHairsets = {
-		Mod_Class::HairSets(1, 0, "H_FMF_1_0","Short Chestnut", -1, -1),
-		Mod_Class::HairSets(1, 1, "H_FMF_1_1","Short Blonde", -1, -1),
-		Mod_Class::HairSets(1, 2, "H_FMF_1_2","Short Auburn", -1, -1),
-		Mod_Class::HairSets(1, 3, "H_FMF_1_3","Short Black", -1, -1),
-		Mod_Class::HairSets(1, 4, "H_FMF_1_4","Short Brown", -1, -1),
-		Mod_Class::HairSets(1, 5, "H_FMF_1_5","Short Purple", -1, -1),
-
-		Mod_Class::HairSets(2, 0, "H_FMF_2_0","Layered Bob Chestnut", -1, -1),
-		Mod_Class::HairSets(2, 1, "H_FMF_2_1","Layered Bob Blonde", -1, -1),
-		Mod_Class::HairSets(2, 2, "H_FMF_2_2","Layered Bob Auburn", -1, -1),
-		Mod_Class::HairSets(2, 3, "H_FMF_2_3","Layered Bob Black", -1, -1),
-		Mod_Class::HairSets(2, 4, "H_FMF_2_4","Layered Bob Brown", -1, -1),
-		Mod_Class::HairSets(2, 5, "H_FMF_2_5","Layered Bob Green", -1, -1),
-
-		Mod_Class::HairSets(3, 0, "H_FMF_3_0","Pigtails Chestnut", -1, -1),
-		Mod_Class::HairSets(3, 1, "H_FMF_3_1","Pigtails Blonde", -1, -1),
-		Mod_Class::HairSets(3, 2, "H_FMF_3_2","Pigtails Auburn", -1, -1),
-		Mod_Class::HairSets(3, 3, "H_FMF_3_3","Pigtails Black", -1, -1),
-		Mod_Class::HairSets(3, 4, "H_FMF_3_4","Pigtails Brown", -1, -1),
-
-		Mod_Class::HairSets(4, 0, "H_FMF_4_0","Ponytail Chestnut", -1, -1),
-		Mod_Class::HairSets(4, 1, "H_FMF_4_1","Ponytail Blonde", -1, -1),
-		Mod_Class::HairSets(4, 2, "H_FMF_4_2","Ponytail Auburn", -1, -1),
-		Mod_Class::HairSets(4, 3, "H_FMF_4_3","Ponytail Black", -1, -1),
-		Mod_Class::HairSets(4, 4, "H_FMF_4_4","Ponytail Brown", -1, -1),
-		Mod_Class::HairSets(4, 5, "H_FMF_4_5","Ponytail Blue", -1, -1),
-
-		Mod_Class::HairSets(5, 0, "H_FMF_5_0","Braided Mohawk Chestnut", -1, -1),
-		Mod_Class::HairSets(5, 1, "H_FMF_5_1","Braided Mohawk Blonde", -1, -1),
-		Mod_Class::HairSets(5, 2, "H_FMF_5_2","Braided Mohawk Auburn", -1, -1),
-		Mod_Class::HairSets(5, 3, "H_FMF_5_3","Braided Mohawk Black", -1, -1),
-		Mod_Class::HairSets(5, 4, "H_FMF_5_4","Braided Mohawk Brown", -1, -1),
-		Mod_Class::HairSets(5, 5, "H_FMF_5_5","Braided Mohawk Pink", -1, -1),
-
-		Mod_Class::HairSets(6, 0, "H_FMF_6_0","Braids Chestnut", -1, -1),
-		Mod_Class::HairSets(6, 1, "H_FMF_6_1","Braids Blonde", -1, -1),
-		Mod_Class::HairSets(6, 2, "H_FMF_6_2","Braids Auburn", -1, -1),
-		Mod_Class::HairSets(6, 3, "H_FMF_6_3","Braids Black", -1, -1),
-		Mod_Class::HairSets(6, 4, "H_FMF_6_4","Braids Brown", -1, -1),
-
-		Mod_Class::HairSets(7, 0, "H_FMF_7_0","Bob Chestnut", -1, -1),
-		Mod_Class::HairSets(7, 1, "H_FMF_7_1","Bob Blonde", -1, -1),
-		Mod_Class::HairSets(7, 2, "H_FMF_7_2","Bob Auburn", -1, -1),
-		Mod_Class::HairSets(7, 3, "H_FMF_7_3","Bob Black", -1, -1),
-		Mod_Class::HairSets(7, 4, "H_FMF_7_4","Bob Brown", -1, -1),
-		Mod_Class::HairSets(7, 5, "H_FMF_7_5","Bob Purple Fade", -1, -1),
-
-		Mod_Class::HairSets(8, 0, "H_FMF_8_0","Faux Hawk Chestnut", -1, -1),
-		Mod_Class::HairSets(8, 1, "H_FMF_8_1","Faux Hawk Blonde", -1, -1),
-		Mod_Class::HairSets(8, 2, "H_FMF_8_2","Faux Hawk Auburn", -1, -1),
-		Mod_Class::HairSets(8, 3, "H_FMF_8_3","Faux Hawk Black", -1, -1),
-		Mod_Class::HairSets(8, 4, "H_FMF_8_4","Faux Hawk Brown", -1, -1),
-		Mod_Class::HairSets(8, 5, "H_FMF_8_5","Faux Hawk Pink", -1, -1),
-
-		Mod_Class::HairSets(9, 0, "H_FMF_9_0","French Twist Chestnut", -1, -1),
-		Mod_Class::HairSets(9, 1, "H_FMF_9_1","French Twist Blonde", -1, -1),
-		Mod_Class::HairSets(9, 2, "H_FMF_9_2","French Twist Auburn", -1, -1),
-		Mod_Class::HairSets(9, 3, "H_FMF_9_3","French Twist Black", -1, -1),
-		Mod_Class::HairSets(9, 4, "H_FMF_9_4","French Twist Brown", -1, -1),
-
-		Mod_Class::HairSets(10, 0, "H_FMF_10_0","Long Bob Chestnut", -1, -1),
-		Mod_Class::HairSets(10, 1, "H_FMF_10_1","Long Bob Blonde", -1, -1),
-		Mod_Class::HairSets(10, 2, "H_FMF_10_2","Long Bob Auburn", -1, -1),
-		Mod_Class::HairSets(10, 3, "H_FMF_10_3","Long Bob Black", -1, -1),
-		Mod_Class::HairSets(10, 4, "H_FMF_10_4","Long Bob Brown", -1, -1),
-		Mod_Class::HairSets(10, 6, "H_FMF_10_6","Long Bob Purple Fade", -1, -1),
-
-		Mod_Class::HairSets(11, 0, "H_FMF_11_0","Loose Tied Chestnut", -1, -1),
-		Mod_Class::HairSets(11, 1, "H_FMF_11_1","Loose Tied Blonde", -1, -1),
-		Mod_Class::HairSets(11, 2, "H_FMF_11_2","Loose Tied Auburn", -1, -1),
-		Mod_Class::HairSets(11, 3, "H_FMF_11_3","Loose Tied Black", -1, -1),
-		Mod_Class::HairSets(11, 4, "H_FMF_11_4","Loose Tied Brown", -1, -1),
-		Mod_Class::HairSets(11, 6, "H_FMF_11_6","Loose Tied Green", -1, -1),
-
-		Mod_Class::HairSets(12, 0, "H_FMF_12_0","Pixie Chestnut", -1, -1),
-		Mod_Class::HairSets(12, 1, "H_FMF_12_1","Pixie Blonde", -1, -1),
-		Mod_Class::HairSets(12, 2, "H_FMF_12_2","Pixie Auburn", -1, -1),
-		Mod_Class::HairSets(12, 3, "H_FMF_12_3","Pixie Black", -1, -1),
-		Mod_Class::HairSets(12, 4, "H_FMF_12_4","Pixie Brown", -1, -1),
-		Mod_Class::HairSets(12, 5, "H_FMF_12_5","Pixie Blue", -1, -1),
-
-		Mod_Class::HairSets(13, 0, "H_FMF_13_0","Shaved Bangs Chestnut", -1, -1),
-		Mod_Class::HairSets(13, 1, "H_FMF_13_1","Shaved Bangs Blonde", -1, -1),
-		Mod_Class::HairSets(13, 2, "H_FMF_13_2","Shaved Bangs Auburn", -1, -1),
-		Mod_Class::HairSets(13, 3, "H_FMF_13_3","Shaved Bangs Black", -1, -1),
-		Mod_Class::HairSets(13, 4, "H_FMF_13_4","Shaved Bangs Brown", -1, -1),
-		Mod_Class::HairSets(13, 5, "H_FMF_13_5","Shaved Bangs Blue Fade", -1, -1),
-
-		Mod_Class::HairSets(14, 0, "H_FMF_14_0","Top Knot Chestnut", -1, -1),
-		Mod_Class::HairSets(14, 1, "H_FMF_14_1","Top Knot Blonde", -1, -1),
-		Mod_Class::HairSets(14, 2, "H_FMF_14_2","Top Knot Auburn", -1, -1),
-		Mod_Class::HairSets(14, 3, "H_FMF_14_3","Top Knot Black", -1, -1),
-		Mod_Class::HairSets(14, 4, "H_FMF_14_4","Top Knot Brown", -1, -1),
-
-		Mod_Class::HairSets(15, 0, "H_FMF_15_0","Wavy Bob Chestnut", -1, -1),
-		Mod_Class::HairSets(15, 1, "H_FMF_15_1","Wavy Bob Blonde", -1, -1),
-		Mod_Class::HairSets(15, 2, "H_FMF_15_2","Wavy Bob Auburn", -1, -1),
-		Mod_Class::HairSets(15, 3, "H_FMF_15_3","Wavy Bob Black", -1, -1),
-		Mod_Class::HairSets(15, 4, "H_FMF_15_4","Wavy Bob Brown", -1, -1),
-		Mod_Class::HairSets(15, 6, "H_FMF_15_6","Wavy Bob Red Fade", -1, -1),
-
-		Mod_Class::HairSets(16, 0, "CLO_BBF_H_00","Pin Up Girl Chestnut", -1, -1),
-		Mod_Class::HairSets(16, 1, "CLO_BBF_H_01","Pin Up Girl Blonde", -1, -1),
-		Mod_Class::HairSets(16, 2, "CLO_BBF_H_02","Pin Up Girl Auburn", -1, -1),
-		Mod_Class::HairSets(16, 3, "CLO_BBF_H_03","Pin Up Girl Black", -1, -1),
-		Mod_Class::HairSets(16, 4, "CLO_BBF_H_04","Pin Up Girl Brown", -1, -1),
-
-		Mod_Class::HairSets(17, 0, "CLO_BBF_H_05","Messy Bun Chestnut", -1398869298, -811206225),
-		Mod_Class::HairSets(17, 1, "CLO_BBF_H_06","Messy Bun Blonde", -1398869298, -1586815686),
-		Mod_Class::HairSets(17, 2, "CLO_BBF_H_07","Messy Bun Auburn", -1398869298, -1423429452),
-		Mod_Class::HairSets(17, 3, "CLO_BBF_H_08","Messy Bun Black", -1398869298, -1697869815),
-		Mod_Class::HairSets(17, 4, "CLO_BBF_H_09","Messy Bun Brown", -1398869298, -1470846183),
-
-		Mod_Class::HairSets(18, 0, "CLO_VALF_H_0_0","Flapper Bob Chestnut", -1, -1),
-		Mod_Class::HairSets(18, 1, "CLO_VALF_H_0_1","Flapper Bob Blonde", -1, -1),
-		Mod_Class::HairSets(18, 2, "CLO_VALF_H_0_2","Flapper Bob Auburn", -1, -1),
-		Mod_Class::HairSets(18, 3, "CLO_VALF_H_0_3","Flapper Bob Black", -1, -1),
-		Mod_Class::HairSets(18, 4, "CLO_VALF_H_0_4","Flapper Bob Brown", -1, -1),
-		Mod_Class::HairSets(18, 5, "CLO_VALF_H_0_5","Flapper Bob Blue", -1, -1),
-
-		Mod_Class::HairSets(19, 0, "CLO_BUS_F_H_0_0","Tight Bun Black", -2086773, -1816086813),
-		Mod_Class::HairSets(19, 1, "CLO_BUS_F_H_0_1","Tight Bun Brown", -2086773, -2113006722),
-		Mod_Class::HairSets(19, 2, "CLO_BUS_F_H_0_2","Tight Bun Auburn", -2086773, -1398740829),
-		Mod_Class::HairSets(19, 3, "CLO_BUS_F_H_0_3","Tight Bun Chestnut", -2086773, -131530830),
-		Mod_Class::HairSets(19, 4, "CLO_BUS_F_H_0_4","Tight Bun Blonde", -2086773, -1101886458),
-
-		Mod_Class::HairSets(20, 0, "CLO_BUS_F_H_1_0","Twisted Bob Chestnut", -1398869298, 558694786),
-		Mod_Class::HairSets(20, 1, "CLO_BUS_F_H_1_1","Twisted Bob Black", -1398869298, 569279177),
-		Mod_Class::HairSets(20, 2, "CLO_BUS_F_H_1_2","Twisted Bob Auburn", -1398869298, 544309199),
-		Mod_Class::HairSets(20, 3, "CLO_BUS_F_H_1_3","Twisted Bob Brown", -1398869298, 1190448341),
-		Mod_Class::HairSets(20, 4, "CLO_BUS_F_H_1_4","Twisted Bob Blonde", -1398869298, 885139568),
-
-		Mod_Class::HairSets(21, 0, "CLO_HP_F_HR_0_0","Big Bangs Chestnut", -1, -1),
-		Mod_Class::HairSets(21, 1, "CLO_HP_F_HR_0_1","Big Bangs Blonde", -1, -1),
-		Mod_Class::HairSets(21, 2, "CLO_HP_F_HR_0_2","Big Bangs Auburn", -1, -1),
-		Mod_Class::HairSets(21, 3, "CLO_HP_F_HR_0_3","Big Bangs Black", -1, -1),
-		Mod_Class::HairSets(21, 4, "CLO_HP_F_HR_0_4","Big Bangs Brown", -1, -1),
-
-		Mod_Class::HairSets(22, 0, "CLO_HP_F_HR_1_0","Braided Top Knot Chestnut", -1398869298, -1845683606),
-		Mod_Class::HairSets(22, 1, "CLO_HP_F_HR_1_1","Braided Top Knot Blonde", -1398869298, -1555317497),
-		Mod_Class::HairSets(22, 2, "CLO_HP_F_HR_1_2","Braided Top Knot Auburn", -1398869298, 1704673699),
-		Mod_Class::HairSets(22, 3, "CLO_HP_F_HR_1_3","Braided Top Knot Black", -1398869298, 1993401358),
-		Mod_Class::HairSets(22, 4, "CLO_HP_F_HR_1_4","Braided Top Knot Brown", -1398869298, 1227065524),
-
-		Mod_Class::HairSets(23, 0, "CLO_INDF_H_0_0","Mullet Chestnut", -1, -1),
-		Mod_Class::HairSets(23, 1, "CLO_INDF_H_0_1","Mullet Blonde", -1, -1),
-		Mod_Class::HairSets(23, 2, "CLO_INDF_H_0_2","Mullet Auburn", -1, -1),
-		Mod_Class::HairSets(23, 3, "CLO_INDF_H_0_3","Mullet Black", -1, -1),
-		Mod_Class::HairSets(23, 4, "CLO_INDF_H_0_4","Mullet Brown", -1, -1),
-
-		Mod_Class::HairSets(25, 0, "CLO_S1F_H_0_0","Pinched Cornrows", 62137527, -1325458477),
-		Mod_Class::HairSets(26, 0, "CLO_S1F_H_1_0","Leaf Cornrows", 62137527, -566725051),
-		Mod_Class::HairSets(27, 0, "CLO_S1F_H_2_0","Zig Zag Cornrows", 62137527, -787850263),
-		Mod_Class::HairSets(28, 0, "CLO_S1F_H_3_0","Pigtail Bangs", 1529191571, 2039295216),
-		Mod_Class::HairSets(29, 0, "CLO_S2F_H_0_0","Wave Braids", 1529191571, 2039295216),
-		Mod_Class::HairSets(30, 0, "CLO_S2F_H_1_0","Coil Braids", 1529191571, 1800147054),
-		Mod_Class::HairSets(31, 0, "CLO_S2F_H_2_0","Rolled Quiff", 1529191571, -2019505897),
-		Mod_Class::HairSets(32, 0, "CLO_BIF_H_0_0","Loose Swept Back", -240234547, -328340062),
-		Mod_Class::HairSets(33, 0, "CLO_BIF_H_1_0","Undercut Swept Back", -240234547, 1657725123),
-		Mod_Class::HairSets(34, 0, "CLO_BIF_H_2_0","Undercut Swept Side", -240234547, -1517964336),
-		Mod_Class::HairSets(35, 0, "CLO_BIF_H_3_0","Spiked Mohawk", -240234547, 1677522529),
-		Mod_Class::HairSets(36, 0, "CLO_BIF_H_4_0","Bandana and Braid", 598190139, -1362677538),
-		Mod_Class::HairSets(37, 0, "CLO_BIF_H_6_0","Skinbyrd", -240234547, 1841934566),
-		Mod_Class::HairSets(38, 0, "CLO_BIF_H_5_0","Layered Mod", -240234547, 1742494019),
-		Mod_Class::HairSets(39, 0, "CC_F_HS_1","Short", 598190139, 104062694),
-		Mod_Class::HairSets(40, 0, "CC_F_HS_2","Layered Bob", 598190139, 869579299),
-		Mod_Class::HairSets(41, 0, "CC_F_HS_3","Pigtails", 598190139, 1201332655),
-		Mod_Class::HairSets(42, 0, "CC_F_HS_4","Ponytail", 598190139, 1028967715),
-		Mod_Class::HairSets(43, 0, "CC_F_HS_5","Braided Mohawk", 598190139, -1651634800),
-		Mod_Class::HairSets(44, 0, "CC_F_HS_6","Braids", 598190139, -892278763),
-		Mod_Class::HairSets(45, 0, "CC_F_HS_7","Bob", 598190139, -1032005779),
-		Mod_Class::HairSets(46, 0, "CC_F_HS_8","Faux Hawk", 598190139, -255675400),
-		Mod_Class::HairSets(47, 0, "CC_F_HS_9","French Twist", 598190139, 1890137027),
-		Mod_Class::HairSets(48, 0, "CC_F_HS_10","Long Bob", 598190139, -406805808),
-		Mod_Class::HairSets(49, 0, "CC_F_HS_11","Loose Tied", 598190139, -592540500),
-		Mod_Class::HairSets(50, 0, "CC_F_HS_12","Pixie", 598190139, 205417419),
-		Mod_Class::HairSets(51, 0, "CC_F_HS_13","Shaved Bangs", 598190139, -2127276619),
-		Mod_Class::HairSets(52, 0, "CC_F_HS_14","Top Knot", 598190139, -1362677538),
-		Mod_Class::HairSets(53, 0, "CC_F_HS_15","Wavy Bob", 598190139, -1549722990),
-		Mod_Class::HairSets(54, 0, "CLO_BBF_H_05","Messy Bun Chestnut", -1398869298, -811206225),
-		Mod_Class::HairSets(55, 0, "CLO_BBF_H_00","Pin Up Girl Chestnut", -1, -1),
-		Mod_Class::HairSets(56, 0, "CLO_BUS_F_H_0_0","Tight Bun Black", -2086773, -1816086813),
-		Mod_Class::HairSets(57, 0, "CLO_BUS_F_H_1_0","Twisted Bob Chestnut", -1398869298, 558694786),
-		Mod_Class::HairSets(58, 0, "CLO_VALF_H_0_0","Flapper Bob Chestnut", -1, -1),
-		Mod_Class::HairSets(59, 0, "CLO_HP_F_HR_0_0","Big Bangs Chestnut", -1, -1),
-		Mod_Class::HairSets(60, 0, "CLO_HP_F_HR_1_0","Braided Top Knot Chestnut", -1398869298, -1845683606),
-		Mod_Class::HairSets(61, 0, "CLO_INDF_H_0_0","Mullet Chestnut", -1, -1),
-		Mod_Class::HairSets(62, 0, "CLO_S1F_H_0_0","Pinched Cornrows", 62137527, -1325458477),
-		Mod_Class::HairSets(63, 0, "CLO_S1F_H_1_0","Leaf Cornrows", 62137527, -566725051),
-		Mod_Class::HairSets(64, 0, "CLO_S1F_H_2_0","Zig Zag Cornrows", 62137527, -787850263),
-		Mod_Class::HairSets(65, 0, "CLO_S1F_H_3_0","Pigtail Bangs", 1529191571, 2039295216),
-		Mod_Class::HairSets(66, 0, "CLO_S2F_H_0_0","Wave Braids", 1529191571, 2039295216),
-		Mod_Class::HairSets(67, 0, "CLO_S2F_H_1_0","Coil Braids", 1529191571, 1800147054),
-		Mod_Class::HairSets(68, 0, "CLO_S2F_H_2_0","Rolled Quiff", 1529191571, -2019505897),
-		Mod_Class::HairSets(69, 0, "CLO_BIF_H_0_0","Loose Swept Back", -240234547, -328340062),
-		Mod_Class::HairSets(70, 0, "CLO_BIF_H_1_0","Undercut Swept Back", -240234547, 1657725123),
-		Mod_Class::HairSets(71, 0, "CLO_BIF_H_2_0","Undercut Swept Side", -240234547, -1517964336),
-		Mod_Class::HairSets(72, 0, "CLO_BIF_H_3_0","Spiked Mohawk", -240234547, 1677522529),
-		Mod_Class::HairSets(73, 0, "CLO_BIF_H_4_0","Bandana and Braid", 598190139, -1362677538),
-		Mod_Class::HairSets(74, 0, "CLO_BIF_H_5_0","Layered Mod", -240234547, 1742494019),
-		Mod_Class::HairSets(75, 0, "CLO_BIF_H_6_0","Skinbyrd", -240234547, 1841934566),
-		Mod_Class::HairSets(76, 0, "CLO_GRF_H_0_0","Neat Bun", 1616273011, 687338866),
-		Mod_Class::HairSets(77, 0, "CLO_GRF_H_1_0","Short Bob", 1616273011, 1827923343),
-		Mod_Class::HairSets(78, 0, "CLO_VWF_H_0_0","Impotent Rage", 1347816957, 987747946),
-		Mod_Class::HairSets(79, 0, "CLO_TRF_H_0_0","Afro", -1970774728, -2025496493),
-		Mod_Class::HairSets(80, 0, "CLO_FXF_H_0_0","Pixie Wavy", 601646824, -974054285),
-		Mod_Class::HairSets(81, 0, "CLO_SBF_H_0_0","Short Tucked Bob", 987639353, -606892013),
-		Mod_Class::HairSets(82, 0, "CLO_SBF_H_1_0","Shaggy Mullet", 987639353, -1514684318),
-		Mod_Class::HairSets(83, 0, "CLO_X6F_H_0_0","Buzzcut", 1841427399, 606012624)
-	};
 
 	Mod_Class::ClothX MaleDefault = Mod_Class::ClothX("AAA_M_Epslon_0", { 0, 0, 0, 8, 104, 0, 20, 129, 15, 0, 0, 272 }, { 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0 }, { -1, -1, -1, -1, -1 }, { -1, -1, -1, -1, -1 });
 	Mod_Class::ClothX FemaleDefault = Mod_Class::ClothX("AAA_F_Epsilon_0", { 21, 0, 0, 3, 111, 0, 29, 99, 6, 0, 0, 285 }, { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 }, { -1, -1, -1, -1, -1 }, { -1, -1, -1, -1, -1 });
@@ -5692,89 +5142,108 @@ namespace Mod_Entitys
 		Mod_Class::ClothX("FemaleSanta CostumesDirty Santa Costume", { 0, 0, -1, 52, 59, 0, 40, 0, 1, 0, 0, 108}, { 0, 0, -1, 0, 1, 0, 0, 0, 2, 0, 0, 1}, { -1, -1, -1, -1, -1}, { -1, -1, -1, -1, -1}),
 		Mod_Class::ClothX("FemaleSanta CostumesBad Santa Costume", { 0, 0, -1, 52, 59, 0, 40, 0, 1, 0, 0, 108}, { 0, 0, -1, 0, 0, 0, 0, 0, 2, 0, 0, 0}, { -1, -1, -1, -1, -1}, { -1, -1, -1, -1, -1})
 	};
-	std::vector<std::string> FindCloths(bool male)
+	std::vector<std::string> FindCloths(Hash UserName)
 	{
-		LoggerLight("-FindCloths-");
+		Mod_Systems::LoggerLight("-FindCloths-");
 		std::vector<std::string> Files = {};
-		std::string OutputFolder = GetDir() + "/Outfits";
-
-		if (CreateDirectoryA((LPSTR)OutputFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
+		std::string OutputFolder = Mod_Systems::GetDir() + "/Outfits";
+		
+		bool GotDir = false;
+		if (UserName == MainProtags[0])//michael
 		{
-
+			OutputFolder = Mod_Systems::GetDir() + "/Outfits/Michael";
+			if (std::filesystem::exists(OutputFolder) && std::filesystem::is_directory(OutputFolder))
+				GotDir = true;
 		}
-		if (male)
+		else if (UserName == MainProtags[1])//frank
 		{
-			OutputFolder = GetDir() + "/Outfits/Male";
-			if (CreateDirectoryA((LPSTR)OutputFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
-			{
-
-			}
+			OutputFolder = Mod_Systems::GetDir() + "/Outfits/Franklin";
+			if (std::filesystem::exists(OutputFolder) && std::filesystem::is_directory(OutputFolder))
+				GotDir = true;
+		}
+		else if (UserName == MainProtags[2])//trev
+		{
+			OutputFolder = Mod_Systems::GetDir() + "/Outfits/Trevor";
+			if (std::filesystem::exists(OutputFolder) && std::filesystem::is_directory(OutputFolder))
+				GotDir = true;
+		}
+		else if (UserName == MainProtags[3])//male
+		{
+			OutputFolder = Mod_Systems::GetDir() + "/Outfits/Male";
+			if (std::filesystem::exists(OutputFolder) && std::filesystem::is_directory(OutputFolder))
+				GotDir = true;
+		}
+		else if (UserName == MainProtags[4])//female
+		{
+			OutputFolder = Mod_Systems::GetDir() + "/Outfits/Female";
+			if (std::filesystem::exists(OutputFolder) && std::filesystem::is_directory(OutputFolder))
+				GotDir = true;
 		}
 		else
 		{
-			OutputFolder = GetDir() + "/Outfits/Female";
-			if (CreateDirectoryA((LPSTR)OutputFolder.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
-			{
-
-			}
+			OutputFolder = Mod_Systems::GetDir() + "/Outfits/" + std::to_string(UserName);
+			if (std::filesystem::exists(OutputFolder) && std::filesystem::is_directory(OutputFolder))
+				GotDir = true;
 		}
 
-		for (const auto& entry : std::filesystem::directory_iterator(OutputFolder))
-			Files.push_back(entry.path().string());
+		if (GotDir)
+		{
+			for (const auto& entry : std::filesystem::directory_iterator(OutputFolder))
+				Files.push_back(entry.path().string());
+		}
 
 		return Files;
 	}
-
 	Mod_Class::ClothX LoadCloths(const std::string& file)
 	{
-		LoggerLight("-LoadCloths-");
+		Mod_Systems::LoggerLight("-LoadCloths-");
 		std::string Cloths = "";
 		std::vector<int> ClothA = {}, ClothB = {}, ExtraA = {}, ExtraB = {};
 		int intList = 0;
 
-		std::vector<std::string> MyColect = ReadSetFile(file);
+		std::vector<std::string> MyColect = Mod_Systems::Read_ini(file);
 
 		for (int i = 0; i < MyColect.size(); i++)
 		{
 			std::string line = MyColect[i];
-			if (StringContains("Title", line))
+			if (Mod_Systems::Contains_string("Title", line))
 			{
-				Cloths = AfterEqual(line);
+				Cloths = Mod_Systems::Remove_char61(line);
 			}
-			else if (StringContains("[ClothA]", line))
+			else if (Mod_Systems::Contains_string("[ClothA]", line))
 			{
 				intList = 1;
 			}
-			else if (StringContains("[ClothB]", line))
+			else if (Mod_Systems::Contains_string("[ClothB]", line))
 			{
 				intList = 2;
 			}
-			else if (StringContains("[ExtraA]", line))
+			else if (Mod_Systems::Contains_string("[ExtraA]", line))
 			{
 				intList = 3;
 			}
-			else if (StringContains("[ExtraB]", line))
+			else if (Mod_Systems::Contains_string("[ExtraB]", line))
 			{
 				intList = 4;
 			}
 			else if (intList == 1)
 			{
-				ClothA.push_back(StingNumbersInt(line));
+				ClothA.push_back(Mod_Systems::Convert_to_int(line));
 			}
 			else if (intList == 2)
 			{
-				int iSpot = StingNumbersInt(line);
+				int iSpot = Mod_Systems::Convert_to_int(line);
 				if (iSpot < 0)
 					iSpot = 0;
 				ClothB.push_back(iSpot);
 			}
 			else if (intList == 3)
 			{
-				ExtraA.push_back(StingNumbersInt(line));
+				ExtraA.push_back(Mod_Systems::Convert_to_int(line));
 			}
 			else if (intList == 4)
 			{
-				int iSpot = StingNumbersInt(line);
+				int iSpot = Mod_Systems::Convert_to_int(line);
 				if (iSpot < 0)
 					iSpot = 0;
 				ExtraB.push_back(iSpot);
@@ -5785,21 +5254,24 @@ namespace Mod_Entitys
 	}
 	Mod_Class::ClothX GetCloths(bool male)
 	{
-		LoggerLight("-GetCloths-");
+		Mod_Systems::LoggerLight("-GetCloths-");
 
 		Mod_Class::ClothX cothing = FemaleDefault;
+		Hash PlayerH = MainProtags[4];
 		if (male)
+		{
 			cothing = MaleDefault;
-
-		std::vector<std::string> Files = FindCloths(male);
+			PlayerH = MainProtags[3];
+		}
+		std::vector<std::string> Files = FindCloths(PlayerH);
 
 		if ((int)Files.size() > 0)
 		{
 			int iRando = 0;
 			if (male)
-				iRando = LessRandomInt("Outfits_01", 0, (int)Files.size() - 1);
+				iRando = Mod_Systems::LessRandomInt("Outfits_01", 0, (int)Files.size() - 1);
 			else
-				iRando = LessRandomInt("Outfits_02", 0, (int)Files.size() - 1);
+				iRando = Mod_Systems::LessRandomInt("Outfits_02", 0, (int)Files.size() - 1);
 
 			cothing = LoadCloths(Files[iRando]);
 		}
@@ -5807,23 +5279,23 @@ namespace Mod_Entitys
 		return cothing;
 	}
 
-	int SizeUpHairList(bool bMale)
+	int SizeUpHairList(bool male)
 	{
-		if (bMale)
+		if (male)
 			return (int)MHairsets.size() - 1;
 		else
 			return (int)FHairsets.size() - 1;
 	}
-	Mod_Class::HairSets PickAStyle(int Style, bool bMale)
+	Mod_Class::HairSets PickAStyle(int style, bool male)
 	{
-		if (bMale)
-			return MHairsets[Style];
+		if (male)
+			return MHairsets[style];
 		else
-			return FHairsets[Style];
+			return FHairsets[style];
 	}
-	Mod_Class::HairSets PickAStyle(bool bMale)
+	Mod_Class::HairSets PickAStyle(bool male)
 	{
-		return PickAStyle(bMale, LessRandomInt("PickAStyle0" + std::to_string(bMale), 0, SizeUpHairList(bMale)));
+		return PickAStyle(male, Mod_Systems::LessRandomInt("PickAStyle0" + std::to_string(male), 0, SizeUpHairList(male)));
 	}
 	Mod_Class::FaceBank AddFace(bool male)
 	{
@@ -5831,24 +5303,24 @@ namespace Mod_Entitys
 		int ShapeSecondID;
 		if (male)
 		{
-			ShapeFirstID = LessRandomInt("AddFaceM01", 0, 20);
-			ShapeSecondID = LessRandomInt("AddFaceM01", 0, 20);
+			ShapeFirstID = Mod_Systems::LessRandomInt("AddFaceM01", 0, 20);
+			ShapeSecondID = Mod_Systems::LessRandomInt("AddFaceM01", 0, 20);
 		}
 		else
 		{
-			ShapeFirstID = LessRandomInt("AddFaceF01", 21, 41);
-			ShapeSecondID = LessRandomInt("AddFaceF01", 21, 41);
+			ShapeFirstID = Mod_Systems::LessRandomInt("AddFaceF01", 21, 41);
+			ShapeSecondID = Mod_Systems::LessRandomInt("AddFaceF01", 21, 41);
 		}
 
-		float ShapeMix = RandomFloat(-0.9, 0.9);
-		float SkinMix = RandomFloat(0.9, 0.99);
-		float ThirdMix = RandomFloat(-0.9, 0.9);
+		float ShapeMix = Mod_Systems::RandomFloat(-0.9, 0.9);
+		float SkinMix = Mod_Systems::RandomFloat(0.9, 0.99);
+		float ThirdMix = Mod_Systems::RandomFloat(-0.9, 0.9);
 
 		return Mod_Class::FaceBank(ShapeFirstID, ShapeSecondID, ShapeMix, SkinMix, ThirdMix);
 	}
 	std::vector<Mod_Class::FreeOverLay> AddOverLay(bool male, bool freemode)
 	{
-		LoggerLight("AddOverLay");
+		Mod_Systems::LoggerLight("AddOverLay");
 
 		std::vector<Mod_Class::FreeOverLay> YourOver = {};
 		if (freemode)
@@ -5856,24 +5328,24 @@ namespace Mod_Entitys
 			for (int i = 0; i < 12; i++)
 			{
 				int iColour = 0;
-				int iChange = RandomInt(0, PED::_GET_NUM_HEAD_OVERLAY_VALUES(i));
-				float fVar = RandomFloat(0.45, 0.99);
+				int iChange = Mod_Systems::RandomInt(0, PED::_GET_NUM_HEAD_OVERLAY_VALUES(i));
+				float fVar = Mod_Systems::RandomFloat(0.45, 0.99);
 
 				if (i == 0)
 				{
-					iChange = RandomInt(0, iChange);
+					iChange = Mod_Systems::RandomInt(0, iChange);
 				}//Blemishes
 				else if (i == 1)
 				{
 					if (male)
-						iChange = RandomInt(0, iChange);
+						iChange = Mod_Systems::RandomInt(0, iChange);
 					else
 						iChange = 255;
 					iColour = 1;
 				}//Facial Hair
 				else if (i == 2)
 				{
-					iChange = RandomInt(0, iChange);
+					iChange = Mod_Systems::RandomInt(0, iChange);
 					iColour = 1;
 				}//Eyebrows
 				else if (i == 3)
@@ -5882,15 +5354,15 @@ namespace Mod_Entitys
 				}//Ageing
 				else if (i == 4)
 				{
-					int iFace = RandomInt(0, 50);
+					int iFace = Mod_Systems::RandomInt(0, 50);
 					if (iFace < 30)
 					{
-						iChange = RandomInt(0, 15);
+						iChange = Mod_Systems::RandomInt(0, 15);
 					}
 					else if (iFace < 45)
 					{
-						iChange = RandomInt(0, iChange);
-						fVar = RandomFloat(0.85f, 0.99f);
+						iChange = Mod_Systems::RandomInt(0, iChange);
+						fVar = Mod_Systems::RandomFloat(0.85f, 0.99f);
 					}
 					else
 						iChange = 255;
@@ -5899,8 +5371,8 @@ namespace Mod_Entitys
 				{
 					if (!male)
 					{
-						iChange = RandomInt(0, iChange);
-						fVar = RandomFloat(0.15f, 0.39f);
+						iChange = Mod_Systems::RandomInt(0, iChange);
+						fVar = Mod_Systems::RandomFloat(0.15f, 0.39f);
 					}
 					else
 						iChange = 255;
@@ -5908,7 +5380,7 @@ namespace Mod_Entitys
 				}//Blush
 				else if (i == 6)
 				{
-					iChange = RandomInt(0, iChange);
+					iChange = Mod_Systems::RandomInt(0, iChange);
 				}//Complexion
 				else if (i == 7)
 				{
@@ -5917,34 +5389,34 @@ namespace Mod_Entitys
 				else if (i == 8)
 				{
 					if (!male)
-						iChange = RandomInt(0, iChange);
+						iChange = Mod_Systems::RandomInt(0, iChange);
 					else
 						iChange = 255;
 					iColour = 2;
 				}//Lipstick
 				else if (i == 9)
 				{
-					iChange = RandomInt(0, iChange);
+					iChange = Mod_Systems::RandomInt(0, iChange);
 				}//Moles/Freckles
 				else if (i == 10)
 				{
 					if (male)
-						iChange = RandomInt(0, iChange);
+						iChange = Mod_Systems::RandomInt(0, iChange);
 					else
 						iChange = 255;
 					iColour = 1;
 				}//Chest Hair
 				else if (i == 11)
 				{
-					iChange = RandomInt(0, iChange);
+					iChange = Mod_Systems::RandomInt(0, iChange);
 				}//Body Blemishes
 
 				int AddColour = -1;
 
 				if (iColour > 0)
-					AddColour = RandomInt(0, 64);
+					AddColour = Mod_Systems::RandomInt(0, 64);
 
-				YourOver.push_back(Mod_Class::FreeOverLay(iChange, AddColour, fVar));
+				YourOver.push_back(Mod_Class::FreeOverLay(iColour, iChange, AddColour, fVar));
 			}
 
 		}
@@ -5953,124 +5425,124 @@ namespace Mod_Entitys
 	}
 	std::vector<Mod_Class::Tattoo> AddRandTats(bool male)
 	{
-		LoggerLight("AddRandTats");
+		Mod_Systems::LoggerLight("AddRandTats");
 		std::vector<Mod_Class::Tattoo> Tatlist = {};
 
 		if (male)
 		{
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = maleTats01[RandomInt(0, (int)maleTats01.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::maleTats01[Mod_Systems::RandomInt(0, (int)Mod_Data::maleTats01.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = maleTats02[RandomInt(0, (int)maleTats02.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::maleTats02[Mod_Systems::RandomInt(0, (int)Mod_Data::maleTats02.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = maleTats03[RandomInt(0, (int)maleTats03.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::maleTats03[Mod_Systems::RandomInt(0, (int)Mod_Data::maleTats03.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = maleTats04[RandomInt(0, (int)maleTats04.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::maleTats04[Mod_Systems::RandomInt(0, (int)Mod_Data::maleTats04.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = maleTats05[RandomInt(0, (int)maleTats05.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::maleTats05[Mod_Systems::RandomInt(0, (int)Mod_Data::maleTats05.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = maleTats06[RandomInt(0, (int)maleTats06.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::maleTats06[Mod_Systems::RandomInt(0, (int)Mod_Data::maleTats06.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = maleTats07[RandomInt(0, (int)maleTats07.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::maleTats07[Mod_Systems::RandomInt(0, (int)Mod_Data::maleTats07.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = maleTats08[RandomInt(0, (int)maleTats08.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::maleTats08[Mod_Systems::RandomInt(0, (int)Mod_Data::maleTats08.size() - 1)];
 				Tatlist.push_back(T);
 			}
 		}
 		else
 		{
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = femaleTats01[RandomInt(0, (int)femaleTats01.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::femaleTats01[Mod_Systems::RandomInt(0, (int)Mod_Data::femaleTats01.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = femaleTats02[RandomInt(0, (int)femaleTats02.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::femaleTats02[Mod_Systems::RandomInt(0, (int)Mod_Data::femaleTats02.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = femaleTats03[RandomInt(0, (int)femaleTats03.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::femaleTats03[Mod_Systems::RandomInt(0, (int)Mod_Data::femaleTats03.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = femaleTats04[RandomInt(0, (int)femaleTats04.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::femaleTats04[Mod_Systems::RandomInt(0, (int)Mod_Data::femaleTats04.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = femaleTats05[RandomInt(0, (int)femaleTats05.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::femaleTats05[Mod_Systems::RandomInt(0, (int)Mod_Data::femaleTats05.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = femaleTats06[RandomInt(0, (int)femaleTats06.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::femaleTats06[Mod_Systems::RandomInt(0, (int)Mod_Data::femaleTats06.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = femaleTats07[RandomInt(0, (int)femaleTats07.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::femaleTats07[Mod_Systems::RandomInt(0, (int)Mod_Data::femaleTats07.size() - 1)];
 				Tatlist.push_back(T);
 			}
-			if (RandomInt(0, 10) < 5)
+			if (Mod_Systems::RandomInt(0, 10) < 5)
 			{
-				Mod_Class::Tattoo T = femaleTats08[RandomInt(0, (int)femaleTats08.size() - 1)];
+				Mod_Class::Tattoo T = Mod_Data::femaleTats08[Mod_Systems::RandomInt(0, (int)Mod_Data::femaleTats08.size() - 1)];
 				Tatlist.push_back(T);
 			}
 		}
 
 		return Tatlist;
 	}
-	Mod_Class::ClothBank NewFreeModePed()
+	Mod_Class::ClothBank NewFreeModePed(int male)
 	{
-		if (LessRandomInt("GotMale", 0, 10) < 5)
+		if (male == 0)
 		{
-			bool Male = true;
+			bool bMale = true;
 			std::string Model = "mp_m_freemode_01";
-			Mod_Class::ClothX Cothing = GetCloths(true);
-			Mod_Class::HairSets MyHair = PickAStyle(Male);
-			return Mod_Class::ClothBank("", Model, 0, true, AddFace(Male), Male, false, MyHair, RandomInt(1, 61), RandomInt(1, 61), RandomInt(0, 10), 0, AddOverLay(Male, true), AddRandTats(Male), std::vector<Mod_Class::ClothX>{ Cothing }, {}, "", "", "");
+			Mod_Class::ClothX Cothing = GetCloths(bMale);
+			Mod_Class::HairSets MyHair = PickAStyle(bMale);
+			return Mod_Class::ClothBank("", Model, Mod_Systems::MyHashKey(Model), true, AddFace(bMale), bMale, false, MyHair, Mod_Systems::RandomInt(1, 61), Mod_Systems::RandomInt(1, 61), Mod_Systems::RandomInt(0, 10), 0, {}, AddOverLay(bMale, true), AddRandTats(bMale), std::vector<Mod_Class::ClothX>{ Cothing }, {}, 0, 0, 0, 200, 1.0f, 1.0f);
 		}
 		else
 		{
-			bool Male = false;
+			bool bMale = false;
 			std::string Model = "mp_f_freemode_01";
-			Mod_Class::ClothX Cothing = GetCloths(false);
-			Mod_Class::HairSets MyHair = PickAStyle(Male);
-			return Mod_Class::ClothBank("", Model, 0, true, AddFace(Male), Male, false, MyHair, RandomInt(1, 61), RandomInt(1, 61), RandomInt(0, 10), 0, AddOverLay(Male, true), AddRandTats(Male), std::vector<Mod_Class::ClothX>{ Cothing }, {}, "", "", "");
+			Mod_Class::ClothX Cothing = GetCloths(bMale);
+			Mod_Class::HairSets MyHair = PickAStyle(bMale);
+			return Mod_Class::ClothBank("", Model, Mod_Systems::MyHashKey(Model), true, AddFace(bMale), bMale, false, MyHair, Mod_Systems::RandomInt(1, 61), Mod_Systems::RandomInt(1, 61), Mod_Systems::RandomInt(0, 10), 0, {}, AddOverLay(bMale, true), AddRandTats(bMale), std::vector<Mod_Class::ClothX>{ Cothing }, {}, 0, 0, 0, 200, 1.0f, 1.0f);
 		}
 	}
 
 	bool ItsChristmas;
 	bool ItHalloween;
 
-	void ThemVoices(const std::string& voip)
+	void ThemVoices(const std::string& voice)
 	{
-		AUDIO::SET_AMBIENT_VOICE_NAME(PLAYER::PLAYER_PED_ID(), (LPSTR)voip.c_str());
+		AUDIO::SET_AMBIENT_VOICE_NAME(PLAYER::PLAYER_PED_ID(), (LPSTR)voice.c_str());
 		invoke <Void>(0x4ADA3F19BE4A6047, PLAYER::PLAYER_PED_ID());
 	}
 	void PullingFaces(const std::string& aniName)
@@ -6279,198 +5751,239 @@ namespace Mod_Entitys
 		"IG_SSS"
 	};
 
-	std::string RandomPed(int iPedtype, int iSubType)
+	Mod_Class::ClothX GetYourTogs(Ped peddy)
+	{
+		Mod_Systems::LoggerLight("GetYourTogs");
+		std::vector<int> ClothA = {};
+		std::vector<int> ClothB = {};
+
+		std::vector<int> ExtraA = {};
+		std::vector<int> ExtraB = {};
+
+		for (int i = 0; i < 12; i++)
+		{
+			int iDrawId = PED::GET_PED_DRAWABLE_VARIATION(peddy, i);
+			ClothA.push_back(iDrawId);
+			int iTextId = PED::GET_PED_TEXTURE_VARIATION(peddy, i);
+			ClothB.push_back(iTextId);
+		}
+
+		for (int i = 0; i < 8; i++)
+		{
+			int iDrawId = PED::GET_PED_PROP_INDEX(peddy, i);
+			ExtraA.push_back(iDrawId);
+			int iTextId = PED::GET_PED_PROP_TEXTURE_INDEX(peddy, i);
+			ExtraB.push_back(iTextId);
+		}
+
+		return Mod_Class::ClothX("Default", ClothA, ClothB, ExtraA, ExtraB);
+	}
+	Mod_Class::FaceBank FreeFaces(Ped peddy, bool free)
+	{
+		if (free)
+		{
+			HeadBlendData MyFace;
+			PED::_GET_PED_HEAD_BLEND_DATA(peddy, (Any*)&MyFace);
+
+			return Mod_Class::FaceBank(MyFace.shapeFirstID, MyFace.shapeSecondID, MyFace.shapeMix, MyFace.skinMix, MyFace.thirdMix);
+		}
+		else
+		{
+			return Mod_Class::FaceBank(0, 0, 0.0f, 0.0f, 0.0f);
+		}
+	}
+	std::string RandomPed(int pedtype, int subType)
 	{
 		std::string YourPed = "s_m_y_clown_01";
-		if (iPedtype == 1)
-			YourPed = PrePed_01[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_01.size() - 1)];		//Beach Peds
-		else if (iPedtype == 2)
-			YourPed = PrePed_02[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_02.size() - 1)];		//Tramps
-		else if (iPedtype == 3)
-			YourPed = PrePed_03[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_03.size() - 1)];		//High class
-		else if (iPedtype == 4)
-			YourPed = PrePed_04[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_04.size() - 1)];		//Mid class
-		else if (iPedtype == 5)
-			YourPed = PrePed_05[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_05.size() - 1)];		//Low class 
-		else if (iPedtype == 6)
-			YourPed = PrePed_06[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_06.size() - 1)];		//Buisness
-		else if (iPedtype == 7)
-			YourPed = PrePed_07[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_07.size() - 1)];		//Body builder
-		else if (iPedtype == 8)
+		if (pedtype == 1)
+			YourPed = Mod_Data::PrePed_01[Mod_Systems::LessRandomInt("RandPed_0" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_01.size() - 1)];		//Beach Peds
+		else if (pedtype == 2)
+			YourPed = Mod_Data::PrePed_02[Mod_Systems::LessRandomInt("RandPed_0" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_02.size() - 1)];		//Tramps
+		else if (pedtype == 3)
+			YourPed = Mod_Data::PrePed_03[Mod_Systems::LessRandomInt("RandPed_0" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_03.size() - 1)];		//High class
+		else if (pedtype == 4)
+			YourPed = Mod_Data::PrePed_04[Mod_Systems::LessRandomInt("RandPed_0" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_04.size() - 1)];		//Mid class
+		else if (pedtype == 5)
+			YourPed = Mod_Data::PrePed_05[Mod_Systems::LessRandomInt("RandPed_0" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_05.size() - 1)];		//Low class 
+		else if (pedtype == 6)
+			YourPed = Mod_Data::PrePed_06[Mod_Systems::LessRandomInt("RandPed_0" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_06.size() - 1)];		//Buisness
+		else if (pedtype == 7)
+			YourPed = Mod_Data::PrePed_07[Mod_Systems::LessRandomInt("RandPed_0" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_07.size() - 1)];		//Body builder
+		else if (pedtype == 8)
 		{
-			if (iSubType == 1)
-				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 0, 3)];
-			else if (iSubType == 2)
-				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 4, 7)];
-			else if (iSubType == 3)
-				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 8, 11)];
-			else if (iSubType == 4)
-				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 12, 15)];
-			else if (iSubType == 5)
-				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 16, 19)];
-			else if (iSubType == 6)
-				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 20, 23)];
-			else if (iSubType == 7)
-				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 24, 32)];
-			else if (iSubType == 8)
-				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 33, 34)];
-			else if (iSubType == 9)
-				YourPed = LsGstars[LessRandomInt("RandGsPed_0" + std::to_string(iSubType), 35, 38)];
-			else if (iSubType == 10)
-				YourPed = LsGstars[LessRandomInt("RandGsPed_" + std::to_string(iSubType), 39, 44)];
+			if (subType == 1)
+				YourPed = LsGstars[Mod_Systems::LessRandomInt("RandGsPed_0" + std::to_string(subType), 0, 3)];
+			else if (subType == 2)
+				YourPed = LsGstars[Mod_Systems::LessRandomInt("RandGsPed_0" + std::to_string(subType), 4, 7)];
+			else if (subType == 3)
+				YourPed = LsGstars[Mod_Systems::LessRandomInt("RandGsPed_0" + std::to_string(subType), 8, 11)];
+			else if (subType == 4)
+				YourPed = LsGstars[Mod_Systems::LessRandomInt("RandGsPed_0" + std::to_string(subType), 12, 15)];
+			else if (subType == 5)
+				YourPed = LsGstars[Mod_Systems::LessRandomInt("RandGsPed_0" + std::to_string(subType), 16, 19)];
+			else if (subType == 6)
+				YourPed = LsGstars[Mod_Systems::LessRandomInt("RandGsPed_0" + std::to_string(subType), 20, 23)];
+			else if (subType == 7)
+				YourPed = LsGstars[Mod_Systems::LessRandomInt("RandGsPed_0" + std::to_string(subType), 24, 32)];
+			else if (subType == 8)
+				YourPed = LsGstars[Mod_Systems::LessRandomInt("RandGsPed_0" + std::to_string(subType), 33, 34)];
+			else if (subType == 9)
+				YourPed = LsGstars[Mod_Systems::LessRandomInt("RandGsPed_0" + std::to_string(subType), 35, 38)];
+			else if (subType == 10)
+				YourPed = LsGstars[Mod_Systems::LessRandomInt("RandGsPed_" + std::to_string(subType), 39, 44)];
 			else
-				YourPed = LsGstars[LessRandomInt("RandGsPed_" + std::to_string(iSubType), 45, (int)LsGstars.size() - 1)];
+				YourPed = LsGstars[Mod_Systems::LessRandomInt("RandGsPed_" + std::to_string(subType), 45, (int)LsGstars.size() - 1)];
 		}       //GangStars--Subset
-		else if (iPedtype == 9)
-			YourPed = Eplomes[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)Eplomes.size() - 1)];			//Epslon 
-		else if (iPedtype == 10)
-			YourPed = PrePed_08[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_08.size() - 1)];		//Jogger
-		else if (iPedtype == 11)
-			YourPed = PrePed_09[LessRandomInt("RandPed_0" + std::to_string(iPedtype), 0, (int)PrePed_09.size() - 1)];		//Golfer
-		else if (iPedtype == 12)
-			YourPed = PrePed_10[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)PrePed_10.size() - 1)];		//Hiker
-		else if (iPedtype == 13)
-			YourPed = PrePed_11[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)PrePed_11.size() - 1)];		//Meth
-		else if (iPedtype == 14)
-			YourPed = PrePed_12[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)PrePed_12.size() - 1)];		//Rural 
-		else if (iPedtype == 15)
-			YourPed = PrePed_13[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)PrePed_13.size() - 1)];		//Cycles
-		else if (iPedtype == 16)
-			YourPed = PrePed_14[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)PrePed_14.size() - 1)];		//LGBTQWSTRVX
-		else if (iPedtype == 17)
-			YourPed = PrePed_01[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)PrePed_01.size() - 1)];		//Pool Peds
-		else if (iPedtype == 18)
+		else if (pedtype == 9)
+			YourPed = Eplomes[Mod_Systems::LessRandomInt("RandPed_0" + std::to_string(pedtype), 0, (int)Eplomes.size() - 1)];			//Epslon 
+		else if (pedtype == 10)
+			YourPed = Mod_Data::PrePed_08[Mod_Systems::LessRandomInt("RandPed_0" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_08.size() - 1)];		//Jogger
+		else if (pedtype == 11)
+			YourPed = Mod_Data::PrePed_09[Mod_Systems::LessRandomInt("RandPed_0" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_09.size() - 1)];		//Golfer
+		else if (pedtype == 12)
+			YourPed = Mod_Data::PrePed_10[Mod_Systems::LessRandomInt("RandPed_" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_10.size() - 1)];		//Hiker
+		else if (pedtype == 13)
+			YourPed = Mod_Data::PrePed_11[Mod_Systems::LessRandomInt("RandPed_" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_11.size() - 1)];		//Meth
+		else if (pedtype == 14)
+			YourPed = Mod_Data::PrePed_12[Mod_Systems::LessRandomInt("RandPed_" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_12.size() - 1)];		//Rural 
+		else if (pedtype == 15)
+			YourPed = Mod_Data::PrePed_13[Mod_Systems::LessRandomInt("RandPed_" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_13.size() - 1)];		//Cycles
+		else if (pedtype == 16)
+			YourPed = Mod_Data::PrePed_14[Mod_Systems::LessRandomInt("RandPed_" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_14.size() - 1)];		//LGBTQWSTRVX
+		else if (pedtype == 17)
+			YourPed = Mod_Data::PrePed_01[Mod_Systems::LessRandomInt("RandPed_" + std::to_string(pedtype), 0, (int)Mod_Data::PrePed_01.size() - 1)];		//Pool Peds
+		else if (pedtype == 18)
 		{
-			if (iSubType == 1)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 0, 2)];
-			else if (iSubType == 2)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 3, 6)];
-			else if (iSubType == 3)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 7, 11)];
-			else if (iSubType == 4)
+			if (subType == 1)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_0" + std::to_string(subType), 0, 2)];
+			else if (subType == 2)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_0" + std::to_string(subType), 3, 6)];
+			else if (subType == 3)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_0" + std::to_string(subType), 7, 11)];
+			else if (subType == 4)
 				YourPed = WorkinClass[12];
-			else if (iSubType == 5)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 13, 14)];
-			else if (iSubType == 6)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 15, 17)];
-			else if (iSubType == 7)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 18, 20)];
-			else if (iSubType == 8)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 21, 23)];
-			else if (iSubType == 9)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_0" + std::to_string(iSubType), 24, 25)];
-			else if (iSubType == 10)
+			else if (subType == 5)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_0" + std::to_string(subType), 13, 14)];
+			else if (subType == 6)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_0" + std::to_string(subType), 15, 17)];
+			else if (subType == 7)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_0" + std::to_string(subType), 18, 20)];
+			else if (subType == 8)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_0" + std::to_string(subType), 21, 23)];
+			else if (subType == 9)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_0" + std::to_string(subType), 24, 25)];
+			else if (subType == 10)
 				YourPed = WorkinClass[26];
-			else if (iSubType == 11)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 27, 28)];
-			else if (iSubType == 12)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 29, 30)];
-			else if (iSubType == 13)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 31, 33)];
-			else if (iSubType == 14)
+			else if (subType == 11)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_" + std::to_string(subType), 27, 28)];
+			else if (subType == 12)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_" + std::to_string(subType), 29, 30)];
+			else if (subType == 13)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_" + std::to_string(subType), 31, 33)];
+			else if (subType == 14)
 				YourPed = WorkinClass[34];
-			else if (iSubType == 15)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 35, 36)];
-			else if (iSubType == 16)
+			else if (subType == 15)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_" + std::to_string(subType), 35, 36)];
+			else if (subType == 16)
 				YourPed = WorkinClass[37];
-			else if (iSubType == 17)
+			else if (subType == 17)
 				YourPed = WorkinClass[38];
-			else if (iSubType == 18)
+			else if (subType == 18)
 				YourPed = WorkinClass[39];
-			else if (iSubType == 19)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 40, 41)];
-			else if (iSubType == 20)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 42, 43)];
-			else if (iSubType == 21)
-				YourPed = WorkinClass[LessRandomInt("RandWkPed_" + std::to_string(iSubType), 44, 45)];
-			else if (iSubType == 22)
+			else if (subType == 19)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_" + std::to_string(subType), 40, 41)];
+			else if (subType == 20)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_" + std::to_string(subType), 42, 43)];
+			else if (subType == 21)
+				YourPed = WorkinClass[Mod_Systems::LessRandomInt("RandWkPed_" + std::to_string(subType), 44, 45)];
+			else if (subType == 22)
 				YourPed = WorkinClass[46];
 			else
 				YourPed = WorkinClass[(int)WorkinClass.size() - 1];
 		}       //Workers--Subset
-		else if (iPedtype == 19)
+		else if (pedtype == 19)
 			YourPed = "a_m_y_jetski_01";		//jet ski
-		else if (iPedtype == 20)
-			YourPed = MotoCrossPeds[LessRandomInt("RandMcPed_" + std::to_string(iPedtype), 0, 1)];		//Bike/ATV Male
-		else if (iPedtype == 21)
+		else if (pedtype == 20)
+			YourPed = MotoCrossPeds[Mod_Systems::LessRandomInt("RandMcPed_" + std::to_string(pedtype), 0, 1)];		//Bike/ATV Male
+		else if (pedtype == 21)
 		{
-			if (iSubType == 1)
-				YourPed = ServicePeds[LessRandomInt("RandSvPed_0" + std::to_string(iSubType), 0, 1)];		//"Baywatch 
-			else if (iSubType == 2)
+			if (subType == 1)
+				YourPed = ServicePeds[Mod_Systems::LessRandomInt("RandSvPed_0" + std::to_string(subType), 0, 1)];		//"Baywatch 
+			else if (subType == 2)
 				YourPed = ServicePeds[2];																	//"US Coastguard
-			else if (iSubType == 3)
-				YourPed = ServicePeds[LessRandomInt("RandSvPed_0" + std::to_string(iSubType), 3, 4)];		//><!--Cops
-			else if (iSubType == 4)
+			else if (subType == 3)
+				YourPed = ServicePeds[Mod_Systems::LessRandomInt("RandSvPed_0" + std::to_string(subType), 3, 4)];		//><!--Cops
+			else if (subType == 4)
 				YourPed = ServicePeds[5];																	//><!-- PoliceBike
-			else if (iSubType == 5)
-				YourPed = ServicePeds[LessRandomInt("RandSvPed_0" + std::to_string(iSubType), 6, 7)];		//><!-- Ranger
-			else if (iSubType == 6)
-				YourPed = ServicePeds[LessRandomInt("RandSvPed_0" + std::to_string(iSubType), 8, 9)];		//><!-- Sherif
-			else if (iSubType == 7)
+			else if (subType == 5)
+				YourPed = ServicePeds[Mod_Systems::LessRandomInt("RandSvPed_0" + std::to_string(subType), 6, 7)];		//><!-- Ranger
+			else if (subType == 6)
+				YourPed = ServicePeds[Mod_Systems::LessRandomInt("RandSvPed_0" + std::to_string(subType), 8, 9)];		//><!-- Sherif
+			else if (subType == 7)
 				YourPed = ServicePeds[10];																	//><!-- fib
-			else if (iSubType == 8)
+			else if (subType == 8)
 				YourPed = ServicePeds[11];																	//><!-- swat
-			else if (iSubType == 9)
-				YourPed = ServicePeds[LessRandomInt("RandSvPed_0" + std::to_string(iSubType), 12, 21)];		//military
-			else if (iSubType == 10)
+			else if (subType == 9)
+				YourPed = ServicePeds[Mod_Systems::LessRandomInt("RandSvPed_0" + std::to_string(subType), 12, 21)];		//military
+			else if (subType == 10)
 				YourPed = ServicePeds[22];																	//medic
 			else
 				YourPed = ServicePeds[(int)ServicePeds.size() - 1];											//fireman
 		}       //Services
-		else if (iPedtype == 22)
+		else if (pedtype == 22)
 		{
-			if (iSubType == 2)
+			if (subType == 2)
 				YourPed = "mp_f_helistaff_01";
 			else
-				YourPed = PilotPeds[LessRandomInt("RandPiPed", 0, (int)PilotPeds.size() - 1)];
+				YourPed = PilotPeds[Mod_Systems::LessRandomInt("RandPiPed", 0, (int)PilotPeds.size() - 1)];
 		}       //Pilot
-		else if (iPedtype == 23)
+		else if (pedtype == 23)
 		{
-			if (iSubType == 1)
+			if (subType == 1)
 				YourPed = AnimalsPeds[0];
-			else if (iSubType == 2)
-				YourPed = AnimalsPeds[LessRandomInt("RandAnPed_0" + std::to_string(iSubType), 1, 8)];		//"Cats/dogs", 
-			else if (iSubType == 3)
+			else if (subType == 2)
+				YourPed = AnimalsPeds[Mod_Systems::LessRandomInt("RandAnPed_0" + std::to_string(subType), 1, 8)];		//"Cats/dogs", 
+			else if (subType == 3)
 				YourPed = AnimalsPeds[9];
-			else if (iSubType == 4)
+			else if (subType == 4)
 				YourPed = AnimalsPeds[10];
-			else if (iSubType == 5)
+			else if (subType == 5)
 				YourPed = AnimalsPeds[11];
-			else if (iSubType == 6)
+			else if (subType == 6)
 				YourPed = AnimalsPeds[12];
-			else if (iSubType == 7)
+			else if (subType == 7)
 				YourPed = AnimalsPeds[13];
-			else if (iSubType == 8)
-				YourPed = AnimalsPeds[LessRandomInt("RandAnPed_0" + std::to_string(iSubType), 14, 15)];		//"dearRabbit", 
-			else if (iSubType == 9)
+			else if (subType == 8)
+				YourPed = AnimalsPeds[Mod_Systems::LessRandomInt("RandAnPed_0" + std::to_string(subType), 14, 15)];		//"dearRabbit", 
+			else if (subType == 9)
 				YourPed = AnimalsPeds[16];
-			else if (iSubType == 10)
+			else if (subType == 10)
 				YourPed = AnimalsPeds[17];
-			else if (iSubType == 11)
+			else if (subType == 11)
 				YourPed = AnimalsPeds[18];
-			else if (iSubType == 12)
-				YourPed = AnimalsPeds[LessRandomInt("RandAnPed_" + std::to_string(iSubType), 19, 25)];
-			else if (iSubType == 13)
+			else if (subType == 12)
+				YourPed = AnimalsPeds[Mod_Systems::LessRandomInt("RandAnPed_" + std::to_string(subType), 19, 25)];
+			else if (subType == 13)
 				YourPed = AnimalsPeds[26];
 			else
-				YourPed = AnimalsPeds[LessRandomInt("RandAnPed_" + std::to_string(iSubType), 27, (int)AnimalsPeds.size() - 1)];
+				YourPed = AnimalsPeds[Mod_Systems::LessRandomInt("RandAnPed_" + std::to_string(subType), 27, (int)AnimalsPeds.size() - 1)];
 		}       //animals
-		else if (iPedtype == 24)
-			YourPed = YankoPPeds[LessRandomInt("RandPed_" + std::to_string(iPedtype), 0, (int)YankoPPeds.size() - 1)];		//Yankton
+		else if (pedtype == 24)
+			YourPed = YankoPPeds[Mod_Systems::LessRandomInt("RandPed_" + std::to_string(pedtype), 0, (int)YankoPPeds.size() - 1)];		//Mod_Data::Yankton
 		else
 		{
-			if (iSubType == 1)
+			if (subType == 1)
 				YourPed = CayoPercPeds[0]; //A_C_Panther  
-			else if (iSubType == 2)
-				YourPed = PrePed_01[LessRandomInt("RandCpPed_0" + std::to_string(iSubType), 0, (int)PrePed_01.size() - 1)];		 //A_F_Y_Beach_02
-			else if (iSubType == 3)
-				YourPed = CayoPercPeds[LessRandomInt("RandCpPed_0" + std::to_string(iSubType), 1, 3)]; //Guard
-			else if (iSubType == 4)
+			else if (subType == 2)
+				YourPed = Mod_Data::PrePed_01[Mod_Systems::LessRandomInt("RandCpPed_0" + std::to_string(subType), 0, (int)Mod_Data::PrePed_01.size() - 1)];		 //A_F_Y_Beach_02
+			else if (subType == 3)
+				YourPed = CayoPercPeds[Mod_Systems::LessRandomInt("RandCpPed_0" + std::to_string(subType), 1, 3)]; //Guard
+			else if (subType == 4)
 				YourPed = CayoPercPeds[4];  //Bar
-			else if (iSubType == 5)
-				YourPed = CayoPercPeds[LessRandomInt("RandCpPed_0" + std::to_string(iSubType), 5, 6)]; //worker
-			else if (iSubType == 6)
-				YourPed = CayoPercPeds[LessRandomInt("RandCpPed_0" + std::to_string(iSubType), 7, (int)CayoPercPeds.size() - 2)];  //pilot
+			else if (subType == 5)
+				YourPed = CayoPercPeds[Mod_Systems::LessRandomInt("RandCpPed_0" + std::to_string(subType), 5, 6)]; //worker
+			else if (subType == 6)
+				YourPed = CayoPercPeds[Mod_Systems::LessRandomInt("RandCpPed_0" + std::to_string(subType), 7, (int)CayoPercPeds.size() - 2)];  //pilot
 			else
 				YourPed = CayoPercPeds[(int)CayoPercPeds.size() - 1];
 
@@ -6479,248 +5992,239 @@ namespace Mod_Entitys
 
 		return YourPed;
 	}
-	Mod_Class::ClothBank NewClothBank(const std::string& PedTitle)
+	Mod_Class::ClothBank NewClothBank(const std::string& pedTitle)
 	{
 		bool Male = true;
-		std::string Model = PedTitle;
+		std::string Model = pedTitle;
 		Mod_Class::HairSets MyHair = MHairsets[0];
-		return Mod_Class::ClothBank("", Model, 0, false, AddFace(Male), Male, false, MyHair, 0, 0, 0, 0, {}, {}, {}, {}, "", "", "");
+		return Mod_Class::ClothBank("", Model, 0, false, AddFace(Male), Male, false, MyHair, 0, 0, 0, 0, {}, {}, {}, {}, {}, 0, 0, 0, 200, 1.0f, 1.0f);
 	}
-	Mod_Class::ClothBank NewClothBank(int iPedtype, int iSubType)
+	Mod_Class::ClothBank NewClothBank(int pedtype, int subType)
 	{
-		return NewClothBank(RandomPed(iPedtype, iSubType));
+		return NewClothBank(RandomPed(pedtype, subType));
+	}
+	Mod_Class::ClothBank PlayerClothBank()
+	{
+		Hash pedHash = ENTITY::GET_ENTITY_MODEL(PLAYER::PLAYER_PED_ID());
+
+		bool freeMode = false;
+		if (pedHash == MainProtags[3] || pedHash == MainProtags[4])
+			freeMode = true;
+		bool male = PED::IS_PED_MALE(PLAYER::PLAYER_PED_ID());
+
+		bool animal_Farm = false;
+		if (PED::GET_PED_TYPE(PLAYER::PLAYER_PED_ID()) == 28)
+			animal_Farm = true;
+
+		return Mod_Class::ClothBank("Current", "", pedHash, freeMode, FreeFaces(PLAYER::PLAYER_PED_ID(), freeMode), male, animal_Farm, Mod_Entitys::PickAStyle(male), 0, 0, 0, 0, {}, Mod_Entitys::AddOverLay(male, freeMode), {}, { GetYourTogs(PLAYER::PLAYER_PED_ID()) }, {}, 0, 0, 0, 200, 1.0f, 1.0f);
 	}
 
-	void ApplyTats(Ped Pedx, Mod_Class::ClothBank* GetTats)
+	void ApplyTats(Ped peddy, Mod_Class::ClothBank* getTats)
 	{
-		if (GetTats != nullptr)
+		if (getTats != nullptr)
 		{
-			for (int i = 0; i < GetTats->MyTattoo.size(); i++)
-				PED::_APPLY_PED_OVERLAY(Pedx, MyHashKey(GetTats->MyTattoo[i].BaseName), MyHashKey(GetTats->MyTattoo[i].TatName));
+			for (int i = 0; i < getTats->MyTattoo.size(); i++)
+				PED::_APPLY_PED_OVERLAY(peddy, Mod_Systems::MyHashKey(getTats->MyTattoo[i].BaseName), Mod_Systems::MyHashKey(getTats->MyTattoo[i].TatName));
 		}
 	}
-	void OnlineDress(Ped Pedx, Mod_Class::ClothX* MyCloths)
+	void OnlineDress(Ped peddy, Mod_Class::ClothX* cloths)
 	{
-		PED::CLEAR_ALL_PED_PROPS(Pedx);
-		if (MyCloths != nullptr)
+		PED::CLEAR_ALL_PED_PROPS(peddy);
+		if (cloths != nullptr)
 		{
-
-			for (int i = 0; i < MyCloths->ClothA.size(); i++)
+			for (int i = 0; i < cloths->ClothA.size(); i++)
 			{
-				if (MyCloths->ClothA[i] != -10)
-					PED::SET_PED_COMPONENT_VARIATION(Pedx, i, MyCloths->ClothA[i], MyCloths->ClothB[i], 2);
+				if (cloths->ClothA[i] != -10)
+					PED::SET_PED_COMPONENT_VARIATION(peddy, i, cloths->ClothA[i], cloths->ClothB[i], 2);
 			}
 
-			for (int i = 0; i < MyCloths->ExtraA.size(); i++)
+			for (int i = 0; i < cloths->ExtraA.size(); i++)
 			{
-				if (MyCloths->ExtraA[i] != -10)
-					PED::SET_PED_PROP_INDEX(Pedx, i, MyCloths->ExtraA[i], MyCloths->ExtraB[i], false);
+				if (cloths->ExtraA[i] != -10)
+					PED::SET_PED_PROP_INDEX(peddy, i, cloths->ExtraA[i], cloths->ExtraB[i], false);
 			}
+			
+			if (cloths->Badge.TatName != "")
+				PED::_APPLY_PED_OVERLAY(peddy, Mod_Systems::MyHashKey(cloths->Badge.BaseName), Mod_Systems::MyHashKey(cloths->Badge.TatName));
 		}
 
 	}
-	void SetingtheHair(Ped Pedx, Mod_Class::HairSets* Hair)
+	void SetingtheHair(Ped peddy, Mod_Class::HairSets* hair)
 	{
-		if (Hair != nullptr)
+		if (hair != nullptr)
 		{
+			PED::SET_PED_COMPONENT_VARIATION(peddy, 2, hair->Comp, hair->Text, 2);
 
-			PED::SET_PED_COMPONENT_VARIATION(Pedx, 2, Hair->Comp, Hair->Text, 2);
-
-			if (Hair->Over != -1)
-				PED::_APPLY_PED_OVERLAY(Pedx, Hair->OverLib, Hair->Over);
+			if (hair->Over != -1)
+				PED::_APPLY_PED_OVERLAY(peddy, hair->OverLib, hair->Over);
 		}
-
 	}
-	void OnlineFaces(Ped Pedx, Mod_Class::ClothBank* pFixtures)
+	void OnlineFaces(Ped peddy, Mod_Class::ClothBank* feats)
 	{
 		//****************FaceShape/Colour****************
-		PED::SET_PED_HEAD_BLEND_DATA(Pedx, pFixtures->MyFaces.ShapeFirstID, pFixtures->MyFaces.ShapeSecondID, pFixtures->MyFaces.ShapeThirdID, pFixtures->MyFaces.SkinFirstID, pFixtures->MyFaces.SkinSecondID, pFixtures->MyFaces.SkinThirdID, pFixtures->MyFaces.ShapeMix, pFixtures->MyFaces.SkinMix, pFixtures->MyFaces.ThirdMix, 0);
+		PED::SET_PED_HEAD_BLEND_DATA(peddy, feats->MyFaces.ShapeFirstID, feats->MyFaces.ShapeSecondID, feats->MyFaces.ShapeThirdID, feats->MyFaces.SkinFirstID, feats->MyFaces.SkinSecondID, feats->MyFaces.SkinThirdID, feats->MyFaces.ShapeMix, feats->MyFaces.SkinMix, feats->MyFaces.ThirdMix, 0);
 
 		if (ItsChristmas)
 		{
-			if (pFixtures->Male)
-				OnlineDress(Pedx, &XmasOut_M[LessRandomInt("Crimb01", 0, (int)XmasOut_M.size() - 1)]);
+			if (feats->Male)
+				OnlineDress(peddy, &XmasOut_M[Mod_Systems::LessRandomInt("Crimb01", 0, (int)XmasOut_M.size() - 1)]);
 			else
-				OnlineDress(Pedx, &XmasOut_F[LessRandomInt("Crimb01", 0, (int)XmasOut_F.size() - 1)]);
+				OnlineDress(peddy, &XmasOut_F[Mod_Systems::LessRandomInt("Crimb01", 0, (int)XmasOut_F.size() - 1)]);
 		}
 		else if (ItHalloween)
 		{
-			if (pFixtures->Male)
+			if (feats->Male)
 			{
-				int iRan = LessRandomInt("Hallow01", 0, 11);
-				Mod_Class::ClothX Cloths = Mod_Class::ClothX("MaleArena WarSpace_Horror", { 0, 141, 0, 164, 108, 0, 33, 0, 15, 0, 0, 277 }, { 0, iRan, 0, iRan, iRan, 0, 0, 0, 0, 0, 0, iRan }, { -1, -1, -1, -1, -1 }, { -1, -1, -1, -1, -1 });
-				OnlineDress(Pedx, &Cloths);
+				int Rand = Mod_Systems::LessRandomInt("Hallow01", 0, 11);
+				Mod_Class::ClothX Cloths = Mod_Class::ClothX("MaleArena WarSpace_Horror", { 0, 141, 0, 164, 108, 0, 33, 0, 15, 0, 0, 277 }, { 0, Rand, 0, Rand, Rand, 0, 0, 0, 0, 0, 0, Rand }, { -1, -1, -1, -1, -1 }, { -1, -1, -1, -1, -1 });
+				OnlineDress(peddy, &Cloths);
 			}
 			else
 			{
-				int iRan = LessRandomInt("Hallow01", 0, 11);
-				Mod_Class::ClothX Cloths = Mod_Class::ClothX("FemaleArena WarSpace_Horror", { 21, 141, 0, 205, 115, 0, 34, 0, 6, 0, 0, 290 }, { 0, iRan, 0, iRan, iRan, 0, 0, 0, 0, 0, 0, iRan }, { -1, -1, -1, -1, -1 }, { -1, -1, -1, -1, -1 });
-				OnlineDress(Pedx, &Cloths);
+				int Rand = Mod_Systems::LessRandomInt("Hallow01", 0, 11);
+				Mod_Class::ClothX Cloths = Mod_Class::ClothX("FemaleArena WarSpace_Horror", { 21, 141, 0, 205, 115, 0, 34, 0, 6, 0, 0, 290 }, { 0, Rand, 0, Rand, Rand, 0, 0, 0, 0, 0, 0, Rand }, { -1, -1, -1, -1, -1 }, { -1, -1, -1, -1, -1 });
+				OnlineDress(peddy, &Cloths);
 			}
 		}
 		else
 		{
-			if ((int)pFixtures->Cothing.size() > 0 && pFixtures->Cloth_Pick < (int)pFixtures->Cothing.size())
+			if ((int)feats->Cothing.size() > 0 && feats->Cloth_Pick < (int)feats->Cothing.size())
 			{
-				Mod_Class::ClothX Cloths = pFixtures->Cothing[pFixtures->Cloth_Pick];
-				OnlineDress(Pedx, &Cloths);
+				Mod_Class::ClothX Cloths = feats->Cothing[feats->Cloth_Pick];
+				OnlineDress(peddy, &Cloths);
 			}
 			else
 			{
-				if (pFixtures->Male)
-					OnlineDress(Pedx, &MaleDefault);
+				if (feats->Male)
+					OnlineDress(peddy, &MaleDefault);
 				else
-					OnlineDress(Pedx, &FemaleDefault);
+					OnlineDress(peddy, &FemaleDefault);
 			}
 		}
 
-		Mod_Class::HairSets Hairs = pFixtures->MyHair;
-		SetingtheHair(Pedx, &Hairs);
+		Mod_Class::HairSets Hairs = feats->MyHair;
+		SetingtheHair(peddy, &Hairs);
 
-		PED::_SET_PED_HAIR_COLOR(Pedx, pFixtures->HairColour, pFixtures->HairStreaks);
+		PED::_SET_PED_HAIR_COLOR(peddy, feats->HairColour, feats->HairStreaks);
+		PED::_SET_PED_EYE_COLOR(peddy, feats->EyeColour);
 		//****************Face****************
-		for (int i = 0; i < pFixtures->MyOverlay.size(); i++)
+		for (int i = 0; i < feats->MyOverlay.size(); i++)
 		{
-			int iColour = 0;
+			PED::SET_PED_HEAD_OVERLAY(peddy, i, feats->MyOverlay[i].Overlay, feats->MyOverlay[i].OverOpc);
 
-			if (i == 1)
-			{
-				iColour = 1;
-			}//Facial Hair
-			else if (i == 2)
-			{
-				iColour = 1;
-			}//Eyebrows
-			else if (i == 5)
-			{
-				iColour = 2;
-			}//Blush
-			else if (i == 8)
-			{
-				iColour = 2;
-			}//Lipstick
-			else if (i == 10)
-			{
-				iColour = 1;
-			}//Chest Hair
-
-			int iChange = pFixtures->MyOverlay[i].Overlay;
-			int AddColour = pFixtures->MyOverlay[i].OverCol;
-			float fVar = pFixtures->MyOverlay[i].OverOpc;
-
-			PED::SET_PED_HEAD_OVERLAY(Pedx, i, iChange, fVar);
-
-			if (iColour > 0)
-				PED::_SET_PED_HEAD_OVERLAY_COLOR(Pedx, i, iColour, AddColour, 0);
+			if (feats->MyOverlay[i].Colour > 0)
+				PED::_SET_PED_HEAD_OVERLAY_COLOR(peddy, i, feats->MyOverlay[i].Colour, feats->MyOverlay[i].OverCol, 0);
 		}
 
-		if ((int)pFixtures->FaceScale.size() > 0)
+		if ((int)feats->FaceScale.size() > 0)
 		{
-			for (int i = 0; i < (int)pFixtures->FaceScale.size(); i++)
-				PED::_SET_PED_FACE_FEATURE(PLAYER::PLAYER_PED_ID(), i, pFixtures->FaceScale[i]);
+			for (int i = 0; i < (int)feats->FaceScale.size(); i++)
+				PED::_SET_PED_FACE_FEATURE(peddy, i, feats->FaceScale[i]);
 		}
 	}
-	Ped PlayerPedGen(Mod_Class::Vector4 vLocal, Mod_Class::ClothBank* thisBrain, bool onFoot, bool bfriend)
+
+	Ped PlayerPedGen(Mod_Class::Vector4 pos, Mod_Class::ClothBank* clothBank, bool onFoot, bool isfriend)
 	{
-		if (thisBrain != nullptr)
+		if (clothBank != nullptr)
 		{
 			WAIT(100);//Can overload and cause CTD if run multiple times.
 
-			LoggerLight("PlayerPedGen == " + thisBrain->Model);
+			Mod_Systems::LoggerLight("PlayerPedGen == " + clothBank->Model);
+			 
+			Ped NewPed = NULL;
+			Hash ModelHash = Mod_Systems::MyHashKey(clothBank->Model);
 
-			Ped thisPed = NULL;
-			Hash model = MyHashKey(thisBrain->Model);
-
-			if (thisBrain->Model == "mp_m_freemode_01" || thisBrain->Model == "mp_f_freemode_01")
-				thisBrain->FreeMode = true;
+			if (clothBank->Model == "mp_m_freemode_01" || clothBank->Model == "mp_f_freemode_01")
+				clothBank->FreeMode = true;
 			else
-				thisBrain->FreeMode = false;
+				clothBank->FreeMode = false;
 
-			if (!STREAMING::IS_MODEL_VALID(model))
-				model = MyHashKey("cs_chrisformage");
+			if (!STREAMING::IS_MODEL_VALID(ModelHash))
+				ModelHash = Mod_Systems::MyHashKey("cs_chrisformage");
 
-			STREAMING::REQUEST_MODEL(model);// Check if the model is valid
-			if ((bool)STREAMING::IS_MODEL_IN_CDIMAGE(model) && (bool)STREAMING::IS_MODEL_VALID(model))
+			STREAMING::REQUEST_MODEL(ModelHash);// Check if the model is valid
+			if ((bool)STREAMING::IS_MODEL_IN_CDIMAGE(ModelHash) && (bool)STREAMING::IS_MODEL_VALID(ModelHash))
 			{
-				while (!STREAMING::HAS_MODEL_LOADED(model))
+				while (!STREAMING::HAS_MODEL_LOADED(ModelHash))
 					WAIT(10);
 
-				thisPed = PED::CREATE_PED(4, model, vLocal.X, vLocal.Y, vLocal.Z, vLocal.R, true, false);
+				NewPed = PED::CREATE_PED(4, ModelHash, pos.X, pos.Y, pos.Z, pos.R, true, false);
 
-				int iAccuracy = RandomInt(50, 75);
-				PED::SET_PED_ACCURACY(thisPed, iAccuracy);
-				PED::SET_PED_MAX_HEALTH(thisPed, 200);
-				ENTITY::SET_ENTITY_HEALTH(thisPed, 200);
+				int iAccuracy = Mod_Systems::RandomInt(50, 75);
+				PED::SET_PED_ACCURACY(NewPed, iAccuracy);
+				PED::SET_PED_MAX_HEALTH(NewPed, 200);
+				ENTITY::SET_ENTITY_HEALTH(NewPed, 200);
 
-				AI::SET_PED_PATH_PREFER_TO_AVOID_WATER(thisPed, false);
-				ENTITY::SET_ENTITY_AS_MISSION_ENTITY(thisPed, 1, 1);
+				AI::SET_PED_PATH_PREFER_TO_AVOID_WATER(NewPed, false);
+				ENTITY::SET_ENTITY_AS_MISSION_ENTITY(NewPed, 1, 1);
 
-				PED::SET_PED_COMBAT_ABILITY(thisPed, 100);
+				PED::SET_PED_COMBAT_ABILITY(NewPed, 100);
 				if (onFoot)
 				{
-					PED::SET_PED_CAN_SWITCH_WEAPON(thisPed, true);
-					PED::SET_PED_COMBAT_MOVEMENT(thisPed, 2);
-					AI::SET_PED_PATH_CAN_USE_CLIMBOVERS(thisPed, true);
-					AI::SET_PED_PATH_CAN_USE_LADDERS(thisPed, true);
-					AI::SET_PED_PATH_CAN_DROP_FROM_HEIGHT(thisPed, true);
-					AI::SET_PED_PATH_PREFER_TO_AVOID_WATER(thisPed, false);
-					PED::SET_PED_COMBAT_ATTRIBUTES(thisPed, 0, true);
-					PED::SET_PED_COMBAT_ATTRIBUTES(thisPed, 1, true);
-					PED::SET_PED_COMBAT_ATTRIBUTES(thisPed, 2, true);
-					PED::SET_PED_COMBAT_ATTRIBUTES(thisPed, 3, true);
+					PED::SET_PED_CAN_SWITCH_WEAPON(NewPed, true);
+					PED::SET_PED_COMBAT_MOVEMENT(NewPed, 2);
+					AI::SET_PED_PATH_CAN_USE_CLIMBOVERS(NewPed, true);
+					AI::SET_PED_PATH_CAN_USE_LADDERS(NewPed, true);
+					AI::SET_PED_PATH_CAN_DROP_FROM_HEIGHT(NewPed, true);
+					AI::SET_PED_PATH_PREFER_TO_AVOID_WATER(NewPed, false);
+					PED::SET_PED_COMBAT_ATTRIBUTES(NewPed, 0, true);
+					PED::SET_PED_COMBAT_ATTRIBUTES(NewPed, 1, true);
+					PED::SET_PED_COMBAT_ATTRIBUTES(NewPed, 2, true);
+					PED::SET_PED_COMBAT_ATTRIBUTES(NewPed, 3, true);
 				}
 
-				if (bfriend)
-					RelGroupMember(thisPed, Gp_Follow);
+				if (isfriend)
+					RelGroupMember(NewPed, Mod_Data::Gp_Follow);
 				else
-					RelGroupMember(thisPed, GP_Attack);
+					RelGroupMember(NewPed, Mod_Data::GP_Attack);
 
-				if (thisBrain->FreeMode)
-					OnlineFaces(thisPed, thisBrain);
+				if (clothBank->FreeMode)
+					OnlineFaces(NewPed, clothBank);
 
-				GunningIt(thisPed, -1);
+				GunningIt(NewPed, -1);
 
-				Ped_List.push_back(thisPed);
-				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
+				Mod_Data::Ped_List.push_back(NewPed);
+				STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(ModelHash);
 			}
 			else
-				thisPed = NULL;
+				NewPed = NULL;
 
-			return thisPed;
+			return NewPed;
 		}
 		else
 			return NULL;
 	}
-	Ped PlayerPedGen(Mod_Class::Vector4 vLocal, int Set, int Subset, bool onFoot, bool bfriend)
+	Ped PlayerPedGen(Mod_Class::Vector4 pos, int set, int subset, bool onFoot, bool isfriend)
 	{
-		Mod_Class::ClothBank PedBank = NewClothBank(Set, Subset);
-		return PlayerPedGen(vLocal, &PedBank, onFoot, bfriend);;
+		Mod_Class::ClothBank PedBank = NewClothBank(set, subset);
+		return PlayerPedGen(pos, &PedBank, onFoot, isfriend);;
 	}
-	Ped PlayerPedGen(Mod_Class::Vector4 vLocal, const std::string& sPed, bool onFoot, bool bfriend)
+	Ped PlayerPedGen(Mod_Class::Vector4 pos, const std::string& pedModel, bool onFoot, bool isfriend)
 	{
-		Mod_Class::ClothBank PedBank = NewClothBank(sPed);
-		return PlayerPedGen(vLocal, &PedBank, onFoot, bfriend);;
+		Mod_Class::ClothBank PedBank = NewClothBank(pedModel);
+		return PlayerPedGen(pos, &PedBank, onFoot, isfriend);
 	}
-	void RepoPedPlayer(Ped Victim)
+
+	void RepoPedPlayer(Ped target)
 	{
 		Ped YoPlaya = PLAYER::PLAYER_PED_ID();
-		PLAYER::CHANGE_PLAYER_PED(PLAYER::PLAYER_ID(), Victim, true, true);
-		ENTITY::SET_ENTITY_AS_NO_LONGER_NEEDED(&Victim);
+		PLAYER::CHANGE_PLAYER_PED(PLAYER::PLAYER_ID(), target, true, true);
+		ENTITY::SET_ENTITY_AS_NO_LONGER_NEEDED(&target);
 
 		if (PED::GET_PED_TYPE(PLAYER::PLAYER_PED_ID()) != 28)
 		{
-			if (Mod_Settings.Random_Weapons)
+			if (Mod_Data::Mod_Settings.Random_Weapons)
 				GunningIt(PLAYER::PLAYER_PED_ID(), 0);
 			else
-				ReturnPlayerWeapons();
+				GunningIt(PLAYER::PLAYER_PED_ID(), Mod_Data::Player_Weaps);
 		}
 	}
-	void ChangePlayer(Hash modelHash, int iWeap)
+	void ChangePlayer(Hash modelHash)
 	{
-		LoggerLight("ChangePlayer == " + std::to_string(modelHash));
+		Mod_Systems::LoggerLight("ChangePlayer == " + std::to_string(modelHash));
 
 		if (!STREAMING::IS_MODEL_VALID(modelHash))
-			modelHash = MyHashKey("cs_chrisformage");
+			modelHash = Mod_Systems::MyHashKey("cs_chrisformage");
 
 		if (STREAMING::IS_MODEL_IN_CDIMAGE(modelHash) && STREAMING::IS_MODEL_VALID(modelHash))
 		{
@@ -6733,174 +6237,214 @@ namespace Mod_Entitys
 			WAIT(1000);
 			STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(modelHash);
 		}
+	}
+	void ChangePlayer(int select, int subset, int weap)
+	{
+		if (weap == -1)
+			weap = Mod_Systems::RandomInt(2, 10);
 
-		if (iWeap == -1)
-			iWeap = RandomInt(2, 10);
+		WAIT(1000);
+		ChangePlayer(Mod_Systems::MyHashKey(RandomPed(select, subset)));
+		PED::SET_PED_RANDOM_COMPONENT_VARIATION(PLAYER::PLAYER_PED_ID(), false);
 
 		if (PED::GET_PED_TYPE(PLAYER::PLAYER_PED_ID()) != 28)
 		{
-			if (Mod_Settings.Random_Weapons)
-				GunningIt(PLAYER::PLAYER_PED_ID(), iWeap);
+			if (Mod_Data::Mod_Settings.Random_Weapons)
+				GunningIt(PLAYER::PLAYER_PED_ID(), weap);
 			else
-				ReturnPlayerWeapons();
+				GunningIt(PLAYER::PLAYER_PED_ID(), Mod_Data::Player_Weaps);
 		}
 	}
-	void ChangePlayer(int iSelect, int iSubset, int iWeap)
+	void SavedPlayer(Mod_Class::ClothBank* clothBank, int weap)
 	{
-		WAIT(1000);
-		ChangePlayer(MyHashKey(RandomPed(iSelect, iSubset)), iWeap);
-		PED::SET_PED_RANDOM_COMPONENT_VARIATION(PLAYER::PLAYER_PED_ID(), false);
-	}
-	void SavedPlayer(Mod_Class::ClothBank* MyBank, int iWeap)
-	{
-		if (MyBank != nullptr)
+		if (clothBank != nullptr)
 		{
-			LoggerLight("SavedPlayer == " + MyBank->CharName);
+			if (weap == -1)
+				weap = Mod_Systems::RandomInt(2, 10);
 
-			if (MyBank->ModelHash == 0)
-				MyBank->ModelHash = MyHashKey(MyBank->Model);
+			Mod_Systems::LoggerLight("SavedPlayer == " + clothBank->CharName);
 
-			ChangePlayer(MyBank->ModelHash, iWeap);
+			if (clothBank->ModelHash == 0)
+				clothBank->ModelHash = Mod_Systems::MyHashKey(clothBank->Model);
 
-			if (MyBank->FreeMode)
-				OnlineFaces(PLAYER::PLAYER_PED_ID(), MyBank);
+			ChangePlayer(clothBank->ModelHash);
+
+			if (clothBank->FreeMode)
+				OnlineFaces(PLAYER::PLAYER_PED_ID(), clothBank);
 			else
-				OnlineDress(PLAYER::PLAYER_PED_ID(), &MyBank->Cothing[MyBank->Cloth_Pick]);
+				OnlineDress(PLAYER::PLAYER_PED_ID(), &clothBank->Cothing[clothBank->Cloth_Pick]);
 
-			if (MyBank->Cothing[MyBank->Cloth_Pick].Badge.TatName != "")
-				PED::_APPLY_PED_OVERLAY(PLAYER::PLAYER_PED_ID(), MyHashKey(MyBank->Cothing[MyBank->Cloth_Pick].Badge.BaseName), MyHashKey(MyBank->Cothing[MyBank->Cloth_Pick].Badge.TatName));
+			if (clothBank->Male)
+			{
+				if (clothBank->Voice >= (int)VoicesMale.size())
+					clothBank->Voice = 0;
 
-			if (MyBank->Voice != "")
-				ThemVoices(MyBank->Voice);
+				if (clothBank->Voice > 0)
+					ThemVoices(VoicesMale[clothBank->Voice]);
 
-			if (MyBank->Walkies != "")
-				WalkingStyle(PLAYER::PLAYER_PED_ID(), MyBank->Walkies);
+				if (clothBank->Walkies >= (int)M_Walks.size())
+					clothBank->Walkies = 0;
 
-			if (MyBank->Moods != "")
-				PullingFaces(MyBank->Moods);
+				if (clothBank->Walkies > 0)
+					WalkingStyle(PLAYER::PLAYER_PED_ID(), M_Walks[clothBank->Walkies]);
+			}
+			else
+			{
+				if (clothBank->Voice >= (int)VoicesFemale.size())
+					clothBank->Voice = 0;
+
+				if (clothBank->Voice > 0)
+					ThemVoices(VoicesFemale[clothBank->Voice]);
+
+				if (clothBank->Walkies >= (int)F_Walks.size())
+					clothBank->Walkies = 0;
+
+				if (clothBank->Walkies > 0)
+					WalkingStyle(PLAYER::PLAYER_PED_ID(), F_Walks[clothBank->Walkies]);
+			}
+			if (clothBank->Moods >= (int)FaceAn.size())
+				clothBank->Moods = 0;
+
+			if (clothBank->Moods > 0)
+				PullingFaces(FaceAn[clothBank->Moods]);
 
 			//****************Tattoos****************
-			ApplyTats(PLAYER::PLAYER_PED_ID(), MyBank);
+			ApplyTats(PLAYER::PLAYER_PED_ID(), clothBank);
+
+			if (PED::GET_PED_TYPE(PLAYER::PLAYER_PED_ID()) != 28)
+			{
+				if (clothBank->MyWeapons.size() > 0)
+					GunningIt(PLAYER::PLAYER_PED_ID(), clothBank->MyWeapons);
+				else if (Mod_Data::Mod_Settings.Random_Weapons)
+					GunningIt(PLAYER::PLAYER_PED_ID(), weap);
+				else
+					GunningIt(PLAYER::PLAYER_PED_ID(), Mod_Data::Player_Weaps);
+			}
+
+			PED::SET_PED_MAX_HEALTH(PLAYER::PLAYER_PED_ID(), clothBank->PlHealth);
+			ENTITY::SET_ENTITY_HEALTH(PLAYER::PLAYER_PED_ID(), clothBank->PlHealth);
+			PLAYER::SET_RUN_SPRINT_MULTIPLIER_FOR_PLAYER(PLAYER::PLAYER_ID(), clothBank->PlRunSp);
+			PLAYER::SET_SWIM_MULTIPLIER_FOR_PLAYER(PLAYER::PLAYER_ID(), clothBank->PlSwimSp);
 		}
 	}
 
-	std::string RandVeh(int iVechList, int iSubSet)
+	std::string RandVeh(int vehList, int subSet)
 	{
-		LoggerLight("RandVeh, iVechList == " + std::to_string(iVechList));
+		Mod_Systems::LoggerLight("RandVeh, vehList == " + std::to_string(vehList) + ", subSet == " + std::to_string(subSet));
 
-		std::string sVeh = "ZENTORNO";
+		std::string VehString = "ZENTORNO";
 
-		if (iVechList == 1)
-			sVeh = PreVeh_01[LessRandomInt("RandVeh01", 0, (int)PreVeh_01.size() - 1)];//Boats
-		else if (iVechList == 3)
-			sVeh = PreVeh_02[LessRandomInt("RandVeh02", 0, (int)PreVeh_02.size() - 1)];//Posh
-		else if (iVechList == 4)
-			sVeh = PreVeh_03[LessRandomInt("RandVeh03", 0, (int)PreVeh_03.size() - 1)];//Mid
-		else if (iVechList == 5)
-			sVeh = PreVeh_04[LessRandomInt("RandVeh04", 0, (int)PreVeh_04.size() - 1)];//low
-		else if (iVechList == 6)
-			sVeh = "VOLATUS";
-		else if (iVechList == 11)
-			sVeh = "CADDY";
-		else if (iVechList == 14)
-			sVeh = "TRACTOR2";
-		else if (iVechList == 15)
+		if (vehList == 1)
+			VehString = Mod_Data::PreVeh_01[Mod_Systems::LessRandomInt("RandVeh01", 0, (int)Mod_Data::PreVeh_01.size() - 1)];//Boats
+		else if (vehList == 3)
+			VehString = Mod_Data::PreVeh_02[Mod_Systems::LessRandomInt("RandVeh02", 0, (int)Mod_Data::PreVeh_02.size() - 1)];//Posh
+		else if (vehList == 4)
+			VehString = Mod_Data::PreVeh_03[Mod_Systems::LessRandomInt("RandVeh03", 0, (int)Mod_Data::PreVeh_03.size() - 1)];//Mid
+		else if (vehList == 5)
+			VehString = Mod_Data::PreVeh_04[Mod_Systems::LessRandomInt("RandVeh04", 0, (int)Mod_Data::PreVeh_04.size() - 1)];//low
+		else if (vehList == 6)
+			VehString = "VOLATUS";
+		else if (vehList == 11)
+			VehString = "CADDY";
+		else if (vehList == 14)
+			VehString = "TRACTOR2";
+		else if (vehList == 15)
 		{
-			if (iSubSet == 1)
-				sVeh = "TRIBIKE";      //Racer
-			else if (iSubSet == 2)
-				sVeh = "SCORCHER";     //Mountain
-			else if (iSubSet == 3)
-				sVeh = "BMX";      //BMX
+			if (subSet == 1)
+				VehString = "TRIBIKE";      //Racer
+			else if (subSet == 2)
+				VehString = "SCORCHER";     //Mountain
+			else if (subSet == 3)
+				VehString = "BMX";      //BMX
 			else
-				sVeh = "CRUISER";      //Cruser
+				VehString = "CRUISER";      //Cruser
 		}
-		else if (iVechList == 18)
+		else if (vehList == 18)
 		{
-			if (iSubSet == 7)
-				sVeh = "STOCKADE";  //"Armoured Van Security 2"); 
-			else if (iSubSet == 8)
-				sVeh = "DILETTANTE2"; //"Security Guard"); 
-			else if (iSubSet == 11)
-				sVeh = PreVeh_05[LessRandomInt("RandVeh05", 0, (int)PreVeh_05.size() - 1)];//low//"construction Worker 2"); 
-			else if (iSubSet == 12)
-				sVeh = "HANDLER"; //"Dock Worker");  
-			else if (iSubSet == 13)
-				sVeh = "AIRTUG";  //Airport
-			else if (iSubSet == 14)
-				sVeh = "TRASH2";  //"Garbage Worker");  
-			else if (iSubSet == 17)
-				sVeh = PreVeh_06[LessRandomInt("RandVeh06", 0, (int)PreVeh_06.size() - 1)]; //"Transport Worker Male");  
-			else if (iSubSet == 19)
-				sVeh = "BOXVILLE2";  //"Postal Worker Male 2");  
-			else if (iSubSet == 20)
-				sVeh = PreVeh_06[LessRandomInt("RandVeh06", 0, (int)PreVeh_06.size() - 1)]; //"Transport Worker Male");  
-			else if (iSubSet == 21)
-				sVeh = "BOXVILLE2";  //"Postal Worker Male 2");  
+			if (subSet == 7)
+				VehString = "STOCKADE";  //"Armoured Van Security 2"); 
+			else if (subSet == 8)
+				VehString = "DILETTANTE2"; //"Security Guard"); 
+			else if (subSet == 11)
+				VehString = Mod_Data::PreVeh_05[Mod_Systems::LessRandomInt("RandVeh05", 0, (int)Mod_Data::PreVeh_05.size() - 1)];//low//"construction Worker 2"); 
+			else if (subSet == 12)
+				VehString = "HANDLER"; //"Dock Worker");  
+			else if (subSet == 13)
+				VehString = "AIRTUG";  //Airport
+			else if (subSet == 14)
+				VehString = "TRASH2";  //"Garbage Worker");  
+			else if (subSet == 17)
+				VehString = Mod_Data::PreVeh_06[Mod_Systems::LessRandomInt("RandVeh06", 0, (int)Mod_Data::PreVeh_06.size() - 1)]; //"Transport Worker Male");  
+			else if (subSet == 19)
+				VehString = "BOXVILLE2";  //"Postal Worker Male 2");  
+			else if (subSet == 20)
+				VehString = Mod_Data::PreVeh_06[Mod_Systems::LessRandomInt("RandVeh06", 0, (int)Mod_Data::PreVeh_06.size() - 1)]; //"Transport Worker Male");  
+			else if (subSet == 21)
+				VehString = "BOXVILLE2";  //"Postal Worker Male 2");  
 		}
-		else if (iVechList == 19)
-			sVeh = "SEASHARK";
-		else if (iVechList == 20)
-			sVeh = PreVeh_07[LessRandomInt("RandVeh07", 0, (int)PreVeh_07.size() - 1)];//bikeAtv
-		else if (iVechList == 21)
+		else if (vehList == 19)
+			VehString = "SEASHARK";
+		else if (vehList == 20)
+			VehString = Mod_Data::PreVeh_07[Mod_Systems::LessRandomInt("RandVeh07", 0, (int)Mod_Data::PreVeh_07.size() - 1)];//bikeAtv
+		else if (vehList == 21)
 		{
-			if (iSubSet == 1)
-				sVeh = "BLAZER2"; //"Baywatch 
-			else if (iSubSet == 2)
-				sVeh = "PREDATOR";  //"US Coastguard
-			else if (iSubSet == 3)
-				sVeh = PreVeh_08[LessRandomInt("RandVeh08a", 8, (int)PreVeh_08.size() - 2)]; //><!--Cops
-			else if (iSubSet == 4)
-				sVeh = PreVeh_08[4]; //><!-- PoliceBike
-			else if (iSubSet == 5)
-				sVeh = PreVeh_08[5];//><!-- Ranger
-			else if (iSubSet == 6)
-				sVeh = PreVeh_08[LessRandomInt("RandVeh08b", 6, 7)]; //><!-- Sherif
-			else if (iSubSet == 7)
-				sVeh = PreVeh_08[LessRandomInt("RandVeh08b", 0, 2)];  //><!-- fib
-			else if (iSubSet == 8)
-				sVeh = PreVeh_08[(int)PreVeh_08.size() - 1]; //><!-- swat
-			else if (iSubSet == 9)
-				sVeh = PreVeh_09[LessRandomInt("RandVeh09", 0, (int)PreVeh_09.size() - 1)]; //military
-			else if (iSubSet == 10)
-				sVeh = "AMBULANCE"; //medic
+			if (subSet == 1)
+				VehString = "BLAZER2"; //"Baywatch 
+			else if (subSet == 2)
+				VehString = "PREDATOR";  //"US Coastguard
+			else if (subSet == 3)
+				VehString = Mod_Data::PreVeh_08[Mod_Systems::LessRandomInt("RandVeh08a", 8, (int)Mod_Data::PreVeh_08.size() - 2)]; //><!--Cops
+			else if (subSet == 4)
+				VehString = Mod_Data::PreVeh_08[4]; //><!-- PoliceBike
+			else if (subSet == 5)
+				VehString = Mod_Data::PreVeh_08[5];//><!-- Ranger
+			else if (subSet == 6)
+				VehString = Mod_Data::PreVeh_08[Mod_Systems::LessRandomInt("RandVeh08b", 6, 7)]; //><!-- Sherif
+			else if (subSet == 7)
+				VehString = Mod_Data::PreVeh_08[Mod_Systems::LessRandomInt("RandVeh08b", 0, 2)];  //><!-- fib
+			else if (subSet == 8)
+				VehString = Mod_Data::PreVeh_08[(int)Mod_Data::PreVeh_08.size() - 1]; //><!-- swat
+			else if (subSet == 9)
+				VehString = Mod_Data::PreVeh_09[Mod_Systems::LessRandomInt("RandVeh09", 0, (int)Mod_Data::PreVeh_09.size() - 1)]; //military
+			else if (subSet == 10)
+				VehString = "AMBULANCE"; //medic
 			else
-				sVeh = "FIRETRUK";  //fireman
+				VehString = "FIRETRUK";  //fireman
 		}
-		else if (iVechList == 22)
+		else if (vehList == 22)
 		{
-			if (iSubSet == 1)
-				sVeh = PreVeh_10[LessRandomInt("RandVeh10a", 17, (int)PreVeh_10.size() - 1)];  //civilian
-			else if (iSubSet == 2)
-				sVeh = PreVeh_10[LessRandomInt("RandVeh10b", 0, 18)];    //milatary
+			if (subSet == 1)
+				VehString = Mod_Data::PreVeh_10[Mod_Systems::LessRandomInt("RandVeh10a", 17, (int)Mod_Data::PreVeh_10.size() - 1)];  //civilian
+			else if (subSet == 2)
+				VehString = Mod_Data::PreVeh_10[Mod_Systems::LessRandomInt("RandVeh10b", 0, 18)];    //milatary
 			else
-				sVeh = PreVeh_11[LessRandomInt("RandVeh11", 0, (int)PreVeh_11.size() - 1)];   //helitours
+				VehString = Mod_Data::PreVeh_11[Mod_Systems::LessRandomInt("RandVeh11", 0, (int)Mod_Data::PreVeh_11.size() - 1)];   //helitours
 		}
-		else if (iVechList == 24)
-			sVeh = PreVeh_12[LessRandomInt("RandVeh12", 0, (int)PreVeh_12.size() - 1)];
-		else if (iVechList == 50)
-			sVeh = "Mule";
-		else //if (iVechList == 25)
-			sVeh = PreVeh_13[LessRandomInt("RandVeh13", 0, (int)PreVeh_13.size() - 1)];
+		else if (vehList == 24)
+			VehString = Mod_Data::PreVeh_12[Mod_Systems::LessRandomInt("RandVeh12", 0, (int)Mod_Data::PreVeh_12.size() - 1)];
+		else if (vehList == 50)
+			VehString = "Mule";
+		else //if (vehList == 25)
+			VehString = Mod_Data::PreVeh_13[Mod_Systems::LessRandomInt("RandVeh13", 0, (int)Mod_Data::PreVeh_13.size() - 1)];
 
-		return sVeh;
+		return VehString;
 	}
-	bool IsItARealVehicle(const std::string& sVehName)
+	bool IsItARealVehicle(const std::string& vehName)
 	{
-		LoggerLight("IsItARealVehicle, sVehName == " + sVehName);
+		Mod_Systems::LoggerLight("IsItARealVehicle, vehName == " + vehName);
 
 		bool bIsReal = false;
-		if ((bool)STREAMING::IS_MODEL_A_VEHICLE(MyHashKey(sVehName)))
+		if ((bool)STREAMING::IS_MODEL_A_VEHICLE(Mod_Systems::MyHashKey(vehName)))
 			bIsReal = true;
 
 		return bIsReal;
 	}
-	bool HasASeat(Vehicle vMe)
+	bool HasASeat(Vehicle vic)
 	{
 		bool bIn = false;
-		if (vMe != NULL)
+		if (vic != NULL)
 		{
-			if (FindUSeat(vMe) > -1)
+			if (FindUSeat(vic) > -1)
 				bIn = true;
 		}
 		return bIn;
@@ -6908,7 +6452,7 @@ namespace Mod_Entitys
 
 	Vehicle VehicleSpawn(Mod_Class::Veh_Set vehSet)
 	{//Fix the player to drive till press buutton and fly and other stuuff
-		LoggerLight("SpawnVehicle");
+		Mod_Systems::LoggerLight("SpawnVehicle");
 
 		Vehicle thisVeh = NULL;
 		WAIT(100);
@@ -6917,7 +6461,7 @@ namespace Mod_Entitys
 		if (!IsItARealVehicle(sVehModel))
 			sVehModel = "MAMBA";
 
-		vehSet.ModelHash = MyHashKey(sVehModel);
+		vehSet.ModelHash = Mod_Systems::MyHashKey(sVehModel);
 
 		if ((bool)STREAMING::IS_MODEL_IN_CDIMAGE(vehSet.ModelHash) && (bool)STREAMING::IS_MODEL_A_VEHICLE(vehSet.ModelHash))
 		{
@@ -6933,7 +6477,10 @@ namespace Mod_Entitys
 				MaxOutAllModsNoWheels(thisVeh, iClass);
 			}
 			else
-				MakeModsNotWar(thisVeh, RandVehModsist());
+			{
+				std::vector<int> Modup = RandVehModsist();
+				MakeModsNotWar(thisVeh, &Modup);
+			}
 
 			ENTITY::SET_ENTITY_AS_MISSION_ENTITY(thisVeh, 1, 1);
 
@@ -6973,7 +6520,7 @@ namespace Mod_Entitys
 
 				for (int i = iStart; i < iSeating; i++)
 				{
-					LoggerLight("Fill Vehicle with peds");
+					Mod_Systems::LoggerLight("Fill Vehicle with peds");
 					Ped CarPed = PlayerPedGen(vehSet.SpawnPoint, vehSet.Select, vehSet.SubSet, false, vehSet.bFriend);
 					WarptoAnyVeh(thisVeh, CarPed, i);
 				}
@@ -6984,7 +6531,7 @@ namespace Mod_Entitys
 				Drive_Fly_On(DesDriver, thisVeh, vehSet.DriveTo, vehSet.IsPlane, vehSet.IsHeli, vehSet.PlayerDriver, vehSet.RanDriveTo);
 			}
 
-			Vehicle_List.push_back(thisVeh);
+			Mod_Data::Vehicle_List.push_back(thisVeh);
 			STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(vehSet.ModelHash);
 		}
 		else
@@ -6993,27 +6540,25 @@ namespace Mod_Entitys
 		return thisVeh;
 	}
 
-	std::vector<Ped> CollectPeds()
+	void CollectPeds(std::vector<Ped>* pedList)
 	{
 		const int PED_ARR_SIZE = 1024;
 		Ped Pedds[PED_ARR_SIZE];
 		int Pedcount = worldGetAllPeds(Pedds, PED_ARR_SIZE);
-		std::vector<Ped> NpcList = {};
 
 		for (int i = 0; i < Pedcount; i++)
 		{
-			Ped Pent = Pedds[i];
-			if (Pent != NULL && ENTITY::DOES_ENTITY_EXIST(Pent))
+			Ped Peddy = Pedds[i];
+			if (Peddy != NULL && ENTITY::DOES_ENTITY_EXIST(Peddy))
 			{
-				if (!ENTITY::IS_ENTITY_A_MISSION_ENTITY(Pent))
-					NpcList.push_back(Pent);
+				if (!ENTITY::IS_ENTITY_A_MISSION_ENTITY(Peddy))
+					pedList->push_back(Peddy);
 			}
 		}
-		return NpcList;
 	}
-	Ped NearByPed(Mod_Class::Vector4 vArea, float areaMin, float areaMax)
+	Ped NearByPed(Mod_Class::Vector4 area, float areaMin, float areaMax)
 	{
-		Ped Pedlass = NULL;
+		Ped Peddy = NULL;
 
 		Ped PlayerPed = PLAYER::PLAYER_PED_ID();
 
@@ -7025,93 +6570,105 @@ namespace Mod_Entitys
 
 		for (int i = 0; i < Pedcount; i++)
 		{
-			Ped Pent = Pedds[i];
-			if (Pent != NULL && ENTITY::DOES_ENTITY_EXIST(Pent))
+			if (Pedds[i] != NULL && ENTITY::DOES_ENTITY_EXIST(Pedds[i]))
 			{
-				if (!ENTITY::IS_ENTITY_A_MISSION_ENTITY(Pent) && Mod_Maths::DistanceTo(vArea, Mod_Maths::EntPosition(Pent)) > areaMin && Mod_Maths::DistanceTo(vArea, Mod_Maths::EntPosition(Pent)) < areaMax)
+				if (!ENTITY::IS_ENTITY_A_MISSION_ENTITY(Pedds[i]) && Mod_Maths::DistanceTo(area, Mod_Maths::EntPosition(Pedds[i])) > areaMin && Mod_Maths::DistanceTo(area, Mod_Maths::EntPosition(Pedds[i])) < areaMax)
 				{
-					if (PED::GET_PED_TYPE(Pent) == 28)
-						AnimalList.push_back(Pent);
+					if (PED::GET_PED_TYPE(Pedds[i]) == 28)
+						AnimalList.push_back(Pedds[i]);
 					else
-						NpcList.push_back(Pent);
+						NpcList.push_back(Pedds[i]);
 				}
 			}
 		}
 
 		for (int i = 0; i < (int)NpcList.size(); i++)
 		{
-			Ped MadP = NpcList[i];
+			Peddy = NpcList[i];
 
-			if (ENTITY::DOES_ENTITY_EXIST(MadP))
+			if (ENTITY::DOES_ENTITY_EXIST(Peddy))
 			{
-				if (MadP != PlayerPed && !(bool)ENTITY::IS_ENTITY_DEAD(MadP) && Mod_Maths::EntPosition(MadP).z > -10)
+				if (Peddy != PlayerPed && !(bool)ENTITY::IS_ENTITY_DEAD(Peddy) && Mod_Maths::EntPosition(Peddy).z > -10)
 				{
-					Pedlass = MadP;
-					ENTITY::SET_ENTITY_AS_MISSION_ENTITY(Pedlass, 1, 1);
+					ENTITY::SET_ENTITY_AS_MISSION_ENTITY(Peddy, 1, 1);
 					break;
 				}
 			}
 		}
 
-		if (Pedlass == NULL)
+		if (Peddy == NULL)
 		{
 			for (int i = 0; i < (int)AnimalList.size(); i++)
 			{
-				Ped MadP = AnimalList[i];
-
-				if (ENTITY::DOES_ENTITY_EXIST(MadP))
+				Ped Peddy = AnimalList[i];
+				if (ENTITY::DOES_ENTITY_EXIST(Peddy))
 				{
-					if (MadP != PlayerPed && !(bool)ENTITY::IS_ENTITY_DEAD(MadP))
+					if (Peddy != PlayerPed && !(bool)ENTITY::IS_ENTITY_DEAD(Peddy))
 					{
-						Pedlass = MadP;
-						ENTITY::SET_ENTITY_AS_MISSION_ENTITY(Pedlass, 1, 1);
+						ENTITY::SET_ENTITY_AS_MISSION_ENTITY(Peddy, 1, 1);
 						break;
 					}
 				}
 			}
 		}
-		return Pedlass;
+		
+		return Peddy;
 	}
 
-	void SideAdviceNote()
+	void CamAction()
 	{
-		Side_Add_Time = InGameTime() + 7000;
-		Disp_Pick = Space38(RSLangMenu[LessRandomInt("BadAdvice", 194, 208)]);
-		Disp_Advice = true;
+		Vector3 Campo = Mod_Maths::PlayerPosi();
+		Vector3 Camro = Mod_Maths::NewVector3(-90.00f, 0.00f, 0.00f);
+		UI::DISPLAY_RADAR(false);
+		Campo.z += 155.00f;
+		char* CamsChar = "DEFAULT_SCRIPTED_CAMERA";
+		Camera CameraObj = CAM::CREATE_CAM_WITH_PARAMS(CamsChar, Campo.x, Campo.y, Campo.z, Camro.x, Camro.y, Camro.z, 150.00f, true, 2);
+		CAM::RENDER_SCRIPT_CAMS(1, 1, CameraObj, 0, 0);
+		WAIT(3000);
+		while (CAM::GET_CAM_COORD(CameraObj).z > Mod_Maths::PlayerPosi().z + 2.00f && !(bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()))
+		{
+			Campo.z -= 1.00f;
+			CAM::SET_CAM_COORD((Any)CameraObj, Campo.x, Campo.y, Campo.z);
+			WAIT(1);
+		}
+		CAM::RENDER_SCRIPT_CAMS(0, 1, 0, 0, 0);
+		CAM::DESTROY_CAM(CameraObj, true);
+		UI::DISPLAY_RADAR(true);
 	}
 	void Reicarnations()
 	{
-		LoggerLight("Reicarnations");
+		Mod_Systems::LoggerLight("Reicarnations");
 
 		Mod_Maths::AnyPreActives(0, false);
 		Mod_Class::Vector4 DeathPlace = Mod_Maths::FindPedSpPoint(Mod_Maths::PlayerPosi());
 		Ped Bob = NULL;
 
-		if (!Mod_Settings.ReCurr || !Mod_Settings.Saved_Ped)
+		if (!Mod_Data::Mod_Settings.Saved_Ped && !Mod_Data::Mod_Settings.Random_Ped && !Mod_Data::Mod_Settings.ReCurr)
+			Mod_Data::Mod_Settings.ReCurr = true;
+
+		if (!Mod_Data::Mod_Settings.ReCurr || Mod_Data::Mod_Settings.Random_Ped)
 			Bob = NearByPed(DeathPlace, 35.0f, 500.0f);
 
 		while ((bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()))
 			WAIT(1);
 
-		WAIT(1000);
-
-		if (Mod_Settings.ReCurr)
+		if (Mod_Data::Mod_Settings.ReCurr)
 			MoveEntity(PLAYER::PLAYER_PED_ID(), DeathPlace);
-		else if (Mod_Settings.Saved_Ped)
+		else if (Mod_Data::Mod_Settings.Saved_Ped && (int)Mod_Data::SavedPeds.size() > 1)
 		{
 			MoveEntity(PLAYER::PLAYER_PED_ID(), DeathPlace);
-			Mod_Class::ClothBank bank = SavedPeds[LessRandomInt("SavedPedFind", 1, (int)SavedPeds.size() - 1)];
+			Mod_Class::ClothBank bank = Mod_Data::SavedPeds[Mod_Systems::LessRandomInt("SavedPedFind", 1, (int)Mod_Data::SavedPeds.size() - 1)];
 			SavedPlayer(&bank, -1);
 		}
 		else
 		{
-			if (Bob != NULL && !Yankton_Loaded)
+			if (Bob != NULL && !Mod_Data::Yankton_Loaded && !Mod_Data::Cayo_Loaded)
 				RepoPedPlayer(Bob);
 			else 
 			{
-				if (Yankton_Loaded)
+				if (Mod_Data::Yankton_Loaded)
 					ChangePlayer(24, 0, 5);
-				else if (Cayo_Loaded)
+				else if (Mod_Data::Cayo_Loaded)
 					ChangePlayer(25, 3, 4);
 				else
 					ChangePlayer(4, 0, 1);
@@ -7120,72 +6677,25 @@ namespace Mod_Entitys
 			}
 		}
 
-		RandomWeatherTime();
-		Play_Wav(Ahhhh);
+		Mod_Systems::RandomWeatherTime();
+		Mod_Systems::Play_wav(Mod_Data::Ahhhh);
 		CAM::DO_SCREEN_FADE_IN(1500);
-		SideAdviceNote();
+		CamAction();
 
-		Vector3 Campo = Mod_Maths::PlayerPosi();
-		Vector3 Camro = Mod_Maths::NewVector3(-90.00f, 0.00f, 0.00f);
-		UI::DISPLAY_RADAR(false);
-		Campo.z += 155.00f;
-		char* Cams = "DEFAULT_SCRIPTED_CAMERA";
-		Camera cCams = CAM::CREATE_CAM_WITH_PARAMS(Cams, Campo.x, Campo.y, Campo.z, Camro.x, Camro.y, Camro.z, 150.00f, true, 2);
-		CAM::RENDER_SCRIPT_CAMS(1, 1, cCams, 0, 0);
-		WAIT(3000);
-		while (CAM::GET_CAM_COORD(cCams).z > Mod_Maths::PlayerPosi().z + 2.00f)
-		{
-			Campo.z -= 1.00f;
-			CAM::SET_CAM_COORD((Any)cCams, Campo.x, Campo.y, Campo.z);
-			WAIT(1);
-		}
-		CAM::RENDER_SCRIPT_CAMS(0, 1, 0, 0, 0);
-		CAM::DESTROY_CAM(cCams, true);
-		UI::DISPLAY_RADAR(true);
-	}//ENTITY::SET_ENTITY_INVINCIBLE(PLAYER::PLAYER_PED_ID(), false);
+		//ENTITY::SET_ENTITY_COLLISION(PLAYER::PLAYER_PED_ID(), true, true);
+		//WAIT(1000);
+	}
+	
 	const std::vector<std::string> fluids = {
 		"scr_solomon3",
 		"scr_trev4_747_blood_splash",
 		"cut_trevor1",
 		"cs_trev1_blood_pool",
 	};
-	void EasyWayOut(Ped Vic)
-	{
-		WEAPON::GIVE_WEAPON_TO_PED(Vic, MyHashKey("WEAPON_pistol"), 100, false, true);
-		WEAPON::SET_CURRENT_PED_WEAPON(Vic, MyHashKey("WEAPON_pistol"), true);
-		WAIT(450);
-		ForceAnim(Vic, "mp_suicide", "pistol", Mod_Maths::GetPosV4(Vic));
-		AUDIO::PLAY_SOUND_FROM_ENTITY(-1, "GENERIC_CURSE_HIGH", Vic, 0, 0, 0);
-		WAIT(700);
-		int WaitHere = InGameTime() + 200;
-		while (true)
-		{
-			if (WaitHere < InGameTime())
-				break;
-			if ((bool)STREAMING::HAS_NAMED_PTFX_ASSET_LOADED((LPSTR)fluids[0].c_str()))
-			{
-				GRAPHICS::_SET_PTFX_ASSET_NEXT_CALL((LPSTR)fluids[0].c_str());
-				GRAPHICS::START_PARTICLE_FX_NON_LOOPED_ON_ENTITY((LPSTR)fluids[1].c_str(), Vic, 0.0f, 0.15f, 0.75f, 0.0f, 0.0f, 90.0f, 1.0f, false, false, false);
-			}
-			else
-				STREAMING::REQUEST_NAMED_PTFX_ASSET((LPSTR)fluids[0].c_str());
-
-			if ((bool)STREAMING::HAS_NAMED_PTFX_ASSET_LOADED((LPSTR)fluids[2].c_str()))
-			{
-				GRAPHICS::_SET_PTFX_ASSET_NEXT_CALL((LPSTR)fluids[2].c_str());
-				GRAPHICS::START_PARTICLE_FX_NON_LOOPED_ON_ENTITY((LPSTR)fluids[3].c_str(), Vic, 0.0f, 0.15f, 0.75f, 0.0f, 0.0f, 90.0f, 0.5f, false, false, false);
-			}
-			else
-				STREAMING::REQUEST_NAMED_PTFX_ASSET((LPSTR)fluids[2].c_str());
-
-			WAIT(1);
-		}
-		//AddDecals(Mod_Maths::FowardOf(WEAPON::GET_CURRENT_PED_WEAPON_ENTITY_INDEX(Vic), 0.01, true), 1017, 10.00f, 10.0f);
-		ENTITY::SET_ENTITY_HEALTH(Vic, 1);
-	}
+	
 	void CayoAudio()
 	{
-		if (Cayo_Loaded)
+		if (Mod_Data::Cayo_Loaded)
 		{
 			AUDIO::SET_STATIC_EMITTER_ENABLED("se_dlc_hei4_island_beach_party_music_new_01_left", true);
 			AUDIO::SET_STATIC_EMITTER_ENABLED("se_dlc_hei4_island_beach_party_music_new_02_right", true);
@@ -7234,22 +6744,22 @@ namespace Mod_Entitys
 			Mod_Class::Vector4(4863.502f, -4955.183f, 2.544171f,78.42456f)
 		};
 
-		int iRan = RandomInt(4, 7);
+		int iRan = Mod_Systems::RandomInt(4, 7);
 		for (int i = 0; i < iRan; i++)
 		{
 			Mod_Class::Vector4 vDance = Mod_Maths::InAreaOf(CayoPartays[0], 2.0f, 5.0f);
 			Ped Dancer = PlayerPedGen(vDance, 1, 0, true, true);
-			CayDancers.push_back(Dancer);
+			Mod_Data::CayDancers.push_back(Dancer);
 			DanceDanceDance(Dancer);
 		}
 
-		iRan = RandomInt(7, 13);
+		iRan = Mod_Systems::RandomInt(7, 13);
 
 		for (int i = 0; i < iRan; i++)
 		{
 			Mod_Class::Vector4 vDance = Mod_Maths::InAreaOf(CayoPartays[1], 2.0f, 8.0f);
 			Ped Dancer = PlayerPedGen(vDance, 1, 0, true, true);
-			CayDancers.push_back(Dancer);
+			Mod_Data::CayDancers.push_back(Dancer);
 			DanceDanceDance(Dancer);
 		}
 
@@ -7278,7 +6788,7 @@ namespace Mod_Entitys
 
 		for (int i = 4; i < CayoLay.size(); i++)
 		{
-			if (RandomInt(0, 20) < 10)
+			if (Mod_Systems::RandomInt(0, 20) < 10)
 			{
 				Ped SunS = PlayerPedGen(CayoLay[i], 1, 0, true, true);
 				SunningIt(SunS, CayoLay[i]);
@@ -7291,593 +6801,5 @@ namespace Mod_Entitys
 		DanceDanceDance(Bar);
 
 		CayoAudio();
-	}
-}
-
-namespace Mod_Ui
-{
-	int AddScreenText(int font, const std::string& caption, float textLeftScaled, float lineTopScaled, float lineHeightScaled, float text_scale, int text_col[4])
-	{
-		// text upper part
-		UI::SET_TEXT_FONT(font);
-		UI::SET_TEXT_SCALE(0.0, text_scale);
-		UI::SET_TEXT_COLOUR(text_col[0], text_col[1], text_col[2], text_col[3]);
-		UI::SET_TEXT_CENTRE(0);
-		UI::SET_TEXT_DROPSHADOW(0, 0, 0, 0, 0);
-		UI::SET_TEXT_EDGE(0, 0, 0, 0, 0);
-		UI::_SET_TEXT_ENTRY("STRING");
-		UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)caption.c_str());
-		UI::_DRAW_TEXT(textLeftScaled, (((lineTopScaled + 0.00278f) + lineHeightScaled) - 0.005f));
-
-		// text lower part
-		UI::SET_TEXT_FONT(font);
-		UI::SET_TEXT_SCALE(0.0, text_scale);
-		UI::SET_TEXT_COLOUR(text_col[0], text_col[1], text_col[2], text_col[3]);
-		UI::SET_TEXT_CENTRE(0);
-		UI::SET_TEXT_DROPSHADOW(0, 0, 0, 0, 0);
-		UI::SET_TEXT_EDGE(0, 0, 0, 0, 0);
-		UI::_SET_TEXT_GXT_ENTRY("STRING");
-		UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)caption.c_str());
-		return UI::_0x9040DFB09BE75706(textLeftScaled, (((lineTopScaled + 0.00278f) + lineHeightScaled) - 0.005f));
-	}
-	void AddSprite(const std::string& spriteLocation, const std::string& spriteName, float posX, float posY, float sizeX, float sizeY, float heading)
-	{
-		if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED((LPSTR)spriteLocation.c_str()))
-			GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT((LPSTR)spriteLocation.c_str(), true);
-
-		int red = 255;
-		int blue = 255;
-		int green = 255;
-		int alpha = 255;
-
-		int iWidth, iHeight;
-		GRAPHICS::GET_SCREEN_RESOLUTION(&iWidth, &iHeight);
-
-		float num = (float)iWidth / (float)iHeight;
-		float num2 = (float)1080.0 * num;
-		float width = posX / num2;
-		float height = posY / 1080;
-		float screenX = sizeX / num2 + width * 0.5f;
-		float screenY = sizeY / 1080 + height * 0.5f;
-		GRAPHICS::DRAW_SPRITE((LPSTR)spriteLocation.c_str(), (LPSTR)spriteName.c_str(), screenX, screenY, width, height, heading, red, green, blue, alpha);
-	}
-	void Draw_rect(float A_0, float A_1, float A_2, float A_3, int A_4, int A_5, int A_6, int A_7)
-	{
-		GRAPHICS::DRAW_RECT((A_0 + (A_2 * 0.5f)), (A_1 + (A_3 * 0.5f)), A_2, A_3, A_4, A_5, A_6, A_7);
-	}
-	void DrawSessionList(const std::string& caption, const std::string& level, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, float textLeft2, bool active, bool title, int position)
-	{
-		// default values
-		int text_col[4] = { 255, 255, 255, 255 },
-			rect_col[4] = { 0, 0, 0, 120 };
-		float text_scale = 0.50;
-		int font = 4;
-
-		// correcting values for active line
-		if (title)
-		{
-			rect_col[0] = 0;
-			rect_col[1] = 0;
-			rect_col[2] = 0;
-			rect_col[3] = 250;
-		}
-
-		int screen_w, screen_h;
-		GRAPHICS::GET_SCREEN_RESOLUTION(&screen_w, &screen_h);
-
-		textLeft += lineLeft;
-		textLeft2 += lineLeft;
-
-		float lineWidthScaled = lineWidth / (float)screen_w; // line width
-		float lineTopScaled = lineTop / (float)screen_h; // line top offset
-		float textLeftScaled = textLeft / (float)screen_w; // text left offset
-		float textLeftScaled2 = textLeft2 / (float)screen_w; // text left offset
-		float lineHeightScaled = lineHeight / (float)screen_h; // line height
-
-		float lineLeftScaled = lineLeft / (float)screen_w;
-
-		// this is how it's done in original scripts
-
-		// text upper part
-		int num25 = AddScreenText(font, caption, textLeftScaled, lineTopScaled, lineHeightScaled, text_scale, text_col);
-		int num26 = AddScreenText(font, level, textLeftScaled2, lineTopScaled, lineHeightScaled, text_scale, text_col);
-		// rect
-		Draw_rect(lineLeftScaled, lineTopScaled + (0.00278f), lineWidthScaled, ((((float)(num25)*UI::_0xDB88A37483346780(text_scale, 0)) + (lineHeightScaled * 2.0f)) + 0.005f), rect_col[0], rect_col[1], rect_col[2], rect_col[3]);
-
-		if (active)
-		{
-			float PosX = 55.5;
-			float PosY = 62.0;
-			float sizeX = 352.0;
-			float sizeY = 51.0;
-			float Heading = 0.0;
-
-			float iTimes1 = 1.0;
-			float iTimes2 = 33.0;
-
-			AddSprite("mpleaderboard", "leaderboard_globe_icon", PosX, PosY + (float)position * iTimes1, sizeX, sizeY + (float)position * iTimes2, 0.0);
-		}
-	}
-	void Draw_menu_line(const std::string& caption, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, bool active, bool title, bool rescaleText)
-	{
-		// default values
-		int text_col[4] = { 255, 255, 255, 245 },
-			rect_col[4] = { 0, 0, 0, 200 };
-		float text_scale = 0.35;
-		int font = 0;
-
-		// correcting values for active line
-		if (active)
-		{
-			text_col[0] = 0;
-			text_col[1] = 0;
-			text_col[2] = 0;
-
-			rect_col[0] = 255;
-			rect_col[1] = 255;
-			rect_col[2] = 255;
-
-			if (rescaleText) text_scale = 0.40;
-		}
-
-		if (title)
-		{
-			rect_col[0] = 112;
-			rect_col[1] = 44;
-			rect_col[2] = 20;
-
-			if (rescaleText) text_scale = 0.50;
-			font = 1;
-		}
-
-		int screen_w, screen_h;
-		GRAPHICS::GET_SCREEN_RESOLUTION(&screen_w, &screen_h);
-
-		textLeft += lineLeft;
-
-		float lineWidthScaled = lineWidth / (float)screen_w; // line width
-		float lineTopScaled = lineTop / (float)screen_h; // line top offset
-		float textLeftScaled = textLeft / (float)screen_w; // text left offset
-		float lineHeightScaled = lineHeight / (float)screen_h; // line height
-
-		float lineLeftScaled = lineLeft / (float)screen_w;
-
-		// this is how it's done in original scripts
-		int num25 = AddScreenText(font, caption, textLeftScaled, lineTopScaled, lineHeightScaled, text_scale, text_col);
-
-		// rect
-		Draw_rect(lineLeftScaled, lineTopScaled + (0.00278f), lineWidthScaled, ((((float)(num25)*UI::_0xDB88A37483346780(text_scale, 0)) + (lineHeightScaled * 2.0f)) + 0.005f),
-			rect_col[0], rect_col[1], rect_col[2], rect_col[3]);
-	}
-	void Draw_menu_line_Numbers(const std::string& caption, int number, float lineWidth, float lineHeight, float lineTop, float lineLeft, float textLeft, float textLeft2, bool active, bool title, bool rescaleText)
-	{
-		// default values
-		int text_col[4] = { 255, 255, 255, 245 },
-			rect_col[4] = { 0, 0, 0, 200 };
-		float text_scale = 0.35;
-		int font = 0;
-
-		if (rescaleText)
-			text_scale = 0.20;
-		// correcting values for active line
-		if (active)
-		{
-			text_col[0] = 0;
-			text_col[1] = 0;
-			text_col[2] = 0;
-
-			rect_col[0] = 255;
-			rect_col[1] = 255;
-			rect_col[2] = 255;
-
-		}
-
-		if (title)
-		{
-			rect_col[0] = 112;
-			rect_col[1] = 44;
-			rect_col[2] = 20;
-
-			if (rescaleText) text_scale = 0.50;
-			font = 1;
-		}
-
-		int screen_w, screen_h;
-		GRAPHICS::GET_SCREEN_RESOLUTION(&screen_w, &screen_h);
-
-		textLeft += lineLeft;
-
-		float lineWidthScaled = lineWidth / (float)screen_w; // line width
-		float lineTopScaled = lineTop / (float)screen_h; // line top offset
-		float textLeftScaled = textLeft / (float)screen_w; // text left offset
-		float lineHeightScaled = lineHeight / (float)screen_h; // line height
-
-		float textLeftScaled2 = textLeft2 / (float)screen_w; // text left offset
-
-		float lineLeftScaled = lineLeft / (float)screen_w;
-
-		// this is how it's done in original scripts
-		int num25 = AddScreenText(font, caption, textLeftScaled, lineTopScaled, lineHeightScaled, text_scale, text_col);
-
-		int num26 = AddScreenText(font, std::to_string(number), textLeftScaled2, lineTopScaled, lineHeightScaled, text_scale, text_col);
-		// rect
-		Draw_rect(lineLeftScaled, lineTopScaled + (0.00278f), lineWidthScaled, ((((float)(num25)*UI::_0xDB88A37483346780(text_scale, 0)) + (lineHeightScaled * 2.0f)) + 0.005f),
-			rect_col[0], rect_col[1], rect_col[2], rect_col[3]);
-	}
-	int BottomRight(std::vector<int>& iButtons, std::vector<std::string>& sInstuctions)
-	{
-		std::string CharCon = "instructional_buttons";
-		int iScale = GRAPHICS::REQUEST_SCALEFORM_MOVIE((LPSTR)CharCon.c_str());
-
-		while (!GRAPHICS::HAS_SCALEFORM_MOVIE_LOADED(iScale))
-			WAIT(1);
-
-		CharCon = "CLEAR_ALL";
-		GRAPHICS::CALL_SCALEFORM_MOVIE_METHOD(iScale, (LPSTR)CharCon.c_str());
-		CharCon = "TOGGLE_MOUSE_BUTTONS";
-		GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(iScale, (LPSTR)CharCon.c_str());
-		GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_BOOL(0);
-		GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
-
-		CharCon = "CREATE_CONTAINER";
-		GRAPHICS::CALL_SCALEFORM_MOVIE_METHOD(iScale, (LPSTR)CharCon.c_str());//Was---_CALL_SCALEFORM_MOVIE_FUNCTION_VOID
-
-		int iAddOns = 0;
-
-		for (int i = 0; i < (int)iButtons.size(); i++)
-		{
-			CharCon = "SET_DATA_SLOT";
-			GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(iScale, (LPSTR)CharCon.c_str());
-			GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(iAddOns);
-			GRAPHICS::_0xE83A3E3557A56640(CONTROLS::_GET_CONTROL_ACTION_NAME(2, iButtons[i], 1));
-			GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_STRING((LPSTR)sInstuctions[i].c_str());
-			GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
-			iAddOns++;
-		}
-		CharCon = "DRAW_INSTRUCTIONAL_BUTTONS";
-		GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(iScale, (LPSTR)CharCon.c_str());
-		GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(-1);
-		GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
-
-		return iScale;
-	}
-	void CloseBaseHelpBar(int CloseMe)
-	{
-		int SF = CloseMe;
-		GRAPHICS::SET_SCALEFORM_MOVIE_AS_NO_LONGER_NEEDED(&SF);
-	}
-	int Get_Int_Length(int iLeg)
-	{
-		int iDis = 0;
-		if (iLeg < -1000)
-			iDis = 5;
-		else if (iLeg < -100)
-			iDis = 4;
-		else if (iLeg < -10)
-			iDis = 3;
-		else if (iLeg < 0)
-			iDis = 2;
-		else if (iLeg < 10)
-			iDis = 1;
-		else if (iLeg < 100)
-			iDis = 2;
-		else if (iLeg < 1000)
-			iDis = 3;
-		else
-			iDis = 4;
-
-		return iDis;
-	}
-	bool CloseAll = false;
-
-	void ShowText(float x, float y, float scale, const std::string& text, int font, Mod_Class::RGBA rgba, bool outline)
-	{
-		UI::SET_TEXT_FONT(font);
-		UI::SET_TEXT_SCALE(scale, scale);
-		UI::SET_TEXT_COLOUR(rgba.R, rgba.G, rgba.B, rgba.A);
-		UI::SET_TEXT_WRAP(0.0, 1.0);
-		UI::SET_TEXT_CENTRE(0);
-		if (outline)
-			UI::SET_TEXT_OUTLINE();
-		UI::_SET_TEXT_ENTRY("STRING");
-		UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)text.c_str());
-		UI::_DRAW_TEXT(x, y);
-	}
-	void ShowPlayerLabel(Vector3 location, float baseSize, const std::vector<std::string>& textLines)
-	{
-		Vector3 cameraPos = CAM::GET_GAMEPLAY_CAM_COORD();
-		float distance = Mod_Maths::DistanceTo(cameraPos, location);
-		float totalMult = baseSize / (distance * (CAM::GET_GAMEPLAY_CAM_FOV() / 60.0f));
-
-		float height = 0.0125f * totalMult;
-		Mod_Class::RGBA fontColor = Mod_Class::RGBA(255, 255, 255, 255);
-		GRAPHICS::SET_DRAW_ORIGIN(location.x, location.y, location.z, 0);
-		int i = 0;
-
-		for (auto line : textLines) {
-
-			ShowText(0.0f, 0.0f + height * i, 0.2f * totalMult, line, 0, fontColor, true);
-			i++;
-		}
-
-		GRAPHICS::CLEAR_DRAW_ORIGIN();
-	}
-	void BigMessage(const std::string& message, const std::string& message2, int colour)
-	{
-		int iScale = GRAPHICS::REQUEST_SCALEFORM_MOVIE("MIDSIZED_MESSAGE");
-
-		WAIT(1500);
-		while (!GRAPHICS::HAS_SCALEFORM_MOVIE_LOADED(iScale))
-			WAIT(1);
-
-		GRAPHICS::_START_SCREEN_EFFECT("SuccessNeutral", 8500, false);
-		GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION(iScale, "SHOW_SHARD_MIDSIZED_MESSAGE");
-		GRAPHICS::_BEGIN_TEXT_COMPONENT("STRING");
-		UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)message.c_str());
-		GRAPHICS::_END_TEXT_COMPONENT();
-		GRAPHICS::_BEGIN_TEXT_COMPONENT("STRING");
-		UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)message2.c_str());
-		GRAPHICS::_END_TEXT_COMPONENT();
-		GRAPHICS::_PUSH_SCALEFORM_MOVIE_FUNCTION_PARAMETER_INT(colour);// color 0,1=white 2=black 3=grey 6,7,8=red 9,10,11=blue 12,13,14=yellow 15,16,17=orange 18,19,20=green 21,22,23=purple 
-		GRAPHICS::_POP_SCALEFORM_MOVIE_FUNCTION_VOID();
-
-		int iWait4 = InGameTime() + 8000;
-
-		while (iWait4 > InGameTime())
-		{
-			GRAPHICS::DRAW_SCALEFORM_MOVIE_FULLSCREEN(iScale, 255, 255, 255, 255, 2);
-			WAIT(1);
-		}
-
-		GRAPHICS::SET_SCALEFORM_MOVIE_AS_NO_LONGER_NEEDED(&iScale);
-	}
-	void TopLeft(const std::string& sText)
-	{
-		UI::_SET_TEXT_COMPONENT_FORMAT("STRING");
-		UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)sText.c_str());
-		UI::_DISPLAY_HELP_TEXT_FROM_STRING_LABEL(0, 0, 1, 5000);
-	}
-	int BottomLeft(const std::string& sText)
-	{
-		UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
-		UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)sText.c_str());
-		return UI::_DRAW_NOTIFICATION(1, 1);
-	}
-	int BottomLeftIcon(const std::string& sText1, const std::string& sText2, const std::string& subject, const std::string& badge, const std::string& clanTag)
-	{
-		//badge = "CHAR_SOCIAL_CLUB";
-		// clanTag = "__EXAMPLE"
-
-		UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
-		UI::_ADD_TEXT_COMPONENT_STRING((LPSTR)sText1.c_str());
-		///char* picName1, char* picName2, BOOL flash, int iconType1, char* sender, char* subject, float duration, char* clanTag, int iconType2, int p9
-		UI::_SET_NOTIFICATION_MESSAGE_CLAN_TAG_2((LPSTR)badge.c_str(), (LPSTR)badge.c_str(), 0, 7, (LPSTR)sText2.c_str(), (LPSTR)subject.c_str(), 3.0, (LPSTR)clanTag.c_str(), 7, 0);
-		return UI::_DRAW_NOTIFICATION(1, 1);
-	}
-	std::vector<std::string> LastMessage = {};
-	void RightSide(const std::string& caption, int iPos)
-	{
-		int text_col[4] = { 255, 255, 255, 255 },
-			rect_col[4] = { 0, 0, 0, 120 };
-		float text_scale = 0.5;
-		int font = 4;
-
-		float lineTop = 251.0f + iPos * 22.5f;
-		float lineHeight = 49.5;
-		float lineLeft = 1000.0;
-		float textLeft = -10.0;
-
-		// correcting values for active line
-		int screen_w, screen_h;
-		GRAPHICS::GET_SCREEN_RESOLUTION(&screen_w, &screen_h);
-
-		textLeft += lineLeft;
-
-		float lineTopScaled = lineTop / (float)screen_h; // line top offset
-		float textLeftScaled = textLeft / (float)screen_w; // text left offset
-		float lineHeightScaled = lineHeight / (float)screen_h; // line height
-
-		float lineLeftScaled = lineLeft / (float)screen_w;
-
-		// this is how it's done in original scripts
-
-		// text upper part
-		int num25 = AddScreenText(font, caption, textLeftScaled, lineTopScaled, lineHeightScaled, text_scale, text_col);
-	}
-	void AddGraphics(const std::string& graphics)
-	{
-		GRAPHICS::_SET_PTFX_ASSET_NEXT_CALL("scr_xm_orbital");
-	}
-
-	int Menu_interval = 150;
-	void MeunDescrition(Mod_Class::MeunSystem* myMenu, std::vector<std::string>& Descrip, bool reSize)
-	{
-		if (myMenu != nullptr)
-		{
-			for (int i = 0; i < (int)Descrip.size(); i++)
-				Draw_menu_line(Descrip[i], myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i + myMenu->High - myMenu->Low + 0.1f) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, false, false, reSize);
-		}
-	}
-	void MenuDisplay(Mod_Class::MeunSystem* myMenu, float screenHeightScaleFactor)
-	{
-		if (myMenu != nullptr)
-		{
-			myMenu->_Exit = false;
-			myMenu->_Activate = false;
-			myMenu->_Left = false;
-			myMenu->_Right = false;
-			std::vector<std::string> Descrip = Space38(myMenu->Menu_Form[myMenu->Index].Description);
-
-			if (myMenu->Menu_Form.size() > 0)
-			{
-				drawTexture(MyBannerPng, 1, 10, 100, myMenu->_Screen.sizeX, myMenu->_Screen.sizeY, myMenu->_Screen.centerX, myMenu->_Screen.centerY, myMenu->_Screen.posX, myMenu->_Screen.posY, myMenu->_Screen.rotation, screenHeightScaleFactor, myMenu->_Screen.red, myMenu->_Screen.green, myMenu->_Screen.blue, myMenu->_Screen.alfa);
-				for (int i = myMenu->Low; i < myMenu->High; i++)
-				{
-					if (i != myMenu->Index)
-					{
-						if (myMenu->Menu_Form[i].TickBox)
-						{
-							Draw_menu_line(myMenu->Menu_Form[i].Title, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, false, false, false);
-							if (myMenu->Menu_Form[i].Current == 1)
-								AddSprite("commonmenu", "shop_box_tick", myMenu->_Screen.tickSizeX, myMenu->_Screen.tickSizeY, myMenu->_Screen.tickX, (myMenu->_Screen.tickY + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
-							else
-								AddSprite("commonmenu", "shop_box_blank", myMenu->_Screen.tickSizeX, myMenu->_Screen.tickSizeY, myMenu->_Screen.tickX, (myMenu->_Screen.tickY + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
-						}
-						else if (myMenu->Menu_Form[i].Numbers)
-						{
-							Draw_menu_line_Numbers(myMenu->Menu_Form[i].Title, myMenu->Menu_Form[i].Current, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, myMenu->_Screen.Numberlr, false, false, false);
-							AddSprite("commonmenu", "arrowleft", myMenu->_Screen.ArrowtickSizeX, myMenu->_Screen.ArrowtickSizeY, myMenu->_Screen.tickX + myMenu->_Screen.ArrowAlr, (myMenu->_Screen.ArrowH + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
-							AddSprite("commonmenu", "arrowright", myMenu->_Screen.ArrowtickSizeX, myMenu->_Screen.ArrowtickSizeY, myMenu->_Screen.tickX + myMenu->_Screen.ArrowBlr + (Get_Int_Length(myMenu->Menu_Form[i].Current) * myMenu->_Screen.NumGap), (myMenu->_Screen.ArrowH + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
-						}
-						else
-							Draw_menu_line(myMenu->Menu_Form[i].Title, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, false, false, false);
-					}
-					else
-					{
-						if (myMenu->Menu_Form[i].TickBox)
-						{
-							Draw_menu_line(myMenu->Menu_Form[i].Title, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, true, false, false);
-							if (myMenu->Menu_Form[i].Current == 1)
-								AddSprite("commonmenu", "shop_box_tickb", myMenu->_Screen.tickSizeX, myMenu->_Screen.tickSizeY, myMenu->_Screen.tickX, (myMenu->_Screen.tickY + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
-							else
-								AddSprite("commonmenu", "shop_box_blankb", myMenu->_Screen.tickSizeX, myMenu->_Screen.tickSizeY, myMenu->_Screen.tickX, (myMenu->_Screen.tickY + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
-						}
-						else if (myMenu->Menu_Form[i].Numbers)
-						{
-							Draw_menu_line_Numbers(myMenu->Menu_Form[i].Title, myMenu->Menu_Form[i].Current, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, myMenu->_Screen.Numberlr, true, false, false);
-							AddSprite("commonmenu", "arrowleft", myMenu->_Screen.ArrowtickSizeX, myMenu->_Screen.ArrowtickSizeY, myMenu->_Screen.tickX + myMenu->_Screen.ArrowAlr, (myMenu->_Screen.ArrowH + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
-							AddSprite("commonmenu", "arrowright", myMenu->_Screen.ArrowtickSizeX, myMenu->_Screen.ArrowtickSizeY, myMenu->_Screen.tickX + myMenu->_Screen.ArrowBlr + (Get_Int_Length(myMenu->Menu_Form[i].Current) * myMenu->_Screen.NumGap), (myMenu->_Screen.ArrowH + i - myMenu->Low) * myMenu->_Screen.tickMulti, 0.0f);
-						}
-						else
-							Draw_menu_line(myMenu->Menu_Form[i].Title, myMenu->_Screen.lineWidth, myMenu->_Screen.lineHeight, myMenu->_Screen.lineTop + (i - myMenu->Low) * myMenu->_Screen.lineTobSpace, myMenu->_Screen.lineLeft, myMenu->_Screen.textLeft, true, false, false);
-					}
-				}
-
-				MeunDescrition(myMenu, Descrip, false);
-			}
-
-			if (myMenu->waitTime < InGameTime())
-			{
-				bool bEnt, bDel, bUp, bDown, bLeft, bRight, bShutDown;
-				get_button_state(&bEnt, &bDel, &bUp, &bDown, &bLeft, &bRight, &bShutDown);
-
-				if (bShutDown || ButtonDown(199, true))
-				{
-					Menu_Index = 0;
-					Close_Menu = true;
-				}
-				else if (ButtonDown(199, true))
-					Close_Menu = true;
-				else if (bDel || ButtonDown(45, true))
-				{
-					menu_beep();
-					myMenu->_Exit = true;
-				}
-				else
-				{
-					if (bEnt || ButtonDown(21, true))
-					{
-						menu_beep();
-						myMenu->_Activate = true;
-						myMenu->waitTime = InGameTime() + 150;
-					}
-					else
-					{
-						if (bUp || ButtonDown(27, true))
-						{
-							if (myMenu->Scroling)
-							{
-								if (myMenu->Low > 0)
-								{
-									myMenu->Low--;
-									myMenu->High--;
-								}
-
-								if (myMenu->Index == 0)
-								{
-									myMenu->Index = (int)myMenu->Menu_Form.size();
-									if (myMenu->Index > 6)
-									{
-										myMenu->High = myMenu->Index;
-										myMenu->Low = myMenu->High - 7;
-									}
-								}
-								myMenu->Index--;
-							}
-							else
-							{
-								if (myMenu->Index == 0)
-									myMenu->Index = (int)myMenu->Menu_Form.size();
-								myMenu->Index--;
-							}
-							myMenu->waitTime = InGameTime() + 150;
-						}
-						else if (bDown || ButtonDown(19, true))
-						{
-							myMenu->Index++;
-							if (myMenu->Scroling)
-							{
-								if (myMenu->Index == (int)myMenu->Menu_Form.size())
-								{
-									myMenu->Index = 0;
-									myMenu->High = 7;
-									myMenu->Low = 0;
-								}
-								else if (myMenu->Index == myMenu->High && myMenu->High < (int)myMenu->Menu_Form.size())
-								{
-									myMenu->Low++;
-									myMenu->High++;
-								}
-							}
-							else
-							{
-								if (myMenu->Index == (int)myMenu->Menu_Form.size())
-									myMenu->Index = 0;
-							}
-							myMenu->waitTime = InGameTime() + 150;
-						}
-						else if (bLeft || ButtonDown(47, true))
-						{
-							myMenu->_Left = true;
-							myMenu->Menu_Form[myMenu->Index].Current--;
-							if (myMenu->Menu_Form[myMenu->Index].Current < myMenu->Menu_Form[myMenu->Index].Min)
-								myMenu->Menu_Form[myMenu->Index].Current = myMenu->Menu_Form[myMenu->Index].Max;
-
-							if (Menu_interval > 0)
-								Menu_interval--;
-							myMenu->waitTime = InGameTime() + Menu_interval;
-						}
-						else if (bRight || ButtonDown(46, true))
-						{
-							myMenu->_Right = true;
-							myMenu->Menu_Form[myMenu->Index].Current++;
-							if (myMenu->Menu_Form[myMenu->Index].Current > myMenu->Menu_Form[myMenu->Index].Max)
-								myMenu->Menu_Form[myMenu->Index].Current = myMenu->Menu_Form[myMenu->Index].Min;
-
-							if (Menu_interval > 0)
-								Menu_interval--;
-							myMenu->waitTime = InGameTime() + Menu_interval;
-						}
-						else
-							Menu_interval = 150;
-					}
-				}
-			}
-		}
-	}
-
-	std::string CaptureScreenText()
-	{
-		std::string output = "";
-		GAMEPLAY::DISPLAY_ONSCREEN_KEYBOARD(0, "FMMC_KEY_TIP8", "", "", "", "", "", 64);
-		while (GAMEPLAY::UPDATE_ONSCREEN_KEYBOARD() == 0)
-			WAIT(1);
-		if (GAMEPLAY::GET_ONSCREEN_KEYBOARD_RESULT())
-		{
-			const char* text = GAMEPLAY::GET_ONSCREEN_KEYBOARD_RESULT();
-
-			output = text;
-		}
-		return output;
 	}
 }
