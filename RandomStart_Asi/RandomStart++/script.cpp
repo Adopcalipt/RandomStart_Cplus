@@ -36,7 +36,8 @@ std::vector<GVM::GVMSystem> Rs_MenuList = {};
 void Rs_MenuStart();
 void Rs_SavedPedEdit(void* obj);
 void Rs_SavedWeapons(void* obj);
-void Rs_PedMenu(void* obj);
+void Rs_Pedditor(void* obj);
+void Rs_PedMenu();
 
 const std::vector<std::string> MultC = {
     "~r~", // Red
@@ -296,6 +297,9 @@ void DeathAndArrest(bool yaDeed)
             Mod_Entitys::Reicarnations();
         else if (Mod_Data::Mod_Settings.Random_Ped || Mod_Data::Mod_Settings.Saved_Ped)
         {
+            if (Mod_Settings.WatchDead)
+                Mod_Entitys::WatchDeath();
+
             if (Mod_Data::Mod_Settings.Funeral)
             {
                 while ((bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()))
@@ -822,8 +826,17 @@ void RandomLocation(int selectSen)
             }       //"Transport Worker Male");  
             else if (SubSet == 18)
             {
-                MySpot = Mod_Class::Vector4(139.4768f, -3103.723f, 5.89631f, 353.8674f);//"Pest Control");  
-                Mod_Entitys::MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
+                if (NSPM_Include)
+                {
+                    NSPMLaunch = "" + Mod_Systems::GetDir() + "/scripts/NSPM/RequestBugStart.txt";
+                    MySpot = Mod_Class::Vector4(139.4768f, -3103.723f, 5.89631f, 353.8674f);//"Pest Control");  
+                    Mod_Entitys::MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
+                }
+                else
+                {
+                    MySpot = Mod_Class::Vector4(139.4768f, -3103.723f, 5.89631f, 353.8674f);//"Pest Control");  
+                    Mod_Entitys::MoveEntity(PLAYER::PLAYER_PED_ID(), MySpot);
+                }
             }
             else if (SubSet == 19)
             {
@@ -1754,7 +1767,7 @@ void NewRandomFreePed(int male)
     MyNewBank = Mod_Entitys::NewFreeModePed(male);
     Mod_Entitys::SavedPlayer(&MyNewBank, -1);
 
-    Rs_PedMenu(&MyNewBank);
+    Rs_Pedditor(&MyNewBank);
 }
 void OutfitChange(void* obj)
 {
@@ -2294,6 +2307,7 @@ void Rs_SavedPedEdit(void* obj)
         int iCharType = YourCharIs();
 
         std::vector<std::string> YourOufits = {};
+
         for (int i = 0; i < (int)thisPed->Cothing.size(); i++)
             YourOufits.push_back(thisPed->Cothing[i].Title);
 
@@ -2308,6 +2322,7 @@ void Rs_SavedPedEdit(void* obj)
             GVM::GVMFields(Mod_Data::RSLangMenu[114], Mod_Data::RSLangMenu[115], &Rs_PropEdit, thisPed),
             GVM::GVMFields(RSLangMenu[261], thisPed->Cothing[thisPed->Cloth_Pick].Badge.Name, &Rs_AddBadges, thisPed)
         };
+
         if ((int)SavedOutfits.size() > 0)
             MainFields.push_back(GVM::GVMFields(Mod_Data::RSLangMenu[116], "", SavedOutfits, &iOutfit, &OutFitList, thisPed, true, false));
 
@@ -3253,7 +3268,6 @@ void RenameSavedPed(void* obj)
 }
 void HealthConcern(void* obj)
 {
-    Mod_Systems::LoggerLight("HealthConcern");
     Mod_Class::ClothBank* thisPed = static_cast<Mod_Class::ClothBank*>(obj);
     if (thisPed != nullptr)
     {
@@ -3263,7 +3277,6 @@ void HealthConcern(void* obj)
 }
 void RunForest(void* obj)
 {
-    Mod_Systems::LoggerLight("RunForest");
     Mod_Class::ClothBank* thisPed = static_cast<Mod_Class::ClothBank*>(obj);
     if (thisPed != nullptr)
     {
@@ -3274,7 +3287,6 @@ void RunForest(void* obj)
 }
 void TomDaily(void* obj)
 {
-    Mod_Systems::LoggerLight("TomDaily");
     Mod_Class::ClothBank* thisPed = static_cast<Mod_Class::ClothBank*>(obj);
     if (thisPed != nullptr)
     {
@@ -3425,22 +3437,26 @@ void Rs_SavePed()
     GVM::GVMSystem NewMenu = GVM::GVMSystem(CustomMenuBannerPos, MainFields);
     Rs_MenuList.push_back(NewMenu);
 }
-void Rs_PedMenu(void* obj)
+void Rs_PedMenu()
 {
-    Mod_Class::ClothBank* thisPed = static_cast<Mod_Class::ClothBank*>(obj);
-    if (thisPed != nullptr)
-    {
-        Mod_Systems::LoggerLight("RsMenu_SavePed");
+    Mod_Systems::LoggerLight("Rs_PedMenu");
 
-        std::vector<GVM::GVMFields> MainFields = {
-            GVM::GVMFields(Mod_Data::RSLangMenu[227] + " " + thisPed->CharName, Mod_Data::RSLangMenu[81], &Rs_Pedditor, thisPed),   //Ext
-            GVM::GVMFields(Mod_Data::RSLangMenu[78], Mod_Data::RSLangMenu[79],  &Rs_SavePed),   //Ext
-            GVM::GVMFields(Mod_Data::RSLangMenu[82], Mod_Data::RSLangMenu[83], { RSLangMenu[228], RSLangMenu[229] }, &iPedMale, &NewRandomFreePed, true, true),
-            GVM::GVMFields(Mod_Data::RSLangMenu[84], Mod_Data::RSLangMenu[85], &Reposesion)
-        };
-        GVM::GVMSystem NewMenu = GVM::GVMSystem(CustomMenuBannerPos, MainFields);
-        Rs_MenuList.push_back(NewMenu);
-    }
+    int MyPedIs = PedBanking(nullptr);
+
+    Mod_Class::ClothBank* Clothpoint;
+    if (MyPedIs != -1)
+        Clothpoint = &Mod_Data::SavedPeds[MyPedIs];
+    else
+        Clothpoint = &MyNewBank;
+
+    std::vector<GVM::GVMFields> MainFields = {
+        GVM::GVMFields(Mod_Data::RSLangMenu[227] + " " + Clothpoint->CharName, Mod_Data::RSLangMenu[81], &Rs_Pedditor, Clothpoint),   //Ext
+        GVM::GVMFields(Mod_Data::RSLangMenu[78], Mod_Data::RSLangMenu[79],  &Rs_SavePed),   //Ext
+        GVM::GVMFields(Mod_Data::RSLangMenu[82], Mod_Data::RSLangMenu[83], { RSLangMenu[228], RSLangMenu[229] }, &iPedMale, &NewRandomFreePed, false, false),
+        GVM::GVMFields(Mod_Data::RSLangMenu[84], Mod_Data::RSLangMenu[85], &Reposesion)
+    };
+    GVM::GVMSystem NewMenu = GVM::GVMSystem(CustomMenuBannerPos, MainFields);
+    Rs_MenuList.push_back(NewMenu);
 }
 void Rs_Scenario()
 {
@@ -3557,7 +3573,7 @@ void ClashingOptions(int item)
 }
 void Rs_OptionsMenu()
 {
-    Mod_Systems::LoggerLight("Rs_MenuStart");
+    Mod_Systems::LoggerLight("Rs_OptionsMenu");
 
     std::vector<GVM::GVMFields> MainFields = {
         GVM::GVMFields(Mod_Data::RSLangMenu[8], Mod_Data::RSLangMenu[9], &Mod_Data::Mod_Settings.Auto_Run),
@@ -3565,6 +3581,7 @@ void Rs_OptionsMenu()
         GVM::GVMFields(Mod_Data::RSLangMenu[12], Mod_Data::RSLangMenu[13], &Mod_Data::Mod_Settings.Saved_Ped, ClashingOptions, true),
         GVM::GVMFields(Mod_Data::RSLangMenu[14], Mod_Data::RSLangMenu[15], &Mod_Data::Mod_Settings.Reincarnate, ClashingOptions, true),
         GVM::GVMFields(Mod_Data::RSLangMenu[16], Mod_Data::RSLangMenu[17], &Mod_Data::Mod_Settings.ReCurr),
+        GVM::GVMFields(Mod_Data::RSLangMenu[271], Mod_Data::RSLangMenu[272], &Mod_Data::Mod_Settings.WatchDead),
         GVM::GVMFields(Mod_Data::RSLangMenu[18], Mod_Data::RSLangMenu[19], &Mod_Data::Mod_Settings.Funeral, ClashingOptions, true),
         GVM::GVMFields(Mod_Data::RSLangMenu[20], Mod_Data::RSLangMenu[21], &Mod_Data::Mod_Settings.Prison),
         GVM::GVMFields(Mod_Data::RSLangMenu[22], Mod_Data::RSLangMenu[23], &Mod_Data::Mod_Settings.Random_Weapons),
@@ -3572,7 +3589,7 @@ void Rs_OptionsMenu()
         GVM::GVMFields(Mod_Data::RSLangMenu[24], Mod_Data::RSLangMenu[25], &WeaponCapture),
         GVM::GVMFields(Mod_Data::RSLangMenu[26], Mod_Data::RSLangMenu[27], &Rs_KeyCapture),
         GVM::GVMFields(Mod_Data::RSLangMenu[234], Mod_Data::RSLangMenu[235], &Mod_Data::Mod_Settings.Menu_Left_Side, &MenuSideSwap, true),         //Ext
-        GVM::GVMFields(TranlatesTo[Mod_Data::Mod_Settings.Lang_Set], Mod_Data::RSLangMenu[236], TranlatesTo, &Mod_Data::Mod_Settings.Lang_Set, &Rs_LangChange, true, false)
+        GVM::GVMFields(TranlatesTo[Mod_Data::Mod_Settings.Lang_Set], Mod_Data::RSLangMenu[236], TranlatesTo, &Mod_Data::Mod_Settings.Lang_Set, &Rs_LangChange, false, false)
     };
     GVM::GVMSystem NewMenu = GVM::GVMSystem(CustomMenuBannerPos, MainFields, &Mod_Systems::ReBuildIni, &Mod_Data::Mod_Settings, false);
     Rs_MenuList.push_back(NewMenu);
@@ -3583,17 +3600,9 @@ void Rs_MenuStart()
 {
     Mod_Systems::LoggerLight("Rs_MenuStart");
 
-    int MyPedIs = PedBanking(nullptr);
-
-    Mod_Class::ClothBank* Clothpoint;
-    if (MyPedIs != -1)
-        Clothpoint = &Mod_Data::SavedPeds[MyPedIs];
-    else
-        Clothpoint = &MyNewBank;
-
     std::vector<GVM::GVMFields> MainFields = {
         GVM::GVMFields(Mod_Data::RSLangMenu[4], Mod_Data::RSLangMenu[5], &Rs_Scenario),
-        GVM::GVMFields(Mod_Data::RSLangMenu[6], Mod_Data::RSLangMenu[7], &Rs_PedMenu, Clothpoint),
+        GVM::GVMFields(Mod_Data::RSLangMenu[6], Mod_Data::RSLangMenu[7], &Rs_PedMenu),
         GVM::GVMFields(Mod_Data::RSLangMenu[213], Mod_Data::RSLangMenu[226], &Rs_SnowJoke),
         GVM::GVMFields(Mod_Data::RSLangMenu[230], Mod_Data::RSLangMenu[231], &Rs_OptionsMenu)
     };
@@ -3692,6 +3701,7 @@ void Rs_main()
                 if (Key0)
                 {
                     CAM::DO_SCREEN_FADE_IN(1);
+                    ENTITY::SET_ENTITY_COLLISION(PLAYER::PLAYER_PED_ID(), true, true);
                     Mod_Data::Close_Menu = false;
                     MenuOpen = true;
                     Rs_MenuStart();

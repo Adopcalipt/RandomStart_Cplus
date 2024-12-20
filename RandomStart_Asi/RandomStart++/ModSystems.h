@@ -24,6 +24,7 @@ namespace Mod_Class
         bool Prison;
         bool BeachPart;
         bool Reincarnate;
+        bool WatchDead;
         bool ReCurr;
         bool Random_Weapons;
         bool Disable_Record_Key;
@@ -79,7 +80,7 @@ namespace Mod_Class
 
     public:
         Settings_Ini()
-            : MenuKey(76), Auto_Run(true), Random_Ped(true), Saved_Ped(false), Disable_Record_Key(true), Random_Weapons(true), Funeral(true), Prison(true), BeachPart(false), Reincarnate(false), ReCurr(false), ControlSupport(false), Auto_Save(true), Menu_Left_Side(true), ControlA(0), ControlB(0), Lang_Set(-1), BeachPed(true), Tramps(true), Highclass(true), Midclass(true), Lowclass(true), Business(true), Bodybuilder(true), GangStars(true), Epsilon(true), Jogger(true), Golfer(true), Hiker(true), Methaddict(true), Rural(true), Cyclist(true), LGBTWXYZ(true), PoolPeds(true), Workers(true), Jetski(true), BikeATV(true), Services(true), Pilot(true), Animals(true), Yankton(true), Cayo(true), Loging(true), Jan(true), Feb(true), Mar(false), Apr(false), May(false), Jun(false), Jul(false), Aug(false), Sep(false), Oct(false), Nov(false), Dec(true) {}
+            : MenuKey(76), Auto_Run(true), Random_Ped(true), Saved_Ped(false), Disable_Record_Key(true), Random_Weapons(true), WatchDead(false), Funeral(true), Prison(true), BeachPart(false), Reincarnate(false), ReCurr(false), ControlSupport(false), Auto_Save(true), Menu_Left_Side(true), ControlA(0), ControlB(0), Lang_Set(-1), BeachPed(true), Tramps(true), Highclass(true), Midclass(true), Lowclass(true), Business(true), Bodybuilder(true), GangStars(true), Epsilon(true), Jogger(true), Golfer(true), Hiker(true), Methaddict(true), Rural(true), Cyclist(true), LGBTWXYZ(true), PoolPeds(true), Workers(true), Jetski(true), BikeATV(true), Services(true), Pilot(true), Animals(true), Yankton(true), Cayo(true), Loging(true), Jan(true), Feb(true), Mar(false), Apr(false), May(false), Jun(false), Jul(false), Aug(false), Sep(false), Oct(false), Nov(false), Dec(true) {}
     };
 
     struct Vector4
@@ -463,6 +464,8 @@ namespace Mod_Systems
     int LessRandomInt(const std::string& file, int min, int max);
     int LessRandomInt(const std::string& file, const std::vector<int>& ranNum);
 
+    bool PressAnyKey();
+
     void StartScript(const std::string& scriptName, int buffer);
 
     void ReBuildIni(void* obj);
@@ -654,7 +657,8 @@ namespace Mod_Entitys
 
     void CollectPeds(std::vector<Ped>* pedList);
     Ped NearByPed(Mod_Class::Vector4 area, float areaMin, float areaMax);
-
+    
+    void WatchDeath();
     void Reicarnations();
 
     void CayoAudio();
@@ -691,6 +695,7 @@ namespace Mod_Data
     inline bool ShowMobile = false;
 
     inline int Side_Add_Time = 0;
+    inline int AnyKeyTimer = 0;
 
     inline const std::string DirRandStart = Mod_Systems::GetDir() + "/RandomStart";
     inline const std::string DirRandNumb = DirRandStart + "/Randoms";
@@ -699,6 +704,7 @@ namespace Mod_Data
     inline const std::string DirVehicles = DirRandStart + "/Vehicles";
     inline const std::string DirTranslate = DirRandStart + "/Translate";
     inline const std::string DirCustPeds = DirRandStart + "/Peds";
+
     inline const std::string DirectOutfitFolder = Mod_Systems::GetDir() + "/Outfits";
     inline const std::string DirectOutfitMale = DirectOutfitFolder + "/Male";
     inline const std::string DirectOutfitFemale = DirectOutfitFolder + "/Female";
@@ -1027,22 +1033,21 @@ namespace Mod_Data
             "Delete your current outfit.",                                                              //263
             "You are missing V_Functions.asi. please download this from here : https://www.gta5-mods.com/scripts/new-street-phone-missions",  //264
             "Max Health",                                                                               //265
-            "Set your max health (110 - 1000)",                                                           //266
+            "Set your max health (110 - 1000)",                                                         //266
             "Run Speed",                                                                                //267
             "Set your run speed multiplier (0 - 1.49)",                                                 //268
             "Swim Speed",                                                                               //269
             "Set your swim speed multiplier (0 - 1.49)",                                                //270
-            "Blank",                                                                                    //280
-            "Blank",                                                                                    //281
-            "Blank",                                                                                    //282
-            "Blank",                                                                                    //283
-            "Blank",                                                                                    //284
-            "Blank",                                                                                    //285
-            "Blank",                                                                                    //286
-            "Blank",                                                                                    //287
-            "Blank",                                                                                    //288
-            "Blank",                                                                                    //289
-            "Blank"                                                                                     //290
+            "Watch your death",                                                                         //271                                            
+            "Don't restart untill the anykeys are pressed",                                             //272
+            "Blank",                                                                                    //273
+            "Blank",                                                                                    //274
+            "Blank",                                                                                    //275
+            "Blank",                                                                                    //276
+            "Blank",                                                                                    //277
+            "Blank",                                                                                    //278
+            "Blank",                                                                                    //279
+            "Blank"                                                                                     //280
 
     };
 

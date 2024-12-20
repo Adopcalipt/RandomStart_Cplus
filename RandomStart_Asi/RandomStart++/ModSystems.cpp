@@ -67,8 +67,7 @@ namespace Mod_Systems
 	void BuildMissingDirectory(std::string dir)
 	{
 		if (CreateDirectoryA((LPSTR)dir.c_str(), NULL) || ERROR_ALREADY_EXISTS == GetLastError())
-		{
-		}
+		{		}
 	}
 	void DirectoryTest()
 	{
@@ -543,8 +542,6 @@ namespace Mod_Systems
 
 	bool ERando = false;
 	bool DirTest = true;	
-
-
 	void RandomizeIntList(std::vector<int>* numbers)
 	{
 		std::random_device Randv;
@@ -673,6 +670,17 @@ namespace Mod_Systems
 			return 0;
 	}
 
+	bool PressAnyKey()
+	{
+		bool AnyKey = false;
+		Mod_Systems::Menu_Button_state(&AnyKey, Mod_Data::KeyFind[Mod_Data::Mod_Settings.MenuKey]);
+		int LastPressed = (int)CONTROLS::_0xD7D22F5592AED8BA(0);
+
+		if (LastPressed < 100)
+			AnyKey = true;
+		return AnyKey;
+	}
+
 	void StartScript(const std::string& scriptName, int buffer)
 	{
 		SCRIPT::REQUEST_SCRIPT((LPSTR)scriptName.c_str());
@@ -688,10 +696,10 @@ namespace Mod_Systems
 
 	void ReBuildIni(void* obj)
 	{
+		LoggerLight("ReBuildIni");
 		Mod_Class::Settings_Ini* PSet = static_cast<Mod_Class::Settings_Ini*>(obj);
 		if (PSet != nullptr)
 		{
-			LoggerLight("ReBuildIni");
 			std::vector<std::string> AddIni = {
 				"[Settings]",
 				"MenuKey=" + std::to_string(PSet->MenuKey),
@@ -700,6 +708,7 @@ namespace Mod_Systems
 				"Saved_Ped=" + Convert_to_string(PSet->Saved_Ped),
 				"Disable_Record_Key=" + Convert_to_string(PSet->Disable_Record_Key),
 				"Random_Weapons=" + Convert_to_string(PSet->Random_Weapons),
+				"WatchDead=" + Convert_to_string(PSet->WatchDead),
 				"Funeral=" + Convert_to_string(PSet->Funeral),
 				"Prison=" + Convert_to_string(PSet->Prison),
 				"BeachPart=" + Convert_to_string(PSet->BeachPart),
@@ -784,6 +793,8 @@ namespace Mod_Systems
 						modSets->Disable_Record_Key = Convert_to_bool(line);
 					else if (Contains_string("Random_Weapons", line))
 						modSets->Random_Weapons = Convert_to_bool(line);
+					else if (Contains_string("WatchDead", line))
+						modSets->WatchDead = Convert_to_bool(line);
 					else if (Contains_string("Funeral", line))
 						modSets->Funeral = Convert_to_bool(line);
 					else if (Contains_string("Prison", line))
@@ -4443,26 +4454,25 @@ namespace Mod_Entitys
 	};
 
 	bool VehicleEnter = false;
-	int FindingTime;
 
 	void GetInVehicle(Ped peddy, Vehicle vic, int seat, bool clearSeat)
 	{
 		Mod_Systems::LoggerLight("GetInVehicle, seat == " + std::to_string(seat));
 
-		FindingTime = Mod_Systems::InGameTime() + 30000;
-
 		if (clearSeat)
 			GetOutVehicle(VEHICLE::GET_PED_IN_VEHICLE_SEAT(vic, seat));
 
 		AI::TASK_ENTER_VEHICLE(peddy, vic, -1, seat, 1.0f, 1, 0);
+		WAIT(500);
 		while (!(bool)PED::IS_PED_IN_ANY_VEHICLE(peddy, 0))
 		{
-			WAIT(1000);
-			if (FindingTime < Mod_Systems::InGameTime())
+			if (Mod_Systems::PressAnyKey())
 			{
-				WarptoAnyVeh(vic, peddy, seat);
+				CAM::DO_SCREEN_FADE_IN(1);
+				AI::CLEAR_PED_TASKS_IMMEDIATELY(peddy);//WarptoAnyVeh(vic, peddy, seat);
 				break;
 			}
+			WAIT(1);
 		}
 	}
 	void PlayerEnterVeh(Vehicle vic)
@@ -4822,9 +4832,8 @@ namespace Mod_Entitys
 				break;
 			else if (Mod_Maths::DistanceTo(PLAYER::PLAYER_PED_ID(), destList[start]) < 3.0f)
 			{
-				if (start < destList.size())
-					start++;
-				else
+				start++;
+				if (start == destList.size())
 					start = 0;
 
 				RunHere(PLAYER::PLAYER_PED_ID(), Mod_Maths::NewVector3(destList[start].X, destList[start].Y, destList[start].Z));
@@ -4862,7 +4871,7 @@ namespace Mod_Entitys
 			if (Mod_Maths::DistanceTo(vic, destList[start]) < fDis)
 			{
 				start++;
-				if (start >= destList.size())
+				if (start == destList.size())
 					start = 0;
 
 				if (plane)
@@ -5146,42 +5155,42 @@ namespace Mod_Entitys
 	{
 		Mod_Systems::LoggerLight("-FindCloths-");
 		std::vector<std::string> Files = {};
-		std::string OutputFolder = Mod_Systems::GetDir() + "/Outfits";
+		std::string OutputFolder;
 		
 		bool GotDir = false;
 		if (UserName == MainProtags[0])//michael
 		{
-			OutputFolder = Mod_Systems::GetDir() + "/Outfits/Michael";
+			OutputFolder = DirectOutfitMichael;
 			if (std::filesystem::exists(OutputFolder) && std::filesystem::is_directory(OutputFolder))
 				GotDir = true;
 		}
 		else if (UserName == MainProtags[1])//frank
 		{
-			OutputFolder = Mod_Systems::GetDir() + "/Outfits/Franklin";
+			OutputFolder = DirectOutfitFranklin;
 			if (std::filesystem::exists(OutputFolder) && std::filesystem::is_directory(OutputFolder))
 				GotDir = true;
 		}
 		else if (UserName == MainProtags[2])//trev
 		{
-			OutputFolder = Mod_Systems::GetDir() + "/Outfits/Trevor";
+			OutputFolder = DirectOutfitTrevor;
 			if (std::filesystem::exists(OutputFolder) && std::filesystem::is_directory(OutputFolder))
 				GotDir = true;
 		}
 		else if (UserName == MainProtags[3])//male
 		{
-			OutputFolder = Mod_Systems::GetDir() + "/Outfits/Male";
+			OutputFolder = DirectOutfitMale;
 			if (std::filesystem::exists(OutputFolder) && std::filesystem::is_directory(OutputFolder))
 				GotDir = true;
 		}
 		else if (UserName == MainProtags[4])//female
 		{
-			OutputFolder = Mod_Systems::GetDir() + "/Outfits/Female";
+			OutputFolder = DirectOutfitFemale;
 			if (std::filesystem::exists(OutputFolder) && std::filesystem::is_directory(OutputFolder))
 				GotDir = true;
 		}
 		else
 		{
-			OutputFolder = Mod_Systems::GetDir() + "/Outfits/" + std::to_string(UserName);
+			OutputFolder = DirectOutfitFolder + "/ModHash" + std::to_string(UserName);
 			if (std::filesystem::exists(OutputFolder) && std::filesystem::is_directory(OutputFolder))
 				GotDir = true;
 		}
@@ -5249,6 +5258,12 @@ namespace Mod_Entitys
 				ExtraB.push_back(iSpot);
 			}
 		}
+
+		for (int i = 4; i < (int)ExtraA.size(); i++)
+			ExtraA.pop_back();
+
+		for (int i = 4; i < (int)ExtraB.size(); i++)
+			ExtraB.pop_back();
 
 		return Mod_Class::ClothX(Cloths, ClothA, ClothB, ExtraA, ExtraB);
 	}
@@ -5768,7 +5783,7 @@ namespace Mod_Entitys
 			ClothB.push_back(iTextId);
 		}
 
-		for (int i = 0; i < 8; i++)
+		for (int i = 0; i < 4; i++)
 		{
 			int iDrawId = PED::GET_PED_PROP_INDEX(peddy, i);
 			ExtraA.push_back(iDrawId);
@@ -6615,6 +6630,29 @@ namespace Mod_Entitys
 		return Peddy;
 	}
 
+	void WatchDeath()
+	{
+		Mod_Systems::LoggerLight("WatchDeath");
+
+		GAMEPLAY::TERMINATE_ALL_SCRIPTS_WITH_THIS_NAME("respawn_controller");
+		GAMEPLAY::IGNORE_NEXT_RESTART(true);
+		GAMEPLAY::_DISABLE_AUTOMATIC_RESPAWN(true);
+		GAMEPLAY::SET_FADE_OUT_AFTER_DEATH(false);
+
+		WAIT(500);
+
+		while (true)
+		{
+			CAM::DO_SCREEN_FADE_IN(1);
+			if (Mod_Systems::PressAnyKey())
+				break;
+			WAIT(1);
+		}
+		
+		GAMEPLAY::SET_FADE_OUT_AFTER_DEATH(true);
+		GAMEPLAY::_DISABLE_AUTOMATIC_RESPAWN(false);
+		GAMEPLAY::_RESET_LOCALPLAYER_STATE();
+	}
 	void CamAction()
 	{
 		Vector3 Campo = Mod_Maths::PlayerPosi();
@@ -6649,8 +6687,11 @@ namespace Mod_Entitys
 		if (!Mod_Data::Mod_Settings.ReCurr || Mod_Data::Mod_Settings.Random_Ped)
 			Bob = NearByPed(DeathPlace, 35.0f, 500.0f);
 
+		if (Mod_Settings.WatchDead)
+			WatchDeath();
+
 		while ((bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()))
-			WAIT(1);
+			WAIT(100);
 
 		if (Mod_Data::Mod_Settings.ReCurr)
 			MoveEntity(PLAYER::PLAYER_PED_ID(), DeathPlace);
@@ -6682,8 +6723,13 @@ namespace Mod_Entitys
 		CAM::DO_SCREEN_FADE_IN(1500);
 		CamAction();
 
-		//ENTITY::SET_ENTITY_COLLISION(PLAYER::PLAYER_PED_ID(), true, true);
-		//WAIT(1000);
+		while (!(bool)ENTITY::IS_ENTITY_DEAD(PLAYER::PLAYER_PED_ID()))
+		{
+			WAIT(1000);
+			break;
+		}
+
+		ENTITY::SET_ENTITY_COLLISION(PLAYER::PLAYER_PED_ID(), true, true);
 	}
 	
 	const std::vector<std::string> fluids = {

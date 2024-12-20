@@ -2,7 +2,6 @@
 	THIS FILE IS A PART OF GTA V SCRIPT HOOK SDK
 				http://dev-c.com			
 		 (C) Alexander Blade 2015-2016
-		--Modified By Adoppocalipt 2023--
 */
 
 #pragma once
@@ -240,10 +239,10 @@ enum eGameVersion : int
 	VER_1_0_2944_0_STEAM,
 	VER_1_0_2944_0_NOSTEAM,
 
+	VER_1_0_3095_0,
+
 	VER_1_0_3095_0_STEAM,
 	VER_1_0_3095_0_NOSTEAM,
-
-	VER_1_0_3095_0,
 
 	VER_SIZE,
 	VER_UNK = -1
